@@ -1,5 +1,6 @@
 package jibril.data.config
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.util.*
 
 data class Config(
@@ -35,7 +36,9 @@ data class DbConfig(
     var hostname: String = "localhost",
     var port: Int = 6379
 ) {
-    val address: String get() = "redis://$hostname:$port"
+    @get:JsonIgnore
+    val address: String
+        get() = "redis://$hostname:$port"
 }
 
 data class ApiConfig(
