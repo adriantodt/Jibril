@@ -30,6 +30,7 @@ object CommandRegistry : KLogging() {
 
     fun register(meta: Command, command: ICommand) {
         sanityChecks(command)
+
         val names = meta.value
             .map { it.toLowerCase() }
             .toTypedArray()

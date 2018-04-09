@@ -36,12 +36,12 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     // Main APIs
-    compile 'net.dv8tion:JDA:3.5.1_351'
-    compile 'com.sedmelluq:lavaplayer:1.2.55'
+    compile 'net.dv8tion:JDA:3.6.0_354'
+    compile 'com.sedmelluq:lavaplayer:1.2.62'
 
     //Useful
     compile 'com.sedmelluq:jda-nas:1.0.5'
-    compile 'com.jagrosh:jda-utilities-menu:2.1'
+    compile 'com.jagrosh:jda-utilities-menu:2.1.1'
     compile 'com.github.natanbc:discordbots-api:2.3'
     compile 'com.github.natanbc:weeb4j:1.0'
 

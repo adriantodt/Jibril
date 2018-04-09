@@ -67,7 +67,7 @@ public class DiscordUtils {
         int currIndex = 0;
         for (FormatToken formatToken : toRemove) {
             if (currIndex < formatToken.start) {
-                out.append(strippedContent.substring(currIndex, formatToken.start));
+                out.append(strippedContent, currIndex, formatToken.start);
             }
             currIndex = formatToken.start + formatToken.format.length();
         }

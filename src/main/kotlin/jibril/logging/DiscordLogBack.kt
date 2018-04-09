@@ -52,8 +52,6 @@ class DiscordLogBack : AppenderBase<ILoggingEvent>() {
         }
     }
 
-    private val truncatedExceptions = listOf("java.net.UnknownHostException", "java.net.SocketException")
-
     override fun append(event: ILoggingEvent) {
         if (event.level.isGreaterOrEqual(Level.INFO)) {
             synchronized(queue) {
