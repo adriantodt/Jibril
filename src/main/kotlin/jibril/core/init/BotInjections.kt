@@ -38,11 +38,6 @@ class BotInjections(
         mapConstants(config.channels, "channel")
         mapLoggers(config.webhooks)
 
-        if (config.dev) {
-            bindClass<DBLPoster>()
-                .to(classOf())
-        }
-
         bindClass<DBLPoster>()
             .to(if (config.dev) classOf<DBLPoster.Dummy>() else classOf<DBLProdPoster>())
             .asEagerSingleton()
