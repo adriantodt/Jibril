@@ -21,8 +21,8 @@ import jibril.logging.TerminalConsoleAdaptor
 import jibril.utils.TaskManager.compute
 import jibril.utils.TaskManager.task
 import jibril.utils.TaskType
-import jibril.utils.api.DiscordBotsStatsPoster
-import jibril.utils.api.JibrilBotStatsPoster
+import jibril.utils.api.DBLPoster
+import jibril.utils.api.JAPIPoster
 import jibril.utils.extensions.*
 import jibril.utils.helpers.AsyncInfoMonitor
 import mu.KotlinLogging.logger
@@ -77,7 +77,7 @@ fun start() {
     )
 
     submit("Bootstrap:StatsPoster") {
-        injector<DiscordBotsStatsPoster>().postStats()
+        injector<DBLPoster>().postStats()
     }
 
     task(1, TimeUnit.MINUTES) {
@@ -87,7 +87,7 @@ fun start() {
     }
 
     if (config.api.enabled) {
-        val statsPoster = injector<JibrilBotStatsPoster>()
+        val statsPoster = injector<JAPIPoster>()
         task(1, TimeUnit.MINUTES) {
             statsPoster.postStats()
         }

@@ -9,12 +9,11 @@ import okhttp3.FormBody
 import okhttp3.Request
 import javax.inject.Inject
 
-interface JibrilBotStatsPoster {
+interface JAPIPoster {
     fun postStats()
-}
 
-class DummyJAPIStatsPoster : JibrilBotStatsPoster {
-    override fun postStats() {
+    class Dummy : JAPIPoster {
+        override fun postStats() = Unit
     }
 }
 
@@ -23,7 +22,7 @@ class JibrilAPIStatsPoster
     private val shardManager: ShardManager,
     private val musicManager: MusicManager,
     private val api: ApiConfig
-) : JibrilBotStatsPoster {
+) : JAPIPoster {
     override fun postStats() {
         val shardTotal = shardManager.shardsTotal
         val guilds = shardManager.guildCache.size()

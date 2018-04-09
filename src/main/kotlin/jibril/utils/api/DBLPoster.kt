@@ -4,21 +4,20 @@ import com.github.natanbc.discordbotsapi.DiscordBotsAPI
 import net.dv8tion.jda.bot.sharding.ShardManager
 import javax.inject.Inject
 
-interface DiscordBotsStatsPoster {
+interface DBLPoster {
     fun postStats()
-}
 
-class DummyDBLStatsPoster : DiscordBotsStatsPoster {
-    override fun postStats() {
+    class Dummy : DBLPoster {
+        override fun postStats() = Unit
     }
 }
 
-class DBLStatsPoster
+class DBLProdPoster
 @Inject constructor(
     private val shardManager: ShardManager,
     private val api: DiscordBotsAPI
-) : DiscordBotsStatsPoster {
+) : DBLPoster {
     override fun postStats() {
-        api.postStats(shardManager.shards.map { it.guildCache.size().toInt() }.toIntArray())
+        api.postStats(shardManager.shards.map { it.guildCache.size().toInt() }.toIntArray()).async()
     }
 }

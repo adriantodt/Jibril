@@ -11,7 +11,7 @@ import jibril.core.commands.ICommand
 import jibril.core.music.MusicManager
 import jibril.utils.Colors
 import jibril.utils.J
-import jibril.utils.api.DiscordBotsStatsPoster
+import jibril.utils.api.DBLPoster
 import jibril.utils.commands.EmbedFirst
 import jibril.utils.commands.HelpFactory
 import jibril.utils.emotes.LOADING
@@ -34,7 +34,7 @@ class DevCmd
     private val injector: Injector,
     private val musicManager: MusicManager,
     private val shardManager: ShardManager,
-    private val statsPoster: DiscordBotsStatsPoster
+    private val statsPoster: DBLPoster
 ) : CommandWithArgs<List<String>>(), ICommand.Permission, ICommand.HelpDialogProvider {
     companion object : KLogging()
 

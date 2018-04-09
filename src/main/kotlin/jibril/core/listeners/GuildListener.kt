@@ -2,8 +2,8 @@ package jibril.core.listeners
 
 import jibril.logging.LogHook
 import jibril.utils.Colors
-import jibril.utils.api.DiscordBotsStatsPoster
-import jibril.utils.api.JibrilBotStatsPoster
+import jibril.utils.api.DBLPoster
+import jibril.utils.api.JAPIPoster
 import jibril.utils.extensions.*
 import jibril.utils.helpers.GuildEvent
 import jibril.utils.helpers.GuildStatsManager
@@ -22,8 +22,8 @@ class GuildListener
     @Named("log.serverLog")
     private val log: LogHook,
     private val shardManager: ShardManager,
-    private val botlistPoster: DiscordBotsStatsPoster,
-    private val apiPoster: JibrilBotStatsPoster
+    private val botlistPoster: DBLPoster,
+    private val apiPoster: JAPIPoster
 ) : EventListener {
     override fun onEvent(event: Event) {
         if (event is GenericGuildEvent && (event is GuildJoinEvent || event is GuildLeaveEvent)) {

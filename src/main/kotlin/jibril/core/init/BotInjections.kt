@@ -12,7 +12,10 @@ import jibril.data.config.ConfigManager
 import jibril.data.config.Webhooks
 import jibril.logging.LogHook
 import jibril.logging.LogHookManager
-import jibril.utils.api.*
+import jibril.utils.api.DBLPoster
+import jibril.utils.api.DBLProdPoster
+import jibril.utils.api.JAPIPoster
+import jibril.utils.api.JibrilAPIStatsPoster
 import jibril.utils.extensions.classOf
 import net.dv8tion.jda.bot.sharding.ShardManager
 import java.beans.IntrospectionException
@@ -35,12 +38,17 @@ class BotInjections(
         mapConstants(config.channels, "channel")
         mapLoggers(config.webhooks)
 
-        bindClass<DiscordBotsStatsPoster>()
-            .to(if (config.dev) classOf<DummyDBLStatsPoster>() else classOf<DBLStatsPoster>())
+        if (config.dev) {
+            bindClass<DBLPoster>()
+                .to(classOf())
+        }
+
+        bindClass<DBLPoster>()
+            .to(if (config.dev) classOf<DBLPoster.Dummy>() else classOf<DBLProdPoster>())
             .asEagerSingleton()
 
-        bindClass<JibrilBotStatsPoster>()
-            .to(if (config.api.enabled) classOf<JibrilAPIStatsPoster>() else classOf<DummyJAPIStatsPoster>())
+        bindClass<JAPIPoster>()
+            .to(if (config.api.enabled) classOf<JibrilAPIStatsPoster>() else classOf<JAPIPoster.Dummy>())
             .asEagerSingleton()
     }
 
