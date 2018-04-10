@@ -35,15 +35,20 @@ data class Tokens(
 data class DbConfig(
     var hostname: String = "localhost",
     var port: Int = 6379
-) {
-    @get:JsonIgnore
-    val address: String
-        get() = "redis://$hostname:$port"
-}
+)
 
 data class ApiConfig(
+    var https: Boolean = false,
     var enabled: Boolean = true,
     var hostname: String = "localhost",
     var port: Int = 8080,
     var token: String = ""
 )
+
+@get:JsonIgnore
+val DbConfig.address: String
+    get() = "redis://$hostname:$port"
+
+@get:JsonIgnore
+val ApiConfig.address: String
+    get() = "${if (https) "https" else "http"}://$hostname:$port"

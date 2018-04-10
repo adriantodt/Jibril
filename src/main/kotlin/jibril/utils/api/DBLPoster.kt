@@ -12,7 +12,7 @@ interface DBLPoster {
     }
 }
 
-class DBLProdPoster
+class DiscordBotsAPIPoster
 @Inject constructor(
     private val shardManager: ShardManager,
     private val api: DiscordBotsAPI

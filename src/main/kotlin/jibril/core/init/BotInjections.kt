@@ -8,14 +8,17 @@ import com.google.inject.Provides
 import com.google.inject.name.Named
 import com.google.inject.name.Names
 import jibril.Jibril
+import jibril.data.config.ApiConfig
 import jibril.data.config.ConfigManager
 import jibril.data.config.Webhooks
+import jibril.data.config.address
 import jibril.logging.LogHook
 import jibril.logging.LogHookManager
 import jibril.utils.api.DBLPoster
-import jibril.utils.api.DBLProdPoster
+import jibril.utils.api.DiscordBotsAPIPoster
 import jibril.utils.api.JAPIPoster
 import jibril.utils.api.JibrilAPIStatsPoster
+import jibril.utils.api.impl.JibrilAPI
 import jibril.utils.extensions.classOf
 import net.dv8tion.jda.bot.sharding.ShardManager
 import java.beans.IntrospectionException
@@ -39,7 +42,7 @@ class BotInjections(
         mapLoggers(config.webhooks)
 
         bindClass<DBLPoster>()
-            .to(if (config.dev) classOf<DBLPoster.Dummy>() else classOf<DBLProdPoster>())
+            .to(if (config.dev) classOf<DBLPoster.Dummy>() else classOf<DiscordBotsAPIPoster>())
             .asEagerSingleton()
 
         bindClass<JAPIPoster>()
@@ -50,6 +53,13 @@ class BotInjections(
     @Provides
     fun provideDiscordBotsAPI(@Nullable @Named("token.discordBots") token: String?) = DiscordBotsAPI.Builder()
         .setToken(token)
+        .setHttpClient(Jibril.httpClient)
+        .build()
+
+    @Provides
+    fun provideJibrilAPI(@Nullable api: ApiConfig) = JibrilAPI.Builder()
+        .setBaseApi(api.address)
+        .setToken(api.token)
         .setHttpClient(Jibril.httpClient)
         .build()
 
