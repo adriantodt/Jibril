@@ -2,12 +2,12 @@
 
 package jibril.utils.extensions
 
-import br.com.brjdevs.java.utils.collections.CollectionUtils
 import jibril.utils.J
 import java.lang.reflect.GenericArrayType
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.WildcardType
+import java.util.*
 import java.util.concurrent.Future
 import java.util.function.Consumer
 
@@ -31,9 +31,11 @@ inline operator fun Appendable.plusAssign(other: Char) {
 
 inline operator fun <T> Consumer<T>.invoke(it: T) = accept(it)
 
-inline fun <E> List<E>.random(): E = CollectionUtils.random(this)
+val random = Random()
 
-inline fun <E> Array<E>.random(): E = CollectionUtils.random(this)
+inline fun <E> List<E>.random(): E = this[random.nextInt(this.size)]
+
+inline fun <E> Array<E>.random(): E = this[random.nextInt(this.size)]
 
 inline fun <E> randomOf(vararg objects: E): E = objects.random()
 

@@ -1,11 +1,11 @@
 package jibril.commands.eastereggs
 
-import br.com.brjdevs.java.utils.collections.CollectionUtils.random
 import jibril.core.categories.Category
 import jibril.core.commands.Command
 import jibril.core.commands.CommandPermission.BOT_DEVELOPER
 import jibril.core.commands.CommandPermission.SERVER_ADMIN
 import jibril.core.commands.ICommand
+import jibril.utils.extensions.random
 import net.dv8tion.jda.core.entities.Member
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import java.text.MessageFormat
@@ -39,13 +39,11 @@ class Greeting : ICommand {
         )
 
         private fun random(member: Member): MessageFormat {
-            return random(
-                when {
-                    BOT_DEVELOPER.test(member) -> speechesOwner
-                    SERVER_ADMIN.test(member) -> speechesAdmin
-                    else -> speeches
-                }
-            ).toMessageFormat()
+            return when {
+                BOT_DEVELOPER.test(member) -> speechesOwner
+                SERVER_ADMIN.test(member) -> speechesAdmin
+                else -> speeches
+            }.random().toMessageFormat()
         }
 
         private val cached = HashMap<String, MessageFormat>()

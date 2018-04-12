@@ -45,11 +45,12 @@ dependencies {
     compile 'com.sedmelluq:jda-nas:1.0.5'
     compile 'com.jagrosh:jda-utilities-menu:2.1.1'
 
-    //Helping stuff
-    compile 'br.com.brjdevs:utils:1.0.0_15'
+    //Project NoBRj/NoClouds
     compile 'br.com.brjdevs:snowflakes:1.0.0_2'
     compile 'xyz.cuteclouds:CloudyUtils:1.0'
     compile 'xyz.cuteclouds:HungerGames:1.0.2'
+
+    //Helping stuff
     compile 'com.google.guava:guava:22.0'
     compile 'org.apache.commons:commons-lang3:3.7'
     compile 'org.apache-extras.beanshell:bsh:2.0b6'

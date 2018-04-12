@@ -1,6 +1,5 @@
 package jibril.core.music
 
-import br.com.brjdevs.java.utils.async.Async
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import jibril.core.listeners.EventListeners.submit
 import jibril.utils.DiscordUtils.stripFormatting
@@ -12,6 +11,7 @@ import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.TextChannel
 import net.dv8tion.jda.core.entities.VoiceChannel
 import net.dv8tion.jda.core.managers.AudioManager
+import java.lang.Thread.sleep
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
@@ -53,7 +53,7 @@ fun connect(channel: TextChannel?, vc: VoiceChannel): Boolean {
 
     val task = queue(TaskType.BUNK) {
         audioManager.openAudioConnection(vc)
-        while (!audioManager.isConnected) Async.sleep(100)
+        while (!audioManager.isConnected) sleep(100)
     }
 
     try {
