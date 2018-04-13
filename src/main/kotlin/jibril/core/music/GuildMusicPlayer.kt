@@ -173,9 +173,16 @@ class GuildMusicPlayer(private val shardManager: ShardManager, private val music
 
     fun startNext(isSkipped: Boolean) {
         val track = previousTrack
-        if (!isSkipped && repeatMode == RepeatMode.SONG && track != null) {
-            this.audioPlayer.playTrack(track.makeCloneWithData())
-            return
+
+        if (track != null) {
+            if (repeatMode == RepeatMode.SONG && !isSkipped) {
+                this.audioPlayer.playTrack(track.makeCloneWithData())
+                return
+            }
+
+            if (repeatMode == RepeatMode.QUEUE) {
+                queue.offer(track.makeCloneWithData())
+            }
         }
 
         val next = queue.poll()
@@ -186,8 +193,6 @@ class GuildMusicPlayer(private val shardManager: ShardManager, private val music
         }
 
         audioPlayer.playTrack(next)
-
-        if (repeatMode == RepeatMode.QUEUE && track != null) queue.offer(track.makeCloneWithData())
     }
 
     fun stop() {

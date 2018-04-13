@@ -12,10 +12,6 @@ typealias Redis = redis.clients.jedis.Jedis
 typealias RedisPool = redis.clients.jedis.JedisPool
 
 class ManagedDatabase(val pool: RedisPool) {
-    companion object {
-        private val factory = Snowflakes.config(1517400000000L, 2L, 2L, 12L)!!
-        val idWorker = factory[0][1]
-    }
 
     constructor(uri: String) : this(RedisPool(uri))
 
@@ -47,5 +43,10 @@ class ManagedDatabase(val pool: RedisPool) {
     private inline fun <M : VersionedObjectManager<T>, reified T : ManagedObject> M.register(): M {
         managers[T::class.java] = this
         return this
+    }
+
+    companion object {
+        private val factory = Snowflakes.config(1517400000000L, 2L, 2L, 12L)!!
+        val idWorker = factory[0][1]
     }
 }

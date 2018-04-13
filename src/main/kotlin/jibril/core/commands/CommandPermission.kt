@@ -9,8 +9,8 @@ enum class CommandPermission(val permName: String) {
         override fun test(member: Member) = true
     },
     DJ("DJ") {
-        override fun test(member: Member): Boolean =
-            member.roles.any { it.name.equals("j!dj", ignoreCase = true) }
+        override fun test(member: Member) =
+            member.roles.any { it.name.equals("j!dj", ignoreCase = true) || it.name.equals("dj", ignoreCase = true) }
                 || SERVER_ADMIN.test(member)
     },
     SERVER_ADMIN("Server Admin") {
