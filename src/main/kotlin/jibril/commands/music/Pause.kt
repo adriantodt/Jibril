@@ -82,7 +82,7 @@ class VotePause @Inject constructor(musicManager: MusicManager) : MusicVotingCom
             "If 60% or more of the users listening vote, the player will be paused."
         )
 
-        alsoSee("pause", "Pause the player without needing voting.")
+        alsoSee("pause", "Pause the player without requiring voting.")
         alsoSee("resume", "Resume the player.")
         alsoSee("voteresume", "Create a poll to resume the player.")
     }

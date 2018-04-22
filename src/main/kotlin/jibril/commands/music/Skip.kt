@@ -62,6 +62,6 @@ class VoteSkip @Inject constructor(musicManager: MusicManager) : MusicVotingComm
             "If 60% or more of the users listening vote, the current track will be skipped."
         )
 
-        alsoSee("skip", "Skips the track without needing voting.")
+        alsoSee("skip", "Skips the track without requiring voting.")
     }
 }

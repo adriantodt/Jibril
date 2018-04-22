@@ -60,6 +60,6 @@ class VoteShuffle @Inject constructor(musicManager: MusicManager) : MusicVotingC
             "If 60% or more of the users listening vote, the queue will be shuffled."
         )
 
-        alsoSee("shuffle", "Pause the player without needing voting.")
+        alsoSee("shuffle", "Pause the player without requiring voting.")
     }
 }
