@@ -15,8 +15,8 @@ class Stop @Inject constructor(musicManager: MusicManager) : MusicPermissionComm
 
     override fun action(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
         val size = musicPlayer.queue.size
-        musicPlayer.queue.clear()
-        musicPlayer.startNext(true)
+
+        musicPlayer.stop()
 
         event.channel.sendMessage(
             "$SUCCESS Stopped the current track and removed $size tracks from the queue."
@@ -54,8 +54,8 @@ class VoteStop @Inject constructor(musicManager: MusicManager) : MusicVotingComm
 
     override fun onVotesReached(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
         val size = musicPlayer.queue.size
-        musicPlayer.queue.clear()
-        musicPlayer.startNext(true)
+
+        musicPlayer.stop()
 
         event.channel.sendMessage(
             "$SUCCESS Enough votes reached! Stopped the current track and removed $size tracks from the queue."

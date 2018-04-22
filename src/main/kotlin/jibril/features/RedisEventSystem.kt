@@ -2,23 +2,29 @@ package jibril.features
 
 import jibril.data.db.Redis
 import mu.KLogging
+import kotlin.concurrent.thread
 
 typealias RedisPubSub = redis.clients.jedis.JedisPubSub
 
-class RedisEventSystem(val redis: Redis) : RedisPubSub() {
+class RedisEventSystem(val redis: Redis) {
     companion object : KLogging()
 
     constructor(uri: String) : this(Redis(uri))
 
     init {
-        redis.subscribe(
-            this,
-            "events.dbl.upvote",
-            "events.patreon.create", "events.patreon.update", "events.patreon.delete"
-        )
+        thread(name = "RedisEventSystem-reader", start = true) {
+            while (true) {
+                val (channel, message) = redis.blpop(
+                    "events.dbl.upvote",
+                    "events.patreon.create", "events.patreon.update", "events.patreon.delete"
+                )
+
+                onMessage(channel, message)
+            }
+        }
     }
 
-    override fun onMessage(channel: String, message: String) {
+    private fun onMessage(channel: String, message: String) {
         when (channel) {
             "events.dbl.upvote" -> processUpvote(message)
             "events.patreon.create" -> createPatron(message)

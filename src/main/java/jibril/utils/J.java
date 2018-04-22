@@ -26,7 +26,7 @@ public class J {
             if (name.equals(name.toUpperCase())) return name.toLowerCase();
             return name;
         }
-        char chars[] = name.toCharArray();
+        char[] chars = name.toCharArray();
         chars[0] = toLowerCase(chars[0]);
         return new String(chars);
     }
@@ -86,25 +86,6 @@ public class J {
         StringBuilder builder = new StringBuilder();
         toString(any, builder);
         return builder.toString();
-    }
-
-    /**
-     * Get the size of {@link Class#getTypeParameters()}.
-     * <br>
-     * Due to the wildcard, Kotlin goes wild and refuses to work.
-     *
-     * @param c a class
-     * @return {@literal c.getTypeParameters().length}
-     */
-    public static int typeParametersSize(@NotNull Class<?> c) {
-        /*
-         * You might be thinking: What the heck? Why?
-         * So, mighty developer, lemme tell you.
-         * Due to the way generics work on both Kotlin and Java,
-         * apparently, wildcards on top of wildcards make Kotlin compiler go nuts.
-         * While the only thing I actually needed was the array length.
-         */
-        return c.getTypeParameters().length;
     }
 
     private static void toString(Object any, StringBuilder builder) {

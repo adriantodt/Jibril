@@ -36,14 +36,17 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     // Main APIs
-    compile 'net.dv8tion:JDA:3.6.0_354'
-    compile 'com.sedmelluq:lavaplayer:1.2.62'
+    compile 'net.dv8tion:JDA:3.6.0_355'
+    compile 'com.sedmelluq:lavaplayer:1.2.63'
     compile 'com.github.natanbc:discordbots-api:3.3.3'
     compile 'com.github.natanbc:weeb4j:3.2'
 
-    //Useful
+    // Useful
     compile 'com.sedmelluq:jda-nas:1.0.5'
     compile 'com.jagrosh:jda-utilities-menu:2.1.1'
+
+    // Open-Source Libraries
+    compile 'jibril:dice-notation:1.0'
 
     //Project NoBRj/NoClouds
     compile 'br.com.brjdevs:snowflakes:1.0.0_2'

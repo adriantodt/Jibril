@@ -4,16 +4,11 @@ import java.util.Base64;
 
 public class Snow64 {
     public static long fromSnow64(String snow64) {
-        return fromByteArray(
-            Base64.getUrlDecoder().decode(
-                snow64.replace('-', '_')
-            )
-        );
+        return fromByteArray(Base64.getUrlDecoder().decode(snow64));
     }
 
     public static String toSnow64(long snowflake) {
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(toByteArray(snowflake))
-            .replace('_', '-');
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(toByteArray(snowflake));
     }
 
     /*
