@@ -29,7 +29,6 @@ import mu.KotlinLogging.logger
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.JDAInfo
 import net.dv8tion.jda.core.entities.Game.playing
-import net.dv8tion.jda.core.requests.RestAction
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -110,7 +109,6 @@ fun main(args: Array<String>) {
     try {
         start()
     } catch (e: Exception) {
-        RestAction.DEFAULT_FAILURE
         DiscordLogBack.disable()
         log.error("Error during load!", e)
         log.error("Impossible to continue, aborting...")

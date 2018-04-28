@@ -77,8 +77,11 @@ class AudioRequester private constructor(
                     .forEach { addChoice("**[${it.title}](${it.uri}) (${musicLength(it.length)})** \uD83C\uDFB5\n") }
 
                 setCancel {
-                    textChannel.sendMessage("$DISAPPOINTED Music choice canceled!")
-                        .queue()
+                    textChannel.sendMessage("$DISAPPOINTED Music choice canceled!").queue()
+
+                    if (musicPlayer.currentTrack == null) {
+                        musicPlayer.stop()
+                    }
                 }
 
                 setSelection { msg, i ->
@@ -102,16 +105,15 @@ class AudioRequester private constructor(
 
         val queueSize = musicPlayer.queue.size.toLong()
         val position = if (addFirst) "0-${playlist.tracks.size}" else "$queueSize-${queueSize + playlist.tracks.size}"
-        val info = TrackData(textChannel, member.user)
 
         if (addFirst) {
             playlist.tracks.reversed().forEach {
-                it.userData = info
+                it.userData = TrackData(textChannel, member.user)
                 musicPlayer.queue.offerFirst(it)
             }
         } else {
             playlist.tracks.forEach {
-                it.userData = info
+                it.userData = TrackData(textChannel, member.user)
                 musicPlayer.queue.offer(it)
             }
         }

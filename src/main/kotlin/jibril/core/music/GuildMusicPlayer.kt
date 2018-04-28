@@ -146,6 +146,7 @@ class GuildMusicPlayer(private val shardManager: ShardManager, private val music
     fun cancelLeave() {
         if (disconnectTask == null) return
         disconnectTask!!.cancel(true)
+        disconnectTask = null
         this.audioPlayer.isPaused = false
         val info = audioPlayer.playingTrack?.trackData ?: return
         val channel = info.textChannel
