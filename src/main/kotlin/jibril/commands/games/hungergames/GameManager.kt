@@ -1,10 +1,10 @@
 package jibril.commands.games.hungergames
 
-import br.com.brjdevs.java.utils.async.Async.thread
 import jibril.commands.games.hungergames.HG.buildHg
 import jibril.commands.games.hungergames.HG.handleHg
 import net.dv8tion.jda.core.entities.TextChannel
 import java.util.*
+import kotlin.concurrent.thread
 
 object GameManager {
     val games = LinkedHashMap<String, Game>()
@@ -18,7 +18,7 @@ object GameManager {
     fun newGame(channel: TextChannel, lobby: Lobby) {
         games[channel.id] = Game(
             lobby,
-            thread("HungerGames@${channel.name}") {
+            thread(name = "HungerGames@${channel.name}") {
                 try {
                     handleHg(buildHg(lobby), channel)
                 } catch (_: InterruptedException) {

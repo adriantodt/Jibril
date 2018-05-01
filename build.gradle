@@ -3,7 +3,7 @@
 //Plugins
 plugins {
     //Compiles Kotlin
-    id 'org.jetbrains.kotlin.jvm' version '1.2.40'
+    id 'org.jetbrains.kotlin.jvm' version '1.2.41'
     //Adds an Executable Manifest
     id 'application'
     //Creates FatJars
@@ -28,7 +28,7 @@ repositories {
     mavenLocal()
 }
 
-def kotlin_version = '1.2.40'
+def kotlin_version = '1.2.41'
 
 dependencies {
     //Source of memes
@@ -47,9 +47,9 @@ dependencies {
 
     // Open-Source Libraries
     compile 'jibril:dice-notation:1.0'
+    compile 'jibril:snowflake-local:1.0'
 
     //Project NoBRj/NoClouds
-    compile 'br.com.brjdevs:snowflakes:1.0.0_2'
     compile 'xyz.cuteclouds:CloudyUtils:1.0'
     compile 'xyz.cuteclouds:HungerGames:1.0.2'
 

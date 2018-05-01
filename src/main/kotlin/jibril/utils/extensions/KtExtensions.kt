@@ -2,6 +2,9 @@
 
 package jibril.utils.extensions
 
+import redis.clients.util.Pool
+import java.io.Closeable
+import java.util.*
 import java.util.concurrent.Future
 import java.util.concurrent.ThreadLocalRandom
 import java.util.function.Consumer
@@ -28,8 +31,12 @@ inline operator fun <T> Consumer<T>.invoke(it: T) = accept(it)
 
 inline fun threadLocalRandom(): ThreadLocalRandom = ThreadLocalRandom.current()
 
-inline fun <E> List<E>.random(): E = this[threadLocalRandom().nextInt(this.size)]
+inline fun <E> List<E>.random(random: Random = threadLocalRandom()): E = this[random.nextInt(this.size)]
 
-inline fun <E> Array<E>.random(): E = this[threadLocalRandom().nextInt(this.size)]
+inline fun <E> Array<E>.random(random: Random = threadLocalRandom()): E = this[random.nextInt(this.size)]
 
 inline fun <E> randomOf(vararg objects: E): E = objects.random()
+
+inline fun <E> Random.anyOf(vararg objects: E): E = objects.random(this)
+
+inline fun <T : Closeable?, R> Pool<T>.useResource(block: (T) -> R) = resource.use(block)

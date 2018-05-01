@@ -1,19 +1,24 @@
 package jibril.data.db
 
-import br.com.brjdevs.java.snowflakes.Snowflakes
 import jibril.data.db.managers.AnnouncementsManager
 import jibril.data.db.managers.GuildSettingsManager
 import jibril.data.db.managers.UserProfilesManager
 import jibril.data.db.managers.UserSettingsManager
 import jibril.data.db.managers.base.VersionedObjectManager
+import jibril.integration.EventPublisher
+import jibril.snowflake.entities.SnowflakeGenerator
+import jibril.snowflake.local.LocalGeneratorBuilder
 import jibril.utils.extensions.get
 
 typealias Redis = redis.clients.jedis.Jedis
 typealias RedisPool = redis.clients.jedis.JedisPool
 
-class ManagedDatabase(val pool: RedisPool) {
+class JibrilDatabase(val pool: RedisPool) {
 
     constructor(uri: String) : this(RedisPool(uri))
+
+    //Event Stuff
+    val publisher: EventPublisher by lazy { EventPublisher(pool) }
 
     //Manager Manager
     private val managers = LinkedHashMap<Class<*>, VersionedObjectManager<out ManagedObject>>()
@@ -46,7 +51,13 @@ class ManagedDatabase(val pool: RedisPool) {
     }
 
     companion object {
-        private val factory = Snowflakes.config(1517400000000L, 2L, 2L, 12L)!!
-        val idWorker = factory[0][1]
+        private val generator: SnowflakeGenerator = LocalGeneratorBuilder()
+            .setEpoch(1517400000000L)
+            .setDatacenterIdBits(2L)
+            .setWorkerIdBits(2L)
+            .setSequenceBits(12L)
+            .build()
+
+        val idWorker = generator[0][1]
     }
 }

@@ -1,3 +1,5 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package jibril.utils.extensions
 
 import jibril.core.commands.CommandPermission

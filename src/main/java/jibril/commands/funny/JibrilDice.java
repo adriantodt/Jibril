@@ -22,7 +22,7 @@ public class JibrilDice {
             .function("cos", args -> Math.cos(args[0].doubleValue()))
             .function("tan", args -> Math.tan(args[0].doubleValue()))
             .function("random", args -> dice.roll(args[0].intValue()))
-            .function("any", KtExtensionsKt::random)
+            .function("any", KtExtensionsKt::randomOf)
             .functionAlias("random", "rand", "rdn", "r")
             .functionAlias("sin", "sen");
     }

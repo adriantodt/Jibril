@@ -3,11 +3,11 @@ package jibril.data.db
 interface ManagedObject {
     val id: Long
 
-    fun delete(db: ManagedDatabase) {
+    fun delete(db: JibrilDatabase) {
         db.delete(this)
     }
 
-    fun save(db: ManagedDatabase) {
+    fun save(db: JibrilDatabase) {
         db.save(this)
     }
 }
