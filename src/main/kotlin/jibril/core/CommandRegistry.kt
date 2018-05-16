@@ -21,23 +21,22 @@ object CommandRegistry : KLogging() {
 
         if (implemented.isEmpty()) {
             logger.warn { "Command \"${command.javaClass.name}\" doesn't implement a help interface." }
-        }
-
-        if (implemented.size > 1) {
+        } else if (implemented.size > 1) {
             logger.warn { "Command \"${command.javaClass.name}\" implements multiple interfaces: ${implemented.joinToString { it.name }}. Implementation ${implemented.first().name} will be used" }
         }
     }
 
-    fun register(meta: Command, command: ICommand) {
+    fun register(command: ICommand, vararg names: String) {
         sanityChecks(command)
 
-        val names = meta.value
-            .map { it.toLowerCase() }
-            .toTypedArray()
+        val keys = names.map(String::toLowerCase).distinct().toTypedArray()
+        for (k in keys) commands[k] = command
+        lookup[command] = keys
+    }
 
-        if (names.isEmpty()) throw IllegalStateException("Empty annotation $meta")
+    fun register(meta: Command, command: ICommand) {
+        if (meta.value.isEmpty()) throw IllegalStateException("Empty annotation $meta")
 
-        for (k in names) commands[k] = command
-        lookup[command] = names
+        register(command, *meta.value)
     }
 }

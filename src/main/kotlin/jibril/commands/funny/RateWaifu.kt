@@ -30,7 +30,7 @@ class RateWaifu : ICommand, ICommand.HelpDialogProvider {
         val rating = when (toRate.toLowerCase()) {
             "mantaro", "mantaro patreon", "mantaro premium", "<@213466096718708737>", "<@302810118335102976>" -> 95
             "jibril", "jebril", "<@406082711271374848>" -> 100
-            else -> (toRate.map(Char::toLong).map { it * 2 }.sum()) % 101
+            else -> (toRate.map(Char::toLong).map { it * 2 }.sum() + 50) % 101
         }
 
         event.channel.sendMessage("$THINKING Hmmm... I think **$toRate** is worth a $rating/100, don't you?").queue(LuckyUser(event))

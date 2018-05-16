@@ -20,7 +20,7 @@ class BotInitializer(reflections: Reflections) {
 
     fun initialize(injector: Injector) {
         commandClasses.forEach {
-            CommandRegistry.register(it.getAnnotation(classOf()), injector(it))
+            CommandRegistry.register(it.getAnnotation<Command>(classOf()), injector(it))
         }
     }
 }

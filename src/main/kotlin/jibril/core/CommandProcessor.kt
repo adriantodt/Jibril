@@ -1,9 +1,9 @@
 package jibril.core
 
 import jibril.Jibril.config
-import jibril.Jibril.db
 import jibril.core.CommandRegistry.commands
 import jibril.core.commands.ICommand
+import jibril.database.entities.GuildSettings
 import jibril.utils.J
 import jibril.utils.Snow64
 import jibril.utils.emotes.*
@@ -20,22 +20,39 @@ import java.util.*
 object CommandProcessor : KLogging() {
 
     var commandCount = 0
-        private set
 
     fun onCommand(event: GuildMessageReceivedEvent) {
         val raw = event.message.contentRaw
 
         for (prefix in config.prefixes) {
             if (raw.startsWith(prefix)) {
-                process(event, raw.substring(prefix.length))
+                process(event, raw.substring(prefix.length).trimStart())
                 return
             }
         }
 
-        val guildPrefix = db.guildSettings.getOrNull(event.guild.idLong)?.prefix
+        val guildPrefix = GuildSettings(event.guild.idLong).prefix
+
         if (guildPrefix != null && raw.startsWith(guildPrefix)) {
             process(event, raw.substring(guildPrefix.length))
             return
+        }
+
+        // onDiscreteCommand(event)
+        if (raw.startsWith('[') && raw.contains(']')) {
+            val (cmdRaw, cmdOuter) = raw.substring(1).trimStart().split(']', limit = 2)
+
+            for (prefix in config.prefixes) {
+                if (cmdRaw.startsWith(prefix)) {
+                    processDiscrete(event, cmdRaw.substring(prefix.length).trimStart(), cmdOuter)
+                    return
+                }
+            }
+
+            if (guildPrefix != null && cmdRaw.startsWith(guildPrefix)) {
+                processDiscrete(event, cmdRaw.substring(guildPrefix.length), cmdOuter)
+                return
+            }
         }
     }
 
@@ -123,6 +140,42 @@ object CommandProcessor : KLogging() {
         commandCount++
         try {
             command.call(event, args)
+        } catch (e: Exception) {
+            try {
+                handleException(command, event, e)
+            } catch (_: Exception) {
+            }
+        }
+
+    }
+
+    private fun processDiscrete(event: GuildMessageReceivedEvent, content: String, outer: String) {
+        if (!permCheck(event)) return
+
+        val split = content.split(' ', limit = 2)
+        val cmd = split[0].toLowerCase()
+        val args = split.getOrNull(1) ?: ""
+
+        val command = commands[cmd] as? ICommand.Discrete ?: return
+
+        if (command is ICommand.Permission && !command.permission.test(event.member)) {
+            event.channel.sendMessage("$STOP B-baka, I'm not allowed to let you do that!").queue()
+            return
+        }
+
+        CommandStatsManager.log(cmd)
+
+        runDiscreteCommand(command, event, args, outer)
+
+        logger.trace {
+            "Discrete Command invoked: $cmd, by ${event.author.name}#${event.author.discriminator} with timestamp ${Date()}"
+        }
+    }
+
+    private fun runDiscreteCommand(command: ICommand.Discrete, event: GuildMessageReceivedEvent, args: String, outer: String) {
+        commandCount++
+        try {
+            command.discreteCall(event, args, outer)
         } catch (e: Exception) {
             try {
                 handleException(command, event, e)

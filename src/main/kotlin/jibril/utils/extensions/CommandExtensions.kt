@@ -10,11 +10,10 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 
 object CommandExceptions {
     object ShowHelp : RuntimeException()
-    object Finish : RuntimeException()
+    
 }
 
 inline fun showHelp(): Unit = throw CommandExceptions.ShowHelp
-inline fun finish(): Unit = throw CommandExceptions.Finish
 
 fun onHelp(command: ICommand, event: GuildMessageReceivedEvent) {
     if (command is ICommand.HelpProvider) {

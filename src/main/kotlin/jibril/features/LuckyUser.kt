@@ -1,6 +1,6 @@
 package jibril.features
 
-import jibril.Jibril.db
+import jibril.database.entities.UserProfile
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
@@ -11,9 +11,10 @@ class LuckyUser(
     private val user: User,
     private val luck: Double = 0.25,
     private val base: Int = 10,
-    private val extra: Int = 10
+    private val extra: Int = 10,
+    private val show: Boolean = true
 ) : Consumer<Message> {
-    constructor(event: GuildMessageReceivedEvent, luck: Double = 0.25, base: Int = 10, extra: Int = 10) : this(event.author, luck, base, extra)
+    constructor(event: GuildMessageReceivedEvent, luck: Double = 0.25, base: Int = 10, extra: Int = 10, show: Boolean = true) : this(event.author, luck, base, extra, show)
 
     companion object {
         private val r = Random()
@@ -23,10 +24,10 @@ class LuckyUser(
     override fun accept(message: Message) {
         if (r.nextDouble() < luck) return
 
-        val profile = db.userProfiles[user.idLong]
-        profile.money += base + r.nextInt(extra)
-        profile.save(db)
+        val profile = UserProfile(user.idLong)
 
-        message.addReaction(coinAdd).queue()
+        profile.money += base + r.nextInt(extra)
+
+        if (show) message.addReaction(coinAdd).queue()
     }
 }

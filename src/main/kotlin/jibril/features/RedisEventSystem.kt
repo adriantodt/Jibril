@@ -1,6 +1,6 @@
 package jibril.features
 
-import jibril.data.db.Redis
+import jibril.database.Redis
 import mu.KLogging
 import kotlin.concurrent.thread
 
@@ -8,8 +8,6 @@ typealias RedisPubSub = redis.clients.jedis.JedisPubSub
 
 class RedisEventSystem(val redis: Redis) {
     companion object : KLogging()
-
-    constructor(uri: String) : this(Redis(uri))
 
     init {
         thread(name = "RedisEventSystem-reader", start = true) {
@@ -31,7 +29,7 @@ class RedisEventSystem(val redis: Redis) {
             "events.patreon.update" -> updatePatron(message)
             "events.patreon.delete" -> deletePatron(message)
             else -> {
-
+                logger.warn { "Channel not implemented: $channel" }
             }
         }
     }

@@ -22,7 +22,8 @@ class AudioRequester private constructor(
     private val textChannel: TextChannel, private val member: Member, private val musicPlayer: GuildMusicPlayer,
     private val playerManager: AudioPlayerManager, private val searchTerm: String,
     private val showDialog: Boolean,
-    private val addFirst: Boolean
+    private val addFirst: Boolean,
+    private val playNow: Boolean
 ) : AudioLoadResultHandler {
 
     override fun trackLoaded(track: AudioTrack) {
@@ -38,7 +39,7 @@ class AudioRequester private constructor(
             musicPlayer.queue.offer(track)
         }
 
-        if (musicPlayer.audioPlayer.playingTrack == null) {
+        if (musicPlayer.audioPlayer.playingTrack == null || playNow) {
             musicPlayer.startNext(true)
         } else if (textChannel.canTalk()) {
             val info = track.info
@@ -119,7 +120,7 @@ class AudioRequester private constructor(
         }
 
         val length = playlist.tracks.map { it.info.length }.sum()
-        if (musicPlayer.audioPlayer.playingTrack == null) {
+        if (musicPlayer.audioPlayer.playingTrack == null || playNow) {
             musicPlayer.startNext(true)
         } else if (textChannel.canTalk()) {
             textChannel.sendMessage(
@@ -131,8 +132,6 @@ class AudioRequester private constructor(
     override fun noMatches() {
         if (searchTerm.startsWith("ytsearch:") || searchTerm.startsWith("scsearch:")) {
             textChannel.sendMessage("$CONFUSED Weird, I didn't find any songs! Did you spell everything correctly?").queue()
-        } else {
-            loadAndPlay(textChannel, member, musicPlayer, "ytsearch:$searchTerm", playerManager, showDialog, addFirst)
         }
     }
 
@@ -152,11 +151,11 @@ class AudioRequester private constructor(
         fun loadAndPlay(
             textChannel: TextChannel, member: Member, musicPlayer: GuildMusicPlayer,
             searchTerm: String, playerManager: AudioPlayerManager,
-            showDialog: Boolean, addFirst: Boolean
+            showDialog: Boolean, addFirst: Boolean, playNow: Boolean
         ): Future<*> {
             return playerManager.loadItem(
                 searchTerm,
-                AudioRequester(textChannel, member, musicPlayer, playerManager, searchTerm, showDialog, addFirst)
+                AudioRequester(textChannel, member, musicPlayer, playerManager, searchTerm, showDialog, addFirst, playNow)
             )
         }
     }

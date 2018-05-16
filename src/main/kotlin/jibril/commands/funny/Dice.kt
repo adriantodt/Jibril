@@ -3,29 +3,43 @@ package jibril.commands.funny
 import jibril.core.categories.Categories
 import jibril.core.commands.Command
 import jibril.core.commands.ICommand
+import jibril.dice.exceptions.EvaluationException
+import jibril.dice.exceptions.SyntaxException
+import jibril.utils.DiscordUtils.stripFormatting
 import jibril.utils.commands.HelpFactory
 import jibril.utils.emotes.GAME_DIE
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import kotlin.math.roundToLong
 
 @Command("dice", "roll")
-class Dice : ICommand, ICommand.HelpDialogProvider {
+class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
+
     override val category = Categories.FUN
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) = roll(event, args, false)
-
-    fun roll(event: GuildMessageReceivedEvent, args: String, simple: Boolean) {
+    fun resolveRoll(args: String, simple: Boolean = false): String {
         when {
-            args.startsWith("-simple") -> return roll(event, args.substring(7), true)
-            args.endsWith("-simple") -> return roll(event, args.substring(0, args.length - 7), true)
-            args.isBlank() -> return roll(event, "d20", simple)
+            args.startsWith("-simple") -> return resolveRoll(args.substring(7), true)
+            args.endsWith("-simple") -> return resolveRoll(args.substring(0, args.length - 7), true)
+            args.isBlank() -> return resolveRoll("d20", simple)
         }
 
-        event.channel.sendMessage(
-            "$GAME_DIE **${event.member.effectiveName}**, you rolled ${
+        return try {
             if (simple) JibrilDice.resolve(args).toPrettyString() else JibrilDice.execute(args)
-            }"
-        ).queue()
+        } catch (e: SyntaxException) {
+            "Error: ${e.message}"
+        } catch (e: EvaluationException) {
+            "Error: ${e.message}"
+        }
+    }
+
+    override fun call(event: GuildMessageReceivedEvent, args: String) {
+        event.channel.sendMessage("$GAME_DIE **${event.member.effectiveName}**, ${resolveRoll(args)}").queue()
+    }
+
+    override fun discreteCall(event: GuildMessageReceivedEvent, args: String, outer: String) {
+        val toSend = stripFormatting(outer.replace('\n', ' '))
+
+        event.channel.sendMessage("**$toSend**\n$GAME_DIE ${resolveRoll(args)}").queue()
     }
 
     private fun Number.toPrettyString(): String = when (this) {

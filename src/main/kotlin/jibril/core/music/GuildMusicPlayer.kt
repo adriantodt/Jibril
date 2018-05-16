@@ -13,6 +13,7 @@ import jibril.utils.emotes.*
 import jibril.utils.extensions.*
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.entities.Guild
+import net.dv8tion.jda.core.entities.Member
 import net.dv8tion.jda.core.entities.VoiceChannel
 import java.util.concurrent.BlockingDeque
 import java.util.concurrent.Future
@@ -105,41 +106,7 @@ class GuildMusicPlayer(private val shardManager: ShardManager, private val music
         val info = track.trackData
         val channel = info.textChannel
         if (channel?.canTalk() == true) {
-            embed {
-                baseEmbed("Now Playing:", image = channel.guild.iconUrl)
-
-                if (track.duration == Long.MAX_VALUE) {
-                    description(
-                        "**[${track.info.title}](${track.info.uri})** by **${track.info.author}**",
-                        "",
-                        "$PLAY $LOADING Streaming $LOADING",
-                        "",
-                        "**Voice Channel**: ${currentChannel!!.name}"
-                    )
-                } else {
-                    description(
-                        "**[${track.info.title}](${track.info.uri})** by **${track.info.author}**",
-                        "",
-                        "$PLAY ${progressBar(track.position, track.duration)} (`${musicLength(track.duration - track.position)}`)",
-                        "",
-                        "**Voice Channel**: ${currentChannel!!.name}"
-                    )
-                }
-                thumbnail(musicManager.resolveThumbnail(track))
-
-                val user = info.user
-                if (user != null) {
-                    val member = channel.guild.getMember(user)
-                    val requester = "**${member?.effectiveName ?: user.discordTag}**"
-
-                    field("Requested by:", requester, inline = true)
-                }
-
-                field("Duration:", musicLength(track.info.length, "Unknown"), inline = true)
-
-                footer("Queue: ${queue.size} songs", channel.guild.iconUrl)
-
-            }.send(channel).queue { info.messageId = it.idLong }
+            nowPlayingEmbed(track).send(channel).queue { info.messageId = it.idLong }
         }
     }
 
@@ -203,6 +170,55 @@ class GuildMusicPlayer(private val shardManager: ShardManager, private val music
         this.audioPlayer.volume = 100
         disconnect(guild.audioManager)
         musicManager.cleanup(guild)
+    }
+
+    fun nowPlayingEmbed(currentTrack: AudioTrack, memberRequested: Member? = null) = embed {
+        val user = currentTrack.trackData.user
+        val trackInfo = currentTrack.info
+        val queue = queue
+
+        baseEmbed("Now Playing:", image = guild.iconUrl)
+
+        if (trackInfo.isStream) {
+            description(
+                "**[${trackInfo.title}](${trackInfo.uri})** by **${trackInfo.author}**",
+                "",
+                "$PLAY $LOADING Streaming $LOADING",
+                "",
+                "**Voice Channel**: ${currentChannel!!.name}"
+            )
+        } else {
+            description(
+                "**[${trackInfo.title}](${trackInfo.uri})** by **${trackInfo.author}**",
+                "",
+                "$PLAY ${progressBar(currentTrack.position, currentTrack.duration)} (`${musicLength(currentTrack.duration - currentTrack.position)}`)",
+                "",
+                "**Voice Channel**: ${currentChannel!!.name}"
+            )
+        }
+
+        thumbnail(musicManager.resolveThumbnail(currentTrack))
+
+        if (user != null) {
+            val member = guild.getMember(user)
+            val requester = "**${member?.effectiveName ?: user.discordTag}**"
+
+            field("Requested by:", requester, inline = true)
+        }
+
+        field("Duration:", musicLength(trackInfo.length, "Unknown"), inline = true)
+
+        if (memberRequested == null) {
+            footer(
+                "Queue: ${queue.size} songs - ${musicLength(queue)} remaining", guild.iconUrl
+            )
+        } else {
+            footer(
+                "Queue: ${queue.size} songs - ${musicLength(queue)} remaining | Requested by ${memberRequested.effectiveName}",
+                memberRequested.user.effectiveAvatarUrl
+            )
+        }
+
     }
 }
 

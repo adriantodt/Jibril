@@ -66,29 +66,27 @@ abstract class MusicPermissionCommand(
     private val alternate: String? = null,
     private val userQueued: Boolean = false
 ) : MusicActionCommand(manager) {
+    companion object {
+        fun checkPermissions(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, userQueued: Boolean): Boolean {
+            // Either:
+            // (If User Queued) User is the one who added the music
+            // User is the only one listening
+            // User is DJ/Server Admin/Bot Developer
+            return (userQueued && musicPlayer.currentTrack!!.trackData.user == event.author)
+                || musicPlayer.currentChannel!!.humanUsers == 1
+                || CommandPermission.DJ.test(event.member)
+        }
+    }
+
     override fun call(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
-        if (userQueued) {
-            //User is the one who added the music
-            if (currentTrack.trackData.user == event.author) {
-                return action(event, musicPlayer, currentTrack, args)
-            }
-        }
-
-        //User is the only one listening
-        if (musicPlayer.currentChannel!!.humanUsers == 1) {
-            return action(event, musicPlayer, currentTrack, args)
-        }
-
-        //User is DJ/Server Admin/Bot Developer
-        if (!CommandPermission.DJ.test(event.member)) {
+        if (checkPermissions(event, musicPlayer, userQueued)) {
+            action(event, musicPlayer, currentTrack, args)
+        } else {
             event.channel.sendMessage(
                 "$STOP B-baka, I'm not allowed to let you do that!" +
                     if (alternate == null) "" else "\n\n$THINKING Maybe you meant ``${alternate.withPrefix()}`` instead?"
             ).queue()
-            return
         }
-
-        action(event, musicPlayer, currentTrack, args)
     }
 
     abstract fun action(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String)

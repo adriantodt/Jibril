@@ -9,6 +9,10 @@ interface ICommand {
 
     fun call(event: GuildMessageReceivedEvent, args: String)
 
+    interface Discrete : ICommand {
+        fun discreteCall(event: GuildMessageReceivedEvent, args: String, outer: String)
+    }
+
     interface Permission {
         val permission: CommandPermission
     }

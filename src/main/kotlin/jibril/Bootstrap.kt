@@ -22,7 +22,6 @@ import jibril.utils.TaskManager.compute
 import jibril.utils.TaskManager.task
 import jibril.utils.TaskType
 import jibril.utils.api.DBLPoster
-import jibril.utils.api.JAPIPoster
 import jibril.utils.extensions.*
 import jibril.utils.helpers.AsyncInfoMonitor
 import mu.KotlinLogging.logger
@@ -82,13 +81,6 @@ fun start() {
     task(1, TimeUnit.MINUTES) {
         shardManager.shards.forEach { jda ->
             jda.presence.game = playing("${config.prefixes[0]}help | ${splashes.random()} [${jda.shardInfo.shardId}]")
-        }
-    }
-
-    if (config.api.enabled) {
-        val statsPoster = injector<JAPIPoster>()
-        task(1, TimeUnit.MINUTES) {
-            statsPoster.postStats()
         }
     }
 

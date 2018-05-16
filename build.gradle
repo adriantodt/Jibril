@@ -11,7 +11,7 @@ plugins {
 }
 
 group = 'jibril'
-version = '2.0'
+version = '2.0-pre1'
 mainClassName = 'jibril.Bootstrap'
 
 // Minified Splash
@@ -36,7 +36,7 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     // Main APIs
-    compile 'net.dv8tion:JDA:3.6.0_355'
+    compile 'net.dv8tion:JDA:3.6.0_362'
     compile 'com.sedmelluq:lavaplayer:1.2.63'
     compile 'com.github.natanbc:discordbots-api:3.3.3'
     compile 'com.github.natanbc:weeb4j:3.2'
@@ -49,7 +49,7 @@ dependencies {
     compile 'jibril:dice-notation:1.0'
     compile 'jibril:snowflake-local:1.0'
 
-    //Project NoBRj/NoClouds
+    //Project NoClouds
     compile 'xyz.cuteclouds:CloudyUtils:1.0'
     compile 'xyz.cuteclouds:HungerGames:1.0.2'
 

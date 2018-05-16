@@ -76,7 +76,7 @@ class RemoveTrack
             }
         }
 
-        musicPlayer.queue = list.filterIndexedTo(LinkedBlockingDeque()) { index, _ -> selected.contains(index) }
+        musicPlayer.queue = list.filterIndexedTo(LinkedBlockingDeque()) { index, _ -> !selected.contains(index) }
 
         event.channel.sendMessage("$SUCCESS Removed **${selected.size()}** track(s) from the queue.").queue()
     }

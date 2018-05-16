@@ -1,6 +1,7 @@
 package jibril.commands.music
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
+import jibril.commands.music.MusicPermissionCommand.Companion.checkPermissions
 import jibril.core.categories.Categories
 import jibril.core.categories.Category
 import jibril.core.commands.Command
@@ -10,6 +11,8 @@ import jibril.core.music.AudioRequester
 import jibril.core.music.MusicManager
 import jibril.utils.commands.HelpFactory
 import jibril.utils.emotes.ERROR2
+import jibril.utils.emotes.STOP
+import jibril.utils.emotes.THINKING
 import jibril.utils.emotes.X
 import jibril.utils.extensions.showHelp
 import jibril.utils.extensions.withPrefix
@@ -23,7 +26,8 @@ import javax.inject.Inject
 sealed class PlayCommand(
     private val musicManager: MusicManager,
     private val force: Boolean,
-    private val next: Boolean
+    private val next: Boolean,
+    private val playNow: Boolean
 ) : ICommand, ICommand.HelpDialogProvider {
     override val category: Category = Categories.MUSIC
 
@@ -81,7 +85,7 @@ sealed class PlayCommand(
             musicManager.getMusicPlayer(event.guild),
             args,
             playerManager,
-            !force, next
+            !force, next, playNow
         )
 
         try {
@@ -96,7 +100,7 @@ sealed class PlayCommand(
 
 @Command("play", "p")
 class Play
-@Inject constructor(musicManager: MusicManager) : PlayCommand(musicManager, false, false) {
+@Inject constructor(musicManager: MusicManager) : PlayCommand(musicManager, false, false, false) {
     override val helpHandler = HelpFactory("Play Command") {
         aliases("p")
 
@@ -111,16 +115,13 @@ class Play
         usage("play [youtube/yt] <search term>", "Searches for the video in Youtube.")
         usage("play <soundcloud/sc> <search term>", "Searches for the song in SoundCloud.")
 
-        alsoSee("forceplay", "Similar to `${"play".withPrefix()}`, but doesn't open a dialog on search results.")
-        alsoSee("playnext", "Similar to `${"play".withPrefix()}`, but add the musics to the begin of the queue.")
-        alsoSee("forceplaynext", "A mix of the `${"forceplay".withPrefix()}` and `${"playnext".withPrefix()}` commands.")
-
+        seeAlso("playnow", "playnext", "forceplay", "forceplaynow", "forceplaynext")
     }
 }
 
 @Command("forceplay", "fp")
 class ForcePlay
-@Inject constructor(musicManager: MusicManager) : PlayCommand(musicManager, true, false) {
+@Inject constructor(musicManager: MusicManager) : PlayCommand(musicManager, true, false, false) {
     override val helpHandler = HelpFactory("ForcePlay Command") {
         aliases("fp")
 
@@ -133,18 +134,16 @@ class ForcePlay
 
         usage("forceplay", "+ attachment", "Loads and plays the song from the attachment.")
         usage("forceplay <song url>", "Loads and plays the song from the URL.")
-        usage("forceplay <youtube/yt> <search term>", "Searches for the video in Youtube and adds the first result.")
+        usage("forceplay [youtube/yt] <search term>", "Searches for the video in Youtube and adds the first result.")
         usage("forceplay <soundcloud/sc> <search term>", "Searches for the song in SoundCloud and adds the first result.")
 
-        alsoSee("play", "Similar to `${"forceplay".withPrefix()}`, but opens a dialog on search results.")
-        alsoSee("playnext", "Similar to `${"play".withPrefix()}`, but add the musics to the begin of the queue.")
-        alsoSee("forceplaynext", "A mix of the `${"forceplay".withPrefix()}` and `${"playnext".withPrefix()}` commands.")
+        seeAlso("play", "playnow", "playnext", "forceplaynow", "forceplaynext")
     }
 }
 
 @Command("playnext", "pn")
 class PlayNext
-@Inject constructor(musicManager: MusicManager) : PlayCommand(musicManager, false, true) {
+@Inject constructor(musicManager: MusicManager) : PlayCommand(musicManager, false, true, false) {
     override val helpHandler = HelpFactory("PlayNext Command") {
         aliases("pn")
 
@@ -156,18 +155,16 @@ class PlayNext
 
         usage("playnext", "+ attachment", "Loads and plays the song from the attachment.")
         usage("playnext <song url>", "Loads and plays the song from the URL.")
-        usage("playnext <youtube/yt> <search term>", "Searches for the video in Youtube.")
+        usage("playnext [youtube/yt] <search term>", "Searches for the video in Youtube.")
         usage("playnext <soundcloud/sc> <search term>", "Searches for the song in SoundCloud.")
 
-        alsoSee("play", "Similar to `${"playnext".withPrefix()}`, but add the musics to the end of the queue.")
-        alsoSee("forceplay", "Similar to `${"play".withPrefix()}`, but doesn't open a dialog on search results.")
-        alsoSee("forceplaynext", "A mix of the `${"forceplay".withPrefix()}` and `${"playnext".withPrefix()}` commands.")
+        seeAlso("play", "playnow", "forceplay", "forceplaynow", "forceplaynext")
     }
 }
 
 @Command("forceplaynext", "fpn")
 class ForcePlayNext
-@Inject constructor(musicManager: MusicManager) : PlayCommand(musicManager, true, true) {
+@Inject constructor(musicManager: MusicManager) : PlayCommand(musicManager, true, true, false) {
     override val helpHandler = HelpFactory("ForcePlayNext Command") {
         aliases("fpn")
 
@@ -180,9 +177,70 @@ class ForcePlayNext
 
         usage("forceplaynext", "+ attachment", "Loads and plays the song from the attachment.")
         usage("forceplaynext <song url>", "Loads and plays the song from the URL.")
-        usage("forceplaynext <youtube/yt> <search term>", "Searches for the video in Youtube and adds the first result.")
+        usage("forceplaynext [youtube/yt] <search term>", "Searches for the video in Youtube and adds the first result.")
         usage("forceplaynext <soundcloud/sc> <search term>", "Searches for the song in SoundCloud and adds the first result.")
 
-        seeAlso("play", "forceplay", "forceplaynext")
+        seeAlso("play", "playnow", "playnext", "forceplay", "forceplaynow")
+    }
+}
+
+@Command("playnow")
+class PlayNow
+@Inject constructor(private val musicManager: MusicManager) : PlayCommand(musicManager, false, true, true) {
+
+    override fun call(event: GuildMessageReceivedEvent, args: String) {
+        if (checkPermissions(event, musicManager.getMusicPlayer(event.guild), true)) {
+            super.call(event, args)
+        } else {
+            event.channel.sendMessage(
+                "$STOP B-baka, I'm not allowed to let you do that!\n\n$THINKING Maybe you meant ``${"playnext".withPrefix()}`` instead?"
+            ).queue()
+        }
+    }
+
+    override val helpHandler = HelpFactory("PlayNow Command") {
+        description(
+            "**Play songs!**",
+            "If the user is in a voice channel and there's no song playing, I'll join your channel before starting.",
+            "If I'm already playing a song, this command will add the song to the begin of the queue."
+        )
+
+        usage("playnext", "+ attachment", "Loads and plays the song from the attachment.")
+        usage("playnext <song url>", "Loads and plays the song from the URL.")
+        usage("playnext [youtube/yt] <search term>", "Searches for the video in Youtube.")
+        usage("playnext <soundcloud/sc> <search term>", "Searches for the song in SoundCloud.")
+
+        seeAlso("play", "playnext", "forceplay", "forceplaynow", "forceplaynext")
+    }
+}
+
+@Command("forceplaynow")
+class ForcePlayNow
+@Inject constructor(private val musicManager: MusicManager) : PlayCommand(musicManager, true, true, true) {
+
+    override fun call(event: GuildMessageReceivedEvent, args: String) {
+        if (checkPermissions(event, musicManager.getMusicPlayer(event.guild), true)) {
+            super.call(event, args)
+        } else {
+            event.channel.sendMessage(
+                "$STOP B-baka, I'm not allowed to let you do that!\n\n$THINKING Maybe you meant ``${"forceplaynext".withPrefix()}`` instead?"
+            ).queue()
+        }
+    }
+
+    override val helpHandler = HelpFactory("ForcePlayNow Command") {
+        description(
+            "**Play songs!**",
+            "If the user is in a voice channel and there's no song playing, I'll join your channel before starting.",
+            "If I'm already playing a song, this command will add the song to the begin of the queue.",
+            "Instead of opening a dialog in a search result, this command adds the first result instead."
+        )
+
+        usage("forceplaynext", "+ attachment", "Loads and plays the song from the attachment.")
+        usage("forceplaynext <song url>", "Loads and plays the song from the URL.")
+        usage("forceplaynext [youtube/yt] <search term>", "Searches for the video in Youtube and adds the first result.")
+        usage("forceplaynext <soundcloud/sc> <search term>", "Searches for the song in SoundCloud and adds the first result.")
+
+        seeAlso("play", "playnow", "playnext", "forceplay", "forceplaynext")
     }
 }

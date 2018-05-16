@@ -2,7 +2,7 @@ package jibril.commands.developer
 
 import bsh.Interpreter
 import com.google.inject.Injector
-import jibril.Jibril
+import jibril.database.JibrilDatabase
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import javax.script.ScriptEngineManager
@@ -15,7 +15,7 @@ class JsEvaluator(
         val engine = ScriptEngineManager().getEngineByName("nashorn")
         engine["injector"] = injector
         engine["shards"] = shardManager
-        engine["db"] = Jibril.db
+        engine["db"] = JibrilDatabase
         engine["jda"] = event.jda
         engine["event"] = event
         engine["guild"] = event.guild
@@ -43,7 +43,7 @@ class PersistentJsEvaluator(
     init {
         engine["injector"] = injector
         engine["shards"] = shardManager
-        engine["db"] = Jibril.db
+        engine["db"] = JibrilDatabase
     }
 
     override fun get(key: String): Any? = engine[key]
@@ -70,7 +70,7 @@ class BshEvaluator(
         val engine = Interpreter()
         engine["injector"] = injector
         engine["shards"] = shardManager
-        engine["db"] = Jibril.db
+        engine["db"] = JibrilDatabase
         engine["jda"] = event.jda
         engine["event"] = event
         engine["guild"] = event.guild

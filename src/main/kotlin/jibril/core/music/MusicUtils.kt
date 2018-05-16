@@ -95,8 +95,8 @@ fun musicLength(millis: Long, stream: String = "stream"): String {
 }
 
 fun musicLength(queue: Iterable<AudioTrack>): String {
-    val length = queue.map { it.duration }.filter { it != Long.MAX_VALUE }.sum()
-    val streamCount = queue.count { it.duration == Long.MAX_VALUE }
+    val length = queue.filter { it.info.isStream }.map { it.duration }.sum()
+    val streamCount = queue.count { it.info.isStream }
 
     if (length == 0L && streamCount != 0) {
         return "$streamCount streams"

@@ -1,12 +1,12 @@
 package jibril.commands.utils
 
 import jibril.Jibril.config
-import jibril.Jibril.db
 import jibril.commands.utils.Iam.iam
 import jibril.commands.utils.Iam.iamnot
 import jibril.core.categories.Categories
 import jibril.core.commands.Command
 import jibril.core.commands.ICommand
+import jibril.database.entities.GuildSettings
 import jibril.utils.emotes.ERROR
 import jibril.utils.emotes.SUCCESS
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
@@ -26,7 +26,7 @@ class IamNotCmd : ICommand {
 
 object Iam {
     fun iam(event: GuildMessageReceivedEvent, roleName: String) {
-        val settings = db.guildSettings[event.guild.idLong]
+        val settings = GuildSettings(event.guild.idLong)
         val roles = settings.assignableRoles
         val roleId = roles[roleName]
 
@@ -41,7 +41,6 @@ object Iam {
             event.channel.sendMessage("$ERROR S-sorry! Someone deleted that role, and I can't assign it to you.").queue()
 
             roles.remove(roleName)
-            settings.save(db)
             return
         }
 
@@ -62,7 +61,7 @@ object Iam {
     }
 
     fun iamnot(event: GuildMessageReceivedEvent, roleName: String) {
-        val settings = jibril.Jibril.db.guildSettings[event.guild.idLong]
+        val settings = GuildSettings(event.guild.idLong)
         val roles = settings.assignableRoles
         val roleId = roles[roleName]
 
@@ -77,7 +76,6 @@ object Iam {
             event.channel.sendMessage("$ERROR S-sorry! Someone deleted that role, and I can't assign it to you.").queue()
 
             roles.remove(roleName)
-            settings.save(db)
             return
         }
 

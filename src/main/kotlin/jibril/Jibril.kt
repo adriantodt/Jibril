@@ -2,8 +2,6 @@ package jibril
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
 import jibril.data.config.ConfigManager
-import jibril.data.config.address
-import jibril.data.db.JibrilDatabase
 import jibril.exported.jibril_version
 import jibril.utils.TaskManager.scheduler
 import jibril.utils.TaskType
@@ -15,11 +13,6 @@ import java.lang.management.ManagementFactory
 object Jibril {
     //Configs
     val config = ConfigManager.config
-
-    //Database
-    val db by lazy {
-        JibrilDatabase(config.database.address)
-    }
 
     //Versioning
     const val version = jibril_version

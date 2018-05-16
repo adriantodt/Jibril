@@ -1,6 +1,6 @@
 package jibril.integration
 
-import jibril.data.db.RedisPool
+import jibril.database.RedisPool
 import jibril.utils.extensions.useResource
 import org.json.JSONObject
 

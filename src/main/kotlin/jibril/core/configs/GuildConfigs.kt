@@ -1,6 +1,6 @@
 package jibril.core.configs
 
-import jibril.Jibril
+import jibril.database.entities.GuildSettings
 import jibril.utils.extensions.withPrefix
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 
@@ -19,14 +19,13 @@ object GuildConfigs : IConfigCompound {
         description = "Custom Prefix of the Guild"
     ) {
         override fun get(event: GuildMessageReceivedEvent): Any {
-            val prefix = Jibril.db.guildSettings.getOrNull(event.guild.idLong)?.prefix ?: return "None set."
+            val prefix = GuildSettings(event.guild.idLong).prefix ?: return "None set."
             return "``$prefix``"
         }
 
         override fun set(event: GuildMessageReceivedEvent, input: String): Any {
-            val settings = Jibril.db.guildSettings[event.guild.idLong]
+            val settings = GuildSettings(event.guild.idLong)
             settings.prefix = input
-            settings.save(Jibril.db)
             return "``$input``"
         }
     }
@@ -37,8 +36,8 @@ object GuildConfigs : IConfigCompound {
         description = "Create roles that can be assignable with ${"iam".withPrefix()} command."
     ) {
         override fun get(event: GuildMessageReceivedEvent): Any {
-            val assignableRoles = Jibril.db.guildSettings.getOrNull(event.guild.idLong)?.assignableRoles
-            if (assignableRoles == null || assignableRoles.isEmpty()) return "None set."
+            val assignableRoles = GuildSettings(event.guild.idLong).assignableRoles
+            if (assignableRoles.isEmpty()) return "None set."
 
             return assignableRoles
                 .mapValues { event.guild.getRoleById(it.value) ?: null }

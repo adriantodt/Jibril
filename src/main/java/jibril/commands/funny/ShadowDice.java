@@ -1,11 +1,16 @@
 package jibril.commands.funny;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class ShadowDice {
-    private final Random random = new Random(), shadow = new Random(random.nextLong());
+
+    private int clamp(int v, int min, int max) {
+        return Math.min(Math.max(v, min), max);
+    }
 
     public int roll(int sides) {
-        return Math.min(random.nextInt(sides) + (sides / 5 == 0 ? 0 : shadow.nextInt(sides / 5)), sides - 1) + 1;
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+
+        return clamp((int) ((random.nextDouble() * 0.75 + random.nextGaussian() * 0.25) * sides), 0, sides - 1) + 1;
     }
 }
