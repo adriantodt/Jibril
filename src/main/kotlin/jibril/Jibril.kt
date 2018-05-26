@@ -25,5 +25,7 @@ object Jibril {
     val bootQuotes: List<String> get() = File("assets/jibril/boot_quotes.txt").readLines()
     val sleepQuotes: List<String> get() = File("assets/jibril/sleep_quotes.txt").readLines()
     val splashes: List<String> get() = File("assets/jibril/splashes.txt").readLines()
-    val uptime: String get() = humanizedTime(ManagementFactory.getRuntimeMXBean().uptime)
+
+    val uptime: String get() = humanizedTime(rawUptime)
+    val rawUptime get() = ManagementFactory.getRuntimeMXBean().uptime
 }

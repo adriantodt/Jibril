@@ -1,6 +1,6 @@
 package jibril.commands.info
 
-import jibril.Jibril
+import  jibril.Jibril
 import jibril.core.CommandProcessor
 import jibril.core.categories.Categories
 import jibril.core.commands.Command
@@ -71,10 +71,10 @@ class Stats
             val uniqueUserCount = shardManager.userCache.stream().map(ISnowflake::getIdLong).distinct().count().format("%,d")
             val textChannelCount = shardManager.textChannelCache.size().format("%,d")
             val voiceChannelCount = shardManager.voiceChannelCache.size().format("%,d")
-            val musicCount = musicManager.musicPlayers.size()
+            val musicCount = musicManager.musicPlayers.size().format("%,d")
             val queueSize = musicManager.musicPlayers.valueCollection()
                 .map { it.queue.size }
-                .sum()
+                .sum().format("%,d")
 
             fields.remove(fields.last())
             field("Discord Stats:",
@@ -83,7 +83,7 @@ class Stats
                     "\u25AB **Unique Users**: $uniqueUserCount",
                     "\u25AB **Text Channels**: $textChannelCount",
                     "\u25AB **Voice Channels**: $voiceChannelCount",
-                    "\u25AB **Playing $musicCount tracks**",
+                    "\u25AB **Playing music on $musicCount servers**",
                     "\u25AB **$queueSize tracks queued**"
                 ),
                 inline = true

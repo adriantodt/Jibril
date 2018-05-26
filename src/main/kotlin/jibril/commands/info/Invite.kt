@@ -3,7 +3,7 @@ package jibril.commands.info
 import jibril.core.categories.Categories
 import jibril.core.commands.Command
 import jibril.core.commands.ICommand
-import jibril.utils.Colors
+import jibril.utils.JibrilColors
 import jibril.utils.commands.HelpFactory
 import jibril.utils.emotes.SMILEY
 import jibril.utils.extensions.*
@@ -15,7 +15,7 @@ class Invite : ICommand, ICommand.HelpDialogProvider {
 
     override fun call(event: GuildMessageReceivedEvent, args: String) {
         embed {
-            baseEmbed(event, name = "Jibril | Invite", color = Colors.jibrilPrimary)
+            baseEmbed(event, name = "Jibril | Invite", color = JibrilColors.primary)
             thumbnail("https://i.imgur.com/ZqJsEBr.jpg")
 
             description(

@@ -17,9 +17,9 @@ import gnu.trove.map.hash.TLongObjectHashMap
 import jibril.Jibril
 import jibril.core.listeners.EventListeners.submit
 import jibril.utils.extensions.computeIfAbsent
+import jibril.utils.extensions.newCall
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.entities.Guild
-import okhttp3.Request
 import org.apache.http.client.config.CookieSpecs
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.utils.URIBuilder
@@ -52,14 +52,14 @@ class MusicManager @Inject constructor(private val shardManager: ShardManager) {
             return m
         }
 
-        private fun devSourceManager(): AudioPlayerManager {
+        private fun devPlayerManager(): AudioPlayerManager {
             val m = DefaultAudioPlayerManager()
             AudioSourceManagers.registerRemoteSources(m)
             AudioSourceManagers.registerLocalSource(m)
             return m
         }
 
-        private fun attachmentsSourceManager(): AudioPlayerManager {
+        private fun httpSafePlayerManager(): AudioPlayerManager {
             val m = DefaultAudioPlayerManager()
             m += HttpAudioSourceManager()
             return m
@@ -72,10 +72,10 @@ class MusicManager @Inject constructor(private val shardManager: ShardManager) {
     val userPlayerManager: AudioPlayerManager = userPlayerManager()
 
     //Attachments
-    val attachmentPlayerManager: AudioPlayerManager = attachmentsSourceManager()
+    val httpSafePlayerManager: AudioPlayerManager = httpSafePlayerManager()
 
     //Developers
-    val devPlayerManager: AudioPlayerManager = devSourceManager()
+    val devPlayerManager: AudioPlayerManager = devPlayerManager()
 
     fun getMusicPlayer(guild: Guild): GuildMusicPlayer {
         return musicPlayers.computeIfAbsent(guild.idLong) { GuildMusicPlayer(shardManager, this, guild) }
@@ -98,23 +98,21 @@ class MusicManager @Inject constructor(private val shardManager: ShardManager) {
         val sourceManager = currentTrack.sourceManager
 
         val thumbnail = when (sourceManager) {
-            is YoutubeAudioSourceManager -> "https://img.youtube.com/vi/" + currentTrack.identifier + "/0.jpg"
+            is YoutubeAudioSourceManager -> "https://img.youtube.com/vi/${currentTrack.identifier}/0.jpg"
             is TwitchStreamAudioSourceManager -> {
                 return "https://static-cdn.jtvnw.net/previews-ttv/live_user_${getChannelIdentifierFromUrl(currentTrack.identifier)}-854x480.jpg&t=${twitchTvThumbId.incrementAndGet()}"
             }
             is SoundCloudAudioSourceManager -> {
 
                 fun request(retry: Boolean = true): String? {
-                    val response = Jibril.httpClient.newCall(
-                        Request.Builder()
-                            .url(
-                                URIBuilder("https://api.soundcloud.com/tracks/${currentTrack.identifier}")
-                                    .addParameter("client_id", sourceManager.clientId)
-                                    .build()
-                                    .toURL()
-                            )
-                            .build()
-                    ).execute()
+                    val response = Jibril.httpClient.newCall {
+                        url(
+                            URIBuilder("https://api.soundcloud.com/tracks/${currentTrack.identifier}")
+                                .addParameter("client_id", sourceManager.clientId)
+                                .build()
+                                .toURL()
+                        )
+                    }.execute()
 
                     if (response.code() == 401) {
                         return if (retry) {

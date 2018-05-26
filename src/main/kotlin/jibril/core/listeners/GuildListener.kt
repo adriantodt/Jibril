@@ -29,11 +29,11 @@ class GuildListener
                 when (event) {
                     is GuildJoinEvent -> {
                         GuildStatsManager.log(GuildEvent.JOIN)
-                        baseEmbed("JibrilLog | New Server", color = Colors.GREEN)
+                        baseEmbed("JibrilLog | New Server", color = Colors.discordGreen)
                     }
                     is GuildLeaveEvent -> {
                         GuildStatsManager.log(GuildEvent.LEAVE)
-                        baseEmbed("JibrilLog | Lost Server", color = Colors.RED)
+                        baseEmbed("JibrilLog | Lost Server", color = Colors.discordRed)
                     }
                 }
 

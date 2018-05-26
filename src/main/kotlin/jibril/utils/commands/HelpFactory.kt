@@ -3,7 +3,7 @@ package jibril.utils.commands
 import jibril.core.commands.CommandPermission
 import jibril.core.commands.ICommand
 import jibril.data.config.ConfigManager
-import jibril.utils.Colors
+import jibril.utils.JibrilColors
 import jibril.utils.extensions.*
 import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
@@ -37,7 +37,7 @@ class HelpFactory(
         }
 
         return embed {
-            helpEmbed(event, name, permission, color = color ?: Colors.jibrilPrimary)
+            helpEmbed(event, name, permission, color = color ?: JibrilColors.primary)
 
             if (aliases.isNotEmpty()) {
                 field("Aliases:", aliases.joinToString("` `", "`", "`"))

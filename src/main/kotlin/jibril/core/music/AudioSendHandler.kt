@@ -15,5 +15,4 @@ class AudioSendHandler(private val audioPlayer: AudioPlayer) : AudioSendHandler 
     override fun provide20MsAudio(): ByteArray = lastFrame.data
 
     override fun isOpus() = true
-
 }

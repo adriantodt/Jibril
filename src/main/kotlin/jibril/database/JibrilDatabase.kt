@@ -14,14 +14,12 @@ object JibrilDatabase {
     //Pool
     val pool = RedisPool()
 
-    fun connected(): Boolean {
-        return try {
-            pool.useResource(Redis::info)
-            true
+    val isConnected: Boolean
+        get() = try {
+            pool.useResource(Redis::info); true
         } catch (e: JedisConnectionException) {
             false
         }
-    }
 
     //Event Stuff
     val publisher: EventPublisher by lazy { EventPublisher(pool) }
@@ -33,6 +31,6 @@ object JibrilDatabase {
         .setSequenceBits(12L)
         .build()
 
-    val idWorker = generator[0][1]
+    val idWorker = generator[0, 1]
 
 }

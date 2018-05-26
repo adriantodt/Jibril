@@ -3,7 +3,7 @@
 package jibril.utils.extensions
 
 import jibril.core.commands.CommandPermission
-import jibril.utils.Colors
+import jibril.utils.JibrilColors
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import java.awt.Color
@@ -13,7 +13,7 @@ fun EmbedBuilder.baseEmbed(
     name: String,
     url: String? = null,
     image: String? = event.jda.selfUser.effectiveAvatarUrl,
-    color: Color? = event.guild.selfMember.color ?: Colors.jibrilPrimary
+    color: Color? = event.guild.selfMember.color ?: JibrilColors.primary
 ) {
     author(name, url, image)
     color(color)
@@ -24,7 +24,7 @@ fun EmbedBuilder.baseEmbed(
     name: String,
     url: String? = null,
     image: String? = null,
-    color: Color? = Colors.jibrilPrimary
+    color: Color? = JibrilColors.primary
 ) {
     author(name, url, image)
     color(color)
@@ -36,7 +36,7 @@ fun EmbedBuilder.helpEmbed(
     commandPermission: CommandPermission? = null,
     url: String? = null,
     image: String = event.jda.selfUser.effectiveAvatarUrl,
-    color: Color? = event.member.color ?: Colors.jibrilPrimary
+    color: Color? = event.member.color ?: JibrilColors.primary
 ) {
     baseEmbed(event, name, url, image, color)
     thumbnail("https://i.imgur.com/a5lJho6.png")

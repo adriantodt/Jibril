@@ -14,9 +14,19 @@ import javax.security.auth.login.LoginException
 
 //Builders
 
+
 inline fun shardManager(init: DefaultShardManagerBuilder.() -> Unit): ShardManager = with(DefaultShardManagerBuilder()) {
     init()
     build()
+}
+
+inline fun message(message: MessageBuilder = MessageBuilder(), init: MessageBuilder.() -> Unit) = with(message) {
+    init()
+    build()
+}
+
+inline fun MessageBuilder.embed(embed: EmbedBuilder = EmbedBuilder(), init: EmbedBuilder.() -> Unit) {
+    setEmbed(embed.also(init).build())
 }
 
 inline fun embed(embed: EmbedBuilder = EmbedBuilder(), init: EmbedBuilder.() -> Unit): MessageEmbed = with(embed) {
@@ -24,15 +34,14 @@ inline fun embed(embed: EmbedBuilder = EmbedBuilder(), init: EmbedBuilder.() -> 
     build()
 }
 
-inline fun message(message: MessageBuilder = MessageBuilder(), init: MessageBuilder.() -> Unit): Message? = with(message) {
-    init()
-    build()
-}
 
 //Member
 
-val Member.idLong: Long
+inline val Member.idLong: Long
     get() = user.idLong
+
+inline val Member.id: String
+    get() = user.id
 
 //Extras
 
@@ -40,16 +49,18 @@ inline fun MessageEmbed.send(e: GuildMessageReceivedEvent) = send(e.channel)
 
 inline fun MessageEmbed.send(c: MessageChannel): MessageAction = c.sendMessage(this)
 
-val User.discordTag: String
+inline fun Message.send(e: GuildMessageReceivedEvent) = send(e.channel)
+
+inline fun Message.send(c: MessageChannel): MessageAction = c.sendMessage(this)
+
+inline val User.discordTag: String
     get() = "$name#$discriminator"
 
-val Member.isValid: Boolean
+inline val Member.isValid: Boolean
     get() = guild.isMember(user)
 
-val VoiceChannel.humanUsers: Int
-    get() {
-        return members.filter { !it.user.isBot }.size
-    }
+inline val VoiceChannel.humanUsers: Int
+    get() = members.count { !it.user.isBot }
 
 @Throws(LoginException::class, InterruptedException::class)
 fun JDA.blockUntil(status: JDA.Status): JDA {

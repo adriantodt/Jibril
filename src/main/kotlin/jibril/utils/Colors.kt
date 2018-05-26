@@ -2,40 +2,59 @@ package jibril.utils
 
 import java.awt.Color
 
-object Colors {
+object JibrilColors {
     /*
      * Jibril colors
      */
-    val jibrilPrimary = Color(0xd63681)
-    val jibrilLighter = Color(0xff66ad)
-    val jibrilDarker = Color(0xa60a50)
+    @JvmField
+    val primary = Color(0xd63681)
+    @JvmField
+    val light = Color(0xff66ad)
+    @JvmField
+    val dark = Color(0xa60a50)
+}
+
+object Colors {
 
     /*
      * Official Discord Colors
      */
-    val BURPLE = Color(0x7289da)
-    val WHITE = Color(0xffffff)
-    val GREYPLE = Color(0x99aab5)
-    val DARK = Color(0x23272a)
-    val BLACKY = Color(0x36393e)
-    val ALBLACK = Color(0x25272B)
+    @JvmField
+    val blurple = Color(0x7289da)
+    @JvmField
+    val white = Color(0xffffff)
+    @JvmField
+    val greyple = Color(0x99aab5)
+    @JvmField
+    val dark = Color(0x23272a)
+    @JvmField
+    val blacky = Color(0x36393e)
+    @JvmField
+    val darkish = Color(0x25272B)
 
     /*
      * Pallete-derived Discord Colors
      */
-    val WHIPLE = Color(0xEFF4F7)
-    val DARK_GREYPLE = Color(0x6E7A82)
+    @JvmField
+    val whiple = Color(0xEFF4F7)
+    @JvmField
+    val darkGreyple = Color(0x6E7A82)
 
     /*
      * Other colors also used by Discord
      */
-    val CANARY = Color(0xfaa61a)
-    val RED = Color(0xf04747)
-    val GREEN = Color(0x43b581)
-    val PURPLE = Color(0x593695)
+    @JvmField
+    val discordCanary = Color(0xfaa61a)
+    @JvmField
+    val discordRed = Color(0xf04747)
+    @JvmField
+    val discordGreen = Color(0x43b581)
+    @JvmField
+    val discordPurple = Color(0x593695)
 
     /*
      * Developer colors
      */
-    val ADRIAN = Color(0xff3600)
+    @JvmField
+    val fireRed = Color(0xff3600)
 }

@@ -3,7 +3,7 @@ package jibril.commands.info
 import jibril.core.categories.Categories
 import jibril.core.commands.Command
 import jibril.core.commands.ICommand
-import jibril.utils.Colors
+import jibril.utils.JibrilColors
 import jibril.utils.commands.HelpFactory
 import jibril.utils.extensions.*
 import net.dv8tion.jda.bot.sharding.ShardManager
@@ -43,7 +43,7 @@ class About
 
     private fun about(event: GuildMessageReceivedEvent) {
         embed {
-            baseEmbed(event, name = "Jibril | About", color = Colors.jibrilPrimary)
+            baseEmbed(event, name = "Jibril | About", color = JibrilColors.primary)
             thumbnail("https://i.imgur.com/ZqJsEBr.jpg")
             description(
                 "Hi, I'm **Jibril**, the personal angel guardian that your server need!",

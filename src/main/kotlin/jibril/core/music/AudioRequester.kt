@@ -7,7 +7,7 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import jibril.Jibril
-import jibril.utils.Colors
+import jibril.utils.JibrilColors
 import jibril.utils.emotes.CONFUSED
 import jibril.utils.emotes.DISAPPOINTED
 import jibril.utils.emotes.X
@@ -65,7 +65,7 @@ class AudioRequester private constructor(
                 addUsers(member.user)
                 setTimeout(30, TimeUnit.SECONDS)
 
-                setColor(member.guild.selfMember.color ?: Colors.jibrilPrimary)
+                setColor(member.guild.selfMember.color ?: JibrilColors.primary)
 
                 useCancelButton(true)
                 setDescription(
@@ -101,6 +101,9 @@ class AudioRequester private constructor(
 
                 build()
             }.display(textChannel)
+            return
+        } else if (playlist.selectedTrack != null) {
+            trackLoaded(playlist.selectedTrack)
             return
         }
 

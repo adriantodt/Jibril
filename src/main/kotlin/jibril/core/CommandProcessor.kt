@@ -186,10 +186,6 @@ object CommandProcessor : KLogging() {
     }
 
     private fun handleException(c: ICommand, event: GuildMessageReceivedEvent, e: Exception) {
-        if (e == CommandExceptions.Finish) {
-            return
-        }
-
         if (e == CommandExceptions.ShowHelp) {
             return onHelp(c, event)
         }

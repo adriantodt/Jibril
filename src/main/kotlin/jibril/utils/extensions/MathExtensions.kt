@@ -7,19 +7,19 @@ import com.google.common.primitives.Longs
 import com.google.common.primitives.Shorts
 import kotlin.experimental.xor
 import kotlin.math.absoluteValue
+import kotlin.math.exp
 
-inline fun Double.floor(factor: Double = 1.0) = Math.floor(this * factor) / factor
+inline fun sigmoid(f: Double) = 1 / (1 + exp(-f))
 
-inline fun Float.floor(factor: Float = 1.0f) = (Math.floor((this * factor).toDouble()) / factor).toFloat()
+inline fun sigmoid(f: Float) = 1 / (1 + exp(-f))
 
-val Long.binary: ByteArray
-    get() = Longs.toByteArray(this)
+inline fun floor(d: Double, factor: Double = 1.0) = Math.floor(d * factor) / factor
 
-val Int.binary: ByteArray
-    get() = Ints.toByteArray(this)
+inline fun floor(f: Float, factor: Float = 1.0f) = (Math.floor((f * factor).toDouble()) / factor).toFloat()
 
-val String.binary: ByteArray
-    get() = toByteArray()
+fun Long.toByteArray(): ByteArray = Longs.toByteArray(this)
+
+fun Int.toByteArray(): ByteArray = Ints.toByteArray(this)
 
 fun Long.fold(): Int {
     val bytes = Longs.toByteArray(this)

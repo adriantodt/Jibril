@@ -10,12 +10,12 @@ class RedisHash<K, V>(
 ) : MutableMap<K, V> {
     override val size: Int get() = pool.useResource { it.hlen(hash).toInt() }
 
-    override fun containsKey(key: K): Boolean = pool.useResource { it.hexists(hash, keySerializer.from(key)) }
+    override fun containsKey(key: K): Boolean = pool.useResource { it.hexists(hash, keySerializer.serialize(key)) }
 
-    override fun containsValue(value: V): Boolean = pool.useResource { it.hvals(hash).contains(valueSerializer.from(value)) }
+    override fun containsValue(value: V): Boolean = pool.useResource { it.hvals(hash).contains(valueSerializer.serialize(value)) }
 
     override fun get(key: K): V? {
-        return valueSerializer.to(pool.useResource { it.hget(hash, keySerializer.from(key)) } ?: return null)
+        return valueSerializer.unserialize(pool.useResource { it.hget(hash, keySerializer.serialize(key)) } ?: return null)
     }
 
     override fun isEmpty(): Boolean = (size == 0)
@@ -23,24 +23,24 @@ class RedisHash<K, V>(
     override val entries: MutableSet<MutableMap.MutableEntry<K, V>>
         get() = pool.useResource { it.hkeys(hash) }.mapTo(LinkedHashSet()) { k ->
             object : MutableMap.MutableEntry<K, V> {
-                override val key: K get() = keySerializer.to(k)
-                override val value: V get() = valueSerializer.to(pool.useResource { it.hget(hash, keySerializer.from(key)) })
+                override val key: K get() = keySerializer.unserialize(k)
+                override val value: V get() = valueSerializer.unserialize(pool.useResource { it.hget(hash, keySerializer.serialize(key)) })
                 override fun setValue(newValue: V): V = put(key, value)!!
             }
         }
 
-    override val keys: MutableSet<K> get() = pool.useResource { it.hkeys(hash) }.mapTo(LinkedHashSet(), keySerializer::to)
+    override val keys: MutableSet<K> get() = pool.useResource { it.hkeys(hash) }.mapTo(LinkedHashSet(), keySerializer::unserialize)
 
-    override val values: MutableCollection<V> get() = pool.useResource { it.hvals(hash) }.mapTo(ArrayList(), valueSerializer::to)
+    override val values: MutableCollection<V> get() = pool.useResource { it.hvals(hash) }.mapTo(ArrayList(), valueSerializer::unserialize)
 
     override fun clear() {
         pool.useResource { it.del(hash) }
     }
 
     override fun put(key: K, value: V): V? {
-        return valueSerializer.to(pool.useResource {
-            val last = it.hget(hash, keySerializer.from(key))
-            it.hset(hash, keySerializer.from(key), valueSerializer.from(value))
+        return valueSerializer.unserialize(pool.useResource {
+            val last = it.hget(hash, keySerializer.serialize(key))
+            it.hset(hash, keySerializer.serialize(key), valueSerializer.serialize(value))
             last
         } ?: return null)
     }
@@ -48,20 +48,29 @@ class RedisHash<K, V>(
     override fun putAll(from: Map<out K, V>) {
         pool.useResource {
             from.forEach { k, v ->
-                it.hset(hash, keySerializer.from(k), valueSerializer.from(v))
+                it.hset(hash, keySerializer.serialize(k), valueSerializer.serialize(v))
             }
         }
     }
 
     override fun remove(key: K): V? {
-        return valueSerializer.to(pool.useResource {
-            val last = it.hget(hash, keySerializer.from(key))
-            it.hdel(hash, keySerializer.from(key))
+        return valueSerializer.unserialize(pool.useResource {
+            val last = it.hget(hash, keySerializer.serialize(key))
+            it.hdel(hash, keySerializer.serialize(key))
             last
         } ?: return null)
     }
 
     override fun hashCode(): Int = pool.useResource { it.hgetAll(hash) }.entries.hashCode()
+
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other !is Map<*, *>) return false
+        if (other is RedisHash<*, *> && other.hash == hash) return true
+        if (size != other.size) return false
+
+        return entries == other.entries
+    }
 
     override fun toString(): String = pool.useResource { it.hgetAll(hash) }.entries
         .joinToString(prefix = "{", separator = ", ", postfix = "}") { (k, v) -> "${keySerializer(k)}=${valueSerializer(v)}" }

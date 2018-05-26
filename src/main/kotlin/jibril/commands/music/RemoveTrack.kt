@@ -22,13 +22,13 @@ class RemoveTrack
 
         val selected = TIntHashSet()
 
-        val last = (list.size - 1).toString()
+        val last = list.size.toString()
 
         for (param in args.split(' ')) {
             val arg = replaceEach(
                 param,
                 arrayOf("first", "next", "last", "all"),
-                arrayOf("0", "0", last, "0-$last")
+                arrayOf("1", "1", last, "0-$last")
             )
 
             if (arg.contains("-") || arg.contains("~")) {

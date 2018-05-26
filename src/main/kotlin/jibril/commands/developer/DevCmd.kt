@@ -133,7 +133,7 @@ class DevCmd
         val evaluator = (if (persistent) pEvals else sEvals)[eval] ?: return showHelp()
 
         EmbedFirst(event) {
-            baseEmbed("DevConsole | Evaluating...", color = Colors.BURPLE)
+            baseEmbed("DevConsole | Evaluating...", color = Colors.blurple)
             thumbnail("https://i.imgur.com/Zy2QUI5.png")
             description("$LOADING Evaluating $LOADING")
         } then {
@@ -144,7 +144,7 @@ class DevCmd
             }
 
             if (e != null) {
-                baseEmbed("DevConsole | Evaluated and errored", color = Colors.RED)
+                baseEmbed("DevConsole | Evaluated and errored", color = Colors.discordRed)
                 descriptionBuilder.setLength(0)
                 field(
                     e.javaClass.name,
@@ -152,7 +152,7 @@ class DevCmd
                 )
                 field("Full Stacktrace:", paste(ThrowableToStringArray.convert(e).joinToString("\n")))
             } else {
-                baseEmbed("DevConsole | Evaluated with success", color = Colors.GREEN)
+                baseEmbed("DevConsole | Evaluated with success", color = Colors.discordGreen)
                 description(
                     "Evaluated with success ${if (result == null) "with no objects returned." else "and returned an object."}"
                 )

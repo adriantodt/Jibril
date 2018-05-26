@@ -10,7 +10,6 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 
 object CommandExceptions {
     object ShowHelp : RuntimeException()
-    
 }
 
 inline fun showHelp(): Unit = throw CommandExceptions.ShowHelp

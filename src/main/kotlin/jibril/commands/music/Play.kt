@@ -54,7 +54,7 @@ sealed class PlayCommand(
             if (attachments.isEmpty()) return showHelp()
 
             attachments.forEach {
-                request(event, it.url, if (isDev) musicManager.devPlayerManager else musicManager.attachmentPlayerManager)
+                request(event, it.url, if (isDev) musicManager.devPlayerManager else musicManager.httpSafePlayerManager)
             }
         } else {
             val playerManager = if (isDev) musicManager.devPlayerManager else musicManager.userPlayerManager
@@ -70,7 +70,8 @@ sealed class PlayCommand(
 
             try {
                 when (URL(args).host) {
-                    "cdn.discordapp.com" -> request(event, args, musicManager.attachmentPlayerManager)
+                    "cdn.discordapp.com", "media.discordapp.com" -> request(event, args, musicManager.httpSafePlayerManager)
+
                     else -> request(event, args, playerManager)
                 }
             } catch (e: Exception) {

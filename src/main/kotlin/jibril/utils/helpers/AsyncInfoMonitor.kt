@@ -71,14 +71,14 @@ object AsyncInfoMonitor : KLogging() {
         task(1, TimeUnit.SECONDS, type = TaskType.PRIORITY) {
             threadCount = thread.threadCount
             availableProcessors = r.availableProcessors()
-            freeMemory = (r.freeMemory() / mb).floor(100.0)
-            maxMemory = (r.maxMemory() / mb).floor(100.0)
-            totalMemory = (r.totalMemory() / mb).floor(100.0)
-            cpuUsage = processCpuUsage().floor(100.0)
-            vpsCpuUsage = (os.systemCpuLoad * 100).floor(100.0)
-            vpsFreeMemory = (os.freePhysicalMemorySize / gb).floor(100.0)
-            vpsMaxMemory = (os.totalPhysicalMemorySize / gb).floor(100.0)
-            vpsUsedMemory = (vpsMaxMemory - vpsFreeMemory).floor(100.0)
+            freeMemory = floor((r.freeMemory() / mb), 100.0)
+            maxMemory = floor((r.maxMemory() / mb), 100.0)
+            totalMemory = floor((r.totalMemory() / mb), 100.0)
+            cpuUsage = floor(processCpuUsage(), 100.0)
+            vpsCpuUsage = floor((os.systemCpuLoad * 100), 100.0)
+            vpsFreeMemory = floor((os.freePhysicalMemorySize / gb), 100.0)
+            vpsMaxMemory = floor((os.totalPhysicalMemorySize / gb), 100.0)
+            vpsUsedMemory = floor((vpsMaxMemory - vpsFreeMemory), 100.0)
         }
     }
 

@@ -3,9 +3,9 @@ package jibril.utils
 import jibril.Jibril.httpClient
 import jibril.exported.user_agent
 import jibril.utils.emotes.DISAPPOINTED
+import jibril.utils.extensions.newCall
 import jibril.utils.extensions.toSmartString
 import okhttp3.MediaType
-import okhttp3.Request
 import okhttp3.RequestBody
 import org.json.JSONObject
 import java.util.*
@@ -32,20 +32,20 @@ fun String.limit(size: Int): String {
 
 fun paste(contents: String): String {
     try {
-        val call = Request.Builder()
-            .url("https://hastebin.com/documents")
-            .header("User-Agent", user_agent)
-            .header("Content-Type", "text/plain")
-            .post(RequestBody.create(MediaType.parse("text/plain"), contents))
-            .build()
+        httpClient.newCall {
+            url("https://hastebin.com/documents")
 
-        val response = httpClient.newCall(call).execute()
-        val result = JSONObject(response.body()!!.string())
-        response.close()
-        return "https://hastebin.com/${result.getString("key")}"
+            header("User-Agent", user_agent)
+            header("Content-Type", "text/plain")
+
+            post(RequestBody.create(MediaType.parse("text/plain"), contents))
+        }.execute().use {
+            return "https://hastebin.com/${JSONObject(it.body()!!.string()).getString("key")}"
+        }
     } catch (e: Exception) {
         e.printStackTrace()
         return "$DISAPPOINTED Hastebin is unavailable right now."
     }
 
 }
+

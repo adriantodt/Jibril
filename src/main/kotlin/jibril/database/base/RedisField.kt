@@ -12,7 +12,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
     override fun getValue(thisRef: RedisObject, property: KProperty<*>): T {
         return thisRef.run {
             pool.useResource {
-                it.hget(remoteId, property.name)?.let(serializer::to) ?: defaultValue ?: throw IllegalStateException("Value not set.")
+                it.hget(remoteId(), property.name)?.let(serializer::unserialize) ?: defaultValue ?: throw IllegalStateException("Value not set.")
             }
         }
     }
@@ -20,10 +20,31 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
     override fun setValue(thisRef: RedisObject, property: KProperty<*>, value: T) {
         thisRef.run {
             pool.useResource {
-                it.hset(remoteId, property.name, serializer.from(value))
+                it.hset(remoteId(), property.name, serializer.serialize(value))
             }
         }
     }
+
+    class Nullable<T>(private val serializer: Serializer<T?>) : ReadWriteProperty<RedisObject, T?> {
+
+        override fun getValue(thisRef: RedisObject, property: KProperty<*>): T? {
+            return thisRef.run {
+                pool.useResource {
+                    it.hget(remoteId(), property.name)?.let(serializer::unserialize)
+                }
+            }
+        }
+
+        override fun setValue(thisRef: RedisObject, property: KProperty<*>, value: T?) {
+            thisRef.run {
+                pool.useResource {
+                    it.hset(remoteId(), property.name, serializer.serialize(value))
+                }
+            }
+        }
+
+    }
+
 
     // Jackson support
 
@@ -36,7 +57,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
         override fun getValue(thisRef: RedisObject, property: KProperty<*>): kotlin.String {
             return thisRef.run {
                 pool.useResource {
-                    it.hget(remoteId, property.name) ?: defaultValue ?: throw IllegalStateException("Value not set.")
+                    it.hget(remoteId(), property.name) ?: defaultValue ?: throw IllegalStateException("Value not set.")
                 }
             }
         }
@@ -44,7 +65,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
         override fun setValue(thisRef: RedisObject, property: KProperty<*>, value: kotlin.String) {
             thisRef.run {
                 pool.useResource {
-                    it.hset(remoteId, property.name, value)
+                    it.hset(remoteId(), property.name, value)
                 }
             }
         }
@@ -55,7 +76,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
         override fun getValue(thisRef: RedisObject, property: KProperty<*>): kotlin.Int {
             return thisRef.run {
                 pool.useResource {
-                    it.hget(remoteId, property.name)?.toInt() ?: defaultValue ?: throw IllegalStateException("Value not set.")
+                    it.hget(remoteId(), property.name)?.toInt() ?: defaultValue ?: throw IllegalStateException("Value not set.")
                 }
             }
         }
@@ -63,7 +84,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
         override fun setValue(thisRef: RedisObject, property: KProperty<*>, value: kotlin.Int) {
             thisRef.run {
                 pool.useResource {
-                    it.hset(remoteId, property.name, value.toString())
+                    it.hset(remoteId(), property.name, value.toString())
                 }
             }
         }
@@ -74,7 +95,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
         override fun getValue(thisRef: RedisObject, property: KProperty<*>): kotlin.Long {
             return thisRef.run {
                 pool.useResource {
-                    it.hget(remoteId, property.name)?.toLong() ?: defaultValue ?: throw IllegalStateException("Value not set.")
+                    it.hget(remoteId(), property.name)?.toLong() ?: defaultValue ?: throw IllegalStateException("Value not set.")
                 }
             }
         }
@@ -82,7 +103,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
         override fun setValue(thisRef: RedisObject, property: KProperty<*>, value: kotlin.Long) {
             thisRef.run {
                 pool.useResource {
-                    it.hset(remoteId, property.name, value.toString())
+                    it.hset(remoteId(), property.name, value.toString())
                 }
             }
         }
@@ -93,7 +114,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
         override fun getValue(thisRef: RedisObject, property: KProperty<*>): kotlin.Double {
             return thisRef.run {
                 pool.useResource {
-                    it.hget(remoteId, property.name)?.toDouble() ?: defaultValue ?: throw IllegalStateException("Value not set.")
+                    it.hget(remoteId(), property.name)?.toDouble() ?: defaultValue ?: throw IllegalStateException("Value not set.")
                 }
             }
         }
@@ -101,7 +122,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
         override fun setValue(thisRef: RedisObject, property: KProperty<*>, value: kotlin.Double) {
             thisRef.run {
                 pool.useResource {
-                    it.hset(remoteId, property.name, value.toString())
+                    it.hset(remoteId(), property.name, value.toString())
                 }
             }
         }
@@ -114,7 +135,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
         override fun getValue(thisRef: RedisObject, property: KProperty<*>): kotlin.String? {
             return thisRef.run {
                 pool.useResource {
-                    it.hget(remoteId, property.name)
+                    it.hget(remoteId(), property.name)
                 }
             }
         }
@@ -122,7 +143,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
         override fun setValue(thisRef: RedisObject, property: KProperty<*>, value: kotlin.String?) {
             thisRef.run {
                 pool.useResource {
-                    it.hset(remoteId, property.name, value)
+                    it.hset(remoteId(), property.name, value)
                 }
             }
         }
@@ -133,7 +154,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
         override fun getValue(thisRef: RedisObject, property: KProperty<*>): kotlin.Int? {
             return thisRef.run {
                 pool.useResource {
-                    it.hget(remoteId, property.name)?.toInt()
+                    it.hget(remoteId(), property.name)?.toInt()
                 }
             }
         }
@@ -141,7 +162,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
         override fun setValue(thisRef: RedisObject, property: KProperty<*>, value: kotlin.Int?) {
             thisRef.run {
                 pool.useResource {
-                    it.hset(remoteId, property.name, value.toString())
+                    it.hset(remoteId(), property.name, value.toString())
                 }
             }
         }
@@ -152,7 +173,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
         override fun getValue(thisRef: RedisObject, property: KProperty<*>): kotlin.Long? {
             return thisRef.run {
                 pool.useResource {
-                    it.hget(remoteId, property.name)?.toLong()
+                    it.hget(remoteId(), property.name)?.toLong()
                 }
             }
         }
@@ -160,7 +181,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
         override fun setValue(thisRef: RedisObject, property: KProperty<*>, value: kotlin.Long?) {
             thisRef.run {
                 pool.useResource {
-                    it.hset(remoteId, property.name, value.toString())
+                    it.hset(remoteId(), property.name, value.toString())
                 }
             }
         }
@@ -171,7 +192,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
         override fun getValue(thisRef: RedisObject, property: KProperty<*>): kotlin.Double? {
             return thisRef.run {
                 pool.useResource {
-                    it.hget(remoteId, property.name)?.toDouble()
+                    it.hget(remoteId(), property.name)?.toDouble()
                 }
             }
         }
@@ -179,7 +200,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
         override fun setValue(thisRef: RedisObject, property: KProperty<*>, value: kotlin.Double?) {
             thisRef.run {
                 pool.useResource {
-                    it.hset(remoteId, property.name, value.toString())
+                    it.hset(remoteId(), property.name, value.toString())
                 }
             }
         }
