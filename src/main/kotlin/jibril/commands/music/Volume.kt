@@ -10,11 +10,10 @@ import jibril.utils.emotes.SUCCESS
 import jibril.utils.emotes.VOLUME
 import jibril.utils.extensions.showHelp
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import javax.inject.Inject
 
 @Command("volume", "vol")
 class Volume
-@Inject constructor(musicManager: MusicManager) : MusicPermissionCommand(musicManager), ICommand.HelpDialogProvider {
+(musicManager: MusicManager) : MusicPermissionCommand(musicManager), ICommand.HelpDialogProvider {
 
     override fun run(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
         if (args.isEmpty()) {

@@ -8,10 +8,9 @@ import jibril.core.music.MusicManager
 import jibril.utils.commands.HelpFactory
 import jibril.utils.emotes.SUCCESS
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import javax.inject.Inject
 
 @Command("stop")
-class Stop @Inject constructor(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "votestop"), ICommand.HelpDialogProvider {
+class Stop(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "votestop"), ICommand.HelpDialogProvider {
 
     override fun action(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
         val size = musicPlayer.queue.size
@@ -37,7 +36,7 @@ class Stop @Inject constructor(musicManager: MusicManager) : MusicPermissionComm
 }
 
 @Command("votestop")
-class VoteStop @Inject constructor(musicManager: MusicManager) : MusicVotingCommand(musicManager), ICommand.HelpDialogProvider {
+class VoteStop(musicManager: MusicManager) : MusicVotingCommand(musicManager), ICommand.HelpDialogProvider {
     override fun getVotes(musicPlayer: GuildMusicPlayer) = musicPlayer.voteStops
 
     override fun onVoteAdded(event: GuildMessageReceivedEvent, votesLeft: Int) {

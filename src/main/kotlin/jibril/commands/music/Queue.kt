@@ -12,11 +12,10 @@ import jibril.utils.emotes.LOADING
 import jibril.utils.emotes.PLAY
 import jibril.utils.extensions.*
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import javax.inject.Inject
 
 @Command("queue", "q")
 class Queue
-@Inject constructor(
+(
     musicManager: MusicManager
 ) : MusicCommand(musicManager), ICommand.HelpDialogProvider {
     override fun run(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {

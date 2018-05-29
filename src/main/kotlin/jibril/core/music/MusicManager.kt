@@ -25,11 +25,8 @@ import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.utils.URIBuilder
 import org.json.JSONObject
 import java.util.concurrent.atomic.AtomicInteger
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class MusicManager @Inject constructor(private val shardManager: ShardManager) {
+class MusicManager(private val shardManager: ShardManager) {
 
     companion object {
         val twitchTvThumbId = AtomicInteger()

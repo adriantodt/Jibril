@@ -12,13 +12,16 @@ import java.lang.management.ManagementFactory
 
 object Jibril {
     //Configs
+    @Deprecated("Use Injections instead")
     val config = ConfigManager.config
 
     //Versioning
     const val version = jibril_version
 
     //Shared Objects
+    @Deprecated("Use Injections instead")
     val httpClient: OkHttpClient by lazy { OkHttpClient() }
+    @Deprecated("Use Injections instead")
     val eventWaiter: EventWaiter by lazy { EventWaiter(scheduler(TaskType.BUNK), false) }
 
     //Lists

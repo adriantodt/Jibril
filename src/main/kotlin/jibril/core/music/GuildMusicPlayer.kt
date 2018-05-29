@@ -128,6 +128,7 @@ class GuildMusicPlayer(private val shardManager: ShardManager, private val music
         this.audioPlayer.isPaused = true
 
         disconnectTask = schedule(2, TimeUnit.MINUTES, TaskType.BUNK) {
+            disconnectTask = null
             val info = audioPlayer.playingTrack?.trackData
             stop()
             val channel = info?.textChannel
@@ -164,6 +165,7 @@ class GuildMusicPlayer(private val shardManager: ShardManager, private val music
     }
 
     fun stop() {
+        if (disconnectTask != null) disconnectTask!!.cancel(true)
         this.queue.clear()
         this.audioPlayer.stopTrack()
         this.audioPlayer.isPaused = false

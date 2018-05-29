@@ -8,11 +8,10 @@ import jibril.utils.commands.HelpFactory
 import jibril.utils.extensions.*
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import javax.inject.Inject
 
 @Command("about")
 class About
-@Inject constructor(
+(
     private val shardManager: ShardManager
 ) : ICommand, ICommand.HelpDialogProvider {
     override val category = Categories.INFO

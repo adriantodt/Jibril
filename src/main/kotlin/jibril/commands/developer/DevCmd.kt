@@ -1,7 +1,6 @@
 package jibril.commands.developer
 
 import ch.qos.logback.core.helpers.ThrowableToStringArray
-import com.google.inject.Injector
 import jibril.Jibril.sleepQuotes
 import jibril.core.categories.Categories
 import jibril.core.commands.Command
@@ -11,7 +10,7 @@ import jibril.core.commands.ICommand
 import jibril.core.music.MusicManager
 import jibril.utils.Colors
 import jibril.utils.J
-import jibril.utils.api.DBLPoster
+import jibril.utils.api.DiscordBotsPoster
 import jibril.utils.commands.EmbedFirst
 import jibril.utils.commands.HelpFactory
 import jibril.utils.emotes.LOADING
@@ -26,15 +25,13 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.requests.RestAction
 import net.dv8tion.jda.core.utils.JDALogger
 import java.util.function.Consumer
-import javax.inject.Inject
 
 @Command("dev", "devtools", "hack")
 class DevCmd
-@Inject constructor(
-    private val injector: Injector,
+(
     private val musicManager: MusicManager,
     private val shardManager: ShardManager,
-    private val statsPoster: DBLPoster
+    private val statsPoster: DiscordBotsPoster
 ) : CommandWithArgs<List<String>>(), ICommand.Permission, ICommand.HelpDialogProvider {
     companion object : KLogging()
 
@@ -107,11 +104,11 @@ class DevCmd
     }
 
     private val sEvals: Map<String, Evaluator> by lazy {
-        Evaluators.newStatelessEvaluatorsMap(injector, shardManager)
+        Evaluators.newStatelessEvaluatorsMap(shardManager)
     }
 
     private val pEvals: Map<String, PersistentEvaluator> by lazy {
-        Evaluators.newPersistentEvaluatorsMap(injector, shardManager)
+        Evaluators.newPersistentEvaluatorsMap(shardManager)
     }
 
     private fun listEvals(event: GuildMessageReceivedEvent, persistent: Boolean) {

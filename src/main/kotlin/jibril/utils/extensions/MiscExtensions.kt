@@ -2,7 +2,6 @@
 
 package jibril.utils.extensions
 
-import com.google.inject.Injector
 import jibril.snowflake.entities.SnowflakeDatacenter
 import jibril.snowflake.entities.SnowflakeGenerator
 import jibril.snowflake.entities.SnowflakeWorker
@@ -11,13 +10,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 
-// Guice
-inline operator fun <reified T> Injector.invoke(): T = this(classOf())
-
-inline operator fun <T> Injector.invoke(c: Class<T>): T = getInstance(c)
-
 // Snowflakes
 inline operator fun SnowflakeGenerator.get(datacenter: Long, worker: Long): SnowflakeWorker = getWorker(datacenter, worker)
+
 inline operator fun SnowflakeGenerator.get(datacenter: Long): SnowflakeDatacenter = getDatacenter(datacenter)
 inline operator fun SnowflakeDatacenter.get(worker: Long): SnowflakeWorker = getWorker(worker)
 

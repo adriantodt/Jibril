@@ -1,19 +1,16 @@
 package jibril.commands.developer
 
 import bsh.Interpreter
-import com.google.inject.Injector
 import jibril.database.JibrilDatabase
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import javax.script.ScriptEngineManager
 
 class JsEvaluator(
-    private val injector: Injector,
     private val shardManager: ShardManager
 ) : Evaluator {
     override fun invoke(event: GuildMessageReceivedEvent, code: String): Any? {
         val engine = ScriptEngineManager().getEngineByName("nashorn")
-        engine["injector"] = injector
         engine["shards"] = shardManager
         engine["db"] = JibrilDatabase
         engine["jda"] = event.jda
@@ -35,13 +32,11 @@ class JsEvaluator(
 }
 
 class PersistentJsEvaluator(
-    injector: Injector,
     shardManager: ShardManager
 ) : PersistentEvaluator {
     private val engine = ScriptEngineManager().getEngineByName("nashorn")
 
     init {
-        engine["injector"] = injector
         engine["shards"] = shardManager
         engine["db"] = JibrilDatabase
     }
@@ -63,12 +58,10 @@ class PersistentJsEvaluator(
 }
 
 class BshEvaluator(
-    private val injector: Injector,
     private val shardManager: ShardManager
 ) : Evaluator {
     override fun invoke(event: GuildMessageReceivedEvent, code: String): Any? {
         val engine = Interpreter()
-        engine["injector"] = injector
         engine["shards"] = shardManager
         engine["db"] = JibrilDatabase
         engine["jda"] = event.jda
@@ -81,14 +74,12 @@ class BshEvaluator(
 }
 
 class PersistentBshEvaluator(
-    injector: Injector,
     shardManager: ShardManager
 ) : PersistentEvaluator {
     val engine = Interpreter()
 
     init {
         engine.eval("import *;")
-        engine["injector"] = injector
         engine["shards"] = shardManager
     }
 

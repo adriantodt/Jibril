@@ -1,31 +1,44 @@
 package jibril.core.listeners
 
-import jibril.logging.LogHook
+import jibril.data.config.Config
 import jibril.utils.Colors
-import jibril.utils.api.DBLPoster
+import jibril.utils.api.DiscordBotsPoster
 import jibril.utils.extensions.*
 import jibril.utils.helpers.GuildEvent
 import jibril.utils.helpers.GuildStatsManager
 import net.dv8tion.jda.bot.sharding.ShardManager
+import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Region
+import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.guild.GenericGuildEvent
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent
 import net.dv8tion.jda.core.hooks.EventListener
-import javax.inject.Inject
-import javax.inject.Named
+import net.dv8tion.jda.webhook.WebhookClientBuilder
+import net.dv8tion.jda.webhook.WebhookMessageBuilder
 
-class GuildListener
-@Inject constructor(
-    @Named("log.serverLog")
-    private val log: LogHook,
+class GuildListener(
     private val shardManager: ShardManager,
-    private val botlistPoster: DBLPoster
+    private val config: Config,
+    private val botlistPoster: DiscordBotsPoster
 ) : EventListener {
+
+    private fun log(user: SelfUser, embed: EmbedBuilder.() -> Unit) {
+        WebhookClientBuilder(config.webhooks.serverLog!!).build().use {
+            it.send(
+                WebhookMessageBuilder()
+                    .setUsername(user.name)
+                    .setAvatarUrl(user.avatarUrl)
+                    .addEmbeds(embed(init = embed))
+                    .build()
+            )
+        }
+    }
+
     override fun onEvent(event: Event) {
         if (event is GenericGuildEvent && (event is GuildJoinEvent || event is GuildLeaveEvent)) {
-            log.info {
+            log(event.jda.selfUser) {
                 when (event) {
                     is GuildJoinEvent -> {
                         GuildStatsManager.log(GuildEvent.JOIN)
@@ -64,4 +77,5 @@ class GuildListener
             botlistPoster.postStats()
         }
     }
+
 }

@@ -1,6 +1,6 @@
 package jibril.commands.info
 
-import  jibril.Jibril
+import jibril.Jibril
 import jibril.core.CommandProcessor
 import jibril.core.categories.Categories
 import jibril.core.commands.Command
@@ -30,11 +30,10 @@ import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.entities.ISnowflake
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import java.lang.Thread.sleep
-import javax.inject.Inject
 
 @Command("stats")
 class Stats
-@Inject constructor(
+(
     private val shardManager: ShardManager,
     private val musicManager: MusicManager
 ) : SimpleArgsCommand(expectedArgs = 2), ICommand.HelpDialogProvider {

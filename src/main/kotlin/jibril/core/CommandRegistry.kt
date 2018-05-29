@@ -7,7 +7,7 @@ import mu.KLogging
 
 object CommandRegistry : KLogging() {
     val commands: MutableMap<String, ICommand> = LinkedHashMap()
-    val lookup: MutableMap<ICommand, Array<out String>> = LinkedHashMap()
+    val lookup: MutableMap<ICommand, Array<String>> = LinkedHashMap()
 
     private val helpInterfaces = listOf(
         classOf<ICommand.HelpDialogProvider>(),

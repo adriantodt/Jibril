@@ -6,6 +6,7 @@ import xyz.cuteclouds.hunger.loader.write
 import java.io.File
 
 object ConfigManager {
+    @Deprecated("Use Injections instead")
     val config: Config by lazy {
         try {
             mapper.readValue<Config>(file.readText())

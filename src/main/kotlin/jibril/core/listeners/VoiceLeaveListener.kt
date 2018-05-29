@@ -10,10 +10,8 @@ import net.dv8tion.jda.core.events.guild.GuildLeaveEvent
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent
 import net.dv8tion.jda.core.hooks.EventListener
-import javax.inject.Inject
 
-class VoiceLeaveListener
-@Inject constructor(private val musicManager: MusicManager) : EventListener {
+class VoiceLeaveListener(private val musicManager: MusicManager) : EventListener {
 
     override fun onEvent(event: Event) {
         when (event) {

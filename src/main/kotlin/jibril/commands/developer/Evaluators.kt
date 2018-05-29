@@ -1,6 +1,5 @@
 package jibril.commands.developer
 
-import com.google.inject.Injector
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import javax.script.ScriptEngine
@@ -9,17 +8,17 @@ import javax.script.ScriptEngineManager
 object Evaluators {
     val engine = ScriptEngineManager()
 
-    fun newStatelessEvaluatorsMap(injector: Injector, shardManager: ShardManager): Map<String, Evaluator> {
+    fun newStatelessEvaluatorsMap(shardManager: ShardManager): Map<String, Evaluator> {
         return mapOf(
-            "js" to JsEvaluator(injector, shardManager),
-            "bsh" to BshEvaluator(injector, shardManager)
+            "js" to JsEvaluator(shardManager),
+            "bsh" to BshEvaluator(shardManager)
         )
     }
 
-    fun newPersistentEvaluatorsMap(injector: Injector, shardManager: ShardManager): Map<String, PersistentEvaluator> {
+    fun newPersistentEvaluatorsMap(shardManager: ShardManager): Map<String, PersistentEvaluator> {
         return mapOf(
-            "js" to PersistentJsEvaluator(injector, shardManager),
-            "bsh" to PersistentBshEvaluator(injector, shardManager)
+            "js" to PersistentJsEvaluator(shardManager),
+            "bsh" to PersistentBshEvaluator(shardManager)
         ).configureIntegrations()
     }
 

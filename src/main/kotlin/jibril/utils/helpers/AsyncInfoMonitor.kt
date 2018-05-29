@@ -82,7 +82,7 @@ object AsyncInfoMonitor : KLogging() {
         }
     }
 
-    fun init() {
+    operator fun invoke() {
         logger.info { "AsyncInfoMonitor started!" }
     }
 }

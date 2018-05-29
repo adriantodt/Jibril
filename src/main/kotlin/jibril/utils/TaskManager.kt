@@ -20,11 +20,11 @@ object TaskManager {
             ThreadFactoryBuilder().setNameFormat("Priority Task Thread-%d").build()
         )
         COMMON_SCHEDULER = ScheduledThreadPoolExecutor(
-            processors,
+            processors / 2,
             ThreadFactoryBuilder().setNameFormat("Common Task Thread-%d").build()
         )
         BUNK_SCHEDULER = ScheduledThreadPoolExecutor(
-            processors,
+            processors / 4,
             ThreadFactoryBuilder().setNameFormat("Bunk Task Thread-%d").build()
         )
     }

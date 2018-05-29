@@ -9,11 +9,10 @@ import jibril.utils.commands.HelpFactory
 import jibril.utils.emotes.SUCCESS
 import jibril.utils.extensions.showHelp
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import javax.inject.Inject
 
 @Command("repeat")
 class Repeat
-@Inject constructor(
+(
     musicManager: MusicManager
 ) : MusicPermissionCommand(musicManager), ICommand.HelpDialogProvider {
     override fun action(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {

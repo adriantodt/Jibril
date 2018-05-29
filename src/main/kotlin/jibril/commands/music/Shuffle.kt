@@ -9,11 +9,10 @@ import jibril.utils.commands.HelpFactory
 import jibril.utils.emotes.SUCCESS
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import java.util.concurrent.LinkedBlockingDeque
-import javax.inject.Inject
 
 @Command("shuffle")
 class Shuffle
-@Inject constructor(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "voteshuffle"), ICommand.HelpDialogProvider {
+(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "voteshuffle"), ICommand.HelpDialogProvider {
     override fun action(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
         musicPlayer.queue = LinkedBlockingDeque(musicPlayer.queue.shuffled())
         event.channel.sendMessage("$SUCCESS Queue shuffled!").queue()
@@ -33,7 +32,7 @@ class Shuffle
 }
 
 @Command("voteshuffle")
-class VoteShuffle @Inject constructor(musicManager: MusicManager) : MusicVotingCommand(musicManager), ICommand.HelpDialogProvider {
+class VoteShuffle(musicManager: MusicManager) : MusicVotingCommand(musicManager), ICommand.HelpDialogProvider {
     override fun getVotes(musicPlayer: GuildMusicPlayer) = musicPlayer.voteShuffles
 
     override fun onVoteAdded(event: GuildMessageReceivedEvent, votesLeft: Int) {

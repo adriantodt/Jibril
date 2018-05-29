@@ -21,7 +21,6 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import java.net.URL
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
-import javax.inject.Inject
 
 sealed class PlayCommand(
     private val musicManager: MusicManager,
@@ -101,7 +100,7 @@ sealed class PlayCommand(
 
 @Command("play", "p")
 class Play
-@Inject constructor(musicManager: MusicManager) : PlayCommand(musicManager, false, false, false) {
+(musicManager: MusicManager) : PlayCommand(musicManager, false, false, false) {
     override val helpHandler = HelpFactory("Play Command") {
         aliases("p")
 
@@ -122,7 +121,7 @@ class Play
 
 @Command("forceplay", "fp")
 class ForcePlay
-@Inject constructor(musicManager: MusicManager) : PlayCommand(musicManager, true, false, false) {
+(musicManager: MusicManager) : PlayCommand(musicManager, true, false, false) {
     override val helpHandler = HelpFactory("ForcePlay Command") {
         aliases("fp")
 
@@ -144,7 +143,7 @@ class ForcePlay
 
 @Command("playnext", "pn")
 class PlayNext
-@Inject constructor(musicManager: MusicManager) : PlayCommand(musicManager, false, true, false) {
+(musicManager: MusicManager) : PlayCommand(musicManager, false, true, false) {
     override val helpHandler = HelpFactory("PlayNext Command") {
         aliases("pn")
 
@@ -165,7 +164,7 @@ class PlayNext
 
 @Command("forceplaynext", "fpn")
 class ForcePlayNext
-@Inject constructor(musicManager: MusicManager) : PlayCommand(musicManager, true, true, false) {
+(musicManager: MusicManager) : PlayCommand(musicManager, true, true, false) {
     override val helpHandler = HelpFactory("ForcePlayNext Command") {
         aliases("fpn")
 
@@ -187,7 +186,7 @@ class ForcePlayNext
 
 @Command("playnow")
 class PlayNow
-@Inject constructor(private val musicManager: MusicManager) : PlayCommand(musicManager, false, true, true) {
+(private val musicManager: MusicManager) : PlayCommand(musicManager, false, true, true) {
 
     override fun call(event: GuildMessageReceivedEvent, args: String) {
         if (checkPermissions(event, musicManager.getMusicPlayer(event.guild), true)) {
@@ -217,7 +216,7 @@ class PlayNow
 
 @Command("forceplaynow")
 class ForcePlayNow
-@Inject constructor(private val musicManager: MusicManager) : PlayCommand(musicManager, true, true, true) {
+(private val musicManager: MusicManager) : PlayCommand(musicManager, true, true, true) {
 
     override fun call(event: GuildMessageReceivedEvent, args: String) {
         if (checkPermissions(event, musicManager.getMusicPlayer(event.guild), true)) {

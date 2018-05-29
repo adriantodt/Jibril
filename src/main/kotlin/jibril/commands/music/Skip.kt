@@ -8,10 +8,9 @@ import jibril.core.music.MusicManager
 import jibril.utils.commands.HelpFactory
 import jibril.utils.emotes.SUCCESS
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import javax.inject.Inject
 
 @Command("skip")
-class Skip @Inject constructor(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "voteskip", true), ICommand.HelpDialogProvider {
+class Skip(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "voteskip", true), ICommand.HelpDialogProvider {
 
     override fun action(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
         event.channel.sendMessage(
@@ -35,7 +34,7 @@ class Skip @Inject constructor(musicManager: MusicManager) : MusicPermissionComm
 }
 
 @Command("voteskip")
-class VoteSkip @Inject constructor(musicManager: MusicManager) : MusicVotingCommand(musicManager), ICommand.HelpDialogProvider {
+class VoteSkip(musicManager: MusicManager) : MusicVotingCommand(musicManager), ICommand.HelpDialogProvider {
     override fun getVotes(musicPlayer: GuildMusicPlayer) = musicPlayer.voteSkips
 
     override fun onVoteAdded(event: GuildMessageReceivedEvent, votesLeft: Int) {

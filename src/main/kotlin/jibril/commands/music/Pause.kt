@@ -12,10 +12,9 @@ import jibril.utils.emotes.THINKING
 import jibril.utils.emotes.X
 import jibril.utils.extensions.withPrefix
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import javax.inject.Inject
 
 @Command("pause")
-class Pause @Inject constructor(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "votepause"), ICommand.HelpDialogProvider {
+class Pause(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "votepause"), ICommand.HelpDialogProvider {
     override fun action(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
         if (musicPlayer.audioPlayer.isPaused) {
             event.channel.sendMessage(
@@ -44,7 +43,7 @@ class Pause @Inject constructor(musicManager: MusicManager) : MusicPermissionCom
 }
 
 @Command("votepause")
-class VotePause @Inject constructor(musicManager: MusicManager) : MusicVotingCommand(musicManager), ICommand.HelpDialogProvider {
+class VotePause(musicManager: MusicManager) : MusicVotingCommand(musicManager), ICommand.HelpDialogProvider {
     override fun checkRequirements(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String): Boolean {
         if (musicPlayer.audioPlayer.isPaused) {
             event.channel.sendMessage(
