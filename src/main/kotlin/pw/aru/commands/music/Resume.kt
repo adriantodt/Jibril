@@ -4,6 +4,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
 import pw.aru.utils.commands.HelpFactory
@@ -14,6 +15,7 @@ import pw.aru.utils.emotes.X
 import pw.aru.utils.extensions.withPrefix
 
 @Command("resume")
+@UseFullInjector
 class Resume(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "voteresume"), ICommand.HelpDialogProvider {
     override fun action(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
         if (!musicPlayer.audioPlayer.isPaused) {
@@ -43,6 +45,7 @@ class Resume(musicManager: MusicManager) : MusicPermissionCommand(musicManager, 
 }
 
 @Command("voteresume")
+@UseFullInjector
 class VoteResume(musicManager: MusicManager) : MusicVotingCommand(musicManager), ICommand.HelpDialogProvider {
     override fun checkRequirements(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String): Boolean {
         if (!musicPlayer.audioPlayer.isPaused) {

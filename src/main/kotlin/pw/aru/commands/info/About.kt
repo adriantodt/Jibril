@@ -5,15 +5,14 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.UseFullInjector
 import pw.aru.utils.AruColors
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.extensions.*
 
 @Command("about")
-class About
-(
-    private val shardManager: ShardManager
-) : ICommand, ICommand.HelpDialogProvider {
+@UseFullInjector
+class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDialogProvider {
     override val category = Categories.INFO
 
     override fun call(event: GuildMessageReceivedEvent, args: String) {

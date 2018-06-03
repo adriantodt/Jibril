@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static java.lang.Character.isUpperCase;
 import static java.lang.Character.toLowerCase;
@@ -15,6 +16,16 @@ import static java.lang.Character.toLowerCase;
  * Bypassing most Kotlin (and Java) memes.
  */
 public class J {
+    private static final Pattern regexPattern = Pattern.compile("[\\-\\[\\]/{}()*+?.\\\\^$|]");
+
+    public static String capitalize(String s) {
+        if (s.length() == 0) return s;
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+    }
+
+    public static String escapeRegex(String input) {
+        return regexPattern.matcher(input).replaceAll("\\$&");
+    }
 
     public static String decapitalize(String name) {
         if (name == null || name.length() == 0) {

@@ -4,12 +4,14 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.SUCCESS
 
 @Command("stop")
+@UseFullInjector
 class Stop(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "votestop"), ICommand.HelpDialogProvider {
 
     override fun action(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
@@ -36,6 +38,7 @@ class Stop(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "v
 }
 
 @Command("votestop")
+@UseFullInjector
 class VoteStop(musicManager: MusicManager) : MusicVotingCommand(musicManager), ICommand.HelpDialogProvider {
     override fun getVotes(musicPlayer: GuildMusicPlayer) = musicPlayer.voteStops
 

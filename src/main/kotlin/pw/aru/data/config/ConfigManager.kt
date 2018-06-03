@@ -1,18 +1,19 @@
 package pw.aru.data.config
 
+import adriantodt.utils.Properties
+import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import xyz.cuteclouds.hunger.loader.write
 import java.io.File
+import java.io.FileNotFoundException
 
 object ConfigManager {
-    @Deprecated("Use Injections instead")
-    val config: Config by lazy {
+    val config: AruConfig by lazy {
         try {
-            mapper.readValue<Config>(file.readText())
+            mapper.convertValue<AruConfig>(Properties.fromFile(file))
         } catch (e: Exception) {
-            file.renameTo(File("config.json.bkp"))
-            save(Config())
+            if (e !is FileNotFoundException) file.renameTo(backupFile)
+            save(AruConfig())
             throw e
         }
     }
@@ -20,7 +21,13 @@ object ConfigManager {
     fun save() = save(config)
 
     private val mapper = jacksonObjectMapper()
-    private val file = File("config.json")
 
-    private fun save(config: Config) = file.write(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(config))
+    private val file = File("aru.properties")
+    private val backupFile = File("aru.properties.bkp")
+
+    private fun save(config: AruConfig) = file.write(
+        Properties().apply {
+            putAll(mapper.convertValue<Map<String, String>>(config))
+        }.saveToString("Aru Config")
+    )
 }

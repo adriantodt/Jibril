@@ -3,7 +3,7 @@ package pw.aru.core.listeners
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.CommandProcessor
-import pw.aru.core.listeners.EventListeners.submit
+import pw.aru.core.listeners.EventListeners.submitTask
 import pw.aru.utils.extensions.classOf
 
 object CommandListener : OptimizedListener<GuildMessageReceivedEvent>(classOf()) {
@@ -18,7 +18,7 @@ object CommandListener : OptimizedListener<GuildMessageReceivedEvent>(classOf())
         ) return
         // @formatter:on
 
-        submit("Cmd:${event.author.name}#${event.author.discriminator}:${event.message.contentRaw}") {
+        submitTask("Cmd:${event.author.name}#${event.author.discriminator}:${event.message.contentRaw}") {
             CommandProcessor.onCommand(event)
         }
     }

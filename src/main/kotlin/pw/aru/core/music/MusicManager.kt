@@ -22,7 +22,7 @@ import org.apache.http.client.config.CookieSpecs
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.utils.URIBuilder
 import org.json.JSONObject
-import pw.aru.core.listeners.EventListeners.submit
+import pw.aru.core.listeners.EventListeners.submitTask
 import pw.aru.utils.extensions.computeIfAbsent
 import pw.aru.utils.extensions.newCall
 import java.util.concurrent.atomic.AtomicInteger
@@ -81,7 +81,7 @@ class MusicManager(private val shardManager: ShardManager, private val httpClien
 
     fun cleanup(guild: Guild) {
         val player = musicPlayers.remove(guild.idLong) ?: return
-        submit("MusicManager cleanup") {
+        submitTask("MusicManager cleanup") {
             val audioPlayer = player.audioPlayer
             audioPlayer.removeListener(player)
             audioPlayer.destroy()

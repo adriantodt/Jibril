@@ -69,7 +69,7 @@ class Help : ICommand, ICommand.HelpDialogProvider {
 
             description(
                 "Here's all my commands. I'm sure you'll find the one you need!",
-                "To check the command usage, type `j!help <command>`."
+                "To check the command usage, type `${"help <command>".withPrefix()}`."
             )
 
             val t = trending

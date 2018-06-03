@@ -4,6 +4,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
 import pw.aru.utils.commands.HelpFactory
@@ -11,8 +12,8 @@ import pw.aru.utils.emotes.SUCCESS
 import java.util.concurrent.LinkedBlockingDeque
 
 @Command("shuffle")
-class Shuffle
-(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "voteshuffle"), ICommand.HelpDialogProvider {
+@UseFullInjector
+class Shuffle(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "voteshuffle"), ICommand.HelpDialogProvider {
     override fun action(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
         musicPlayer.queue = LinkedBlockingDeque(musicPlayer.queue.shuffled())
         event.channel.sendMessage("$SUCCESS Queue shuffled!").queue()
@@ -32,6 +33,7 @@ class Shuffle
 }
 
 @Command("voteshuffle")
+@UseFullInjector
 class VoteShuffle(musicManager: MusicManager) : MusicVotingCommand(musicManager), ICommand.HelpDialogProvider {
     override fun getVotes(musicPlayer: GuildMusicPlayer) = musicPlayer.voteShuffles
 

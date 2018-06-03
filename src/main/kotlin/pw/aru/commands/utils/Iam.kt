@@ -2,7 +2,7 @@ package pw.aru.commands.utils
 
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.exceptions.PermissionException
-import pw.aru.Aru.config
+import pw.aru.Aru
 import pw.aru.commands.utils.Iam.iam
 import pw.aru.commands.utils.Iam.iamnot
 import pw.aru.core.categories.Categories
@@ -51,7 +51,7 @@ object Iam {
 
         try {
             event.guild.controller.addSingleRoleToMember(event.member, role)
-                .reason("${event.member.effectiveName} issued ${config.prefixes[0]}iam $roleName")
+                .reason("${event.member.effectiveName} issued ${Aru.prefixes[0]}iam $roleName")
                 .queue {
                     event.channel.sendMessage("$SUCCESS ${event.member.effectiveName}, you've now have the **${role.name}** role.").queue()
                 }
@@ -86,7 +86,7 @@ object Iam {
 
         try {
             event.guild.controller.removeSingleRoleFromMember(event.member, role)
-                .reason("${event.member.effectiveName} issued ${config.prefixes[0]}iamnot $roleName")
+                .reason("${event.member.effectiveName} issued ${Aru.prefixes[0]}iamnot $roleName")
                 .queue {
                     event.channel.sendMessage("$SUCCESS ${event.member.effectiveName}, you've lost the **${role.name}** role.").queue()
                 }

@@ -5,3 +5,9 @@ package pw.aru.core.commands
 annotation class Command(
     vararg val value: String
 )
+
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.CLASS)
+annotation class UseFullInjector(
+    val reroute: Boolean = false
+)

@@ -21,8 +21,6 @@ class Poll : ICommand, ICommand.Discrete {
     )
 
     override fun discreteCall(event: GuildMessageReceivedEvent, args: String, outer: String) {
-        println("Ué")
-
         outer.split('\n')
             .mapNotNull { it.trimStart().let { s -> emotes.firstOrNull { s.trimStart().startsWith(it) } } }
             .distinct()

@@ -9,7 +9,9 @@ import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.SimpleArgsCommand
+import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.music.MusicManager
+import pw.aru.exported.aru_version
 import pw.aru.utils.commands.EmbedFirst
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.LOADING
@@ -32,6 +34,7 @@ import pw.aru.utils.helpers.StatsManager.Type.*
 import java.lang.Thread.sleep
 
 @Command("stats")
+@UseFullInjector
 class Stats
 (
     private val shardManager: ShardManager,
@@ -55,7 +58,7 @@ class Stats
             field("Uptime:", Aru.uptime)
             field("Bot Stats:",
                 arrayOf(
-                    "\u25AB **Aru Version**: ${Aru.version}",
+                    "\u25AB **Aru Version**: ${aru_version}",
                     "\u25AB **Threads**: ${Thread.activeCount().format("%,d")}",
                     "\u25AB **Shards**: ${shardManager.shardsTotal.format("%,d")} (Current: ${event.jda.shardInfo.shardId})",
                     "\u25AB **Commands**: ${CommandProcessor.commandCount.format("%,d")} executed"

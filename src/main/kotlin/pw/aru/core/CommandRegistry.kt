@@ -1,8 +1,10 @@
 package pw.aru.core
 
 import mu.KLogging
-import pw.aru.core.commands.Command
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.placeholder.PlaceholderCommand
+import pw.aru.core.commands.placeholder.ReRoutingPlaceholderCommand
 import pw.aru.utils.extensions.classOf
 
 object CommandRegistry : KLogging() {
@@ -16,7 +18,13 @@ object CommandRegistry : KLogging() {
         classOf<ICommand.HelpHandler>()
     )
 
-    private fun sanityChecks(command: ICommand) {
+    private fun sanityChecks(command: ICommand, names: Array<out String>) {
+        check(names.isNotEmpty()) {
+            logger.error { "Command \"${command.javaClass.name}\" doesn't has any defined names." }
+
+            "empty array"
+        }
+
         val implemented = helpInterfaces.filter { it.isInstance(command) }
 
         if (implemented.isEmpty()) {
@@ -26,17 +34,37 @@ object CommandRegistry : KLogging() {
         }
     }
 
-    fun register(command: ICommand, vararg names: String) {
-        sanityChecks(command)
+    fun registerPlaceholder(names: Array<out String>, logCalls: Boolean) {
+        val command = if (logCalls) ReRoutingPlaceholderCommand() else PlaceholderCommand
+        val keys = names.map(String::toLowerCase).distinct().toTypedArray()
+
+        for (k in keys) commands[k] = command
+        lookup[command] = keys
+    }
+
+    fun register(names: Array<out String>, command: ICommand) {
+        sanityChecks(command, names)
 
         val keys = names.map(String::toLowerCase).distinct().toTypedArray()
         for (k in keys) commands[k] = command
         lookup[command] = keys
     }
 
-    fun register(meta: Command, command: ICommand) {
-        if (meta.value.isEmpty()) throw IllegalStateException("Empty annotation $meta")
+    fun registerOverride(names: Array<out String>, command: ICommand): List<Pair<GuildMessageReceivedEvent, String>> {
+        sanityChecks(command, names)
+        val keys = names.map(String::toLowerCase).distinct().toTypedArray()
 
-        register(command, *meta.value)
+        val placeholder = commands[keys[0]]
+
+        val logs: List<Pair<GuildMessageReceivedEvent, String>> = when (placeholder) {
+            is ReRoutingPlaceholderCommand -> placeholder.queue
+            is PlaceholderCommand -> emptyList()
+            else -> throw IllegalStateException("Command is not a placeholder")
+        }
+
+        for (k in keys) commands[k] = command
+        lookup[command] = keys
+
+        return logs
     }
 }

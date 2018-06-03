@@ -10,10 +10,7 @@ import net.dv8tion.jda.core.utils.JDALogger
 import okhttp3.OkHttpClient
 import pw.aru.Aru.sleepQuotes
 import pw.aru.core.categories.Categories
-import pw.aru.core.commands.Command
-import pw.aru.core.commands.CommandPermission
-import pw.aru.core.commands.CommandWithArgs
-import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.*
 import pw.aru.utils.Colors
 import pw.aru.utils.J
 import pw.aru.utils.api.DiscordBotsPoster
@@ -27,6 +24,7 @@ import pw.aru.utils.paste
 import java.util.function.Consumer
 
 @Command("dev", "devtools", "hack")
+@UseFullInjector
 class DevCmd
 (
     private val httpClient: OkHttpClient,

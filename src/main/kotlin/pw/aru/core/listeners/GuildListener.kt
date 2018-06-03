@@ -11,7 +11,7 @@ import net.dv8tion.jda.core.events.guild.GuildLeaveEvent
 import net.dv8tion.jda.core.hooks.EventListener
 import net.dv8tion.jda.webhook.WebhookClientBuilder
 import net.dv8tion.jda.webhook.WebhookMessageBuilder
-import pw.aru.data.config.Config
+import pw.aru.data.config.AruConfig
 import pw.aru.utils.Colors
 import pw.aru.utils.api.DiscordBotsPoster
 import pw.aru.utils.extensions.*
@@ -20,12 +20,12 @@ import pw.aru.utils.helpers.GuildStatsManager
 
 class GuildListener(
     private val shardManager: ShardManager,
-    private val config: Config,
+    private val config: AruConfig,
     private val botlistPoster: DiscordBotsPoster
 ) : EventListener {
 
     private fun log(user: SelfUser, embed: EmbedBuilder.() -> Unit) {
-        WebhookClientBuilder(config.webhooks.serverLog!!).build().use {
+        WebhookClientBuilder(config.serverWebhook).build().use {
             it.send(
                 WebhookMessageBuilder()
                     .setUsername(user.name)

@@ -4,6 +4,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
 import pw.aru.utils.commands.HelpFactory
@@ -11,10 +12,8 @@ import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.extensions.showHelp
 
 @Command("repeat")
-class Repeat
-(
-    musicManager: MusicManager
-) : MusicPermissionCommand(musicManager), ICommand.HelpDialogProvider {
+@UseFullInjector
+class Repeat(musicManager: MusicManager) : MusicPermissionCommand(musicManager), ICommand.HelpDialogProvider {
     override fun action(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
         val mode = when (args) {
             "" -> {

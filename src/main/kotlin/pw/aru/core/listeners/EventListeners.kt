@@ -8,7 +8,7 @@ import java.util.concurrent.Future
 object EventListeners {
     private val sharedPool = Executors.newCachedThreadPool()!!
 
-    fun <T> submit(name: String, task: () -> T): Future<T> {
+    fun <T> submitTask(name: String, task: () -> T): Future<T> {
         return sharedPool.submit(Callable<T> {
             val t = currentThread()
             val n = t.name
@@ -20,5 +20,19 @@ object EventListeners {
                 t.name = n
             }
         })
+    }
+
+    fun queueTask(name: String, task: () -> Unit): Future<*> {
+        return sharedPool.submit {
+            val t = currentThread()
+            val n = t.name
+            t.name = name
+
+            try {
+                task()
+            } finally {
+                t.name = n
+            }
+        }
     }
 }

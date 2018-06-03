@@ -4,91 +4,72 @@
 package pw.aru
 
 import mu.KotlinLogging.logger
-import net.dv8tion.jda.core.JDAInfo
-import net.dv8tion.jda.core.entities.Game.playing
 import org.kodein.di.direct
-import org.kodein.di.jit.jit
-import pw.aru.Aru.splashes
+import org.kodein.di.generic.instance
 import pw.aru.core.CommandRegistry
-import pw.aru.core.commands.ICommand
-import pw.aru.core.listeners.AsyncEventWaiter
-import pw.aru.core.listeners.CommandListener
-import pw.aru.core.listeners.EventListeners.submit
-import pw.aru.core.listeners.GuildListener
-import pw.aru.core.listeners.VoiceLeaveListener
+import pw.aru.core.commands.UseFullInjector
+import pw.aru.core.listeners.EventListeners.queueTask
+import pw.aru.core.listeners.EventListeners.submitTask
 import pw.aru.data.config.ConfigManager
-import pw.aru.utils.TaskManager.compute
 import pw.aru.utils.TaskManager.queue
-import pw.aru.utils.TaskManager.task
 import pw.aru.utils.TaskType
 import pw.aru.utils.api.DiscordBotsPoster
+import pw.aru.utils.extensions.classOf
 import pw.aru.utils.extensions.invoke
-import pw.aru.utils.extensions.random
 import pw.aru.utils.helpers.AsyncInfoMonitor
-import java.util.concurrent.TimeUnit
 
 val log = logger("pw.aru.Bootstrap")
 
 internal fun start() {
     // Start-up AsyncInfoMonitor
     AsyncInfoMonitor()
-    log.info { "AruBot starting..." }
+    log.info("AruBot starting...")
 
-    //Compute Reflections Scan async
-    val initTask = compute(type = TaskType.PRIORITY) {
+    // Compute Reflections Scan async
+    val scanTask = submitTask("ReflectionsScanTask") {
         computeReflectionsScan(basePackage = "pw.aru")
     }
 
     val config = ConfigManager.config
+    Aru.prefixes += config.prefixes.split(',')
 
-    //Create Shard Manager and enable DiscordLogBack
-    val shardManager = createShardManager(config.tokens.discord!!)
-    enableDiscordLogBack(shardManager, config)
+    //Create the Base Injector
+    val initInjector = createInitialInjector(config)
 
-    //Splash
-    arrayOf(
+    // Compute Command Initialization (Step 1)
+    // Requires initInjector; Returns notInitializedCommands
+    val notInitializedCommands = submitTask("InitCommands (Phase 1)") {
+        val commands = scanTask().commandScan
+        val (noInit, toInit) = commands.partition { it.isAnnotationPresent(classOf<UseFullInjector>()) }.let { (a, b) -> a.toSet() to b.toSet() }
 
-        "[-=-=-=-=-=- ARUBOT STARTED -=-=-=-=-=-]",
-        "AruBot v${Aru.version} (JDA v${JDAInfo.VERSION}) started.",
-        "[-=-=-=-=-=- -=-=-=-=-=-=-=-=- -=-=-=-=-=-]"
-
-    ).forEach(log::info)
-
-    //Create Injector
-    val injector = createInjector(shardManager, config)
-    val directInjector = injector.direct
-
-    //Create the Commands
-    val results = initTask()
-    initCommands(directInjector, results.commandScan)
-
-    with(directInjector.jit) {
-        shardManager.addEventListener(
-            CommandListener,
-
-            newInstance<AsyncEventWaiter>(),
-            newInstance<VoiceLeaveListener>(),
-            newInstance<GuildListener>()
-        )
+        initCommands(initInjector.direct, toInit)
+        createPlaceholderCommands(noInit)
+        noInit
     }
 
-    queue(type = TaskType.BUNK) {
-        directInjector.jit.newInstance<DiscordBotsPoster>().postStats()
-    }
+    //Create Shard Manager
+    createShardManager(initInjector, config.botToken) {
+        queueTask("DiscordLogBack StartTask") { enableDiscordLogBack(it, config) }
 
-    task(1, TimeUnit.MINUTES) {
-        shardManager.shards.forEach {
-            it.presence.game = playing("${config.prefixes[0]}help | ${splashes.random()} [${it.shardInfo.shardId}]")
+        val injector = createFullInjector(initInjector, it)
+
+        // Compute Command Initialization (Step 2)
+        // Requires injector, notInitializedCommands
+        queueTask("InitCommands (Phase 2)") {
+            replacePlaceholderCommands(injector.direct, notInitializedCommands()).forEach { queue(TaskType.BUNK, it) }
+            executePostLoad()
+
+            log.info { "${CommandRegistry.lookup.size} commands loaded!" }
+        }
+
+        queueTask("BotInit") {
+            completeShardManager(it, injector)
+
+            log.info("ShardManager initialized!")
+        }
+
+        queue(type = TaskType.BUNK) {
+            injector.direct.instance<DiscordBotsPoster>().postStats()
         }
     }
-
-    CommandRegistry.lookup.keys.forEach {
-        if (it is ICommand.PostLoad) {
-            submit("PostLoad:${it.javaClass.simpleName}", it::postLoad)
-        }
-    }
-
-    log.info { "Finished! ${CommandRegistry.lookup.size} commands loaded!" }
-
-    ConfigManager.save()
 }

@@ -4,6 +4,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
 import pw.aru.core.music.musicLength
@@ -14,10 +15,8 @@ import pw.aru.utils.emotes.PLAY
 import pw.aru.utils.extensions.*
 
 @Command("queue", "q")
-class Queue
-(
-    musicManager: MusicManager
-) : MusicCommand(musicManager), ICommand.HelpDialogProvider {
+@UseFullInjector
+class Queue(musicManager: MusicManager) : MusicCommand(musicManager), ICommand.HelpDialogProvider {
     override fun run(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
         val queue = musicPlayer.queue
         val lastPage = queue.size / 5
@@ -51,7 +50,7 @@ class Queue
 
             field("Queue: (${queue.size} songs - ${musicLength(queue)})",
                 if (queue.isEmpty()) {
-                    "Music queue is empty! You can add more songs using `j!play`!"
+                    "Music queue is empty! You can add more songs using `${"play".withPrefix()}`!"
                 } else {
                     queue.withIndex()
                         .drop(page * 5)

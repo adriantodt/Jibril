@@ -9,6 +9,7 @@ import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.CommandPermission
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.music.AudioRequester
 import pw.aru.core.music.MusicManager
 import pw.aru.utils.commands.HelpFactory
@@ -99,8 +100,8 @@ sealed class PlayCommand(
 }
 
 @Command("play", "p")
-class Play
-(musicManager: MusicManager) : PlayCommand(musicManager, false, false, false) {
+@UseFullInjector
+class Play(musicManager: MusicManager) : PlayCommand(musicManager, false, false, false) {
     override val helpHandler = HelpFactory("Play Command") {
         aliases("p")
 
@@ -120,8 +121,8 @@ class Play
 }
 
 @Command("forceplay", "fp")
-class ForcePlay
-(musicManager: MusicManager) : PlayCommand(musicManager, true, false, false) {
+@UseFullInjector
+class ForcePlay(musicManager: MusicManager) : PlayCommand(musicManager, true, false, false) {
     override val helpHandler = HelpFactory("ForcePlay Command") {
         aliases("fp")
 
@@ -142,8 +143,8 @@ class ForcePlay
 }
 
 @Command("playnext", "pn")
-class PlayNext
-(musicManager: MusicManager) : PlayCommand(musicManager, false, true, false) {
+@UseFullInjector
+class PlayNext(musicManager: MusicManager) : PlayCommand(musicManager, false, true, false) {
     override val helpHandler = HelpFactory("PlayNext Command") {
         aliases("pn")
 
@@ -163,8 +164,8 @@ class PlayNext
 }
 
 @Command("forceplaynext", "fpn")
-class ForcePlayNext
-(musicManager: MusicManager) : PlayCommand(musicManager, true, true, false) {
+@UseFullInjector
+class ForcePlayNext(musicManager: MusicManager) : PlayCommand(musicManager, true, true, false) {
     override val helpHandler = HelpFactory("ForcePlayNext Command") {
         aliases("fpn")
 
@@ -185,8 +186,8 @@ class ForcePlayNext
 }
 
 @Command("playnow")
-class PlayNow
-(private val musicManager: MusicManager) : PlayCommand(musicManager, false, true, true) {
+@UseFullInjector
+class PlayNow(private val musicManager: MusicManager) : PlayCommand(musicManager, false, true, true) {
 
     override fun call(event: GuildMessageReceivedEvent, args: String) {
         if (checkPermissions(event, musicManager.getMusicPlayer(event.guild), true)) {
@@ -215,8 +216,8 @@ class PlayNow
 }
 
 @Command("forceplaynow")
-class ForcePlayNow
-(private val musicManager: MusicManager) : PlayCommand(musicManager, true, true, true) {
+@UseFullInjector
+class ForcePlayNow(private val musicManager: MusicManager) : PlayCommand(musicManager, true, true, true) {
 
     override fun call(event: GuildMessageReceivedEvent, args: String) {
         if (checkPermissions(event, musicManager.getMusicPlayer(event.guild), true)) {

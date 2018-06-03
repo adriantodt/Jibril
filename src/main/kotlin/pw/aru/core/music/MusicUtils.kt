@@ -5,7 +5,7 @@ import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.TextChannel
 import net.dv8tion.jda.core.entities.VoiceChannel
 import net.dv8tion.jda.core.managers.AudioManager
-import pw.aru.core.listeners.EventListeners.submit
+import pw.aru.core.listeners.EventListeners.submitTask
 import pw.aru.utils.DiscordUtils.stripFormatting
 import pw.aru.utils.TaskManager.queue
 import pw.aru.utils.TaskType
@@ -62,7 +62,7 @@ fun connect(channel: TextChannel?, vc: VoiceChannel): Boolean {
         task.cancel(true)
         if (channel?.canTalk() == true) {
             channel.sendMessage(
-                "$X I couldn't connect to the voice channel. Mind reporting this to my developer? (Check out `j!hangout`)"
+                "$X I couldn't connect to the voice channel. Mind reporting this to my developer? (Check out `a!hangout`)"
             ).queue()
         }
 
@@ -79,7 +79,7 @@ fun connect(channel: TextChannel?, vc: VoiceChannel): Boolean {
 }
 
 fun disconnect(audioManager: AudioManager): Future<*> {
-    return submit("Audio Disconnect") {
+    return submitTask("Audio Disconnect") {
         audioManager.closeAudioConnection()
     }
 }

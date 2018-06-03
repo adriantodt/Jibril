@@ -1,14 +1,14 @@
 package pw.aru.core
 
+import jibril.snow64.Snow64
 import mu.KLogging
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import pw.aru.Aru.config
+import pw.aru.Aru.prefixes
 import pw.aru.core.CommandRegistry.commands
 import pw.aru.core.commands.ICommand
 import pw.aru.database.entities.GuildSettings
 import pw.aru.utils.J
-import pw.aru.utils.Snow64
 import pw.aru.utils.emotes.*
 import pw.aru.utils.extensions.CommandExceptions
 import pw.aru.utils.extensions.onHelp
@@ -24,7 +24,7 @@ object CommandProcessor : KLogging() {
     fun onCommand(event: GuildMessageReceivedEvent) {
         val raw = event.message.contentRaw
 
-        for (prefix in config.prefixes) {
+        for (prefix in prefixes) {
             if (raw.startsWith(prefix)) {
                 process(event, raw.substring(prefix.length).trimStart())
                 return
@@ -42,7 +42,7 @@ object CommandProcessor : KLogging() {
         if (raw.startsWith('[') && raw.contains(']')) {
             val (cmdRaw, cmdOuter) = raw.substring(1).trimStart().split(']', limit = 2)
 
-            for (prefix in config.prefixes) {
+            for (prefix in prefixes) {
                 if (cmdRaw.startsWith(prefix)) {
                     processDiscrete(event, cmdRaw.substring(prefix.length).trimStart(), cmdOuter)
                     return
@@ -209,7 +209,7 @@ object CommandProcessor : KLogging() {
     )
 
     private fun reportException(c: ICommand, event: GuildMessageReceivedEvent, e: Exception, h: Exception? = null) {
-        val errorId = J.initials(J.exceptionName(e)) + "#" + Snow64.toSnow64(event.message.idLong)
+        val errorId = J.initials(J.exceptionName(e)) + "#" + Snow64.fromSnowflake(event.message.idLong)
 
         logger.error(e) {
             "**ERROR REPORTED**\n**ErrorID**: `$errorId`\n**Type**: `${e.javaClass.simpleName}`\n**Command**: ``${event.message.contentRaw}`\n"

@@ -33,6 +33,13 @@ inline fun embed(embed: EmbedBuilder = EmbedBuilder(), init: EmbedBuilder.() -> 
     build()
 }
 
+//Builders: Assist
+
+inline operator fun DefaultShardManagerBuilder.plusAssign(listener: Any) {
+    addEventListeners(listener)
+}
+
+
 //Member
 
 inline val Member.idLong: Long

@@ -5,8 +5,8 @@ import pw.aru.core.categories.Categories
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
-import pw.aru.utils.BotUtils.capitalize
 import pw.aru.utils.Colors
+import pw.aru.utils.J.capitalize
 import pw.aru.utils.extensions.*
 import java.awt.Color
 import java.awt.image.BufferedImage
