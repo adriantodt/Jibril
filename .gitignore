@@ -1,4 +1,4 @@
-# GitIgnore for Jibril
+# GitIgnore for Aru
 
 # IntelliJ
 /.idea/
@@ -8,8 +8,8 @@
 *.iml
 
 # Generated files
-/src/main/kotlin/jibril/exported/exported.kt
-/src/main/resources/jibril/assets/assets.zip
+/src/main/kotlin/aru/exported/exported.kt
+/src/main/resources/aru/assets/assets.zip
 
 # Runtime
 /logs/
