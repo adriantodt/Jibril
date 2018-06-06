@@ -19,8 +19,6 @@ import org.kodein.di.generic.bind
 import org.kodein.di.generic.eagerSingleton
 import org.kodein.di.generic.instance
 import org.kodein.di.generic.singleton
-import org.kodein.di.jit.jit
-import org.kodein.di.jit.jitModule
 import org.reflections.Reflections
 import pw.aru.Aru.bootQuotes
 import pw.aru.core.CommandRegistry
@@ -30,6 +28,8 @@ import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.listeners.*
 import pw.aru.core.music.MusicManager
 import pw.aru.data.config.AruConfig
+import pw.aru.kodein.jit.installJit
+import pw.aru.kodein.jit.jit
 import pw.aru.logging.DiscordLogBack
 import pw.aru.logging.TerminalConsoleAdaptor
 import pw.aru.utils.TaskManager
@@ -105,8 +105,8 @@ internal fun enableDiscordLogBack(shardManager: ShardManager, config: AruConfig)
 
 internal fun createInitialInjector(config: AruConfig): Kodein {
     return Kodein {
-        // JIT Module
-        import(jitModule)
+        // Install JIT Module
+        installJit()
 
         // Self-references
         bind<Kodein>() with singleton { kodein }

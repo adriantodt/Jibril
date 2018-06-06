@@ -21,6 +21,7 @@ object Aru {
     val sleepQuotes: List<String> get() = File("assets/aru/sleep_quotes.txt").readLines()
     val splashes: List<String> get() = File("assets/aru/splashes.txt").readLines()
 
+    //Uptime
     val uptime: String get() = humanizedTime(rawUptime)
     val rawUptime get() = ManagementFactory.getRuntimeMXBean().uptime
 }

@@ -62,7 +62,7 @@ dependencies {
 
     //Scanning and Injections
     compile 'org.kodein.di:kodein-di-generic-jvm:5.0.0'
-    compile 'jibril:kodein-jit-bindings:1.0'
+    compile 'pw.aru.kt:kodein-jit-bindings:1.1.1'
     compile 'org.reflections:reflections:0.9.11'
 
     //Data Stack

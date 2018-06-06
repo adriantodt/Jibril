@@ -1,4 +1,4 @@
-package pw.aru.commands.funny
+package pw.aru.commands.funny.dice
 
 import jibril.dice.ast.value.DecimalNode
 import jibril.dice.ast.value.IntNode
@@ -19,7 +19,7 @@ object AruDice {
         builder
             .value("pi", Math.PI)
             .value("e", Math.E)
-            .value("r") { Math.random() }
+            .value("r", Math::random)
             .valueAlias("r", "rand", "rdn", "random")
             .function("sin") { Math.sin(it[0].toDouble()) }
             .function("cos") { Math.cos(it[0].toDouble()) }

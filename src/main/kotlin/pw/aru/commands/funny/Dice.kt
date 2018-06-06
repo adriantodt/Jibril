@@ -3,6 +3,7 @@ package pw.aru.commands.funny
 import jibril.dice.exceptions.EvaluationException
 import jibril.dice.exceptions.SyntaxException
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import pw.aru.commands.funny.dice.AruDice
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
@@ -13,10 +14,9 @@ import kotlin.math.roundToLong
 
 @Command("dice", "roll")
 class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
-
     override val category = Categories.FUN
 
-    fun resolveRoll(args: String, simple: Boolean = false): String {
+    private fun resolveRoll(args: String, simple: Boolean = false): String {
         when {
             args.startsWith("-simple") -> return resolveRoll(args.substring(7), true)
             args.endsWith("-simple") -> return resolveRoll(args.substring(0, args.length - 7), true)
@@ -25,10 +25,14 @@ class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
 
         return try {
             if (simple) AruDice.resolve(args).toPrettyString() else AruDice.execute(args)
-        } catch (e: SyntaxException) {
-            "Error: ${e.message}"
-        } catch (e: EvaluationException) {
-            "Error: ${e.message}"
+        } catch (e: Exception) {
+            when (e) {
+                is SyntaxException,
+                is EvaluationException,
+                is IllegalArgumentException,
+                is IllegalStateException -> "Error: ${e.message}"
+                else -> throw e
+            }
         }
     }
 
