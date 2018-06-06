@@ -2,9 +2,9 @@ package pw.aru.utils.commands
 
 import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import pw.aru.Aru
 import pw.aru.core.commands.CommandPermission
 import pw.aru.core.commands.ICommand
-import pw.aru.data.config.ConfigManager
 import pw.aru.utils.AruColors
 import pw.aru.utils.extensions.*
 import java.awt.Color
@@ -121,6 +121,6 @@ class HelpFactory(
     }
 
     companion object {
-        val prefix = ConfigManager.config.prefixes.first()
+        val prefix = Aru.prefixes.first()
     }
 }

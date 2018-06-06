@@ -1,12 +1,12 @@
 package pw.aru.commands.funny
 
-import jibril.dice.exceptions.EvaluationException
-import jibril.dice.exceptions.SyntaxException
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.commands.funny.dice.AruDice
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.dice.exceptions.EvaluationException
+import pw.aru.dice.exceptions.SyntaxException
 import pw.aru.utils.DiscordUtils.stripFormatting
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.GAME_DIE

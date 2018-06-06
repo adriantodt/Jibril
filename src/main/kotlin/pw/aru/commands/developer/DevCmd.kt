@@ -16,7 +16,6 @@ import pw.aru.utils.J
 import pw.aru.utils.api.DiscordBotsPoster
 import pw.aru.utils.commands.EmbedFirst
 import pw.aru.utils.commands.HelpFactory
-import pw.aru.utils.emotes.LOADING
 import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.extensions.*
 import pw.aru.utils.limit
@@ -82,7 +81,7 @@ class DevCmd
     private fun adminCheck(event: GuildMessageReceivedEvent) {
         embed {
             baseEmbed(event, "Aru Bot | DevTools")
-            thumbnail("https://i.imgur.com/gtkaUqF.png") //CHANGE TO ARU_HALO_YES
+            thumbnail("https://assets.aru.pw/img/yes.png")
 
             description(
                 "*${adminJokes.random()}* **${event.member.effectiveName}** is one of my developers${randomOf(".", "!")}"
@@ -121,6 +120,14 @@ class DevCmd
         }.send(event).queue()
     }
 
+    private val evaluatingQuotes = arrayOf(
+        "Creating Pylons of Java...",
+        "Warming up compilers...",
+        "Starting up Reflections...",
+        "Building Abstract Syntax Trees...",
+        "Recursively interpreting code..."
+    )
+
     private fun eval(event: GuildMessageReceivedEvent, persistent: Boolean, args: String) {
         val (eval, code) = with(args.split(" ", limit = 2)) { get(0) to getOrElse(1) { "" } }
         if (eval.isEmpty()) return listEvals(event, persistent)
@@ -129,8 +136,8 @@ class DevCmd
 
         EmbedFirst(event) {
             baseEmbed("DevConsole | Evaluating...", color = Colors.blurple)
-            thumbnail("https://i.imgur.com/Zy2QUI5.png")
-            description("$LOADING Evaluating $LOADING")
+            thumbnail("https://assets.aru.pw/img/loading.gif")
+            description("*${evaluatingQuotes.random()}*")
         } then {
             val (result, e) = try {
                 evaluator(event, code) to null
@@ -140,6 +147,7 @@ class DevCmd
 
             if (e != null) {
                 baseEmbed("DevConsole | Evaluated and errored", color = Colors.discordRed)
+                thumbnail("https://assets.aru.pw/img/no.png")
                 descriptionBuilder.setLength(0)
                 field(
                     e.javaClass.name,
@@ -148,6 +156,7 @@ class DevCmd
                 field("Full Stacktrace:", paste(httpClient, ThrowableToStringArray.convert(e).joinToString("\n")))
             } else {
                 baseEmbed("DevConsole | Evaluated with success", color = Colors.discordGreen)
+                thumbnail("https://assets.aru.pw/img/yes.png")
                 description(
                     "Evaluated with success ${if (result == null) "with no objects returned." else "and returned an object."}"
                 )

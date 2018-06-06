@@ -1,13 +1,13 @@
 package pw.aru.commands.funny.dice
 
-import jibril.dice.ast.value.DecimalNode
-import jibril.dice.ast.value.IntNode
-import jibril.dice.ast.value.SolvedDiceNode
-import jibril.dice.evaluator.DiceEvaluatorBuilder
-import jibril.dice.evaluator.DicePreEvaluator
-import jibril.dice.evaluator.DiceSolver
-import jibril.dice.lexer.DiceLexer
-import jibril.dice.parser.DiceParser
+import pw.aru.dice.ast.value.DecimalNode
+import pw.aru.dice.ast.value.IntNode
+import pw.aru.dice.ast.value.SolvedDiceNode
+import pw.aru.dice.evaluator.DiceEvaluatorBuilder
+import pw.aru.dice.evaluator.DicePreEvaluator
+import pw.aru.dice.evaluator.DiceSolver
+import pw.aru.dice.lexer.DiceLexer
+import pw.aru.dice.parser.DiceParser
 import pw.aru.utils.extensions.randomOf
 import java.util.function.IntUnaryOperator
 
@@ -26,8 +26,12 @@ object AruDice {
             .function("tan") { Math.tan(it[0].toDouble()) }
             .function("random") { dice.roll(it[0].toInt()) }
             .function("any") { randomOf(*it) }
+            .function("int") { it[0].toInt() }
+            .function("double") { it[0].toDouble() }
             .functionAlias("random", "rand", "rdn", "r")
             .functionAlias("sin", "sen")
+            .functionAlias("int", "integer", "long")
+            .functionAlias("double", "float", "decimal")
     }
 
     fun execute(s: String): String {

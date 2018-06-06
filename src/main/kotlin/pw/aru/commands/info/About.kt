@@ -42,7 +42,7 @@ class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDia
     private fun about(event: GuildMessageReceivedEvent) {
         embed {
             baseEmbed(event, name = "Aru | About", color = AruColors.primary)
-            thumbnail("https://i.imgur.com/ZqJsEBr.jpg")
+            thumbnail("https://assets.aru.pw/img/aru_avatar.jpg")
             description(
                 "Hi, I'm **Aru**, the personal angel guardian that your server need!",
                 "I'm here to provide you with:",
@@ -55,7 +55,7 @@ class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDia
                 "If you feel like helping a poor angel, **[be a Patreon](https://patreon.com/arubot)** and support my development!"
             )
             footer(
-                "Invite link: http://is.gd/aru | Requested by ${event.member.effectiveName}",
+                "Invite link: https://add.aru.pw/ | Requested by ${event.member.effectiveName}",
                 event.jda.selfUser.effectiveAvatarUrl
             )
         }.send(event).queue()

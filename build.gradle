@@ -11,7 +11,7 @@ plugins {
 }
 
 group = 'pw.aru'
-version = '2.0-pre5'
+version = '2.0-pre'
 mainClassName = 'pw.aru.Bootstrap'
 
 // Minified Splash
@@ -46,9 +46,9 @@ dependencies {
     compile 'com.jagrosh:jda-utilities-menu:2.1.1'
 
     // Open-Source Libraries
+    compile 'pw.aru.discord:dice-notation:1.0'
 
     //Group WILL change
-    compile 'jibril:dice-notation:1.0'
     compile 'jibril:snowflake-local:1.0'
 
     //Project NoClouds

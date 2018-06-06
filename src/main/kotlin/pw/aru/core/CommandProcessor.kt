@@ -85,7 +85,7 @@ object CommandProcessor : KLogging() {
                     "Sadly, I have to refuse all commands until you give me that permission. $DISAPPOINTED",
                     "",
                     "Fix the current channel's permissions and enable me the above permissions.",
-                    "If you need help on doing that, check my support server: ``is.gd/aruhub``"
+                    "If you need help on doing that, check my support server: ``https://support.aru.pw/``"
                 ).joinToString("\n")
             ).queue()
         } else {
@@ -100,8 +100,8 @@ object CommandProcessor : KLogging() {
                     "${if (eExternalEmoji) "✅" else "❎"} **Use External Emoji**",
                     "Sadly, I have to refuse all commands until you give me that permission. $DISAPPOINTED",
                     "",
-                    "You can **easily** fix that by re-inviting me with the following link: ``is.gd/aru``",
-                    "If you need help on doing that, check my support server: ``is.gd/aruhub``"
+                    "You can **easily** fix that by re-inviting me with the following link: ``https://add.aru.pw/``",
+                    "If you need help on doing that, check my support server: ``https://support.aru.pw/``"
                 ).joinToString("\n")
             ).queue()
         }

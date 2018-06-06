@@ -39,7 +39,7 @@ fun EmbedBuilder.helpEmbed(
     color: Color? = event.member.color ?: AruColors.primary
 ) {
     baseEmbed(event, name, url, image, color)
-    thumbnail("https://i.imgur.com/a5lJho6.png")
+    thumbnail("https://assets.aru.pw/img/help_thumbnail.png")
     if (commandPermission != null) field("Permission Required:", commandPermission.toString(), false)
 }
 
