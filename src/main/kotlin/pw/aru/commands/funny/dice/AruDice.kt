@@ -12,27 +12,24 @@ import pw.aru.utils.extensions.randomOf
 import java.util.function.IntUnaryOperator
 
 object AruDice {
-    private val builder = DiceEvaluatorBuilder()
     private val dice = ShadowDice()
-
-    init {
-        builder
-            .value("pi", Math.PI)
-            .value("e", Math.E)
-            .value("r", Math::random)
-            .valueAlias("r", "rand", "rdn", "random")
-            .function("sin") { Math.sin(it[0].toDouble()) }
-            .function("cos") { Math.cos(it[0].toDouble()) }
-            .function("tan") { Math.tan(it[0].toDouble()) }
-            .function("random") { dice.roll(it[0].toInt()) }
-            .function("any") { randomOf(*it) }
-            .function("int") { it[0].toInt() }
-            .function("double") { it[0].toDouble() }
-            .functionAlias("random", "rand", "rdn", "r")
-            .functionAlias("sin", "sen")
-            .functionAlias("int", "integer", "long")
-            .functionAlias("double", "float", "decimal")
-    }
+    private val evaluator = DiceEvaluatorBuilder()
+        .value("pi", Math.PI)
+        .value("e", Math.E)
+        .value("r", Math::random)
+        .valueAlias("r", "rand", "rdn", "random")
+        .function("sin") { Math.sin(it[0].toDouble()) }
+        .function("cos") { Math.cos(it[0].toDouble()) }
+        .function("tan") { Math.tan(it[0].toDouble()) }
+        .function("random") { dice.roll(it[0].toInt()) }
+        .function("any") { randomOf(*it) }
+        .function("int") { it[0].toInt() }
+        .function("double") { it[0].toDouble() }
+        .functionAlias("random", "rand", "rdn", "r")
+        .functionAlias("sin", "sen")
+        .functionAlias("int", "integer", "long")
+        .functionAlias("double", "float", "decimal")
+        .build()
 
     fun execute(s: String): String {
         val solvedExpr = DiceParser(DiceLexer(s))
@@ -46,8 +43,8 @@ object AruDice {
                 "$preEvaluatedExpr ⟵ $solvedExpr"
             }
             else -> {
-                val result = solvedExpr.accept(builder.build())
-                "$result ⟵ $preEvaluatedExpr ⟵ $solvedExpr"
+                val result = solvedExpr.accept(evaluator)
+                "$result ⟵ $solvedExpr"
             }
         }
     }
@@ -55,6 +52,6 @@ object AruDice {
     fun resolve(s: String): Number {
         return DiceParser(DiceLexer(s))
             .parse()
-            .accept(DiceSolver(IntUnaryOperator { dice.roll(it) }).andFinally(builder.build()))
+            .accept(DiceSolver(IntUnaryOperator { dice.roll(it) }).andFinally(evaluator))
     }
 }

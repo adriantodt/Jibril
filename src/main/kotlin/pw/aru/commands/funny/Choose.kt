@@ -13,8 +13,7 @@ import pw.aru.utils.extensions.random
 class Choose : ICommand, ICommand.HelpDialogProvider {
 
     override fun call(event: GuildMessageReceivedEvent, args: String) {
-        val options = args.split(',').map(String::trim).filter(String::isEmpty)
-
+        val options = args.split(',').map(String::trim).filterNot(String::isEmpty)
         event.channel.sendMessage("$THINKING Hmmm... I choose `${options.random()}`!").queue(LuckyUser(event))
     }
 

@@ -1,29 +1,40 @@
 package pw.aru.commands.utils
 
+import net.dv8tion.jda.core.entities.IFakeable
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Categories
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.utils.commands.HelpFactory
+import pw.aru.utils.extensions.showHelp
+import pw.aru.utils.extensions.withPrefix
 
 @Command("poll")
-class Poll : ICommand, ICommand.Discrete {
+class Poll : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
     override val category: Category = Categories.UTILS
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun call(event: GuildMessageReceivedEvent, args: String) = showHelp()
 
-    private val emotes = arrayOf(
-        "1\u20E3", "2\u20E3", "3\u20E3", "4\u20E3", "5\u20E3", "6\u20E3", "7\u20E3", "8\u20E3", "9\u20E3", "\uD83D\uDD1F",
-        "\uD83C\uDDE6", "\uD83C\uDDE7", "\uD83C\uDDE8", "\uD83C\uDDE9", "\uD83C\uDDEA", "\uD83C\uDDEB", "\uD83C\uDDEC", "\uD83C\uDDED", "\uD83C\uDDEE", "\uD83C\uDDEF",
-        "\u274C"
-    )
+    private val pattern = Regex("^((([\uD83C\uDF00-\uD83D\uDDFF]|[\uD83D\uDE00-\uD83D\uDE4F]|[\uD83D\uDE80-\uD83D\uDEFF]|[\u2600-\u26FF]|[\u2700-\u27BF])[\\x{1F3FB}-\\x{1F3FF}]?))")
 
     override fun discreteCall(event: GuildMessageReceivedEvent, args: String, outer: String) {
+        val emotes = event.message.emotes.filterNot(IFakeable::isFake).map { it.asMention to "${it.name}:${it.id}" }
         outer.split('\n')
-            .mapNotNull { it.trimStart().let { s -> emotes.firstOrNull { s.trimStart().startsWith(it) } } }
+            .mapNotNull { pattern.find(it.trimStart())?.value ?: emotes.firstOrNull { (e) -> it.trimStart().startsWith(e) }?.second }
             .distinct()
             .forEach { event.message.addReaction(it).queue() }
+    }
+
+    override val helpHandler = HelpFactory("Poll Command") {
+        description("Creates a new poll. It supports most emoji and local emotes.")
+
+        examples(
+            "[${"poll".withPrefix()}] Should we play Fortnite or PUGB?",
+            ":one: Fornite",
+            ":two: PUGB",
+
+            withPrefix = false
+        )
     }
 }

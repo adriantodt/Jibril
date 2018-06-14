@@ -58,7 +58,7 @@ class HelpFactory(
             if (examples.isNotEmpty()) {
                 field(
                     "Examples:",
-                    examples.joinToString(prefix = "```\n", separator = "\n", postfix = "\n```") { it.withPrefix() }
+                    examples.joinToString(prefix = "```\n", separator = "\n", postfix = "\n```")
                 )
             }
 
@@ -116,8 +116,8 @@ class HelpFactory(
         seeAlso.add(commands.joinToString("` `", "`", "`"))
     }
 
-    fun examples(vararg commands: String) {
-        examples.addAll(commands)
+    fun examples(vararg commands: String, withPrefix: Boolean = true) {
+        examples.addAll(if (!withPrefix) commands.toList() else commands.map(String::withPrefix))
     }
 
     companion object {

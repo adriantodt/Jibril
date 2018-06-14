@@ -14,7 +14,7 @@ import pw.aru.utils.emotes.CONFUSED
 import pw.aru.utils.emotes.ERROR
 import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.extensions.*
-import xyz.cuteclouds.utils.args.ArgParser
+import java.util.*
 
 @Command("hg", "hungergames")
 class HungerGamesCmd : SimpleArgsCommand(expectedArgs = 1, rest = true), ICommand.HelpHandler, ICommand.Invisible {
@@ -148,8 +148,7 @@ class HungerGamesCmd : SimpleArgsCommand(expectedArgs = 1, rest = true), IComman
             return
         }
 
-        val list = ArgParser(arg).parse().mapNotNull { if (it.isText) it.asText() else null }
-            .toMutableList()
+        val list = arg.split(',').map(String::trim).filterNotTo(ArrayList(), String::isEmpty)
 
         list.remove("@everyone")
         list.remove("@here")
@@ -202,8 +201,7 @@ class HungerGamesCmd : SimpleArgsCommand(expectedArgs = 1, rest = true), IComman
             return
         }
 
-        val list = ArgParser(arg).parse().mapNotNull { if (it.isText) it.asText() else null }
-            .toMutableList()
+        val list = arg.split(',').map(String::trim).filterNotTo(ArrayList(), String::isEmpty)
 
         list.removeIf { it.contains("@everyone") || it.contains("@here") }
 
@@ -271,16 +269,34 @@ class HungerGamesCmd : SimpleArgsCommand(expectedArgs = 1, rest = true), IComman
         event.channel.sendMessage(
             embed {
                 baseEmbed(event, "HungerGames | ${event.guild.getMemberById(lobby.adminId).effectiveName}'s Lobby")
-                field(
-                    "Players:",
-                    if (lobby.players.isEmpty()) arrayOf("None") else lobby.players.map { "**${it.effectiveName}**" }.toTypedArray()
-                )
-                field(
-                    "Guests:",
-                    if (lobby.guests.isEmpty()) arrayOf("None") else lobby.guests.map { "**$it**" }.toTypedArray()
-                )
+
+
+                field("Players:", limitedToString(lobby.players.map { "**${it.effectiveName}**" }.sorted()))
+                field("Guests:", limitedToString(lobby.guests.map { "**$it**" }.sorted()))
             }
         ).queue()
+    }
+
+    private fun limitedToString(it: List<String>): String {
+        if (it.isEmpty()) return "None"
+        else {
+            val builder = StringBuilder()
+            val iterator = it.listIterator()
+
+            while (iterator.hasNext()) {
+                val next = iterator.next()
+
+                if ((builder.length + next.length + 2) < 1000) {
+                    builder.append(next)
+                    if (iterator.hasNext()) builder.append(", ")
+                } else {
+                    builder.append("more ").append(it.size - iterator.nextIndex()).append("...")
+                    break
+                }
+            }
+
+            return builder.toString()
+        }
     }
 
     override fun onHelp(event: GuildMessageReceivedEvent) {

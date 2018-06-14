@@ -9,7 +9,7 @@ import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.SMILEY
 import pw.aru.utils.extensions.*
 
-@Command("invite", "links", "hangout", "patreon")
+@Command("invite", "links", "hangout")
 class Invite : ICommand, ICommand.HelpDialogProvider {
     override val category = Categories.INFO
 

@@ -51,8 +51,8 @@ class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDia
                 "",
                 "Wanna get started? Send `${"help".withPrefix()}` to check my command list!",
                 "",
-                "Questions? Check out my **[Support server!](https://discord.gg/WDyhg9F)**",
-                "If you feel like helping a poor angel, **[be a Patreon](https://patreon.com/arubot)** and support my development!"
+                "Questions? Check out my **[Support server!](https://support.aru.pw)**",
+                "If you feel like helping a poor angel, **[be a Patreon](https://patreon.aru.pw)** and support my development!"
             )
             footer(
                 "Invite link: https://add.aru.pw/ | Requested by ${event.member.effectiveName}",

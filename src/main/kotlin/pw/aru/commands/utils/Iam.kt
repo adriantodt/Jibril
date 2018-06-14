@@ -6,19 +6,18 @@ import pw.aru.Aru
 import pw.aru.commands.utils.Iam.iam
 import pw.aru.commands.utils.Iam.iamnot
 import pw.aru.core.categories.Categories
-import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.database.entities.GuildSettings
 import pw.aru.utils.emotes.ERROR
 import pw.aru.utils.emotes.SUCCESS
 
-@Command("iam")
+//@Command("iam")
 class IamCmd : ICommand {
     override val category = Categories.UTILS
     override fun call(event: GuildMessageReceivedEvent, args: String) = iam(event, args)
 }
 
-@Command("iamnot")
+//@Command("iamnot")
 class IamNotCmd : ICommand {
     override val category = Categories.UTILS
     override fun call(event: GuildMessageReceivedEvent, args: String) = iamnot(event, args)

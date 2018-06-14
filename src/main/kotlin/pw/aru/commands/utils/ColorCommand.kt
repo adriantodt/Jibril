@@ -2,11 +2,11 @@ package pw.aru.commands.utils
 
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Categories
-import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.utils.Colors
 import pw.aru.utils.J.capitalize
+import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.extensions.*
 import java.awt.Color
 import java.awt.image.BufferedImage
@@ -16,8 +16,8 @@ import javax.imageio.ImageIO
 import kotlin.math.absoluteValue
 
 @Command("color")
-class ColorCommand : ICommand {
-    override val category: Category = Categories.UTILS
+class ColorCommand : ICommand, ICommand.HelpDialogProvider {
+    override val category = Categories.UTILS
 
     override fun call(event: GuildMessageReceivedEvent, allArgs: String) {
         val args = allArgs.split(' ', limit = 2)
@@ -130,7 +130,15 @@ class ColorCommand : ICommand {
         event.channel.sendMessage(embed).addFile(generate(color), file).queue()
     }
 
-    private fun generate(color: Color): ByteArray? {
+    override val helpHandler = HelpFactory("Color Command") {
+        description("Returns the visual representation of the specified color.")
+        usage("color #<hex code>", "Parses the hex-code of the color.")
+        usage("color rgb <red> <green> <blue>", "Parses a color in RGB format.")
+        usage("color hsv <hue> <saturation> <value>", "Parses a color in HSV format.")
+        usage("color random", "Returns a random color.")
+    }
+
+    private fun generate(color: Color): ByteArray {
         val image = BufferedImage(300, 300, BufferedImage.TYPE_INT_RGB)
 
         with(image.createGraphics()) {
@@ -141,12 +149,12 @@ class ColorCommand : ICommand {
         return ByteArrayOutputStream().also { ImageIO.write(image, "png", it) }.toByteArray()
     }
 
-    val colors = listOf(classOf<Color>(), classOf<Colors>())
+    private val colors = listOf(classOf<Color>(), classOf<Colors>())
         .flatMap { it.fields.asIterable() }
         .filter { Modifier.isStatic(it.modifiers) && it.type == Color::class.java }
         .map { it.name.let { if (it == it.toUpperCase()) it.toLowerCase() else it } to it.get(null) as Color }
         .distinct()
         .toMap(LinkedHashMap())
 
-    val colorLookup = colors.entries.groupBy({ it.value }, { it.key }).mapValues { it.value[0] }
+    private val colorLookup = colors.entries.groupBy({ it.value }, { it.key }).mapValues { it.value[0] }
 }
