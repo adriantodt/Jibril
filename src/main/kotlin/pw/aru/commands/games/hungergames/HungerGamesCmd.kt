@@ -1,9 +1,8 @@
-package pw.aru.commands.games
+package pw.aru.commands.games.hungergames
 
 import com.jagrosh.jdautilities.commons.utils.FinderUtil
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import pw.aru.commands.games.hungergames.GameManager
-import pw.aru.commands.games.hungergames.LobbyManager
+import pw.aru.commands.games.lobby.LobbyManager
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand

@@ -3,6 +3,7 @@ package pw.aru.commands.games.hungergames
 import net.dv8tion.jda.core.entities.TextChannel
 import pw.aru.commands.games.hungergames.HG.buildHg
 import pw.aru.commands.games.hungergames.HG.handleHg
+import pw.aru.commands.games.lobby.LobbyManager
 import java.util.*
 import kotlin.concurrent.thread
 

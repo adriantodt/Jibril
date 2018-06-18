@@ -1,4 +1,4 @@
-package pw.aru.commands.games.hungergames
+package pw.aru.commands.games.lobby
 
 import net.dv8tion.jda.core.entities.Member
 import net.dv8tion.jda.core.entities.TextChannel
@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 
 object LobbyManager {
     val executor by lazy { Executors.newSingleThreadScheduledExecutor()!! }
-    val lobbys = LinkedHashMap<String, Lobby>()
+    val lobbies = LinkedHashMap<String, Lobby>()
     val futures = LinkedHashMap<String, ScheduledFuture<*>>()
 
     private fun schedule(channel: TextChannel) {
@@ -18,7 +18,7 @@ object LobbyManager {
         futures.remove(id)?.cancel(false)
         futures[id] = executor.schedule(
             {
-                lobbys.remove(id)
+                lobbies.remove(id)
                 futures.remove(id)
                 channel.sendMessage("$SAD Apparently no one wanted to play anymore, so I closed the lobby...").queue()
             },
@@ -28,23 +28,23 @@ object LobbyManager {
 
     fun getOrCreateLobby(channel: TextChannel, member: Member): Lobby {
         val id = channel.id
-        val lobby = lobbys.computeIfAbsent(id) { Lobby(member) }
+        val lobby = lobbies.computeIfAbsent(id) { Lobby(member) }
         schedule(channel)
 
         return lobby
     }
 
-    fun lobbyExists(channel: TextChannel) = lobbys.contains(channel.id)
+    fun lobbyExists(channel: TextChannel) = lobbies.contains(channel.id)
 
     fun registerLobby(channel: TextChannel, lobby: Lobby) {
         val id = channel.id
-        lobbys[id] = lobby
+        lobbies[id] = lobby
         schedule(channel)
     }
 
     fun getLobby(channel: TextChannel): Lobby? {
         val id = channel.id
-        val lobby = lobbys[id]
+        val lobby = lobbies[id]
         if (lobby != null) {
             schedule(channel)
         }
@@ -54,7 +54,7 @@ object LobbyManager {
 
     fun removeLobby(channel: TextChannel): Lobby? {
         val id = channel.id
-        val lobby = lobbys.remove(id)
+        val lobby = lobbies.remove(id)
         if (lobby != null) {
             futures.remove(id)?.cancel(false)
         }
