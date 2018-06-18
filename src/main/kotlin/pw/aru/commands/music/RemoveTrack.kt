@@ -27,11 +27,14 @@ class RemoveTrack(musicManager: MusicManager) : MusicPermissionCommand(musicMana
         for (param in args.split(' ')) {
             val arg = replaceEach(
                 param,
-                arrayOf("first", "next", "last", "all"),
-                arrayOf("1", "1", last, "0-$last")
+                arrayOf("first", "next", "last"),
+                arrayOf("1", "1", last)
             )
 
-            if (arg.contains("-") || arg.contains("~")) {
+            if (arg == "all") {
+                (0..list.size).forEach { selected.add(it) }
+                break
+            } else if (arg.contains("-") || arg.contains("~")) {
                 val range = args.split("[-~]")
 
                 if (range.size != 2) {
