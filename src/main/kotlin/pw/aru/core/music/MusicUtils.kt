@@ -9,11 +9,21 @@ import pw.aru.core.listeners.EventListeners.submitTask
 import pw.aru.utils.DiscordUtils.stripFormatting
 import pw.aru.utils.TaskManager.queue
 import pw.aru.utils.TaskType
+import pw.aru.utils.emotes.SOUNDCLOUD
 import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.emotes.X
+import pw.aru.utils.emotes.YOUTUBE
 import java.lang.Thread.sleep
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
+
+enum class SearchType(val startsWith: String, val emote: String) {
+    YouTube("ytsearch:", YOUTUBE), SoundCloud("scsearch:", SOUNDCLOUD), OTHER("", "");
+
+    companion object {
+        operator fun invoke(searchTerm: String) = values().asIterable().first { searchTerm.startsWith(it.startsWith) }
+    }
+}
 
 fun connect(channel: TextChannel?, vc: VoiceChannel): Boolean {
 

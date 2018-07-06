@@ -1,12 +1,16 @@
 package pw.aru.commands.utils
 
+import com.jagrosh.jdautilities.commons.utils.FinderUtil
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Categories
+import pw.aru.core.commands.ArgsCommand
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.parser.Args
 import pw.aru.utils.Colors
 import pw.aru.utils.J.capitalize
 import pw.aru.utils.commands.HelpFactory
+import pw.aru.utils.emotes.THINKING
 import pw.aru.utils.extensions.*
 import java.awt.Color
 import java.awt.image.BufferedImage
@@ -16,23 +20,24 @@ import javax.imageio.ImageIO
 import kotlin.math.absoluteValue
 
 @Command("color")
-class ColorCommand : ICommand, ICommand.HelpDialogProvider {
+class ColorCommand : ArgsCommand(), ICommand.HelpDialogProvider {
     override val category = Categories.UTILS
 
-    override fun call(event: GuildMessageReceivedEvent, allArgs: String) {
-        val args = allArgs.split(' ', limit = 2)
+    override fun call(event: GuildMessageReceivedEvent, args: Args) {
+        val arg = args.takeString()
 
-        if (args.isEmpty()) return showHelp()
+        if (arg.isEmpty()) return showHelp()
 
-        val color: Color = when (args[0]) {
+        val color: Color = when (arg) {
             "rgb" -> {
-                if (args.size != 2) return showHelp()
-                val arg = args[1]
+                val v = args.takeRemaining()
 
-                if (arg.startsWith("#") || arg.startsWith("0x")) {
-                    Color.decode(arg)
-                } else if (arg.contains(" ") || arg.contains(",")) {
-                    val parts = arg.split(' ', ',').filter(String::isNotBlank)
+                if (v.isEmpty()) return showHelp()
+
+                if (v.startsWith("#") || v.startsWith("0x")) {
+                    Color.decode(v)
+                } else if (v.contains(" ") || v.contains(",")) {
+                    val parts = v.split(' ', ',').filter(String::isNotBlank)
 
                     if (parts.size != 3) return showHelp()
 
@@ -50,9 +55,7 @@ class ColorCommand : ICommand, ICommand.HelpDialogProvider {
                 } else return showHelp()
             }
             "hsv" -> {
-                if (args.size != 2) return showHelp()
-
-                val parts = args[1].split(' ', ',').filter(String::isNotBlank)
+                val parts = args.takeRemaining().split(' ', ',').filter(String::isNotBlank)
 
                 if (parts.size != 3) return showHelp()
 
@@ -64,21 +67,36 @@ class ColorCommand : ICommand, ICommand.HelpDialogProvider {
                 }
             }
             "random" -> {
-                val r = threadLocalRandom()
-
-                Color.getHSBColor(r.nextFloat(), r.nextFloat(), r.nextFloat())
+                with(threadLocalRandom()) { Color.getHSBColor(nextFloat(), nextFloat(), nextFloat()) }
+            }
+            "member" -> {
+                event.member.color ?: Color.white
             }
             else -> {
-                if (allArgs.startsWith("#") || allArgs.startsWith("0x")) {
-                    Color.decode(allArgs)
+                val raw = args.raw
+                if (raw.startsWith("#") || raw.startsWith("0x")) {
+                    Color.decode(raw)
                 } else {
-                    val colors = listOf(classOf<Color>(), classOf<Colors>())
-                        .flatMap { it.fields.asIterable() }
-                    val colorField = colors
-                        .firstOrNull {
-                            it.type == Color::class.java && (it.name.equals(allArgs, true) || it.name.equals(args[0], true))
-                        }
-                    colorField?.get(null) as? Color ?: return showHelp()
+                    val members = FinderUtil.findMembers(raw, event.guild)
+
+                    if (members.isNotEmpty()) {
+                        if (members.size > 1) return event.channel.sendMessage(
+                            arrayOf(
+                                "$THINKING Well, I found too many users. How about refining your search?",
+                                "**Users found**: ${members.joinToString(", ") { it.user.discordTag }}"
+                            ).joinToString("\n")
+                        ).queue()
+
+                        members.first().color ?: Color.white
+                    } else {
+                        val colors = listOf(classOf<Color>(), classOf<Colors>())
+                            .flatMap { it.fields.asIterable() }
+                        val colorField = colors
+                            .firstOrNull {
+                                it.type == Color::class.java && (it.name.equals(raw, true) || it.name.equals(raw, true))
+                            }
+                        colorField?.get(null) as? Color ?: return showHelp()
+                    }
                 }
             }
         }
@@ -136,6 +154,8 @@ class ColorCommand : ICommand, ICommand.HelpDialogProvider {
         usage("color rgb <red> <green> <blue>", "Parses a color in RGB format.")
         usage("color hsv <hue> <saturation> <value>", "Parses a color in HSV format.")
         usage("color random", "Returns a random color.")
+        usage("color member", "Returns your color.")
+        usage("color <mention/nickname/name[#discriminator]>", "Returns the member's color.")
     }
 
     private fun generate(color: Color): ByteArray {

@@ -8,16 +8,19 @@ import pw.aru.features.LuckyUser
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.THINKING
 import pw.aru.utils.extensions.random
+import pw.aru.utils.extensions.showHelp
 
 @Command("choose")
 class Choose : ICommand, ICommand.HelpDialogProvider {
+    override val category = Categories.FUN
 
     override fun call(event: GuildMessageReceivedEvent, args: String) {
         val options = args.split(',').map(String::trim).filterNot(String::isEmpty)
+
+        if (options.isEmpty()) return showHelp()
+
         event.channel.sendMessage("$THINKING Hmmm... I choose `${options.random()}`!").queue(LuckyUser(event))
     }
-
-    override val category = Categories.FUN
 
     override val helpHandler = HelpFactory("Choose Command") {
         description("Decisions are though, huh?")

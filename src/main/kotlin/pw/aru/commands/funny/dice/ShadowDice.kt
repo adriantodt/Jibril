@@ -15,5 +15,6 @@ class ShadowDice {
         return ((random.nextDouble() * 0.9 + random.nextGaussianOf3() * 0.3) * sides).toInt().clamp(0, sides - 1) + 1
     }
 
+    @Suppress("NOTHING_TO_INLINE")
     private inline fun Random.nextGaussianOf3() = nextDouble() * nextDouble() * nextDouble() * 3
 }

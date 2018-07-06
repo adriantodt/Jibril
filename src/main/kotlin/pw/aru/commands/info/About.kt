@@ -30,7 +30,7 @@ class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDia
 
     private fun credits(event: GuildMessageReceivedEvent) {
         embed {
-            baseEmbed(event, "Aru Bot | Credits")
+            baseEmbed(event, "Aru! | Credits")
             field(
                 "Developers",
                 "${discordTag("217747278071463937")}: Main Developer",
@@ -41,10 +41,10 @@ class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDia
 
     private fun about(event: GuildMessageReceivedEvent) {
         embed {
-            baseEmbed(event, name = "Aru | About", color = AruColors.primary)
+            baseEmbed(event, name = "Aru! | About", color = AruColors.primary)
             thumbnail("https://assets.aru.pw/img/aru_avatar.jpg")
             description(
-                "Hi, I'm **Aru**, the personal angel guardian that your server need!",
+                "Hi, I'm **Aru**, the personal angel guardian that your server needs!",
                 "I'm here to provide you with:",
                 "\u25AB **Music!** Check out `${"help music".withPrefix()}` to get started!",
                 "\u25AB Add **fun** to your server with action commands, games and more!",

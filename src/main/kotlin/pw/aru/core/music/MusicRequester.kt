@@ -13,11 +13,10 @@ import pw.aru.utils.AruColors
 import pw.aru.utils.emotes.CONFUSED
 import pw.aru.utils.emotes.DISAPPOINTED
 import pw.aru.utils.emotes.X
-import pw.aru.utils.emotes.YOUTUBE
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
-class AudioRequester private constructor(
+class MusicRequester private constructor(
     private val textChannel: TextChannel, private val member: Member, private val musicPlayer: GuildMusicPlayer,
     private val searchTerm: String, private val showDialog: Boolean,
     private val addFirst: Boolean,
@@ -52,6 +51,8 @@ class AudioRequester private constructor(
         if (!connect(textChannel, member.voiceState.channel)) return
 
         if (playlist.isSearchResult) {
+            val searchType = SearchType(searchTerm)
+
             if (!showDialog) {
                 trackLoaded(playlist.tracks[0])
                 return
@@ -67,7 +68,7 @@ class AudioRequester private constructor(
 
                 useCancelButton(true)
                 setDescription(
-                    "$YOUTUBE **React this message with the appropriate number of the song**\n(or with $X in case none of these are correct)"
+                    "${searchType.emote} **React this message with the appropriate number of the song**\n(or with $X in case none of these are correct)"
                 )
 
                 val trackSelection = playlist.tracks.take(3)
@@ -99,9 +100,6 @@ class AudioRequester private constructor(
 
                 build()
             }.display(textChannel)
-            return
-        } else if (playlist.selectedTrack != null) {
-            trackLoaded(playlist.selectedTrack)
             return
         }
 
@@ -156,7 +154,7 @@ class AudioRequester private constructor(
         ): Future<*> {
             return playerManager.loadItem(
                 searchTerm,
-                AudioRequester(textChannel, member, musicPlayer, searchTerm, showDialog, addFirst, playNow)
+                MusicRequester(textChannel, member, musicPlayer, searchTerm, showDialog, addFirst, playNow)
             )
         }
     }

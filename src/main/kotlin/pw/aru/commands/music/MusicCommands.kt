@@ -69,12 +69,14 @@ abstract class MusicPermissionCommand(
     companion object {
         fun checkPermissions(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, userQueued: Boolean): Boolean {
             // Either:
+            // I'm not playing at all or User is the only one listening
             // (If User Queued) User is the one who added the music
-            // User is the only one listening
             // User is DJ/Server Admin/Bot Developer
-            return (userQueued && musicPlayer.currentTrack!!.trackData.user == event.author)
-                || musicPlayer.currentChannel!!.humanUsers == 1
-                || CommandPermission.DJ.test(event.member)
+            val currentChannel = musicPlayer.currentChannel
+            val currentTrack = musicPlayer.currentTrack
+            return (currentChannel == null || currentChannel.humanUsers == 1)
+                || (userQueued && currentTrack != null && currentTrack.trackData.user == event.author)
+                || (CommandPermission.DJ.test(event.member))
         }
     }
 

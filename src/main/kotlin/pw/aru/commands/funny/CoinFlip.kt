@@ -9,17 +9,11 @@ import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.COIN_HEADS
 import pw.aru.utils.emotes.COIN_TAILS
 import pw.aru.utils.extensions.random
-import java.util.*
+import pw.aru.utils.extensions.threadLocalRandom
 
 @Command("coinflip", "flip", "coin")
 class CoinFlip : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
-
     override val category = Categories.FUN
-
-    private val random: Random = Random()
-
-    private val heads = "$COIN_HEADS Heads!"
-    private val tails = "$COIN_TAILS Tails!"
 
     private val sThrow = listOf(
         "Here it goes...",
@@ -27,17 +21,22 @@ class CoinFlip : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
     )
 
     override fun call(event: GuildMessageReceivedEvent, args: String) {
-        event.channel.sendMessage("*${sThrow.random()}*\n${if (random.nextBoolean()) heads else tails}").queue()
+        event.channel.sendMessage("*${sThrow.random()}*\n${if (threadLocalRandom().nextBoolean()) heads else tails}").queue()
     }
 
     override fun discreteCall(event: GuildMessageReceivedEvent, args: String, outer: String) {
         val toSend = DiscordUtils.stripFormatting(outer.replace('\n', ' '))
 
-        event.channel.sendMessage("**$toSend**\n${if (random.nextBoolean()) heads else tails}").queue()
+        event.channel.sendMessage("**$toSend**\n${if (threadLocalRandom().nextBoolean()) heads else tails}").queue()
     }
 
     override val helpHandler = HelpFactory("CoinFlip Command") {
         aliases("flip", "coin")
         description("Have some fun, flip a coin.")
+    }
+
+    companion object {
+        private const val heads = "$COIN_HEADS Heads!"
+        private const val tails = "$COIN_TAILS Tails!"
     }
 }

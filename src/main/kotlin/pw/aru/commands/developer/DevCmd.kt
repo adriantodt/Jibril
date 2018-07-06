@@ -11,6 +11,7 @@ import okhttp3.OkHttpClient
 import pw.aru.Aru.sleepQuotes
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.*
+import pw.aru.core.parser.Args
 import pw.aru.utils.Colors
 import pw.aru.utils.J
 import pw.aru.utils.api.DiscordBotsPoster
@@ -29,29 +30,22 @@ class DevCmd
     private val httpClient: OkHttpClient,
     private val shardManager: ShardManager,
     private val statsPoster: DiscordBotsPoster
-) : CommandWithArgs<List<String>>(), ICommand.Permission, ICommand.HelpDialogProvider {
+) : ArgsCommand(), ICommand.Permission, ICommand.HelpDialogProvider {
     companion object : KLogging()
-
-    override fun args(event: GuildMessageReceivedEvent, args: String) = if (args.isEmpty()) listOf() else args.split(" ", limit = 2)
 
     override val category = Categories.DEVELOPER
     override val permission = CommandPermission.BOT_DEVELOPER
 
-    override fun call(event: GuildMessageReceivedEvent, args: List<String>) {
-        when (args.getOrNull(0)) {
-            null, "", "check" -> adminCheck(event)
+    override fun call(event: GuildMessageReceivedEvent, args: Args) {
+        when (args.takeString()) {
             "shutdown" -> shutdown(event)
-            "eval", "run" -> eval(event, false, args.getOrNull(1) ?: "")
-            "peval", "prun" -> eval(event, true, args.getOrNull(1) ?: "")
+            "eval", "run" -> eval(event, false, args.takeRemaining())
+            "peval", "prun" -> eval(event, true, args.takeRemaining())
             "enablecallsite" -> callsite(event, true)
             "disablecallsite" -> callsite(event, false)
-            "fixmusic" -> fixmusic(event)
+            "", "check" -> adminCheck(event)
             else -> showHelp()
         }
-    }
-
-    private fun fixmusic(event: GuildMessageReceivedEvent) {
-
     }
 
     private var disabledCallsiteConsumer = RestAction.DEFAULT_FAILURE

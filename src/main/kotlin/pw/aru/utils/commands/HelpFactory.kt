@@ -21,6 +21,7 @@ class HelpFactory(
     private val examples = LinkedList<String>()
     private val seeAlso = LinkedList<String>()
     private var description: String? = null
+    private var note: String? = null
     private var tutorial: String? = null
     private var color: Color? = null
 
@@ -62,6 +63,10 @@ class HelpFactory(
                 )
             }
 
+            if (note != null) {
+                field("Note:", note!!, false)
+            }
+
             if (seeAlso.isNotEmpty()) {
                 field(if (category) "Other Commands:" else "See Also:", seeAlso.joinToString("\n"), false)
             }
@@ -86,6 +91,10 @@ class HelpFactory(
 
     fun tutorial(vararg value: String) {
         tutorial = value.joinToString("\n")
+    }
+
+    fun note(vararg value: String) {
+        note = value.joinToString("\n")
     }
 
     fun usageSeparator() {

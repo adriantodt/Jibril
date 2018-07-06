@@ -12,9 +12,7 @@ class TrackData(channel: TextChannel, user: User) {
 
     var thumbnail: String? = null
 
-    val textChannel: TextChannel?
-        get() = jda.getTextChannelById(channelId)
+    val textChannel: TextChannel? get() = jda.getTextChannelById(channelId)
 
-    val user: User?
-        get() = jda.getUserById(userId)
+    val user: User? get() = jda.getUserById(userId)
 }

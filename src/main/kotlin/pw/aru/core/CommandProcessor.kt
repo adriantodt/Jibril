@@ -15,6 +15,7 @@ import pw.aru.utils.extensions.onHelp
 import pw.aru.utils.extensions.random
 import pw.aru.utils.extensions.withPrefix
 import pw.aru.utils.helpers.CommandStatsManager
+import redis.clients.jedis.exceptions.JedisConnectionException
 import java.util.*
 
 object CommandProcessor : KLogging() {
@@ -31,7 +32,11 @@ object CommandProcessor : KLogging() {
             }
         }
 
-        val guildPrefix = GuildSettings(event.guild.idLong).prefix
+        val guildPrefix = try {
+            GuildSettings(event.guild.idLong).prefix
+        } catch (_: JedisConnectionException) {
+            null
+        }
 
         if (guildPrefix != null && raw.startsWith(guildPrefix)) {
             process(event, raw.substring(guildPrefix.length))
@@ -84,7 +89,7 @@ object CommandProcessor : KLogging() {
                     "${if (eExternalEmoji) "✅" else "❎"} **Use External Emoji**",
                     "Sadly, I have to refuse all commands until you give me that permission. $DISAPPOINTED",
                     "",
-                    "Fix the current channel's permissions and enable me the above permissions.",
+                    "Fix the current channel's permissions and enable me the permissions above.",
                     "If you need help on doing that, check my support server: ``https://support.aru.pw/``"
                 ).joinToString("\n")
             ).queue()

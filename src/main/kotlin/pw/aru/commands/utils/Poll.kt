@@ -9,6 +9,7 @@ import pw.aru.core.commands.ICommand
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.extensions.showHelp
 import pw.aru.utils.extensions.withPrefix
+import pw.aru.utils.twemoji_pattern
 
 @Command("poll")
 class Poll : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
@@ -16,7 +17,7 @@ class Poll : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
 
     override fun call(event: GuildMessageReceivedEvent, args: String) = showHelp()
 
-    private val pattern = Regex("^((([\uD83C\uDF00-\uD83D\uDDFF]|[\uD83D\uDE00-\uD83D\uDE4F]|[\uD83D\uDE80-\uD83D\uDEFF]|[\u2600-\u26FF]|[\u2700-\u27BF])[\\x{1F3FB}-\\x{1F3FF}]?))")
+    private val pattern = Regex(twemoji_pattern)
 
     override fun discreteCall(event: GuildMessageReceivedEvent, args: String, outer: String) {
         val emotes = event.message.emotes.filterNot(IFakeable::isFake).map { it.asMention to "${it.name}:${it.id}" }
@@ -37,4 +38,9 @@ class Poll : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
             withPrefix = false
         )
     }
+}
+
+private fun <T> T?.log(s: String? = null): T? {
+    println("$s${this}")
+    return this
 }

@@ -3,7 +3,7 @@
 //Plugins
 plugins {
     //Compiles Kotlin
-    id 'org.jetbrains.kotlin.jvm' version '1.2.41'
+    id 'org.jetbrains.kotlin.jvm' version '1.2.51'
     //Adds an Executable Manifest
     id 'application'
     //Creates FatJars
@@ -11,7 +11,7 @@ plugins {
 }
 
 group = 'pw.aru'
-version = '2.0'
+version = '2.0.1'
 mainClassName = 'pw.aru.Bootstrap'
 
 // Minified Splash
@@ -19,7 +19,7 @@ mainClassName = 'pw.aru.Bootstrap'
     def d = "$l ${(v.size() + l.size() + 1) % 2 != 0 ? "-" : "--"} v$v"
     def w = (0..(30 - d.size() / 2)).collect { it % 2 != 0 ? '-' : '=' }.join ''
     println "|$w| $d |${w.reverse()}|"
-})("Aru", version)
+})("Aru!", version)
 
 //Repositories and Dependencies
 repositories {
@@ -28,7 +28,7 @@ repositories {
     mavenLocal()
 }
 
-def kotlin_version = '1.2.41'
+def kotlin_version = '1.2.51'
 
 dependencies {
     //Source of memes
@@ -95,7 +95,7 @@ new File("src/main/kotlin/pw/aru/exported/exported.kt").with {
 package pw.aru.exported
 
 /**
- * Aru Version
+ * Aru! Version
  */
 const val aru_version = "${version}"
 
@@ -107,7 +107,7 @@ const val kotlin_version = "${kotlin_version}"
 /**
  * User Agent
  */
-const val user_agent = "JDA/DiscordBot (Aru ${version})"
+const val user_agent = "JDA/DiscordBot (Aru! ${version})"
 """.trim(), "UTF-8")
 }
 

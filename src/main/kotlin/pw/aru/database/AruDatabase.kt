@@ -2,15 +2,18 @@ package pw.aru.database
 
 import jibril.snowflake.entities.SnowflakeGenerator
 import jibril.snowflake.local.LocalGeneratorBuilder
+import mu.KLogging
 import pw.aru.integration.EventPublisher
+import pw.aru.utils.TaskManager.task
 import pw.aru.utils.extensions.get
 import pw.aru.utils.extensions.useResource
 import redis.clients.jedis.exceptions.JedisConnectionException
+import java.util.concurrent.TimeUnit.MINUTES
 
 typealias Redis = redis.clients.jedis.Jedis
 typealias RedisPool = redis.clients.jedis.JedisPool
 
-object AruDatabase {
+object AruDatabase : KLogging() {
     //Pool
     val pool = RedisPool()
 
@@ -33,4 +36,15 @@ object AruDatabase {
 
     val idWorker = generator[0, 1]
 
+    init {
+        launchRedisThread()
+    }
+
+    private fun launchRedisThread() {
+        task(1, MINUTES) {
+            if (!isConnected) {
+                logger.warn("Redis Server offline! Please put it back up!")
+            }
+        }
+    }
 }

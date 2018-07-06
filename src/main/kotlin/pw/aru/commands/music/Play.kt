@@ -10,8 +10,8 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.CommandPermission
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
-import pw.aru.core.music.AudioRequester
 import pw.aru.core.music.MusicManager
+import pw.aru.core.music.MusicRequester
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.ERROR2
 import pw.aru.utils.emotes.STOP
@@ -44,6 +44,13 @@ sealed class PlayCommand(
 
         if (!event.guild.selfMember.hasPermission(event.channel, MESSAGE_ADD_REACTION)) {
             event.channel.sendMessage("$X Hey, I need the **${MESSAGE_ADD_REACTION.name}** permission in order to do that!").queue()
+            return
+        }
+
+        if (playNow && !checkPermissions(event, musicManager.getMusicPlayer(event.guild), true)) {
+            event.channel.sendMessage(
+                "$STOP B-baka, I'm not allowed to let you do that!\n\n$THINKING Maybe you meant ``${(if (force) "forceplaynext" else "playnext").withPrefix()}`` instead?"
+            ).queue()
             return
         }
 
@@ -81,7 +88,7 @@ sealed class PlayCommand(
     }
 
     private fun request(event: GuildMessageReceivedEvent, args: String, playerManager: AudioPlayerManager) {
-        val future = AudioRequester.loadAndPlay(
+        val future = MusicRequester.loadAndPlay(
             event.channel, event.member,
             musicManager.getMusicPlayer(event.guild),
             args,
@@ -94,7 +101,7 @@ sealed class PlayCommand(
         } catch (e: TimeoutException) {
             future.cancel(true)
             event.channel.sendMessage("$ERROR2 The music search took too long. If this keeps happening, go to our Support Server.").queue()
-            AudioRequester.logger.warn("Took too long to get results from LavaPlayer.")
+            MusicRequester.logger.warn("Took too long to get results from LavaPlayer.")
         }
     }
 }
@@ -187,17 +194,7 @@ class ForcePlayNext(musicManager: MusicManager) : PlayCommand(musicManager, true
 
 @Command("playnow")
 @UseFullInjector
-class PlayNow(private val musicManager: MusicManager) : PlayCommand(musicManager, false, true, true) {
-
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
-        if (checkPermissions(event, musicManager.getMusicPlayer(event.guild), true)) {
-            super.call(event, args)
-        } else {
-            event.channel.sendMessage(
-                "$STOP B-baka, I'm not allowed to let you do that!\n\n$THINKING Maybe you meant ``${"playnext".withPrefix()}`` instead?"
-            ).queue()
-        }
-    }
+class PlayNow(musicManager: MusicManager) : PlayCommand(musicManager, false, true, true) {
 
     override val helpHandler = HelpFactory("PlayNow Command") {
         description(
@@ -217,17 +214,7 @@ class PlayNow(private val musicManager: MusicManager) : PlayCommand(musicManager
 
 @Command("forceplaynow")
 @UseFullInjector
-class ForcePlayNow(private val musicManager: MusicManager) : PlayCommand(musicManager, true, true, true) {
-
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
-        if (checkPermissions(event, musicManager.getMusicPlayer(event.guild), true)) {
-            super.call(event, args)
-        } else {
-            event.channel.sendMessage(
-                "$STOP B-baka, I'm not allowed to let you do that!\n\n$THINKING Maybe you meant ``${"forceplaynext".withPrefix()}`` instead?"
-            ).queue()
-        }
-    }
+class ForcePlayNow(musicManager: MusicManager) : PlayCommand(musicManager, true, true, true) {
 
     override val helpHandler = HelpFactory("ForcePlayNow Command") {
         description(

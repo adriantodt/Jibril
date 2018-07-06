@@ -5,7 +5,7 @@ class Args(val raw: String) {
 
     fun takeString(): String {
         val re = remaining
-        val i = re.indexOf(' ')
+        val i = re.indexOfAny(charArrayOf(' ', '\r', '\n', '\t'))
 
         if (i == -1) {
             remaining = ""
@@ -16,7 +16,13 @@ class Args(val raw: String) {
         return re.substring(0, i)
     }
 
-    fun takeRemainingStrings(): String {
+    fun takeAllStrings(): List<String> {
+        val re = remaining
+        remaining = ""
+        return re.split(' ', '\r', '\n', '\t')
+    }
+
+    fun takeRemaining(): String {
         val re = remaining
         remaining = ""
         return re

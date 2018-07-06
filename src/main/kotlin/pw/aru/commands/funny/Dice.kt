@@ -41,7 +41,9 @@ class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
     }
 
     override fun discreteCall(event: GuildMessageReceivedEvent, args: String, outer: String) {
-        val toSend = stripFormatting(outer.replace('\n', ' '))
+        val toSend = stripFormatting(outer.replace('\n', ' ')).trim()
+
+        if (toSend.isEmpty()) call(event, args)
 
         event.channel.sendMessage("**$toSend**\n$GAME_DIE ${resolveRoll(args)}").queue()
     }
