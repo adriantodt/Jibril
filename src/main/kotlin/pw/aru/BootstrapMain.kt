@@ -36,6 +36,9 @@ internal fun start() {
     //Create the Base Injector
     val initInjector = createInitialInjector(config)
 
+    //Launch check thread
+    launchRedisCheckThread(initInjector.direct.instance())
+
     // Compute Command Initialization (Step 1)
     // Requires initInjector; Returns notInitializedCommands
     val notInitializedCommands = submitTask("InitCommands (Phase 1)") {

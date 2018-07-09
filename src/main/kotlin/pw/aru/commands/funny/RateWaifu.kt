@@ -4,7 +4,6 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
-import pw.aru.features.LuckyUser
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.ERROR
 import pw.aru.utils.emotes.THINKING
@@ -23,17 +22,18 @@ class RateWaifu : ICommand, ICommand.HelpDialogProvider {
         else args
             .replace("<@!", "<@")
             .splitToSequence(' ', '\r', '\n')
-            .filter { it.isNotBlank() }
+            .filter(String::isNotBlank)
             .joinToString(" ")
             .trim()
 
         val rating = when (toRate.toLowerCase()) {
             "mantaro", "mantaro patreon", "mantaro premium", "<@213466096718708737>", "<@302810118335102976>" -> 95
-            "aru", "jebril", "<@406082711271374848>" -> 100
+            "aru dev", "arudev", "jibrildev", "jibril dev", "<@406945939148898304>" -> 99
+            "aru", "jibril", "<@406082711271374848>" -> 100
             else -> (toRate.map(Char::toLong).map { it * 2 }.sum() + 50) % 101
         }
 
-        event.channel.sendMessage("$THINKING Hmmm... I think **$toRate** is worth a $rating/100, don't you?").queue(LuckyUser(event))
+        event.channel.sendMessage("$THINKING Hmmm... I think **$toRate** is worth a $rating/100, don't you?").queue()
     }
 
     override val helpHandler = HelpFactory("RateWaifu Command") {

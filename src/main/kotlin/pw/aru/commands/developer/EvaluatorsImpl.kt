@@ -3,16 +3,17 @@ package pw.aru.commands.developer
 import bsh.Interpreter
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import pw.aru.database.AruDatabase
+import pw.aru.db.AruDB
 import javax.script.ScriptEngineManager
 
 class JsEvaluator(
-    private val shardManager: ShardManager
+    private val shardManager: ShardManager,
+    private val db: AruDB
 ) : Evaluator {
     override fun invoke(event: GuildMessageReceivedEvent, code: String): Any? {
         val engine = ScriptEngineManager().getEngineByName("nashorn")
         engine["shards"] = shardManager
-        engine["db"] = AruDatabase
+        engine["db"] = db
         engine["jda"] = event.jda
         engine["event"] = event
         engine["guild"] = event.guild
@@ -32,14 +33,10 @@ class JsEvaluator(
 }
 
 class PersistentJsEvaluator(
-    shardManager: ShardManager
+    private val shardManager: ShardManager,
+    private val db: AruDB
 ) : PersistentEvaluator {
     private val engine = ScriptEngineManager().getEngineByName("nashorn")
-
-    init {
-        engine["shards"] = shardManager
-        engine["db"] = AruDatabase
-    }
 
     override fun get(key: String): Any? = engine[key]
 
@@ -48,6 +45,8 @@ class PersistentJsEvaluator(
     }
 
     override fun invoke(event: GuildMessageReceivedEvent, code: String): Any? {
+        engine["shards"] = shardManager
+        engine["db"] = db
         engine["jda"] = event.jda
         engine["event"] = event
         engine["guild"] = event.guild
@@ -58,12 +57,13 @@ class PersistentJsEvaluator(
 }
 
 class BshEvaluator(
-    private val shardManager: ShardManager
+    private val shardManager: ShardManager,
+    private val db: AruDB
 ) : Evaluator {
     override fun invoke(event: GuildMessageReceivedEvent, code: String): Any? {
         val engine = Interpreter()
         engine["shards"] = shardManager
-        engine["db"] = AruDatabase
+        engine["db"] = db
         engine["jda"] = event.jda
         engine["event"] = event
         engine["guild"] = event.guild
@@ -74,14 +74,10 @@ class BshEvaluator(
 }
 
 class PersistentBshEvaluator(
-    shardManager: ShardManager
+    private val shardManager: ShardManager,
+    private val db: AruDB
 ) : PersistentEvaluator {
     val engine = Interpreter()
-
-    init {
-        engine.eval("import *;")
-        engine["shards"] = shardManager
-    }
 
     override fun get(key: String): Any? = engine[key]
 
@@ -90,6 +86,9 @@ class PersistentBshEvaluator(
     }
 
     override fun invoke(event: GuildMessageReceivedEvent, code: String): Any? {
+        engine.eval("import *;")
+        engine["shards"] = shardManager
+        engine["db"] = db
         engine["jda"] = event.jda
         engine["event"] = event
         engine["guild"] = event.guild

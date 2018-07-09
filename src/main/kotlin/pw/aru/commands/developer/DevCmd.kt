@@ -12,6 +12,7 @@ import pw.aru.Aru.sleepQuotes
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.*
 import pw.aru.core.parser.Args
+import pw.aru.db.AruDB
 import pw.aru.utils.Colors
 import pw.aru.utils.J
 import pw.aru.utils.api.DiscordBotsPoster
@@ -28,7 +29,8 @@ import java.util.function.Consumer
 class DevCmd
 (
     private val httpClient: OkHttpClient,
-    private val shardManager: ShardManager,
+    shardManager: ShardManager,
+    db: AruDB,
     private val statsPoster: DiscordBotsPoster
 ) : ArgsCommand(), ICommand.Permission, ICommand.HelpDialogProvider {
     companion object : KLogging()
@@ -95,11 +97,11 @@ class DevCmd
     }
 
     private val sEvals: Map<String, Evaluator> by lazy {
-        Evaluators.newStatelessEvaluatorsMap(shardManager)
+        Evaluators.newStatelessEvaluatorsMap(shardManager, db)
     }
 
     private val pEvals: Map<String, PersistentEvaluator> by lazy {
-        Evaluators.newPersistentEvaluatorsMap(shardManager)
+        Evaluators.newPersistentEvaluatorsMap(shardManager, db)
     }
 
     private fun listEvals(event: GuildMessageReceivedEvent, persistent: Boolean) {

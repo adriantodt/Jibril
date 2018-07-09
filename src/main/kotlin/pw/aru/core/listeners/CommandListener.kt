@@ -6,7 +6,7 @@ import pw.aru.core.CommandProcessor
 import pw.aru.core.listeners.EventListeners.submitTask
 import pw.aru.utils.extensions.classOf
 
-object CommandListener : OptimizedListener<GuildMessageReceivedEvent>(classOf()) {
+class CommandListener(private val processor: CommandProcessor) : OptimizedListener<GuildMessageReceivedEvent>(classOf()) {
     override fun event(event: GuildMessageReceivedEvent) {
         // @formatter:off
 		if (
@@ -19,7 +19,7 @@ object CommandListener : OptimizedListener<GuildMessageReceivedEvent>(classOf())
         // @formatter:on
 
         submitTask("Cmd:${event.author.name}#${event.author.discriminator}:${event.message.contentRaw}") {
-            CommandProcessor.onCommand(event)
+            processor.onCommand(event)
         }
     }
 }

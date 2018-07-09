@@ -1,26 +1,27 @@
-package pw.aru.database.base
+package pw.aru.db.base
 
-import pw.aru.database.AruDatabase.pool
-import pw.aru.database.Redis
+import pw.aru.db.AruDB
+import pw.aru.db.Redis
 import pw.aru.utils.extensions.useResource
 
 class RedisList<E>(
+    val db: AruDB,
     private val hash: String,
     private val serializer: Serializer<E>
 ) : MutableList<E>, RandomAccess {
     override val size: Int
-        get() = pool.useResource { it.llen(hash) }.toInt()
+        get() = db.pool.useResource { it.llen(hash) }.toInt()
 
     override fun isEmpty(): Boolean = size == 0
 
-    override fun get(index: Int): E = serializer.unserialize(pool.useResource { it.lindex(hash, index.toLong()) })
+    override fun get(index: Int): E = serializer.unserialize(db.pool.useResource { it.lindex(hash, index.toLong()) })
 
     override fun set(index: Int, element: E): E {
         checkElementIndex(index, size)
 
         val serialized = serializer.serialize(element)
 
-        val old = pool.useResource {
+        val old = db.pool.useResource {
             val s = it.lindex(hash, index.toLong())
             it.lset(hash, index.toLong(), serialized)
 
@@ -44,7 +45,7 @@ class RedisList<E>(
     override fun add(element: E): Boolean {
         val serialized = serializer.serialize(element)
 
-        pool.useResource { it.lpush(hash, serialized) }
+        db.pool.useResource { it.lpush(hash, serialized) }
 
         return true
     }
@@ -52,7 +53,7 @@ class RedisList<E>(
     override fun addAll(elements: Collection<E>): Boolean {
         val serialized = elements.map(serializer::serialize).toTypedArray()
 
-        pool.useResource { it.lpush(hash, *serialized) }
+        db.pool.useResource { it.lpush(hash, *serialized) }
 
         return true
     }
@@ -62,7 +63,7 @@ class RedisList<E>(
 
         if (index == size) add(element)
 
-        pool.useResource {
+        db.pool.useResource {
             val all = all(it)
             all.add(index, serializer.serialize(element))
             replace(it, all)
@@ -74,7 +75,7 @@ class RedisList<E>(
 
         if (index == size) addAll(elements)
 
-        pool.useResource {
+        db.pool.useResource {
             val all = all(it)
             all.addAll(index, elements.map(serializer::serialize))
             replace(it, all)
@@ -84,11 +85,11 @@ class RedisList<E>(
     }
 
     override fun clear() {
-        pool.useResource { it.del(hash) }
+        db.pool.useResource { it.del(hash) }
     }
 
     override fun remove(element: E): Boolean {
-        pool.useResource {
+        db.pool.useResource {
             val all = all(it)
             val result = all.remove(serializer.serialize(element))
             replace(it, all)
@@ -99,7 +100,7 @@ class RedisList<E>(
     override fun removeAt(index: Int): E {
         checkElementIndex(index, size)
 
-        val at = pool.useResource {
+        val at = db.pool.useResource {
             val all = all(it)
             val at = all.removeAt(index)
             replace(it, all)
@@ -110,7 +111,7 @@ class RedisList<E>(
     }
 
     override fun removeAll(elements: Collection<E>): Boolean {
-        pool.useResource {
+        db.pool.useResource {
             val all = all(it)
             val result = all.removeAll(elements.map(serializer::serialize))
             replace(it, all)
@@ -119,7 +120,7 @@ class RedisList<E>(
     }
 
     override fun retainAll(elements: Collection<E>): Boolean {
-        pool.useResource {
+        db.pool.useResource {
             val all = all(it)
             val result = all.retainAll(elements.map(serializer::serialize))
             replace(it, all)
@@ -127,13 +128,13 @@ class RedisList<E>(
         }
     }
 
-    override fun contains(element: E): Boolean = pool.useResource(this::all).contains(serializer.serialize(element))
+    override fun contains(element: E): Boolean = db.pool.useResource(this::all).contains(serializer.serialize(element))
 
-    override fun containsAll(elements: Collection<E>): Boolean = pool.useResource(this::all).containsAll(elements.map(serializer::serialize))
+    override fun containsAll(elements: Collection<E>): Boolean = db.pool.useResource(this::all).containsAll(elements.map(serializer::serialize))
 
-    override fun indexOf(element: E): Int = pool.useResource(this::all).indexOf(serializer.serialize(element))
+    override fun indexOf(element: E): Int = db.pool.useResource(this::all).indexOf(serializer.serialize(element))
 
-    override fun lastIndexOf(element: E): Int = pool.useResource(this::all).lastIndexOf(serializer.serialize(element))
+    override fun lastIndexOf(element: E): Int = db.pool.useResource(this::all).lastIndexOf(serializer.serialize(element))
 
     override fun iterator(): MutableIterator<E> = IteratorImpl()
 
@@ -152,7 +153,7 @@ class RedisList<E>(
 
     override fun hashCode(): Int = orderedHashCode(this)
 
-    override fun toString(): String = pool.useResource { it.lrange(hash, 0, -1) }
+    override fun toString(): String = db.pool.useResource { it.lrange(hash, 0, -1) }
         .joinToString(prefix = "[", separator = ", ", postfix = "]") { serializer(it).toString() }
 
     private class SubList<E>(private val list: MutableList<E>, private val fromIndex: Int, toIndex: Int) : AbstractMutableList<E>(), RandomAccess {

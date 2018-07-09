@@ -21,6 +21,7 @@ import org.kodein.di.generic.instance
 import org.kodein.di.generic.singleton
 import org.reflections.Reflections
 import pw.aru.Aru.bootQuotes
+import pw.aru.core.CommandProcessor
 import pw.aru.core.CommandRegistry
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
@@ -28,11 +29,13 @@ import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.listeners.*
 import pw.aru.core.music.MusicManager
 import pw.aru.data.config.AruConfig
+import pw.aru.db.AruDB
 import pw.aru.kodein.jit.installJit
 import pw.aru.kodein.jit.jit
 import pw.aru.logging.DiscordLogBack
 import pw.aru.logging.TerminalConsoleAdaptor
 import pw.aru.utils.TaskManager
+import pw.aru.utils.TaskManager.task
 import pw.aru.utils.TaskType
 import pw.aru.utils.api.DiscordBotsPoster
 import pw.aru.utils.extensions.classOf
@@ -66,7 +69,8 @@ internal fun createShardManager(injector: Kodein, token: String, onAllShardsRead
         setAutoReconnect(true)
         setAudioEnabled(true)
         setCorePoolSize(5)
-        setGame(playing(bootQuotes.random()))
+        val quote = bootQuotes.random()
+        setGame(playing(quote))
         setStatus(OnlineStatus.DO_NOT_DISTURB)
 
         addEventListeners(
@@ -76,18 +80,24 @@ internal fun createShardManager(injector: Kodein, token: String, onAllShardsRead
                 if (shardManager.shardCache.all { it.status == LOADING_SUBSYSTEMS || it.status == CONNECTED }) {
                     shardManager.removeEventListener(this)
                     onAllShardsReady(shardManager)
+                } else {
+                    val online = shardManager.shardCache.filter { it.status == LOADING_SUBSYSTEMS || it.status == CONNECTED }
+                    val size = shardManager.shardCache.size()
+
+                    val game = playing("$quote (${online.size} of $size)")
+                    online.forEach { it.presence.game = game }
                 }
             },
-            CommandListener,
-            injector.jit.newInstance<AsyncEventWaiter>()
+            injector.direct.instance<CommandListener>(),
+            injector.direct.instance<AsyncEventWaiter>()
         )
     }
 }
 
 internal fun completeShardManager(shardManager: ShardManager, injector: Kodein) {
     shardManager.addEventListener(
-        injector.jit.newInstance<VoiceLeaveListener>(),
-        injector.jit.newInstance<GuildListener>()
+        injector.direct.instance<VoiceLeaveListener>(),
+        injector.direct.instance<GuildListener>()
     )
 
     shardManager.shardCache.forEach { it.presence.status = OnlineStatus.ONLINE }
@@ -115,6 +125,8 @@ internal fun createInitialInjector(config: AruConfig): Kodein {
         // Instances
         bind<Future<ShardManager>>() with instance(CompletableFuture())
         bind<AruConfig>() with instance(config)
+        bind<AruDB>() with singleton { AruDB() }
+        bind<CommandProcessor>() with singleton { CommandProcessor(instance()) }
         bind<EventWaiter>() with singleton { EventWaiter(TaskManager.scheduler(TaskType.BUNK), false) }
 
         // APIs
@@ -226,4 +238,12 @@ internal fun replacePlaceholderCommands(injector: DKodein, commands: Set<Class<o
     }
 
     return map.values.map { { it.forEach { it() } } }
+}
+
+internal fun launchRedisCheckThread(db: AruDB) {
+    task(1, TimeUnit.MINUTES) {
+        if (!db.isConnected) {
+            log.warn("Redis Server offline! Please put it back up!")
+        }
+    }
 }

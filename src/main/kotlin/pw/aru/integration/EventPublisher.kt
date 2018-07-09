@@ -1,7 +1,7 @@
 package pw.aru.integration
 
 import pw.aru.Aru
-import pw.aru.database.RedisPool
+import pw.aru.db.RedisPool
 import pw.aru.utils.TaskManager.task
 import pw.aru.utils.extensions.jsonStringOf
 import pw.aru.utils.extensions.useResource

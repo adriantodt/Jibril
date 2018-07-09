@@ -1,7 +1,8 @@
-package pw.aru.database.base
+package pw.aru.db.base
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import pw.aru.db.AruDB
 
 interface Serializer<T> {
     fun serialize(obj: T): String
@@ -20,9 +21,9 @@ interface Serializer<T> {
             override fun unserialize(obj: String): T = mapper.readValue(obj, type)
         }
 
-        fun <T : RedisObject> redisObject(from: (Long) -> T) = object : Serializer<T> {
+        fun <T : RedisObject> redisObject(db: AruDB, from: (AruDB, Long) -> T) = object : Serializer<T> {
             override fun serialize(obj: T): String = obj.id.toString()
-            override fun unserialize(obj: String): T = from(obj.toLong())
+            override fun unserialize(obj: String): T = from(db, obj.toLong())
         }
 
         inline fun <reified T : Enum<T>> enum() = enum(T::class.java)

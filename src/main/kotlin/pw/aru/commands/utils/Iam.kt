@@ -7,25 +7,26 @@ import pw.aru.commands.utils.Iam.iam
 import pw.aru.commands.utils.Iam.iamnot
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.ICommand
-import pw.aru.database.entities.GuildSettings
+import pw.aru.db.AruDB
+import pw.aru.db.entities.GuildSettings
 import pw.aru.utils.emotes.ERROR
 import pw.aru.utils.emotes.SUCCESS
 
 //@Command("iam")
-class IamCmd : ICommand {
+class IamCmd(private val db: AruDB) : ICommand {
     override val category = Categories.UTILS
-    override fun call(event: GuildMessageReceivedEvent, args: String) = iam(event, args)
+    override fun call(event: GuildMessageReceivedEvent, args: String) = iam(db, event, args)
 }
 
 //@Command("iamnot")
-class IamNotCmd : ICommand {
+class IamNotCmd(private val db: AruDB) : ICommand {
     override val category = Categories.UTILS
-    override fun call(event: GuildMessageReceivedEvent, args: String) = iamnot(event, args)
+    override fun call(event: GuildMessageReceivedEvent, args: String) = iamnot(db, event, args)
 }
 
 object Iam {
-    fun iam(event: GuildMessageReceivedEvent, roleName: String) {
-        val settings = GuildSettings(event.guild.idLong)
+    fun iam(db: AruDB, event: GuildMessageReceivedEvent, roleName: String) {
+        val settings = GuildSettings(db, event.guild.idLong)
         val roles = settings.assignableRoles
         val roleId = roles[roleName]
 
@@ -59,8 +60,8 @@ object Iam {
         }
     }
 
-    fun iamnot(event: GuildMessageReceivedEvent, roleName: String) {
-        val settings = GuildSettings(event.guild.idLong)
+    fun iamnot(db: AruDB, event: GuildMessageReceivedEvent, roleName: String) {
+        val settings = GuildSettings(db, event.guild.idLong)
         val roles = settings.assignableRoles
         val roleId = roles[roleName]
 

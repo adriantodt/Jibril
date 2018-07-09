@@ -7,7 +7,8 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.Aru.prefixes
 import pw.aru.core.CommandRegistry.commands
 import pw.aru.core.commands.ICommand
-import pw.aru.database.entities.GuildSettings
+import pw.aru.db.AruDB
+import pw.aru.db.entities.GuildSettings
 import pw.aru.utils.J
 import pw.aru.utils.emotes.*
 import pw.aru.utils.extensions.CommandExceptions
@@ -18,7 +19,7 @@ import pw.aru.utils.helpers.CommandStatsManager
 import redis.clients.jedis.exceptions.JedisConnectionException
 import java.util.*
 
-object CommandProcessor : KLogging() {
+class CommandProcessor(private val db: AruDB) : KLogging() {
 
     var commandCount = 0
 
@@ -33,7 +34,7 @@ object CommandProcessor : KLogging() {
         }
 
         val guildPrefix = try {
-            GuildSettings(event.guild.idLong).prefix
+            GuildSettings(db, event.guild.idLong).prefix
         } catch (_: JedisConnectionException) {
             null
         }

@@ -1,8 +1,6 @@
 package pw.aru.commands.games.hungergames
 
-import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.TextChannel
-import pw.aru.features.LuckyUser
 import xyz.cuteclouds.hunger.HungerGames
 import xyz.cuteclouds.hunger.HungerGamesBuilder
 import xyz.cuteclouds.hunger.data.SimpleTribute
@@ -16,7 +14,6 @@ import xyz.cuteclouds.hunger.loader.parseHarmfulActions
 import xyz.cuteclouds.hunger.loader.parseHarmlessActions
 import xyz.cuteclouds.hunger.phases.*
 import java.io.File
-import java.util.function.Consumer
 
 object HG {
     val actions: Actions by lazy {
@@ -63,8 +60,8 @@ object HG {
     }
 
     fun handleHg(hungerGames: HungerGames, channel: TextChannel) {
-        fun send(vararg messages: Any?, success: Consumer<Message>? = null) {
-            channel.sendMessage(messages.joinToString("\n", transform = Any?::toString)).queue(success)
+        fun send(vararg messages: Any?) {
+            channel.sendMessage(messages.joinToString("\n", transform = Any?::toString)).queue()
         }
 
         fun quickYield() = Thread.sleep(2500)
@@ -122,8 +119,7 @@ object HG {
                     val winner = e.winner
                     send(
                         "=-=- **Winner!** -=-=",
-                        formatter.format("{0} is the winner!", listOf(winner)),
-                        success = if (winner is DiscordTribute) LuckyUser(winner.member.user, 0.0, 50, 50) else null
+                        formatter.format("{0} is the winner!", listOf(winner))
                     )
                     return
                 }

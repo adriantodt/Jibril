@@ -4,7 +4,6 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
-import pw.aru.features.LuckyUser
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.THINKING
 import pw.aru.utils.extensions.random
@@ -19,7 +18,7 @@ class Choose : ICommand, ICommand.HelpDialogProvider {
 
         if (options.isEmpty()) return showHelp()
 
-        event.channel.sendMessage("$THINKING Hmmm... I choose `${options.random()}`!").queue(LuckyUser(event))
+        event.channel.sendMessage("$THINKING Hmmm... I choose `${options.random()}`!").queue()
     }
 
     override val helpHandler = HelpFactory("Choose Command") {

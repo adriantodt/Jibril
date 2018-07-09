@@ -1,12 +1,15 @@
 package pw.aru.features
 
 import mu.KLogging
-import pw.aru.database.Redis
+import org.json.JSONObject
+import pw.aru.db.AruDB
+import pw.aru.db.Redis
+import pw.aru.db.entities.UserPledge
 import kotlin.concurrent.thread
 
 typealias RedisPubSub = redis.clients.jedis.JedisPubSub
 
-class RedisEventSystem(val redis: Redis) {
+class RedisEventSystem(val db: AruDB, val redis: Redis) {
     companion object : KLogging()
 
     init {
@@ -24,29 +27,36 @@ class RedisEventSystem(val redis: Redis) {
 
     private fun onMessage(channel: String, message: String) {
         when (channel) {
-            "events.dbl.upvote" -> processUpvote(message)
-            "events.patreon.create" -> createPatron(message)
-            "events.patreon.update" -> updatePatron(message)
-            "events.patreon.delete" -> deletePatron(message)
+            "events.dbl.upvote" -> processUpvote(JSONObject(message))
+            "events.patreon.create" -> createPatron(JSONObject(message))
+            "events.patreon.update" -> updatePatron(JSONObject(message))
+            "events.patreon.delete" -> deletePatron(JSONObject(message))
             else -> {
                 logger.warn { "Channel not implemented: $channel" }
             }
         }
     }
 
-    private fun processUpvote(message: String) {
+    private fun processUpvote(message: JSONObject) {
+    }
+
+    private fun createPatron(message: JSONObject) {
+        val data = message["data"] as JSONObject
+        val database = message.getJSONArray("included").map {
+            val j = it as JSONObject
+            j.getString("id") to j
+        }.toMap()
+
+        val pledge = UserPledge(db, data.getString("id").toLong())
+        pledge.enabled = true
 
     }
 
-    private fun createPatron(message: String) {
+    private fun updatePatron(message: JSONObject) {
 
     }
 
-    private fun updatePatron(message: String) {
-
-    }
-
-    private fun deletePatron(message: String) {
+    private fun deletePatron(message: JSONObject) {
 
     }
 }

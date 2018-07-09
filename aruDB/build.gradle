@@ -1,0 +1,76 @@
+// Aru!DB
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id 'maven'
+    id 'maven-publish'
+    id 'org.jetbrains.dokka' version '0.9.17'
+}
+
+group = 'pw.aru'
+version = '2.0.1'
+//Repositories and Dependencies
+repositories {
+    jcenter()
+    maven { url = 'https://dl.bintray.com/adriantodt/maven' }
+    mavenLocal()
+}
+
+dependencies {
+    //Source of memes
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compile "org.jetbrains.kotlin:kotlin-reflect"
+
+    //Group WILL change
+    compile 'jibril:snowflake-local:1.0'
+
+    //Data Stack
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.0'
+    compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.0'
+    compile 'redis.clients:jedis:2.9.0'
+    compile 'de.undercouch:bson4jackson:2.9.0'
+
+
+    //Logging
+    compile 'org.slf4j:slf4j-api:1.7.25'
+    compile 'io.github.microutils:kotlin-logging:1.4.6'
+
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
+    outputFormat = 'javadoc'
+    outputDirectory = "$buildDir/javadoc"
+}
+
+task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
+    classifier = 'javadoc'
+    from "$buildDir/javadoc"
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+publishing {
+    publications {
+        LocalRelease(MavenPublication) {
+            from components.java
+            groupId group
+            artifactId project.name
+            version project.version
+            artifact javadocJar
+            artifact sourcesJar
+        }
+    }
+}

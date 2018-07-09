@@ -38,7 +38,8 @@ import java.lang.Thread.sleep
 class Stats
 (
     private val shardManager: ShardManager,
-    private val musicManager: MusicManager
+    private val musicManager: MusicManager,
+    private val processor: CommandProcessor
 ) : SimpleArgsCommand(expectedArgs = 2), ICommand.HelpDialogProvider {
     override val category = Categories.INFO
 
@@ -61,7 +62,7 @@ class Stats
                     "\u25AB **Aru Version**: ${aru_version}",
                     "\u25AB **Threads**: ${Thread.activeCount().format("%,d")}",
                     "\u25AB **Shards**: ${shardManager.shardsTotal.format("%,d")} (Current: ${event.jda.shardInfo.shardId})",
-                    "\u25AB **Commands**: ${CommandProcessor.commandCount.format("%,d")} executed"
+                    "\u25AB **Commands**: ${processor.commandCount.format("%,d")} executed"
                 ),
                 inline = true
             )

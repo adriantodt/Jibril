@@ -6,7 +6,6 @@ import pw.aru.core.categories.Categories
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
-import pw.aru.features.LuckyUser
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.DISAPPOINTED
 import pw.aru.utils.emotes.ERROR
@@ -38,7 +37,7 @@ class Avatar : ICommand, ICommand.HelpDialogProvider {
 
         event.channel.sendMessage(
             "$SUCCESS Avatar for **${user.discordTag}**:\n${user.effectiveAvatarUrl}"
-        ).queue(LuckyUser(event))
+        ).queue()
     }
 
     override val helpHandler = HelpFactory("Avatar Command") {

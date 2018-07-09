@@ -24,20 +24,21 @@ mainClassName = 'pw.aru.Bootstrap'
 //Repositories and Dependencies
 repositories {
     jcenter()
-    maven { url = "https://dl.bintray.com/adriantodt/maven" }
+    maven { url = 'https://dl.bintray.com/adriantodt/maven' }
     mavenLocal()
 }
 
-def kotlin_version = '1.2.51'
-
 dependencies {
+    //Dependency: aruDB
+    compile project('aruDB')
+
     //Source of memes
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    compile 'org.jetbrains.kotlin:kotlin-reflect'
 
     // Main APIs
-    compile 'net.dv8tion:JDA:3.6.0_362'
-    compile 'com.sedmelluq:lavaplayer:1.2.63'
+    compile 'net.dv8tion:JDA:3.6.0_376'
+    compile 'com.sedmelluq:lavaplayer:1.3.7'
     compile 'com.github.natanbc:discordbots-api:3.3.3'
     compile 'com.github.natanbc:weeb4j:3.2'
 
@@ -47,6 +48,7 @@ dependencies {
 
     // Open-Source Libraries
     compile 'pw.aru.discord:dice-notation:1.0'
+    compile 'pw.aru.utils:pipes:1.0'
 
     //Group WILL change
     compile 'jibril:snowflake-local:1.0'
@@ -82,7 +84,8 @@ dependencies {
 }
 
 //FILE src/main/kotlin/aru/exported/exported.kt
-new File("src/main/kotlin/pw/aru/exported/exported.kt").with {
+rootProject.file("src/main/kotlin/pw/aru/exported/exported.kt").with {
+    parentFile.mkdirs()
     createNewFile()
     write("""
 @file:JvmName("AruExported")
@@ -98,11 +101,6 @@ package pw.aru.exported
  * Aru! Version
  */
 const val aru_version = "${version}"
-
-/**
- * Kotlin Version
- */
-const val kotlin_version = "${kotlin_version}"
 
 /**
  * User Agent

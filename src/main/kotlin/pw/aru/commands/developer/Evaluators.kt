@@ -2,23 +2,21 @@ package pw.aru.commands.developer
 
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import pw.aru.db.AruDB
 import javax.script.ScriptEngine
-import javax.script.ScriptEngineManager
 
 object Evaluators {
-    val engine = ScriptEngineManager()
-
-    fun newStatelessEvaluatorsMap(shardManager: ShardManager): Map<String, Evaluator> {
+    fun newStatelessEvaluatorsMap(shardManager: ShardManager, db: AruDB): Map<String, Evaluator> {
         return mapOf(
-            "js" to JsEvaluator(shardManager),
-            "bsh" to BshEvaluator(shardManager)
+            "js" to JsEvaluator(shardManager, db),
+            "bsh" to BshEvaluator(shardManager, db)
         )
     }
 
-    fun newPersistentEvaluatorsMap(shardManager: ShardManager): Map<String, PersistentEvaluator> {
+    fun newPersistentEvaluatorsMap(shardManager: ShardManager, db: AruDB): Map<String, PersistentEvaluator> {
         return mapOf(
-            "js" to PersistentJsEvaluator(shardManager),
-            "bsh" to PersistentBshEvaluator(shardManager)
+            "js" to PersistentJsEvaluator(shardManager, db),
+            "bsh" to PersistentBshEvaluator(shardManager, db)
         ).configureIntegrations()
     }
 
