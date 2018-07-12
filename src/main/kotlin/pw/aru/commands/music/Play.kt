@@ -10,6 +10,7 @@ import pw.aru.core.commands.*
 import pw.aru.core.music.MusicManager
 import pw.aru.core.music.MusicRequester
 import pw.aru.core.parser.Args
+import pw.aru.core.parser.tryTakeInt
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.ERROR2
 import pw.aru.utils.emotes.STOP

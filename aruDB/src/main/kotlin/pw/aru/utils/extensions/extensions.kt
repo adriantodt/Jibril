@@ -2,9 +2,9 @@
 
 package pw.aru.utils.extensions
 
-import jibril.snowflake.entities.SnowflakeDatacenter
-import jibril.snowflake.entities.SnowflakeGenerator
-import jibril.snowflake.entities.SnowflakeWorker
+import pw.aru.snowflake.entities.SnowflakeDatacenter
+import pw.aru.snowflake.entities.SnowflakeGenerator
+import pw.aru.snowflake.entities.SnowflakeWorker
 import redis.clients.util.Pool
 import java.io.Closeable
 

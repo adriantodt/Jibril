@@ -44,30 +44,6 @@ class Args(val raw: String) {
         return t
     }
 
-    fun tryTakeInt(): Int? = mapNextString {
-        try {
-            it.toInt() to true
-        } catch (e: NumberFormatException) {
-            null to false
-        }
-    }
-
-    fun tryTakeLong(): Long? = mapNextString {
-        try {
-            it.toLong() to true
-        } catch (e: NumberFormatException) {
-            null to false
-        }
-    }
-
-    fun tryTakeDouble(): Double? = mapNextString {
-        try {
-            it.toDouble() to true
-        } catch (e: NumberFormatException) {
-            null to false
-        }
-    }
-
     fun takeAllStrings(): List<String> {
         val re = remaining
         remaining = ""
@@ -80,7 +56,7 @@ class Args(val raw: String) {
         return re
     }
 
-    fun takeStrings() = descontructed { takeString() }
+    fun takeStrings() = descontructed(Args::takeString)
 
     inner class Descontructed<T>(private val f: (Args) -> T) {
         operator fun component0() = f(this@Args)
@@ -98,6 +74,5 @@ class Args(val raw: String) {
         operator fun component12() = f(this@Args)
     }
 
-    fun <T> descontructed(f: (Args) -> T) = Descontructed(f)
+    fun <T> descontructed(f: Args.() -> T) = Descontructed(f)
 }
-

@@ -20,11 +20,9 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     compile "org.jetbrains.kotlin:kotlin-reflect"
 
-    //Client
+    //Client and ID generator
     compile 'redis.clients:jedis:2.9.0'
-
-    //Group WILL change
-    compile 'jibril:snowflake-local:1.0'
+    compile 'pw.aru.snowflake:snowflake-local:1.0'
 
     //Data Conversion Stack
     compile 'com.fasterxml.jackson.core:jackson-databind:2.9.0'
