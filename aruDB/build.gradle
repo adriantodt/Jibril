@@ -20,20 +20,16 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     compile "org.jetbrains.kotlin:kotlin-reflect"
 
+    //Client
+    compile 'redis.clients:jedis:2.9.0'
+
     //Group WILL change
     compile 'jibril:snowflake-local:1.0'
 
-    //Data Stack
+    //Data Conversion Stack
     compile 'com.fasterxml.jackson.core:jackson-databind:2.9.0'
     compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.0'
-    compile 'redis.clients:jedis:2.9.0'
     compile 'de.undercouch:bson4jackson:2.9.0'
-
-
-    //Logging
-    compile 'org.slf4j:slf4j-api:1.7.25'
-    compile 'io.github.microutils:kotlin-logging:1.4.6'
-
 }
 
 compileKotlin {

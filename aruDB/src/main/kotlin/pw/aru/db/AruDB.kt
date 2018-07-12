@@ -2,12 +2,11 @@ package pw.aru.db
 
 import jibril.snowflake.entities.SnowflakeGenerator
 import jibril.snowflake.local.LocalGeneratorBuilder
-import mu.KLogging
 import pw.aru.utils.extensions.get
 import pw.aru.utils.extensions.useResource
 import redis.clients.jedis.exceptions.JedisConnectionException
 
-class AruDB(uri: String = "redis://localhost:6379", database: Long = 0, worker: Long = 0) : KLogging() {
+class AruDB(uri: String = "redis://localhost:6379", database: Long = 0, worker: Long = 0) {
     //Pool
     val pool = RedisPool(uri)
 

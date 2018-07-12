@@ -15,7 +15,8 @@ import pw.aru.core.parser.Args
 import pw.aru.db.AruDB
 import pw.aru.utils.Colors
 import pw.aru.utils.J
-import pw.aru.utils.api.DiscordBotsPoster
+import pw.aru.utils.api.DBLPoster
+import pw.aru.utils.api.DBotsPoster
 import pw.aru.utils.commands.EmbedFirst
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.SUCCESS
@@ -31,7 +32,8 @@ class DevCmd
     private val httpClient: OkHttpClient,
     shardManager: ShardManager,
     db: AruDB,
-    private val statsPoster: DiscordBotsPoster
+    private val dblPoster: DBLPoster,
+    private val dpwPoster: DBotsPoster
 ) : ArgsCommand(), ICommand.Permission, ICommand.HelpDialogProvider {
     companion object : KLogging()
 
@@ -88,7 +90,8 @@ class DevCmd
 
     private fun shutdown(event: GuildMessageReceivedEvent) {
         try {
-            statsPoster.postStats()
+            dblPoster.postStats()
+            dpwPoster.postStats()
             event.channel.sendMessage(sleepQuotes.random()).complete()
         } catch (ignored: Exception) {
         }

@@ -2,8 +2,7 @@ package pw.aru.commands.info
 
 import mu.KLogging
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import pw.aru.core.CommandRegistry.commands
-import pw.aru.core.CommandRegistry.lookup
+import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
@@ -15,15 +14,14 @@ import pw.aru.utils.helpers.CommandStatsManager
 import java.util.concurrent.TimeUnit
 
 @Command("help", "h")
-class Help : ICommand, ICommand.HelpDialogProvider {
+class Help(private val registry: CommandRegistry) : ICommand, ICommand.HelpDialogProvider {
     companion object : KLogging()
 
     override val category = Categories.INFO
 
-    var trending = emptyList<ICommand>()
+    private var trending = emptyList<ICommand>()
 
     init {
-
         fun trendValue(arr: Array<out String>): Long {
             var v = 0L
             for (it in arr) {
@@ -34,9 +32,8 @@ class Help : ICommand, ICommand.HelpDialogProvider {
             return v
         }
 
-
         task(1, TimeUnit.MINUTES) {
-            trending = lookup.entries
+            trending = registry.lookup.entries
                 .map { it.key to trendValue(it.value) }
                 .filter { it.second != 0L && it.first.category != null }
                 .sortedBy { it.second }
@@ -78,13 +75,13 @@ class Help : ICommand, ICommand.HelpDialogProvider {
                     "Trending:",
                     t.asSequence().filter { it !is ICommand.Permission || it.permission.test(event.member) }
                         .take(10)
-                        .joinToString(prefix = "`", separator = "` `", postfix = "`") { lookup[it]!![0] },
+                        .joinToString(prefix = "`", separator = "` `", postfix = "`") { registry.lookup[it]!![0] },
                     inline = false
                 )
             }
 
             Categories.LIST.forEach { cat ->
-                val list = lookup
+                val list = registry.lookup
                     .entries
                     .filter { (c) -> c.category == cat && (c !is ICommand.Permission || c.permission.test(event.member)) }
                     .map { it.value[0] }
@@ -100,7 +97,7 @@ class Help : ICommand, ICommand.HelpDialogProvider {
     }
 
     private fun findHelp(event: GuildMessageReceivedEvent, args: String) {
-        commands.ifContains(args) {
+        registry.commands.ifContains(args) {
             onHelp(it, event)
             return
         }

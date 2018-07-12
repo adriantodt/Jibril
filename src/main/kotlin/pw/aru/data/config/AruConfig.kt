@@ -10,10 +10,11 @@ data class AruConfig(
     // botlists token
     var dblToken: String = "",
     var dpwToken: String = "",
+    var wshToken: String = "",
 
     // logging
-    var logChannel: String = "",
-    var serverWebhook: String = "",
+    var consoleWebhook: String = "",
+    var serversWebhook: String = "",
 
     // prefixes
     var prefixes: String = ""

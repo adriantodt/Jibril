@@ -2,7 +2,6 @@ package pw.aru.core.categories
 
 import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import pw.aru.core.CommandRegistry
 import pw.aru.core.commands.CommandPermission
 import pw.aru.core.commands.ICommand
 import pw.aru.utils.commands.HelpFactory
@@ -58,21 +57,6 @@ object Categories {
             usage("shuffle", "Shuffles the queue.")
 
             usageNote("(There's also the ${listOf("votepause", "voteresume", "voteshuffle").toSmartString { "`${it.withPrefix()}`" }} commands!)")
-
-            val ignored = arrayOf(
-                "play", "playnext", "forceplay", "forceplaynext",
-                "queue", "nowplaying",
-                "pause", "resume", "shuffle",
-                "votepause", "voteresume", "voteshuffle"
-            )
-            seeAlso(
-                *CommandRegistry.lookup
-                    .mapNotNull { (k, v) ->
-                        if (k.category?.id != "music" || k is ICommand.Invisible || ignored.contains(v[0])) null else v[0]
-                    }
-                    .sorted()
-                    .toTypedArray()
-            )
         }
     }
 

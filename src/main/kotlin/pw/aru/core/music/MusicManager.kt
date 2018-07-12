@@ -75,9 +75,7 @@ class MusicManager(private val shardManager: ShardManager, private val httpClien
     //Developers
     val devPlayerManager: AudioPlayerManager = devPlayerManager()
 
-    fun getMusicPlayer(guild: Guild): GuildMusicPlayer {
-        return musicPlayers.computeIfAbsent(guild.idLong) { GuildMusicPlayer(shardManager, this, guild) }
-    }
+    operator fun get(guild: Guild): GuildMusicPlayer = musicPlayers.computeIfAbsent(guild.idLong) { GuildMusicPlayer(shardManager, this, guild) }
 
     fun cleanup(guild: Guild) {
         val player = musicPlayers.remove(guild.idLong) ?: return

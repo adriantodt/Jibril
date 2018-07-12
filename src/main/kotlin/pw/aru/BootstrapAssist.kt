@@ -23,9 +23,7 @@ import org.reflections.Reflections
 import pw.aru.Aru.bootQuotes
 import pw.aru.core.CommandProcessor
 import pw.aru.core.CommandRegistry
-import pw.aru.core.commands.Command
-import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.UseFullInjector
+import pw.aru.core.commands.*
 import pw.aru.core.listeners.*
 import pw.aru.core.music.MusicManager
 import pw.aru.data.config.AruConfig
@@ -37,8 +35,10 @@ import pw.aru.logging.TerminalConsoleAdaptor
 import pw.aru.utils.TaskManager
 import pw.aru.utils.TaskManager.task
 import pw.aru.utils.TaskType
-import pw.aru.utils.api.DiscordBotsPoster
+import pw.aru.utils.api.DBLPoster
+import pw.aru.utils.api.DBotsPoster
 import pw.aru.utils.extensions.classOf
+import pw.aru.utils.extensions.listener
 import pw.aru.utils.extensions.random
 import pw.aru.utils.extensions.shardManager
 import java.util.*
@@ -109,8 +109,8 @@ internal fun completeShardManager(shardManager: ShardManager, injector: Kodein) 
     }
 }
 
-internal fun enableDiscordLogBack(shardManager: ShardManager, config: AruConfig) {
-    DiscordLogBack.enable(shardManager.getTextChannelById(config.logChannel))
+internal fun enableDiscordLogBack(config: AruConfig) {
+    DiscordLogBack.enable(config.consoleWebhook)
 }
 
 internal fun createInitialInjector(config: AruConfig): Kodein {
@@ -126,7 +126,8 @@ internal fun createInitialInjector(config: AruConfig): Kodein {
         bind<Future<ShardManager>>() with instance(CompletableFuture())
         bind<AruConfig>() with instance(config)
         bind<AruDB>() with singleton { AruDB() }
-        bind<CommandProcessor>() with singleton { CommandProcessor(instance()) }
+        bind<CommandRegistry>() with singleton { CommandRegistry() }
+        bind<CommandProcessor>() with singleton { CommandProcessor(instance(), instance()) }
         bind<EventWaiter>() with singleton { EventWaiter(TaskManager.scheduler(TaskType.BUNK), false) }
 
         // APIs
@@ -158,16 +159,21 @@ internal fun createFullInjector(injector: Kodein, shardManager: ShardManager): K
         // Managers
         bind<MusicManager>() with singleton { MusicManager(shardManager, instance(), instance()) }
 
+        //Posters
+        bind<DBLPoster>() with eagerSingleton {
+            if (instance<AruConfig>().dev) DBLPoster.Dummy
+            else DBLPoster.APIImpl(shardManager, instance())
+        }
 
-        bind<DiscordBotsPoster>() with eagerSingleton {
-            if (instance<AruConfig>().dev) DiscordBotsPoster.Dummy
-            else DiscordBotsPoster.APIImpl(shardManager, instance())
+        bind<DBotsPoster>() with eagerSingleton {
+            if (instance<AruConfig>().dev) DBotsPoster.Dummy
+            else DBotsPoster.APIImpl(shardManager, instance(), instance<AruConfig>().dpwToken)
         }
     }
 }
 
-internal fun executePostLoad() {
-    CommandRegistry.lookup.keys.forEach {
+internal fun executePostLoad(registry: CommandRegistry) {
+    registry.lookup.keys.forEach {
         if (it is ICommand.PostLoad) {
             EventListeners.submitTask("PostLoad:${it.javaClass.simpleName}", it::postLoad)
         }
@@ -181,25 +187,29 @@ internal fun computeReflectionsScan(basePackage: String): ReflectionsResult {
         .getSubTypesOf(classOf<ICommand>())
         .filterTo(LinkedHashSet()) { it.isAnnotationPresent(classOf<Command>()) }
 
-    return ReflectionsResult(reflections, commandScan)
+    val commandProviders = reflections
+        .getSubTypesOf(classOf<ICommandProvider>())
+        .filterTo(LinkedHashSet()) { it.isAnnotationPresent(classOf<CommandProvider>()) }
+
+    return ReflectionsResult(commandScan, commandProviders)
 }
 
 internal data class ReflectionsResult(
-    //Reflections
-    val reflections: Reflections,
-
     //Scans
-    val commandScan: Set<Class<out ICommand>>
+    val commandScan: Set<Class<out ICommand>>,
+
+    //Command Providers
+    val commandProviders: LinkedHashSet<Class<out ICommandProvider>>
 )
 
-internal fun initCommands(injector: DKodein, commands: Set<Class<out ICommand>>) {
+internal fun initCommands(injector: DKodein, registry: CommandRegistry, commands: Set<Class<out ICommand>>) {
     with(injector.jit) {
         commands.forEach {
             try {
                 val meta = it.getAnnotation(classOf<Command>())
                 val command = newInstance(it)
 
-                CommandRegistry.register(meta.value, command)
+                registry.register(meta.value, command)
             } catch (e: Exception) {
                 println("$it\n$e")
             }
@@ -207,16 +217,28 @@ internal fun initCommands(injector: DKodein, commands: Set<Class<out ICommand>>)
     }
 }
 
-internal fun createPlaceholderCommands(commands: Set<Class<out ICommand>>) {
+internal fun initProviders(injector: DKodein, registry: CommandRegistry, commands: Set<Class<out ICommandProvider>>) {
+    with(injector.jit) {
+        commands.forEach {
+            try {
+                newInstance(it).provide(registry)
+            } catch (e: Exception) {
+                println("$it\n$e")
+            }
+        }
+    }
+}
+
+internal fun createPlaceholderCommands(registry: CommandRegistry, commands: Set<Class<out ICommand>>) {
     commands.forEach {
         val meta = it.getAnnotation(classOf<Command>())
         val req = it.getAnnotation(classOf<UseFullInjector>())
 
-        CommandRegistry.registerPlaceholder(meta.value, req.reroute)
+        registry.registerPlaceholder(meta.value, req.reroute)
     }
 }
 
-internal fun replacePlaceholderCommands(injector: DKodein, commands: Set<Class<out ICommand>>): List<() -> Unit> {
+internal fun replacePlaceholderCommands(injector: DKodein, registry: CommandRegistry, commands: Set<Class<out ICommand>>): List<() -> Unit> {
     //Used to create the commands
     val jit = injector.jit
 
@@ -229,7 +251,7 @@ internal fun replacePlaceholderCommands(injector: DKodein, commands: Set<Class<o
             val meta = it.getAnnotation(classOf<Command>())
             val command = jit.newInstance(it)
 
-            for ((event, args) in CommandRegistry.registerOverride(meta.value, command)) {
+            for ((event, args) in registry.registerOverride(meta.value, command)) {
                 map.getOrPut(event.guild.idLong, ::ArrayList) += { command.call(event, args) }
             }
         } catch (e: Exception) {

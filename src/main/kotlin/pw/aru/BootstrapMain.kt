@@ -13,7 +13,8 @@ import pw.aru.core.listeners.EventListeners.submitTask
 import pw.aru.data.config.ConfigManager
 import pw.aru.utils.TaskManager.queue
 import pw.aru.utils.TaskType
-import pw.aru.utils.api.DiscordBotsPoster
+import pw.aru.utils.api.DBLPoster
+import pw.aru.utils.api.DBotsPoster
 import pw.aru.utils.extensions.classOf
 import pw.aru.utils.extensions.invoke
 import pw.aru.utils.helpers.AsyncInfoMonitor
@@ -31,38 +32,44 @@ internal fun start() {
     }
 
     val config = ConfigManager.config
+    enableDiscordLogBack(config)
+
     Aru.prefixes += config.prefixes.split(',')
 
     //Create the Base Injector
     val initInjector = createInitialInjector(config)
+    val registry = initInjector.direct.instance<CommandRegistry>()
 
     //Launch check thread
     launchRedisCheckThread(initInjector.direct.instance())
 
     // Compute Command Initialization (Step 1)
-    // Requires initInjector; Returns notInitializedCommands
-    val notInitializedCommands = submitTask("InitCommands (Phase 1)") {
-        val commands = scanTask().commandScan
+    // Requires initInjector; Returns otherCommands
+    val otherCommands = submitTask("InitCommands (Phase 1)") {
+        val (commands, commandProviders) = scanTask()
         val (noInit, toInit) = commands.partition { it.isAnnotationPresent(classOf<UseFullInjector>()) }.let { (a, b) -> a.toSet() to b.toSet() }
+        val (noInitProviders, toInitProviders) = commandProviders.partition { it.isAnnotationPresent(classOf<UseFullInjector>()) }.let { (a, b) -> a.toSet() to b.toSet() }
 
-        initCommands(initInjector.direct, toInit)
-        createPlaceholderCommands(noInit)
-        noInit
+
+        initCommands(initInjector.direct, registry, toInit)
+        initProviders(initInjector.direct, registry, toInitProviders)
+        createPlaceholderCommands(registry, noInit)
+        noInit to noInitProviders
     }
 
     //Create Shard Manager
     createShardManager(initInjector, config.botToken) {
-        queueTask("DiscordLogBack StartTask") { enableDiscordLogBack(it, config) }
-
         val injector = createFullInjector(initInjector, it)
 
         // Compute Command Initialization (Step 2)
-        // Requires injector, notInitializedCommands
+        // Requires injector, otherCommands
         queueTask("InitCommands (Phase 2)") {
-            replacePlaceholderCommands(injector.direct, notInitializedCommands()).forEach { queue(TaskType.BUNK, it) }
-            executePostLoad()
+            val (toInit, toInitProviders) = otherCommands()
+            replacePlaceholderCommands(injector.direct, registry, toInit).forEach { queue(TaskType.BUNK, it) }
+            initProviders(initInjector.direct, registry, toInitProviders)
+            executePostLoad(registry)
 
-            log.info { "${CommandRegistry.lookup.size} commands loaded!" }
+            log.info { "${registry.lookup.size} commands loaded!" }
         }
 
         queueTask("BotInit") {
@@ -72,7 +79,8 @@ internal fun start() {
         }
 
         queue(type = TaskType.BUNK) {
-            injector.direct.instance<DiscordBotsPoster>().postStats()
+            injector.direct.instance<DBLPoster>().postStats()
+            injector.direct.instance<DBotsPoster>().postStats()
         }
     }
 }

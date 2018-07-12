@@ -34,7 +34,7 @@ class VoiceLeaveListener(private val musicManager: MusicManager) : EventListener
                 onVoiceJoin(GuildVoiceJoinEvent(event.jda, event.responseNumber, event.member))
             }
         } else {
-            val musicPlayer = musicManager.getMusicPlayer(event.guild)
+            val musicPlayer = musicManager.get(event.guild)
 
             arrayOf(
                 musicPlayer.votePauses,
@@ -63,7 +63,7 @@ class VoiceLeaveListener(private val musicManager: MusicManager) : EventListener
         if (event.member.user.isBot) return
         if (!event.channelLeft.members.contains(event.guild.selfMember)) return
 
-        val musicPlayer = musicManager.getMusicPlayer(event.guild)
+        val musicPlayer = musicManager.get(event.guild)
 
         arrayOf(
             musicPlayer.votePauses,
@@ -84,7 +84,7 @@ class VoiceLeaveListener(private val musicManager: MusicManager) : EventListener
 
         if (!event.channelJoined.members.contains(event.guild.selfMember)) return
 
-        val musicPlayer = musicManager.getMusicPlayer(event.guild)
+        val musicPlayer = musicManager.get(event.guild)
         val voiceChannel = musicPlayer.currentChannel
 
         if (voiceChannel == event.channelJoined && event.channelJoined.humanUsers > 0) {

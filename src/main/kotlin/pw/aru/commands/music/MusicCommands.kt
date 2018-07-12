@@ -21,7 +21,7 @@ abstract class MusicCommand(val musicManager: MusicManager) : ICommand {
     override val category = Categories.MUSIC
 
     override fun call(event: GuildMessageReceivedEvent, args: String) {
-        val musicPlayer = musicManager.getMusicPlayer(event.guild)
+        val musicPlayer = musicManager.get(event.guild)
         val currentTrack = musicPlayer.currentTrack
 
         if (currentTrack == null) {

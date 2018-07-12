@@ -1,13 +1,19 @@
 package pw.aru.core.listeners
 
 import net.dv8tion.jda.core.Permission
+import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import net.dv8tion.jda.core.hooks.EventListener
 import pw.aru.core.CommandProcessor
 import pw.aru.core.listeners.EventListeners.submitTask
-import pw.aru.utils.extensions.classOf
 
-class CommandListener(private val processor: CommandProcessor) : OptimizedListener<GuildMessageReceivedEvent>(classOf()) {
-    override fun event(event: GuildMessageReceivedEvent) {
+class CommandListener(private val processor: CommandProcessor) : EventListener {
+
+    override fun onEvent(event: Event) {
+        if (event is GuildMessageReceivedEvent) onMessage(event)
+    }
+
+    private fun onMessage(event: GuildMessageReceivedEvent) {
         // @formatter:off
 		if (
             event.author.isBot

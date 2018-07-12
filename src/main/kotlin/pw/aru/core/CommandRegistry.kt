@@ -7,7 +7,8 @@ import pw.aru.core.commands.placeholder.PlaceholderCommand
 import pw.aru.core.commands.placeholder.ReRoutingPlaceholderCommand
 import pw.aru.utils.extensions.classOf
 
-object CommandRegistry : KLogging() {
+class CommandRegistry {
+    companion object : KLogging()
     val commands: MutableMap<String, ICommand> = LinkedHashMap()
     val lookup: MutableMap<ICommand, Array<String>> = LinkedHashMap()
 
@@ -32,6 +33,12 @@ object CommandRegistry : KLogging() {
         } else if (implemented.size > 1) {
             logger.warn { "Command \"${command.javaClass.name}\" implements multiple interfaces: ${implemented.joinToString { it.name }}. Implementation ${implemented.first().name} will be used" }
         }
+    }
+
+    operator fun get(key: String) = commands[key]
+
+    operator fun set(vararg names: String, command: ICommand) {
+        register(names, command)
     }
 
     fun registerPlaceholder(names: Array<out String>, logCalls: Boolean) {

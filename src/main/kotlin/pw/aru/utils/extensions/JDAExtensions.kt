@@ -8,7 +8,9 @@ import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.entities.*
+import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import net.dv8tion.jda.core.hooks.EventListener
 import net.dv8tion.jda.core.requests.restaction.MessageAction
 import javax.security.auth.login.LoginException
 
@@ -49,6 +51,12 @@ inline val Member.id: String
     get() = user.id
 
 //Extras
+
+inline fun <reified T : Event> listener(noinline onEvent: EventListener.(T) -> Unit) = object : EventListener {
+    override fun onEvent(it: Event) {
+        if (it is T) onEvent(this, it)
+    }
+}
 
 inline fun MessageEmbed.send(e: GuildMessageReceivedEvent) = send(e.channel)
 

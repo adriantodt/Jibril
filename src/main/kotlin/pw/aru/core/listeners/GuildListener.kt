@@ -3,7 +3,6 @@ package pw.aru.core.listeners
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Region
-import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.guild.GenericGuildEvent
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent
@@ -13,7 +12,8 @@ import net.dv8tion.jda.webhook.WebhookClientBuilder
 import net.dv8tion.jda.webhook.WebhookMessageBuilder
 import pw.aru.data.config.AruConfig
 import pw.aru.utils.Colors
-import pw.aru.utils.api.DiscordBotsPoster
+import pw.aru.utils.api.DBLPoster
+import pw.aru.utils.api.DBotsPoster
 import pw.aru.utils.extensions.*
 import pw.aru.utils.helpers.GuildEvent
 import pw.aru.utils.helpers.GuildStatsManager
@@ -21,24 +21,19 @@ import pw.aru.utils.helpers.GuildStatsManager
 class GuildListener(
     private val shardManager: ShardManager,
     private val config: AruConfig,
-    private val botlistPoster: DiscordBotsPoster
+    private val dbl: DBLPoster,
+    private val dpw: DBotsPoster
 ) : EventListener {
 
-    private fun log(user: SelfUser, embed: EmbedBuilder.() -> Unit) {
-        WebhookClientBuilder(config.serverWebhook).build().use {
-            it.send(
-                WebhookMessageBuilder()
-                    .setUsername(user.name)
-                    .setAvatarUrl(user.avatarUrl)
-                    .addEmbeds(embed(init = embed))
-                    .build()
-            )
+    private fun log(embed: EmbedBuilder.() -> Unit) {
+        WebhookClientBuilder(config.serversWebhook).build().use {
+            it.send(WebhookMessageBuilder().addEmbeds(embed(init = embed)).build())
         }
     }
 
     override fun onEvent(event: Event) {
         if (event is GenericGuildEvent && (event is GuildJoinEvent || event is GuildLeaveEvent)) {
-            log(event.jda.selfUser) {
+            log {
                 when (event) {
                     is GuildJoinEvent -> {
                         GuildStatsManager.log(GuildEvent.JOIN)
@@ -74,7 +69,8 @@ class GuildListener(
                 footer("Count: ${shardManager.guildCache.size()} | ID: ${guild.id}", event.jda.selfUser.effectiveAvatarUrl)
             }
 
-            botlistPoster.postStats()
+            dbl.postStats()
+            dpw.postStats()
         }
     }
 

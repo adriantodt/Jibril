@@ -6,12 +6,10 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.commands.music.MusicPermissionCommand.Companion.checkPermissions
 import pw.aru.core.categories.Categories
 import pw.aru.core.categories.Category
-import pw.aru.core.commands.Command
-import pw.aru.core.commands.CommandPermission
-import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.UseFullInjector
+import pw.aru.core.commands.*
 import pw.aru.core.music.MusicManager
 import pw.aru.core.music.MusicRequester
+import pw.aru.core.parser.Args
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.ERROR2
 import pw.aru.utils.emotes.STOP
@@ -28,7 +26,7 @@ sealed class PlayCommand(
     private val force: Boolean,
     private val next: Boolean,
     private val playNow: Boolean
-) : ICommand, ICommand.HelpDialogProvider {
+) : ArgsCommand(), ICommand.HelpDialogProvider {
     override val category: Category = Categories.MUSIC
 
     private val replacers = listOf(
@@ -36,7 +34,7 @@ sealed class PlayCommand(
         listOf("youtube:", "youtube ", "yt:", "yt ") to "ytsearch:"
     )
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
+    override fun call(event: GuildMessageReceivedEvent, args: Args) {
         if (!event.member.voiceState.inVoiceChannel()) {
             event.channel.sendMessage("$X You need to be connected to a Voice Channel to use this command!").queue()
             return
@@ -47,7 +45,8 @@ sealed class PlayCommand(
             return
         }
 
-        if (playNow && !checkPermissions(event, musicManager.getMusicPlayer(event.guild), true)) {
+        val musicPlayer = musicManager[event.guild]
+        if (playNow && !checkPermissions(event, musicPlayer, true)) {
             event.channel.sendMessage(
                 "$STOP B-baka, I'm not allowed to let you do that!\n\n$THINKING Maybe you meant ``${(if (force) "forceplaynext" else "playnext").withPrefix()}`` instead?"
             ).queue()
@@ -55,6 +54,13 @@ sealed class PlayCommand(
         }
 
         val isDev = CommandPermission.BOT_DEVELOPER.test(event.member)
+
+        if (args.matchNextString("--vol"::equals)) {
+            val vol = args.tryTakeInt()
+            if (vol != null) {
+                musicPlayer.audioPlayer.volume = vol
+            }
+        }
 
         if (args.isEmpty()) {
             val attachments = event.message.attachments.filter { !it.isImage }
@@ -65,24 +71,24 @@ sealed class PlayCommand(
             }
         } else {
             val playerManager = if (isDev) musicManager.devPlayerManager else musicManager.userPlayerManager
+            val music = args.takeRemaining()
 
             for ((list, replacement) in replacers) {
                 for (prefix in list) {
-                    if (args.startsWith(prefix)) {
-                        request(event, replacement + args.substring(prefix.length).trim(), playerManager)
+                    if (music.startsWith(prefix)) {
+                        request(event, replacement + music.substring(prefix.length).trim(), playerManager)
                         return
                     }
                 }
             }
 
             try {
-                when (URL(args).host) {
-                    "cdn.discordapp.com", "media.discordapp.com" -> request(event, args, musicManager.httpSafePlayerManager)
-
-                    else -> request(event, args, playerManager)
+                when (URL(music).host) {
+                    "cdn.discordapp.com", "media.discordapp.com" -> request(event, music, musicManager.httpSafePlayerManager)
+                    else -> request(event, music, playerManager)
                 }
             } catch (e: Exception) {
-                request(event, "ytsearch: ${args.trim()}", playerManager)
+                request(event, "ytsearch: ${music.trim()}", playerManager)
             }
         }
     }
@@ -90,7 +96,7 @@ sealed class PlayCommand(
     private fun request(event: GuildMessageReceivedEvent, args: String, playerManager: AudioPlayerManager) {
         val future = MusicRequester.loadAndPlay(
             event.channel, event.member,
-            musicManager.getMusicPlayer(event.guild),
+            musicManager[event.guild],
             args,
             playerManager,
             !force, next, playNow

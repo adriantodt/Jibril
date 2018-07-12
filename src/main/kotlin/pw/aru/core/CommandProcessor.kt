@@ -5,7 +5,6 @@ import mu.KLogging
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.Aru.prefixes
-import pw.aru.core.CommandRegistry.commands
 import pw.aru.core.commands.ICommand
 import pw.aru.db.AruDB
 import pw.aru.db.entities.GuildSettings
@@ -19,7 +18,7 @@ import pw.aru.utils.helpers.CommandStatsManager
 import redis.clients.jedis.exceptions.JedisConnectionException
 import java.util.*
 
-class CommandProcessor(private val db: AruDB) : KLogging() {
+class CommandProcessor(private val db: AruDB, private val registry: CommandRegistry) : KLogging() {
 
     var commandCount = 0
 
@@ -122,7 +121,7 @@ class CommandProcessor(private val db: AruDB) : KLogging() {
         val cmd = split[0].toLowerCase()
         val args = split.getOrNull(1) ?: ""
 
-        val command = commands[cmd] ?: return processCustomCommand(event, cmd, args)
+        val command = registry[cmd] ?: return processCustomCommand(event, cmd, args)
 
         if (command is ICommand.Permission && !command.permission.test(event.member)) {
             event.channel.sendMessage("$STOP B-baka, I'm not allowed to let you do that!").queue()
@@ -162,7 +161,7 @@ class CommandProcessor(private val db: AruDB) : KLogging() {
         val cmd = split[0].toLowerCase()
         val args = split.getOrNull(1) ?: ""
 
-        val command = commands[cmd] as? ICommand.Discrete ?: return
+        val command = registry[cmd] as? ICommand.Discrete ?: return
 
         if (command is ICommand.Permission && !command.permission.test(event.member)) {
             event.channel.sendMessage("$STOP B-baka, I'm not allowed to let you do that!").queue()
