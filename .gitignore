@@ -15,7 +15,6 @@
 /logs/
 /db/
 /tests/
-/config.json
-/config.json.bkp
+/url_cache/
 *.log
 aru.properties

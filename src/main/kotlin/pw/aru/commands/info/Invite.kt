@@ -36,7 +36,7 @@ class Invite : ICommand, ICommand.HelpDialogProvider {
     }
 
     override val helpHandler = HelpFactory("Invite and other Links") {
-        aliases("links", "hangout", "patreon")
+        aliases("links", "hangout")
 
         description("Provides Useful Links like Invite and Support Server.")
     }

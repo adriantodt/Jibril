@@ -9,6 +9,7 @@ import pw.aru.utils.extensions.classOf
 
 class CommandRegistry {
     companion object : KLogging()
+
     val commands: MutableMap<String, ICommand> = LinkedHashMap()
     val lookup: MutableMap<ICommand, Array<String>> = LinkedHashMap()
 
@@ -41,18 +42,18 @@ class CommandRegistry {
         register(names, command)
     }
 
-    fun registerPlaceholder(names: Array<out String>, logCalls: Boolean) {
-        val command = if (logCalls) ReRoutingPlaceholderCommand() else PlaceholderCommand
-        val keys = names.map(String::toLowerCase).distinct().toTypedArray()
-
-        for (k in keys) commands[k] = command
-        lookup[command] = keys
-    }
-
     fun register(names: Array<out String>, command: ICommand) {
         sanityChecks(command, names)
 
         val keys = names.map(String::toLowerCase).distinct().toTypedArray()
+        for (k in keys) commands[k] = command
+        lookup[command] = keys
+    }
+
+    fun registerPlaceholder(names: Array<out String>, logCalls: Boolean) {
+        val command = if (logCalls) ReRoutingPlaceholderCommand() else PlaceholderCommand
+        val keys = names.map(String::toLowerCase).distinct().toTypedArray()
+
         for (k in keys) commands[k] = command
         lookup[command] = keys
     }

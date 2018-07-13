@@ -33,7 +33,11 @@ inline fun threadLocalRandom(): ThreadLocalRandom = ThreadLocalRandom.current()
 
 inline fun <E> List<E>.random(random: Random = threadLocalRandom()): E = this[random.nextInt(this.size)]
 
+inline fun <E> List<E>.randomOrNull(random: Random = threadLocalRandom()): E? = if (isEmpty()) null else this[random.nextInt(this.size)]
+
 inline fun <E> Array<E>.random(random: Random = threadLocalRandom()): E = this[random.nextInt(this.size)]
+
+inline fun <E> Array<E>.randomOrNull(random: Random = threadLocalRandom()): E? = if (isEmpty()) null else this[random.nextInt(this.size)]
 
 inline fun <E> randomOf(vararg objects: E): E = objects.random()
 

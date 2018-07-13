@@ -31,7 +31,7 @@ class Args(val raw: String) {
         return p
     }
 
-    fun <T> mapNextString(map: (String) -> Pair<T?, Boolean>): T? {
+    fun <T> mapNextString(map: (String) -> Pair<T, Boolean>): T {
         val args = remaining
         val i = args.indexOfAny(charArrayOf(' ', '\r', '\n', '\t'))
 
@@ -58,21 +58,29 @@ class Args(val raw: String) {
 
     fun takeStrings() = descontructed(Args::takeString)
 
-    inner class Descontructed<T>(private val f: (Args) -> T) {
-        operator fun component0() = f(this@Args)
-        operator fun component1() = f(this@Args)
-        operator fun component2() = f(this@Args)
-        operator fun component3() = f(this@Args)
-        operator fun component4() = f(this@Args)
-        operator fun component5() = f(this@Args)
-        operator fun component6() = f(this@Args)
-        operator fun component7() = f(this@Args)
-        operator fun component8() = f(this@Args)
-        operator fun component9() = f(this@Args)
-        operator fun component10() = f(this@Args)
-        operator fun component11() = f(this@Args)
-        operator fun component12() = f(this@Args)
-    }
-
     fun <T> descontructed(f: Args.() -> T) = Descontructed(f)
+
+    inner class Descontructed<T>(private val f: Args.() -> T) {
+        operator fun get(amount: Int) = (0 until amount).map { f() }
+        operator fun component0() = f()
+        operator fun component1() = f()
+        operator fun component2() = f()
+        operator fun component3() = f()
+        operator fun component4() = f()
+        operator fun component5() = f()
+        operator fun component6() = f()
+        operator fun component7() = f()
+        operator fun component8() = f()
+        operator fun component9() = f()
+        operator fun component10() = f()
+        operator fun component11() = f()
+        operator fun component12() = f()
+        operator fun component13() = f()
+        operator fun component14() = f()
+        operator fun component15() = f()
+        operator fun component16() = f()
+        operator fun component17() = f()
+        operator fun component18() = f()
+        operator fun component19() = f()
+    }
 }

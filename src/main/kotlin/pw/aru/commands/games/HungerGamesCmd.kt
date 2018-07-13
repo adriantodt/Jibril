@@ -5,9 +5,10 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.commands.games.hungergames.GameManager
 import pw.aru.commands.games.hungergames.LobbyManager
 import pw.aru.core.categories.Categories
+import pw.aru.core.commands.ArgsCommand
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.SimpleArgsCommand
+import pw.aru.core.parser.Args
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.commands.HelpFactory.Companion.prefix
 import pw.aru.utils.emotes.CONFUSED
@@ -17,27 +18,27 @@ import pw.aru.utils.extensions.*
 import java.util.*
 
 @Command("hg", "hungergames")
-class HungerGamesCmd : SimpleArgsCommand(expectedArgs = 1, rest = true), ICommand.HelpHandler, ICommand.Invisible {
+class HungerGamesCmd : ArgsCommand(), ICommand.HelpHandler, ICommand.Invisible {
     override val category = Categories.GAMES
 
-    override fun call(event: GuildMessageReceivedEvent, args: Array<String>) {
+    override fun call(event: GuildMessageReceivedEvent, args: Args) {
         if (GameManager.isGameRunning(event.channel)) {
-            when (args.firstOrNull()) {
+            when (args.takeString()) {
                 "cancel", "end", "finish" -> finishGame(event)
                 else -> showHelp()
             }
         } else {
-            when (args.firstOrNull()?.toLowerCase()) {
+            when (args.takeString()) {
                 "new" -> newLobby(event)
                 "join" -> joinLobby(event)
                 "leave" -> leaveLobby(event)
-                "addguests", "addguest" -> addGuests(event, args)
+                "addguests", "addguest" -> addGuests(event, args.takeRemaining())
                 "addall" -> addAllGuests(event)
-                "rmguests", "rmguest" -> rmGuests(event, args)
+                "rmguests", "rmguest" -> rmGuests(event, args.takeRemaining())
                 "clearguests" -> clearGuests(event)
             //  "configs" -> { }
                 "start" -> startGame(event)
-                null, "", "lobby" -> lobby(event)
+                "", "lobby" -> lobby(event)
                 else -> showHelp()
             }
         }
@@ -128,7 +129,7 @@ class HungerGamesCmd : SimpleArgsCommand(expectedArgs = 1, rest = true), IComman
         }
     }
 
-    private fun addGuests(event: GuildMessageReceivedEvent, args: Array<String>) {
+    private fun addGuests(event: GuildMessageReceivedEvent, args: String) {
         val lobby = LobbyManager.getLobby(event.channel)
 
         if (lobby == null) {
@@ -141,14 +142,12 @@ class HungerGamesCmd : SimpleArgsCommand(expectedArgs = 1, rest = true), IComman
             return
         }
 
-        val arg = args.getOrNull(1)
-
-        if (arg == null) {
+        if (args.isEmpty()) {
             showHelp()
             return
         }
 
-        val list = arg.split(',').map(String::trim).filterNotTo(ArrayList(), String::isEmpty)
+        val list = args.split(',').map(String::trim).filterNotTo(ArrayList(), String::isEmpty)
 
         list.remove("@everyone")
         list.remove("@here")
@@ -181,7 +180,7 @@ class HungerGamesCmd : SimpleArgsCommand(expectedArgs = 1, rest = true), IComman
         lobby.playerGuests.addAll(event.guild.members.filterNot(lobby.players::contains))
     }
 
-    private fun rmGuests(event: GuildMessageReceivedEvent, args: Array<String>) {
+    private fun rmGuests(event: GuildMessageReceivedEvent, args: String) {
         val lobby = LobbyManager.getLobby(event.channel)
 
         if (lobby == null) {
@@ -194,14 +193,12 @@ class HungerGamesCmd : SimpleArgsCommand(expectedArgs = 1, rest = true), IComman
             return
         }
 
-        val arg = args.getOrNull(1)
-
-        if (arg == null) {
+        if (args.isEmpty()) {
             showHelp()
             return
         }
 
-        val list = arg.split(',').map(String::trim).filterNotTo(ArrayList(), String::isEmpty)
+        val list = args.split(',').map(String::trim).filterNotTo(ArrayList(), String::isEmpty)
 
         list.removeIf { it.contains("@everyone") || it.contains("@here") }
 

@@ -4,27 +4,19 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import pw.aru.exported.user_agent
 import java.io.File
-import java.io.InputStream
 import java.util.concurrent.ConcurrentHashMap
 
-class URLCache(private val httpClient: OkHttpClient, private var cacheDir: File, cacheSize: Int) {
-    companion object {
-        val DEFAULT_CACHE_DIR = File("cache")
-        private val saved = ConcurrentHashMap<String, File>()
-    }
-
-    private val cache: FileCache = FileCache(cacheSize)
+class URLCache(private val httpClient: OkHttpClient, private var cacheDir: File) {
+    private val cachedLinks = ConcurrentHashMap<String, File>()
 
     init {
         if (cacheDir.isFile) cacheDir.delete()
         cacheDir.mkdirs()
     }
 
-    constructor(httpClient: OkHttpClient, cacheSize: Int) : this(httpClient, DEFAULT_CACHE_DIR, cacheSize)
-
-    fun getFile(url: String): File {
+    fun cacheToFile(url: String): File {
         //Test directly
-        val file = saved.getOrPut(url) { File(cacheDir, url.replace('/', '_').replace(':', '_')) }
+        val file = cachedLinks.getOrPut(url) { File(cacheDir, url.replace('/', '_').replace(':', '_')) }
         if (file.exists()) return file
 
         //Download and Cache
@@ -40,9 +32,5 @@ class URLCache(private val httpClient: OkHttpClient, private var cacheDir: File,
         file.writeBytes(bytes)
 
         return file
-    }
-
-    fun getInput(url: String): InputStream {
-        return cache.input(getFile(url))
     }
 }

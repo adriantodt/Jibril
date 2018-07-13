@@ -4,6 +4,8 @@
 package pw.aru
 
 import com.github.natanbc.discordbotsapi.DiscordBotsAPI
+import com.github.natanbc.weeb4j.TokenType
+import com.github.natanbc.weeb4j.Weeb4J
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.JDA.Status.CONNECTED
@@ -28,6 +30,7 @@ import pw.aru.core.listeners.*
 import pw.aru.core.music.MusicManager
 import pw.aru.data.config.AruConfig
 import pw.aru.db.AruDB
+import pw.aru.exported.aru_version
 import pw.aru.kodein.jit.installJit
 import pw.aru.kodein.jit.jit
 import pw.aru.logging.DiscordLogBack
@@ -48,7 +51,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.collections.LinkedHashMap
 import kotlin.collections.LinkedHashSet
 
-fun main(args: Array<String>) {
+fun startBootstrap(args: Array<String>) {
     Locale.setDefault(Locale("en", "US"))
 
     TerminalConsoleAdaptor.initializeTerminal()
@@ -132,6 +135,14 @@ internal fun createInitialInjector(config: AruConfig): Kodein {
 
         // APIs
         bind<OkHttpClient>() with singleton { OkHttpClient() }
+
+        bind<Weeb4J>() with singleton {
+            Weeb4J.Builder()
+                .setToken(TokenType.WOLKE, config.wshToken)
+                .setHttpClient(instance())
+                .setBotInfo(if (config.dev) "AruDev!" else "Aru!", aru_version, if (config.dev) "development" else "production")
+                .build()
+        }
 
         bind<DiscordBotsAPI>() with singleton {
             DiscordBotsAPI.Builder()

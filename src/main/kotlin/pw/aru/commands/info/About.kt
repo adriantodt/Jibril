@@ -17,24 +17,30 @@ class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDia
 
     override fun call(event: GuildMessageReceivedEvent, args: String) {
         when (args) {
-            "credits" -> credits(event)
+            "credits", "credit" -> credits(event)
             "aru", "me", "bot", "" -> about(event)
             else -> showHelp()
         }
     }
 
     private fun discordTag(id: String): String {
-        val user = shardManager.getUserById(id)
+        val user = shardManager.getUserById(id) ?: return "Unknown User"
         return "**${user.name}#${user.discriminator}**"
     }
 
     private fun credits(event: GuildMessageReceivedEvent) {
         embed {
             baseEmbed(event, "Aru! | Credits")
+            thumbnail("https://assets.aru.pw/img/aru_avatar.jpg")
             field(
                 "Developers",
-                "${discordTag("217747278071463937")}: Main Developer",
-                false
+                "${discordTag("217747278071463937")}: Main Developer"
+            )
+            field(
+                "Other",
+                arrayOf(
+                    "\u25AB Image and Action Commands powered by https://weeb.sh/"
+                )
             )
         }.send(event).queue()
     }
@@ -49,10 +55,12 @@ class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDia
                 "\u25AB **Music!** Check out `${"help music".withPrefix()}` to get started!",
                 "\u25AB Add **fun** to your server with action commands, games and more!",
                 "",
-                "Wanna get started? Send `${"help".withPrefix()}` to check my command list!",
+                "Let's get started? Send `${"help".withPrefix()}` to check my command list!",
                 "",
                 "Questions? Check out my **[Support server!](https://support.aru.pw)**",
-                "If you feel like helping a poor angel, **[be a Patreon](https://patreon.aru.pw)** and support my development!"
+                "If you feel like helping a poor angel, **[be a Patreon](https://patreon.aru.pw)** and support my development!",
+                "",
+                "Send `${"about credits".withPrefix()}` to see the credits."
             )
             footer(
                 "Invite link: https://add.aru.pw/ | Requested by ${event.member.effectiveName}",

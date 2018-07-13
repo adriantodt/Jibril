@@ -21,6 +21,8 @@ import pw.aru.utils.helpers.AsyncInfoMonitor
 
 val log = logger("pw.aru.Bootstrap")
 
+fun main(args: Array<String>) = startBootstrap(args)
+
 internal fun start() {
     // Start-up AsyncInfoMonitor
     AsyncInfoMonitor()

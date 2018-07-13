@@ -1,6 +1,9 @@
 package pw.aru.commands.developer
 
 import ch.qos.logback.core.helpers.ThrowableToStringArray
+import com.github.natanbc.weeb4j.Weeb4J
+import com.github.natanbc.weeb4j.image.FileType
+import com.github.natanbc.weeb4j.image.NsfwFilter
 import mu.KLogging
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.entities.MessageEmbed
@@ -9,6 +12,7 @@ import net.dv8tion.jda.core.requests.RestAction
 import net.dv8tion.jda.core.utils.JDALogger
 import okhttp3.OkHttpClient
 import pw.aru.Aru.sleepQuotes
+import pw.aru.commands.weebsh.base.GetImage
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.*
 import pw.aru.core.parser.Args
@@ -19,6 +23,7 @@ import pw.aru.utils.api.DBLPoster
 import pw.aru.utils.api.DBotsPoster
 import pw.aru.utils.commands.EmbedFirst
 import pw.aru.utils.commands.HelpFactory
+import pw.aru.utils.emotes.CONFUSED
 import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.extensions.*
 import pw.aru.utils.limit
@@ -32,6 +37,7 @@ class DevCmd
     private val httpClient: OkHttpClient,
     shardManager: ShardManager,
     db: AruDB,
+    private val weebSh: Weeb4J,
     private val dblPoster: DBLPoster,
     private val dpwPoster: DBotsPoster
 ) : ArgsCommand(), ICommand.Permission, ICommand.HelpDialogProvider {
@@ -47,6 +53,7 @@ class DevCmd
             "peval", "prun" -> eval(event, true, args.takeRemaining())
             "enablecallsite" -> callsite(event, true)
             "disablecallsite" -> callsite(event, false)
+            "weebsh" -> weebsh(event, args)
             "", "check" -> adminCheck(event)
             else -> showHelp()
         }
@@ -86,6 +93,54 @@ class DevCmd
             )
 
         }.send(event).queue()
+    }
+
+    private fun weebsh(event: GuildMessageReceivedEvent, args: Args) {
+        val type = if (args.matchNextString("-type"::equals)) args.takeString() else null
+        val tags = if (args.matchNextString("-tags"::equals)) args.takeString().split(',') else null
+        val ext = if (args.matchNextString("-ext"::equals)) FileType.valueOf(args.takeString().toUpperCase()) else null
+        val nsfw = if (args.matchNextString("-nsfw"::equals)) NsfwFilter.valueOf(("${args.takeString()}_NSFW").toUpperCase()) else null
+
+        if (type != null || tags != null) {
+            return weebshGet(event, GetImage(type, tags, ext), nsfw)
+        }
+
+        val imageTypes = weebSh.imageProvider.imageTypes.submit()
+        val imageTags = weebSh.imageProvider.imageTags.submit()
+        embed {
+            baseEmbed(event, "Aru Bot | Weeb.sh Debug")
+            thumbnail("https://assets.aru.pw/img/yes.png")
+
+            description(
+                "Types:",
+                "```",
+                imageTypes().types.sorted().joinToString(" "),
+                "```",
+                "",
+                "Tags:",
+                "```",
+                imageTags().sorted().joinToString(" "),
+                "```"
+            )
+        }.send(event).queue()
+    }
+
+    private fun weebshGet(event: GuildMessageReceivedEvent, img: GetImage, nsfw: NsfwFilter?) {
+        weebSh.imageProvider.getRandomImage(img.type, img.tags, null, nsfw, img.fileType).async {
+            if (it == null) {
+                event.channel.sendMessage("$CONFUSED No images found... ").queue()
+            } else {
+                embed {
+                    baseEmbed(event, "Aru Bot | Weeb.sh Debug")
+                    image(it.url)
+                    description(
+                        "Type: ${it.type}",
+                        "Tags: ${it.tags.joinToString(", ", "[", "]") { "Tag[name=${it.name}, user=${it.user}]" }}",
+                        "Account: ${it.account}"
+                    )
+                }.send(event).queue()
+            }
+        }
     }
 
     private fun shutdown(event: GuildMessageReceivedEvent) {
