@@ -48,7 +48,7 @@ dependencies {
 
     // Open-Source Libraries
     compile 'pw.aru.discord:dice-notation:1.0'
-    compile 'pw.aru.utils:simple-ipc:1.0'
+    compile 'pw.aru.utils:simple-ipc:1.1.1'
     compile 'pw.aru.snowflake:snowflake-local:1.0'
 
     //Groups WILL change

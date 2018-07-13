@@ -1,6 +1,5 @@
 package pw.aru.core
 
-import jibril.snow64.Snow64
 import mu.KLogging
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
@@ -8,6 +7,7 @@ import pw.aru.Aru.prefixes
 import pw.aru.core.commands.ICommand
 import pw.aru.db.AruDB
 import pw.aru.db.entities.GuildSettings
+import pw.aru.snow64.Snow64
 import pw.aru.utils.J
 import pw.aru.utils.emotes.*
 import pw.aru.utils.extensions.CommandExceptions
