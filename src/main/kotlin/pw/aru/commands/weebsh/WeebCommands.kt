@@ -20,9 +20,12 @@ class WeebCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvider
     private val cache = URLCache(httpClient, File("url_cache"))
 
     /*
+    types.rejected: [
+        bang, delet_this
+    ]
     types: [
-        bang, dab, dance, delet_this, deredere, greet,
-        handholding, highfive, insult, megumin, nani, poi,
+        deredere, greet,
+        highfive, insult, megumin, nani, poi,
         poke, pout, punch, rem, slap, sleepy, smile, sumfuk,
         teehee, tickle, trap, thumbsup, triggered, wag, waifu_insult, wasted
     ]
@@ -55,10 +58,22 @@ class WeebCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvider
             )
         )
 
+        r["holdhands", "holdhand"] = ActionCommand(
+            category, provider, cache,
+            CommandInfo("Hold Hands Command", "Holds the hands of the specified user."),
+            GetImage(type = "handholding", fileType = GIF),
+            ActionLines(
+                "$CUDDLE {author} is holding {mentions}'s hand",
+                "$CUDDLE *Holds hands~*",
+                "$CUDDLE *Holds your hand~*",
+                "$CUDDLE Oh, eh.. T-thanks~ $BLUSH"
+            )
+        )
+
         r["hug"] = ActionCommand(
             category, provider, cache,
             CommandInfo("Hug Command", "Hugs the specified user."),
-            GetImage(type = "kiss", fileType = GIF),
+            GetImage(type = "hug", fileType = GIF),
             ActionLines(
                 "$HUG {mentions}, you have been hugged by {author}",
                 "$HUG *Hugs~*",
@@ -141,9 +156,16 @@ class WeebCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvider
 
         r["blush"] = ImageCommand(
             category, provider, cache,
-            CommandInfo("Blush Command", "When it's just too much to handle."),
+            CommandInfo("Blush Command", "When it's just too much for you to handle."),
             GetImage(type = "banghead", fileType = GIF),
             listOf("$BLUSH {author} is slowly turning into a tomato")
+        )
+
+        r["dance"] = ImageCommand(
+            category, provider, cache,
+            CommandInfo("Dance Command", "Sends a random dance image."),
+            GetImage(type = "dance", fileType = GIF),
+            listOf("$DANCE {author} is dancing $DANCE2")
         )
 
         r["facedesk", "banghead"] = ImageCommand(
@@ -189,6 +211,12 @@ class WeebCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvider
             category, provider, cache,
             CommandInfo("OwO Command", "What's this?"),
             GetImage(type = "owo")
+        )
+
+        r["dab"] = ImageCommand(
+            category, provider, cache,
+            CommandInfo("Dabs Command", "Sends a random dab image."),
+            GetImage(type = "dab")
         )
 
         r["shrug"] = ActionCommand(
