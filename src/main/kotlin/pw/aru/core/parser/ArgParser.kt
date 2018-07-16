@@ -18,6 +18,12 @@ class Args(val raw: String) {
         return re.substring(0, i)
     }
 
+    fun peekString(): String {
+        val re = remaining
+        val i = re.indexOfAny(charArrayOf(' ', '\r', '\n', '\t'))
+        return if (i != -1) re.substring(0, i) else re
+    }
+
     fun matchNextString(predicate: (String) -> Boolean): Boolean {
         val args = remaining
         val i = args.indexOfAny(charArrayOf(' ', '\r', '\n', '\t'))
@@ -29,6 +35,17 @@ class Args(val raw: String) {
         if (p) remaining = re
 
         return p
+    }
+
+    fun <T> matchAny(vararg pairs: Pair<T, (String) -> Boolean>): Set<T> {
+        val map = pairs.toMap(LinkedHashMap())
+        val validKeys = LinkedHashSet<T>()
+
+        while (true) {
+            val (key) = map.entries.firstOrNull { matchNextString(it.value) } ?: return validKeys
+            map.remove(key)
+            validKeys.add(key)
+        }
     }
 
     fun <T> mapNextString(map: (String) -> Pair<T, Boolean>): T {

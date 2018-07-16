@@ -1,7 +1,7 @@
 package pw.aru.core
 
 import mu.KLogging
-import net.dv8tion.jda.core.Permission
+import net.dv8tion.jda.core.Permission.*
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.Aru.prefixes
 import pw.aru.core.commands.ICommand
@@ -10,10 +10,7 @@ import pw.aru.db.entities.GuildSettings
 import pw.aru.snow64.Snow64
 import pw.aru.utils.J
 import pw.aru.utils.emotes.*
-import pw.aru.utils.extensions.CommandExceptions
-import pw.aru.utils.extensions.onHelp
-import pw.aru.utils.extensions.random
-import pw.aru.utils.extensions.withPrefix
+import pw.aru.utils.extensions.*
 import pw.aru.utils.helpers.CommandStatsManager
 import redis.clients.jedis.exceptions.JedisConnectionException
 import java.util.*
@@ -61,61 +58,33 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
         }
     }
 
-    private fun permCheck(event: GuildMessageReceivedEvent): Boolean {
-        val effectivePerms = event.guild.selfMember.getPermissions(event.channel)
+    val permissions = arrayOf(MESSAGE_EMBED_LINKS, MESSAGE_ADD_REACTION, MESSAGE_EXT_EMOJI)
+    private fun checkPermissions(event: GuildMessageReceivedEvent): Boolean {
+        val self = event.guild.selfMember
+        val channel = event.channel
 
-        val eEmbedLinks = effectivePerms.contains(Permission.MESSAGE_EMBED_LINKS)
-        val eReactions = effectivePerms.contains(Permission.MESSAGE_ADD_REACTION)
-        val eExternalEmoji = effectivePerms.contains(Permission.MESSAGE_EXT_EMOJI)
+        if (self.hasPermission(channel, *permissions)) return true
 
-        if (eEmbedLinks && eReactions && eExternalEmoji) return true
+        val guildCheck = self.hasPermission(*permissions)
+        val perms = permissions.map { it to self.hasPermission(channel, it) }
 
-        //Automatic diagnostic
-        val guildPerms = event.guild.selfMember.permissions
-
-        val gEmbedlinks = guildPerms.contains(Permission.MESSAGE_EMBED_LINKS)
-        val gReactions = guildPerms.contains(Permission.MESSAGE_ADD_REACTION)
-        val gExternalEmoji = guildPerms.contains(Permission.MESSAGE_EXT_EMOJI)
-
-        if (gEmbedlinks && gReactions && gExternalEmoji) {
-            //Borked channel permissions
-
-            event.channel.sendMessage(
-                arrayOf(
-                    "\uD83D\uDED1 **Stop there!**",
-                    "I **require** the following permissions to work:",
-                    "${if (eEmbedLinks) "✅" else "❎"} **Embed Links**",
-                    "${if (eReactions) "✅" else "❎"} **Add Reactions**",
-                    "${if (eExternalEmoji) "✅" else "❎"} **Use External Emoji**",
-                    "Sadly, I have to refuse all commands until you give me that permission. $DISAPPOINTED",
-                    "",
-                    "Fix the current channel's permissions and enable me the permissions above.",
-                    "If you need help on doing that, check my support server: ``https://support.aru.pw/``"
-                ).joinToString("\n")
-            ).queue()
-        } else {
-            //Missing perms
-
-            event.channel.sendMessage(
-                arrayOf(
-                    "\uD83D\uDED1 **Stop there!**",
-                    "I **require** the following permissions to work:",
-                    "${if (eEmbedLinks) "✅" else "❎"} **Embed Links**",
-                    "${if (eReactions) "✅" else "❎"} **Add Reactions**",
-                    "${if (eExternalEmoji) "✅" else "❎"} **Use External Emoji**",
-                    "Sadly, I have to refuse all commands until you give me that permission. $DISAPPOINTED",
-                    "",
-                    "You can **easily** fix that by re-inviting me with the following link: ``https://add.aru.pw/``",
-                    "If you need help on doing that, check my support server: ``https://support.aru.pw/``"
-                ).joinToString("\n")
-            ).queue()
-        }
+        event.channel.sendMessage(
+            arrayOf(
+                "$STOP **Stop there!**",
+                "I **require** the following permissions to work:",
+                perms.joinToString("\n") { (perm, enabled) -> "${if (enabled) "✅" else "❎"} **${perm.name}**" },
+                "Sadly, I have to refuse all commands until you give me that permission. $DISAPPOINTED",
+                "",
+                if (guildCheck) ERROR_CHANNEL_PERMS else ERROR_GUILD_PERMS,
+                "If you need help on doing that, check my support server: ``https://support.aru.pw/``"
+            ).joinToString("\n")
+        ).queue()
 
         return false
     }
 
     private fun process(event: GuildMessageReceivedEvent, content: String) {
-        if (!permCheck(event)) return
+        if (!checkPermissions(event)) return
 
         val split = content.split(' ', limit = 2)
         val cmd = split[0].toLowerCase()
@@ -155,7 +124,7 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
     }
 
     private fun processDiscrete(event: GuildMessageReceivedEvent, content: String, outer: String) {
-        if (!permCheck(event)) return
+        if (!checkPermissions(event)) return
 
         val split = content.split(' ', limit = 2)
         val cmd = split[0].toLowerCase()
