@@ -1,4 +1,5 @@
 @file:Suppress("NOTHING_TO_INLINE")
+@file:JvmName("AruDB_ExtensionsKt")
 
 package pw.aru.utils.extensions
 

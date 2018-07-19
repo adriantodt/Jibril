@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'pw.aru'
-version = '2.0.1'
+version = '2.1.1-dashboard.2'
 //Repositories and Dependencies
 repositories {
     jcenter()
@@ -16,18 +16,19 @@ repositories {
 }
 
 dependencies {
-    //Source of memes
+    //Kotlin
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.2.60"
     compile "org.jetbrains.kotlin:kotlin-reflect:1.2.60"
 
-    //Client and ID generator
+    //Redis
     compile 'redis.clients:jedis:2.9.0'
-    compile 'pw.aru.snowflake:snowflake-local:1.0'
 
-    //Data Conversion Stack
+    //JacksonXML
     compile 'com.fasterxml.jackson.core:jackson-databind:2.9.6'
     compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.6'
-    compile 'de.undercouch:bson4jackson:2.9.2'
+
+    //Snowflakes
+    compile 'pw.aru.snowflake:snowflake-local:1.2'
 }
 
 compileKotlin {

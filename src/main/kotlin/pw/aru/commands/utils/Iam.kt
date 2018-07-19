@@ -9,7 +9,7 @@ import pw.aru.core.categories.Category
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.db.AruDB
-import pw.aru.db.entities.GuildSettings
+import pw.aru.db.entities.guild.GuildSettings
 import pw.aru.utils.emotes.ERROR
 import pw.aru.utils.emotes.SUCCESS
 

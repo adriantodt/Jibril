@@ -24,7 +24,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
         }
     }
 
-    class Nullable<T>(private val serializer: Serializer<T?>) : ReadWriteProperty<RedisObject, T?> {
+    open class Nullable<T>(private val serializer: Serializer<T?>) : ReadWriteProperty<RedisObject, T?> {
 
         override fun getValue(thisRef: RedisObject, property: KProperty<*>): T? {
             return thisRef.run {
@@ -46,7 +46,7 @@ open class RedisField<T>(private val serializer: Serializer<T>, private val defa
 
     // Jackson support
 
-    class Jackson<T>(mapper: ObjectMapper, type: TypeReference<T>, defaultValue: T? = null) : RedisField<T>(Serializer.jackson(mapper, type), defaultValue)
+    class Jackson<T : Any>(mapper: ObjectMapper, type: TypeReference<T>, defaultValue: T? = null) : RedisField<T>(Serializer.jackson(mapper, type), defaultValue)
 
     //Strings and Primitives
 

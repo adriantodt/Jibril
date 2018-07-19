@@ -4,7 +4,7 @@ import mu.KLogging
 import org.json.JSONObject
 import pw.aru.db.AruDB
 import pw.aru.db.Redis
-import pw.aru.db.entities.UserPledge
+import pw.aru.db.entities.user.UserPledge
 import kotlin.concurrent.thread
 
 typealias RedisPubSub = redis.clients.jedis.JedisPubSub

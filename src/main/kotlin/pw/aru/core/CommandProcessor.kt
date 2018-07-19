@@ -7,7 +7,7 @@ import pw.aru.Aru.prefixes
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.db.AruDB
-import pw.aru.db.entities.GuildSettings
+import pw.aru.db.entities.guild.GuildSettings
 import pw.aru.snow64.Snow64
 import pw.aru.utils.emotes.*
 import pw.aru.utils.extensions.*

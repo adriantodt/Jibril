@@ -1,4 +1,4 @@
-package pw.aru.db.entities
+package pw.aru.db.entities.user
 
 import pw.aru.db.AruDB
 import pw.aru.db.base.RedisObject

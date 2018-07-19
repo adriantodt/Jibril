@@ -2,58 +2,66 @@ package pw.aru.db.base
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import pw.aru.db.AruDB
 
 interface Serializer<T> {
     fun serialize(obj: T): String
-    fun unserialize(obj: String): T
+    fun unserialize(s: String): T
 
     operator fun invoke(obj: String) = unserialize(obj)
 
     companion object {
         fun <T> of(from: (T) -> String, to: (String) -> T): Serializer<T> = object : Serializer<T> {
             override fun serialize(obj: T) = from(obj)
-            override fun unserialize(obj: String) = to(obj)
+            override fun unserialize(s: String) = to(s)
         }
 
-        fun <T> jackson(mapper: ObjectMapper, type: TypeReference<T>) = object : Serializer<T> {
+        inline fun <reified T : Any> jackson(mapper: ObjectMapper) = jackson(mapper, jacksonTypeRef<T>())
+
+        fun <T : Any> jackson(mapper: ObjectMapper, type: TypeReference<T>) = object : Serializer<T> {
             override fun serialize(obj: T): String = mapper.writeValueAsString(obj)
-            override fun unserialize(obj: String): T = mapper.readValue(obj, type)
+            override fun unserialize(s: String): T = mapper.readValue(s, type)
         }
 
         fun <T : RedisObject> redisObject(db: AruDB, from: (AruDB, Long) -> T) = object : Serializer<T> {
             override fun serialize(obj: T): String = obj.id.toString()
-            override fun unserialize(obj: String): T = from(db, obj.toLong())
+            override fun unserialize(s: String): T = from(db, s.toLong())
         }
 
         inline fun <reified T : Enum<T>> enum() = enum(T::class.java)
 
         fun <T : Enum<T>> enum(c: Class<T>) = object : Serializer<T> {
             override fun serialize(obj: T): String = "&${obj.ordinal}"
-            override fun unserialize(obj: String): T {
-                check(obj.startsWith("&")) { "the String is not a Enum reference." }
-                return c.enumConstants[obj.substring(1).toInt()]
+            override fun unserialize(s: String): T {
+                check(s.startsWith("&")) { "the String is not a Enum reference." }
+                return c.enumConstants[s.substring(1).toInt()]
             }
         }
     }
 
     object AsIs : Serializer<String> {
         override fun serialize(obj: String): String = obj
-        override fun unserialize(obj: String): String = obj
+        override fun unserialize(s: String): String = s
     }
 
     object ToInt : Serializer<Int> {
         override fun serialize(obj: Int): String = obj.toString()
-        override fun unserialize(obj: String): Int = obj.toInt()
+        override fun unserialize(s: String): Int = s.toInt()
     }
 
     object ToLong : Serializer<Long> {
         override fun serialize(obj: Long): String = obj.toString()
-        override fun unserialize(obj: String): Long = obj.toLong()
+        override fun unserialize(s: String): Long = s.toLong()
     }
 
     object ToDouble : Serializer<Double> {
         override fun serialize(obj: Double): String = obj.toString()
-        override fun unserialize(obj: String): Double = obj.toDouble()
+        override fun unserialize(s: String): Double = s.toDouble()
+    }
+
+    object ToBoolean : Serializer<Boolean> {
+        override fun serialize(obj: Boolean): String = obj.toString()
+        override fun unserialize(s: String): Boolean = s.toBoolean()
     }
 }
