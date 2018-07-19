@@ -24,7 +24,7 @@ class Invite : ICommand, ICommand.HelpDialogProvider {
                 "If you want, I can help you in another servers you might own!",
                 "Also, if a bug or error appears, report it in my support server!",
                 "",
-                "I don't like asking for this but server costs are expensive. If you feel like helping a poor angel, check out my Patreon and be my patron, so I can keep healthly and growing!"
+                "I don't like asking for this but server costs are expensive. If you feel like helping a poor angel, check out my Patreon and be my patron, so I can stay up and growing! It's as cheap as $1 a month."
             )
 
             field("I have my own website now!", "https://aru.pw/")

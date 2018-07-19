@@ -62,7 +62,7 @@ class Help(private val registry: CommandRegistry) : ICommand, ICommand.HelpDialo
 
     private fun botHelp(event: GuildMessageReceivedEvent) {
         embed {
-            baseEmbed(event, "Aru Bot | Help")
+            baseEmbed(event, "Aru! | Help")
 
             description(
                 "Here's all my commands. I'm sure you'll find the one you need!",

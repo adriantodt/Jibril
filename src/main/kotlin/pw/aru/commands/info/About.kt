@@ -58,7 +58,7 @@ class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDia
                 "Let's get started? Send `${"help".withPrefix()}` to check my command list!",
                 "",
                 "Questions? Check out my **[Support server!](https://support.aru.pw)**",
-                "If you feel like helping a poor angel, **[be a Patreon](https://patreon.aru.pw)** and support my development!",
+                "If you feel like helping a poor angel, **[be a Patreon](https://patreon.aru.pw)** and support my development! It's as cheap as $1 a month.",
                 "",
                 "Send `${"about credits".withPrefix()}` to see the credits."
             )

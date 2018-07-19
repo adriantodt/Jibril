@@ -55,7 +55,7 @@ class Stats
 
     private fun discordStats(event: GuildMessageReceivedEvent) {
         EmbedFirst(event) {
-            baseEmbed(event, "Aru Bot | Discord Stats")
+            baseEmbed(event, "Aru! | Discord Stats")
             field("Uptime:", Aru.uptime)
             field("Bot Stats:",
                 arrayOf(
@@ -124,7 +124,7 @@ class Stats
 
     private fun serverStats(event: GuildMessageReceivedEvent) {
         embed {
-            baseEmbed(event, "Aru Bot | Server Stats")
+            baseEmbed(event, "Aru! | Server Stats")
             field(
                 "Resource Usage:",
                 arrayOf(

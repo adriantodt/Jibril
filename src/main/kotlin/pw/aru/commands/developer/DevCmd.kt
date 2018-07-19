@@ -85,7 +85,7 @@ class DevCmd
 
     private fun adminCheck(event: GuildMessageReceivedEvent) {
         embed {
-            baseEmbed(event, "Aru Bot | DevTools")
+            baseEmbed(event, "Aru! | DevTools")
             thumbnail("https://assets.aru.pw/img/yes.png")
 
             description(
@@ -108,7 +108,7 @@ class DevCmd
         val imageTypes = weebSh.imageProvider.imageTypes.submit()
         val imageTags = weebSh.imageProvider.imageTags.submit()
         embed {
-            baseEmbed(event, "Aru Bot | Weeb.sh Debug")
+            baseEmbed(event, "Aru! | Weeb.sh Debug")
             thumbnail("https://assets.aru.pw/img/yes.png")
 
             description(
@@ -131,7 +131,7 @@ class DevCmd
                 event.channel.sendMessage("$CONFUSED No images found... ").queue()
             } else {
                 embed {
-                    baseEmbed(event, "Aru Bot | Weeb.sh Debug")
+                    baseEmbed(event, "Aru! | Weeb.sh Debug")
                     image(it.url)
                     description(
                         "Type: ${it.type}",
