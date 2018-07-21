@@ -17,7 +17,10 @@ class RedisObjectMetadata private constructor(c: Class<*>) {
     fun toString(id: Long) = "$javaClassSimpleName[id=$id]"
 
     companion object {
-        operator fun invoke(c: Class<*>): RedisObjectMetadata = container.computeIfAbsent(c, ::RedisObjectMetadata)
         private val container = WeakHashMap<Class<*>, RedisObjectMetadata>()
+
+        @JvmStatic
+        @JvmName("getOrCreate")
+        operator fun invoke(c: Class<*>): RedisObjectMetadata = container.computeIfAbsent(c, ::RedisObjectMetadata)
     }
 }
