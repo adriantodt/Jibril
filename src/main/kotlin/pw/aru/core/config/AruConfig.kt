@@ -1,4 +1,4 @@
-package pw.aru.data.config
+package pw.aru.core.config
 
 data class AruConfig(
     // dev mode

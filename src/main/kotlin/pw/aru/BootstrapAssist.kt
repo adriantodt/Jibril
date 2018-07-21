@@ -26,15 +26,14 @@ import pw.aru.Aru.bootQuotes
 import pw.aru.core.CommandProcessor
 import pw.aru.core.CommandRegistry
 import pw.aru.core.commands.*
+import pw.aru.core.config.AruConfig
 import pw.aru.core.listeners.*
+import pw.aru.core.logging.DiscordLogBack
 import pw.aru.core.music.MusicManager
-import pw.aru.data.config.AruConfig
 import pw.aru.db.AruDB
 import pw.aru.exported.aru_version
 import pw.aru.kodein.jit.installJit
 import pw.aru.kodein.jit.jit
-import pw.aru.logging.DiscordLogBack
-import pw.aru.logging.TerminalConsoleAdaptor
 import pw.aru.utils.TaskManager
 import pw.aru.utils.TaskManager.task
 import pw.aru.utils.TaskType
@@ -54,7 +53,7 @@ import kotlin.collections.LinkedHashSet
 fun startBootstrap(args: Array<String>) {
     Locale.setDefault(Locale("en", "US"))
 
-    TerminalConsoleAdaptor.initializeTerminal()
+    //TerminalConsoleAdaptor.initializeTerminal()
 
     try {
         start()

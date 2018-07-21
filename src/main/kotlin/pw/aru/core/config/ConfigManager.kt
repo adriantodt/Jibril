@@ -1,8 +1,8 @@
-package pw.aru.data.config
+package pw.aru.core.config
 
-import adriantodt.utils.Properties
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import pw.aru.utils.Properties
 import xyz.cuteclouds.hunger.loader.write
 import java.io.File
 import java.io.FileNotFoundException
@@ -28,6 +28,6 @@ object ConfigManager {
     private fun save(config: AruConfig) = file.write(
         Properties().apply {
             putAll(mapper.convertValue<Map<String, String>>(config))
-        }.saveToString("Aru Config")
+        }.storeToString("Aru Config")
     )
 }

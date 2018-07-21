@@ -6,6 +6,9 @@ import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
+import java.lang.reflect.Array.get
+import java.lang.reflect.Array.getLength
+import java.util.*
 
 //Json
 fun jsonOf(vararg pairs: Pair<*, *>): JSONObject = if (pairs.isNotEmpty()) JSONObject(mapOf(*pairs)) else JSONObject()
@@ -35,4 +38,121 @@ internal fun <T> T.transformElement(transform: ((T) -> CharSequence)?): CharSequ
         this is CharSequence -> this
         else -> this.toString()
     }
+}
+
+fun Exception.simpleName(): String {
+    var c: Class<*>? = javaClass
+
+    while (c != null) {
+        val name = c.simpleName
+        if (!name.isEmpty()) return name
+        c = c.superclass
+    }
+
+    return "Exception"
+}
+
+fun Exception.exceptionType(): String {
+    var c: Class<*>? = javaClass
+
+    while (c != null && c != Exception::class.java) {
+        val name = c.simpleName
+        if (!name.isEmpty()) {
+            return when {
+                name.endsWith("Exception") -> name.substring(0, name.length - 9)
+                name.endsWith("Error") -> name.substring(0, name.length - 5)
+                else -> name
+            }
+        }
+        c = c.superclass
+    }
+
+    return "Exception"
+}
+
+/**
+ * toString + array "unboxing" + builder reusing
+ *
+ * @param this@advancedToString Any object, from null to an array
+ * @return if the object is an array, an actual array representation, else a toString()
+ */
+fun Any?.advancedToString(): String {
+    return when {
+        this == null -> "null"
+        this.javaClass.isArray -> StringBuilder().advancedToString(this).toString()
+        else -> toString()
+    }
+}
+
+private fun StringBuilder.advancedToString(any: Any?) {
+    when {
+        any == null -> append("null")
+        any.javaClass.isArray -> {
+            val length = getLength(any)
+            if (length == 0) {
+                append("[]")
+                return
+            }
+            for (i in 0 until length) append(if (i == 0) "[" else ", ").advancedToString(get(any, i))
+            append("]")
+        }
+        else -> append(any)
+    }
+}
+
+private val keys = listOf("*", "_", "`", "~~").map { it to Regex.fromLiteral(it) }
+private val escapes = arrayOf("*" to "\\*", "_" to "\\_", "~" to "\\~")
+
+private data class FormatToken(val format: String, val start: Int)
+
+fun String.stripFormatting(): String {
+    //all the formatting keys to keep track of
+
+    //find all tokens (formatting strings described above)
+    val tokens = keys.asSequence()
+        .flatMap { (key, p) -> p.findAll(this).map { FormatToken(key, it.range.start) } }
+        .sortedBy(FormatToken::start)
+
+    //iterate over all tokens, find all matching pairs, and add them to the list toRemove
+    val stack = Stack<FormatToken>()
+    val toRemove = ArrayList<FormatToken>()
+    var inBlock = false
+    for (token in tokens) {
+        if (stack.empty() || stack.peek().format != token.format || stack.peek().start + token.format.length == token.start) {
+            //we are at opening tag
+            if (!inBlock) {
+                //we are outside of block -> handle normally
+                if (token.format == "`") {
+                    //block start... invalidate all previous tags
+                    stack.clear()
+                    inBlock = true
+                }
+                stack.push(token)
+            } else if (token.format == "`") {
+                //we are inside of a block -> handle only block tag
+                stack.push(token)
+            }
+        } else if (!stack.empty()) {
+            //we found a matching close-tag
+            toRemove.add(stack.pop())
+            toRemove.add(token)
+            if (token.format == "`" && stack.empty()) {
+                //close tag closed the block
+                inBlock = false
+            }
+        }
+    }
+
+    //sort tags to remove by their start-index and iteratively build the remaining string
+    toRemove.sortBy(FormatToken::start)
+
+    val out = StringBuilder()
+    var currIndex = 0
+    for (formatToken in toRemove) {
+        if (currIndex < formatToken.start) out.append(this, currIndex, formatToken.start)
+        currIndex = formatToken.start + formatToken.format.length
+    }
+    if (currIndex < length) out.append(substring(currIndex))
+    //return the stripped text, escape all remaining formatting characters (did not have matching open/close before or were left/right of block
+    return out.toString().replaceEach(*escapes)
 }

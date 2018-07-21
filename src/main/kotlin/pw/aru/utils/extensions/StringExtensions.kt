@@ -1,10 +1,10 @@
 package pw.aru.utils.extensions
 
-fun String.replaceEach(vararg list: Pair<String, String>): String {
+import java.lang.Character.*
+import kotlin.math.min
 
-    if (isEmpty() || list.isEmpty()) {
-        return this
-    }
+fun String.replaceEach(vararg list: Pair<String, String>): String {
+    if (isEmpty() || list.isEmpty()) return this
 
     // keep track of which still have matches
     val noMoreMatchesForReplIndex = BooleanArray(list.size)
@@ -18,27 +18,21 @@ fun String.replaceEach(vararg list: Pair<String, String>): String {
     // NOTE: logic duplicated below START
     for ((i, pair) in list.withIndex()) {
         val (search) = pair
-        if (noMoreMatchesForReplIndex[i] || search.isEmpty()) {
-            continue
-        }
+        if (noMoreMatchesForReplIndex[i] || search.isEmpty()) continue
         tempIndex = indexOf(search)
 
         // see if we need to keep searching for this
         if (tempIndex == -1) {
             noMoreMatchesForReplIndex[i] = true
-        } else {
-            if (textIndex == -1 || tempIndex < textIndex) {
-                textIndex = tempIndex
-                replaceIndex = i
-            }
+        } else if (textIndex == -1 || tempIndex < textIndex) {
+            textIndex = tempIndex
+            replaceIndex = i
         }
     }
     // NOTE: logic mostly below END
 
     // no search strings found, we are done
-    if (textIndex == -1) {
-        return this
-    }
+    if (textIndex == -1) return this
 
     var start = 0
 
@@ -48,20 +42,16 @@ fun String.replaceEach(vararg list: Pair<String, String>): String {
     // count the replacement text elements that are larger than their corresponding text being replaced
     for ((search, replacement) in list) {
         val greater = replacement.length - search.length
-        if (greater > 0) {
-            increase += 3 * greater // assume 3 matches
-        }
+        // assume 3 matches
+        if (greater > 0) increase += 3 * greater
     }
     // have upper-bound at 20% increase, then let Java take over
-    increase = Math.min(increase, length / 5)
+    increase = min(increase, length / 5)
 
     val buf = StringBuilder(length + increase)
 
     while (textIndex != -1) {
-
-        for (i in start until textIndex) {
-            buf.append(this[i])
-        }
+        for (i in start until textIndex) buf.append(this[i])
         buf.append(list[replaceIndex].second)
 
         start = textIndex + list[replaceIndex].first.length
@@ -72,28 +62,40 @@ fun String.replaceEach(vararg list: Pair<String, String>): String {
         // NOTE: logic mostly duplicated above START
         for ((i, pair) in list.withIndex()) {
             val (search) = pair
-            if (noMoreMatchesForReplIndex[i] || search.isEmpty()) {
-                continue
-            }
+            if (noMoreMatchesForReplIndex[i] || search.isEmpty()) continue
             tempIndex = indexOf(search, start)
 
             // see if we need to keep searching for this
             if (tempIndex == -1) {
                 noMoreMatchesForReplIndex[i] = true
-            } else {
-                if (textIndex == -1 || tempIndex < textIndex) {
-                    textIndex = tempIndex
-                    replaceIndex = i
-                }
+            } else if (textIndex == -1 || tempIndex < textIndex) {
+                textIndex = tempIndex
+                replaceIndex = i
             }
         }
         // NOTE: logic duplicated above END
+    }
 
-    }
-    val textLength = length
-    for (i in start until textLength) {
-        buf.append(this[i])
-    }
+    for (i in start until length) buf.append(this[i])
 
     return buf.toString()
+}
+
+fun String.initials(): String = StringBuilder().let { b -> codePoints().filter(::isUpperCase).forEach { b.appendCodePoint(it) } }.toString()
+
+fun String.capitalize(): String = if (isEmpty()) this else "${toUpperCase(this[0])}${substring(1)}"
+
+private val regexRegex = Regex("[\\-\\[\\]/{}()*+?.\\\\^$|]")
+fun String.escapeRegex(): String = regexRegex.replace(this, "\\$&")
+
+fun String.decapitalize(): String? {
+    if (isEmpty()) return this
+
+    if (length > 1 && isUpperCase(this[1]) && isUpperCase(this[0])) {
+        //IO -> io; JDA -> jda
+        return if (this == toUpperCase()) toLowerCase() else this
+    }
+    val chars = toCharArray()
+    chars[0] = toLowerCase(chars[0])
+    return String(chars)
 }

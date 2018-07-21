@@ -10,7 +10,7 @@ import net.dv8tion.jda.core.events.guild.GuildLeaveEvent
 import net.dv8tion.jda.core.hooks.EventListener
 import net.dv8tion.jda.webhook.WebhookClientBuilder
 import net.dv8tion.jda.webhook.WebhookMessageBuilder
-import pw.aru.data.config.AruConfig
+import pw.aru.core.config.AruConfig
 import pw.aru.utils.Colors
 import pw.aru.utils.api.DBLPoster
 import pw.aru.utils.api.DBotsPoster

@@ -18,7 +18,6 @@ import pw.aru.core.commands.*
 import pw.aru.core.parser.Args
 import pw.aru.db.AruDB
 import pw.aru.utils.Colors
-import pw.aru.utils.J
 import pw.aru.utils.api.DBLPoster
 import pw.aru.utils.api.DBotsPoster
 import pw.aru.utils.commands.EmbedFirst
@@ -215,7 +214,7 @@ class DevCmd
                     "Evaluated with success ${if (result == null) "with no objects returned." else "and returned an object."}"
                 )
                 if (result != null) {
-                    val toString = J.toString(result)
+                    val toString = result.advancedToString()
                     field(
                         result.javaClass.simpleName,
                         toString.limit(MessageEmbed.VALUE_MAX_LENGTH)

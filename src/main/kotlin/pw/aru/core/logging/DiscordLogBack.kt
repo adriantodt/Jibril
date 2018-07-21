@@ -1,4 +1,4 @@
-package pw.aru.logging
+package pw.aru.core.logging
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.PatternLayout

@@ -8,7 +8,6 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.parser.Args
 import pw.aru.utils.Colors
-import pw.aru.utils.J.capitalize
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.THINKING
 import pw.aru.utils.extensions.*
@@ -127,7 +126,7 @@ class ColorCommand : ArgsCommand(), ICommand.HelpDialogProvider {
             }
 
             description(
-                if (name != null) "**Name**: ${capitalize(name)}" else "",
+                if (name != null) "**Name**: ${name.capitalize()}" else "",
                 "**Representations**:",
                 "```kotlin",
                 "//RGB as hex",

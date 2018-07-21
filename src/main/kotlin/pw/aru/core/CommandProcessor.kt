@@ -8,7 +8,6 @@ import pw.aru.core.commands.ICommand
 import pw.aru.db.AruDB
 import pw.aru.db.entities.GuildSettings
 import pw.aru.snow64.Snow64
-import pw.aru.utils.J
 import pw.aru.utils.emotes.*
 import pw.aru.utils.extensions.*
 import pw.aru.utils.helpers.CommandStatsManager
@@ -183,7 +182,7 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
     )
 
     private fun reportException(c: ICommand, event: GuildMessageReceivedEvent, e: Exception, h: Exception? = null) {
-        val errorId = J.initials(J.exceptionName(e)) + "#" + Snow64.fromSnowflake(event.message.idLong)
+        val errorId = J.initials(J.simpleName(e)) + "#" + Snow64.fromSnowflake(event.message.idLong)
 
         logger.error(e) {
             "**ERROR REPORTED**\n**ErrorID**: `$errorId`\n**Type**: `${e.javaClass.simpleName}`\n**Command**: ``${event.message.contentRaw}`\n"

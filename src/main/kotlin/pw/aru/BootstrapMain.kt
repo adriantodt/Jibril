@@ -8,9 +8,9 @@ import org.kodein.di.direct
 import org.kodein.di.generic.instance
 import pw.aru.core.CommandRegistry
 import pw.aru.core.commands.UseFullInjector
+import pw.aru.core.config.ConfigManager
 import pw.aru.core.listeners.EventListeners.queueTask
 import pw.aru.core.listeners.EventListeners.submitTask
-import pw.aru.data.config.ConfigManager
 import pw.aru.utils.TaskManager.queue
 import pw.aru.utils.TaskType
 import pw.aru.utils.api.DBLPoster
