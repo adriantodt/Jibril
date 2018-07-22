@@ -119,7 +119,7 @@ class GuildMusicPlayer(private val shardManager: ShardManager, val musicManager:
         val channel = info.textChannel
         if (channel?.canTalk() == true) {
             channel.sendMessage(
-                "$SMILEY *Yay someone joined me to listen to some nice songs!*\nI've resumed from where I stopped for you!"
+                "$SMILE2 *Yay someone joined me to listen to some nice songs!*\nI've resumed from where I stopped for you!"
             ).queue()
         }
     }

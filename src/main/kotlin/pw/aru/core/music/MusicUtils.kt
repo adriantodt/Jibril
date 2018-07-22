@@ -6,13 +6,13 @@ import net.dv8tion.jda.core.entities.TextChannel
 import net.dv8tion.jda.core.entities.VoiceChannel
 import net.dv8tion.jda.core.managers.AudioManager
 import pw.aru.core.listeners.EventListeners.submitTask
-import pw.aru.utils.DiscordUtils.stripFormatting
 import pw.aru.utils.TaskManager.queue
 import pw.aru.utils.TaskType
 import pw.aru.utils.emotes.SOUNDCLOUD
 import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.emotes.X
 import pw.aru.utils.emotes.YOUTUBE
+import pw.aru.utils.extensions.stripFormatting
 import java.lang.Thread.sleep
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
@@ -34,7 +34,7 @@ fun connect(channel: TextChannel?, vc: VoiceChannel): Boolean {
     if (audioManager.isConnected && vc != audioManager.connectedChannel) {
         if (channel?.canTalk() == true) {
             channel.sendMessage(
-                "$X Wait, I'm already connected to **${stripFormatting(audioManager.connectedChannel.name)}**, silly! Join it if you wanna hear some nice music!"
+                "$X Wait, I'm already connected to **${audioManager.connectedChannel.name.stripFormatting()}**, silly! Join it if you wanna hear some nice music!"
             ).queue()
         }
 
@@ -81,7 +81,7 @@ fun connect(channel: TextChannel?, vc: VoiceChannel): Boolean {
 
     if (channel?.canTalk() == true) {
         channel.sendMessage(
-            "$SUCCESS Yay! Connected to voice channel **${stripFormatting(vc.name)}**!"
+            "$SUCCESS Yay! Connected to voice channel **${vc.name.stripFormatting()}**!"
         ).queue()
     }
 

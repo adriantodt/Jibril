@@ -4,11 +4,11 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
-import pw.aru.utils.DiscordUtils
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.COIN_HEADS
 import pw.aru.utils.emotes.COIN_TAILS
 import pw.aru.utils.extensions.random
+import pw.aru.utils.extensions.stripFormatting
 import pw.aru.utils.extensions.threadLocalRandom
 
 @Command("coinflip", "flip", "coin")
@@ -25,7 +25,7 @@ class CoinFlip : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
     }
 
     override fun discreteCall(event: GuildMessageReceivedEvent, args: String, outer: String) {
-        val toSend = DiscordUtils.stripFormatting(outer.replace('\n', ' '))
+        val toSend = outer.replace('\n', ' ').stripFormatting()
 
         event.channel.sendMessage("**$toSend**\n${if (threadLocalRandom().nextBoolean()) heads else tails}").queue()
     }

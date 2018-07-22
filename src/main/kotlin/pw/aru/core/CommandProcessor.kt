@@ -182,7 +182,7 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
     )
 
     private fun reportException(c: ICommand, event: GuildMessageReceivedEvent, e: Exception, h: Exception? = null) {
-        val errorId = J.initials(J.simpleName(e)) + "#" + Snow64.fromSnowflake(event.message.idLong)
+        val errorId = e.simpleName().initials() + "#" + Snow64.fromSnowflake(event.message.idLong)
 
         logger.error(e) {
             "**ERROR REPORTED**\n**ErrorID**: `$errorId`\n**Type**: `${e.javaClass.simpleName}`\n**Command**: ``${event.message.contentRaw}`\n"

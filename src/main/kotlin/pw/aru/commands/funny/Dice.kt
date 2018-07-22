@@ -7,9 +7,9 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.dice.exceptions.EvaluationException
 import pw.aru.dice.exceptions.SyntaxException
-import pw.aru.utils.DiscordUtils.stripFormatting
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.GAME_DIE
+import pw.aru.utils.extensions.stripFormatting
 import kotlin.math.roundToLong
 
 @Command("dice", "roll")
@@ -41,7 +41,7 @@ class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
     }
 
     override fun discreteCall(event: GuildMessageReceivedEvent, args: String, outer: String) {
-        val toSend = stripFormatting(outer.replace('\n', ' ')).trim()
+        val toSend = outer.replace('\n', ' ').stripFormatting().trim()
 
         if (toSend.isEmpty()) call(event, args)
 

@@ -12,7 +12,7 @@ import net.dv8tion.jda.core.requests.RestAction
 import net.dv8tion.jda.core.utils.JDALogger
 import okhttp3.OkHttpClient
 import pw.aru.Aru.sleepQuotes
-import pw.aru.commands.weebsh.base.GetImage
+import pw.aru.commands.actions.base.GetImage
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.*
 import pw.aru.core.parser.Args

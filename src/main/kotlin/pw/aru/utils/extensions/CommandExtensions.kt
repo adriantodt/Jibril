@@ -65,6 +65,21 @@ fun onHelp(category: Category, event: GuildMessageReceivedEvent) {
 
 const val ERROR_GUILD_PERMS = "You can **easily** fix that by re-inviting me with the following link: ``https://add.aru.pw/``"
 const val ERROR_CHANNEL_PERMS = "Fix the **current channel**'s permissions and enable me the missing permissions shown above."
+const val ERROR_CHANNEL_NOT_NSFW = "For this ccommand to work, set this text channel to **NSFW**."
+
+fun requireNsfw(event: GuildMessageReceivedEvent): Boolean {
+    if (!event.channel.isNSFW) {
+        event.channel.sendMessage(
+            arrayOf(
+                "$X S-Sorry, but this channel is not a **NSFW** channel!",
+                ERROR_CHANNEL_NOT_NSFW
+            ).joinToString("\n")
+        ).queue()
+        return false
+    }
+
+    return true
+}
 
 fun requirePerms(event: GuildMessageReceivedEvent, vararg permissions: Permission): Boolean {
     val self = event.guild.selfMember
