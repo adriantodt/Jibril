@@ -3,7 +3,6 @@ package pw.aru.core.config
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import pw.aru.utils.Properties
-import xyz.cuteclouds.hunger.loader.write
 import java.io.File
 import java.io.FileNotFoundException
 

@@ -1,18 +1,18 @@
 package pw.aru.commands.games.hungergames
 
 import net.dv8tion.jda.core.entities.TextChannel
-import xyz.cuteclouds.hunger.HungerGames
-import xyz.cuteclouds.hunger.HungerGamesBuilder
-import xyz.cuteclouds.hunger.data.SimpleTribute
-import xyz.cuteclouds.hunger.events.EventFormatter
-import xyz.cuteclouds.hunger.game.Actions
-import xyz.cuteclouds.hunger.game.HarmfulAction
-import xyz.cuteclouds.hunger.game.HarmlessAction
-import xyz.cuteclouds.hunger.game.Phase
-import xyz.cuteclouds.hunger.loader.loadFile
-import xyz.cuteclouds.hunger.loader.parseHarmfulActions
-import xyz.cuteclouds.hunger.loader.parseHarmlessActions
-import xyz.cuteclouds.hunger.phases.*
+import pw.aru.hungergames.HungerGames
+import pw.aru.hungergames.HungerGamesBuilder
+import pw.aru.hungergames.data.SimpleTribute
+import pw.aru.hungergames.events.EventFormatter
+import pw.aru.hungergames.game.Actions
+import pw.aru.hungergames.game.HarmfulAction
+import pw.aru.hungergames.game.HarmlessAction
+import pw.aru.hungergames.game.Phase
+import pw.aru.hungergames.loader.loadFile
+import pw.aru.hungergames.loader.parseHarmfulActions
+import pw.aru.hungergames.loader.parseHarmlessActions
+import pw.aru.hungergames.phases.*
 import java.io.File
 
 object HG {
