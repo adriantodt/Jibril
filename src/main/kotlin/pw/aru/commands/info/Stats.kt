@@ -6,11 +6,12 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.Aru
 import pw.aru.core.CommandProcessor
 import pw.aru.core.categories.Categories
+import pw.aru.core.commands.ArgsCommand
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.SimpleArgsCommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.music.MusicManager
+import pw.aru.core.parser.Args
 import pw.aru.exported.aru_version
 import pw.aru.utils.commands.EmbedFirst
 import pw.aru.utils.commands.HelpFactory
@@ -40,15 +41,15 @@ class Stats
     private val shardManager: ShardManager,
     private val musicManager: MusicManager,
     private val processor: CommandProcessor
-) : SimpleArgsCommand(expectedArgs = 2), ICommand.HelpDialogProvider {
+) : ArgsCommand(), ICommand.HelpDialogProvider {
     override val category = Categories.INFO
 
-    override fun call(event: GuildMessageReceivedEvent, args: Array<String>) {
-        when (args.getOrNull(0)) {
+    override fun call(event: GuildMessageReceivedEvent, args: Args) {
+        when (args.takeString()) {
             "server", "s" -> serverStats(event)
-            null, "discord", "d" -> discordStats(event)
-            "cmds", "cmd", "commands", "c" -> statsManager(CommandStatsManager, "Command Stats", event, args.getOrNull(1))
-            "guilds", "guild", "g" -> statsManager(GuildStatsManager, "Guild Stats", event, args.getOrNull(1))
+            "", "discord", "d" -> discordStats(event)
+            "cmds", "cmd", "commands", "c" -> statsManager(CommandStatsManager, "Command Stats", event, args.takeString())
+            "guilds", "guild", "g" -> statsManager(GuildStatsManager, "Guild Stats", event, args.takeString())
             else -> showHelp()
         }
     }
@@ -59,7 +60,7 @@ class Stats
             field("Uptime:", Aru.uptime)
             field("Bot Stats:",
                 arrayOf(
-                    "\u25AB **Aru Version**: ${aru_version}",
+                    "\u25AB **Aru Version**: $aru_version",
                     "\u25AB **Threads**: ${Thread.activeCount().format("%,d")}",
                     "\u25AB **Shards**: ${shardManager.shardsTotal.format("%,d")} (Current: ${event.jda.shardInfo.shardId})",
                     "\u25AB **Commands**: ${processor.commandCount.format("%,d")} executed"

@@ -7,6 +7,7 @@ import com.github.natanbc.discordbotsapi.DiscordBotsAPI
 import com.github.natanbc.weeb4j.TokenType
 import com.github.natanbc.weeb4j.Weeb4J
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
+import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.JDA.Status.CONNECTED
 import net.dv8tion.jda.core.JDA.Status.LOADING_SUBSYSTEMS
@@ -21,7 +22,6 @@ import org.kodein.di.generic.bind
 import org.kodein.di.generic.eagerSingleton
 import org.kodein.di.generic.instance
 import org.kodein.di.generic.singleton
-import org.reflections.Reflections
 import pw.aru.Aru.bootQuotes
 import pw.aru.core.CommandProcessor
 import pw.aru.core.CommandRegistry
@@ -191,17 +191,19 @@ internal fun executePostLoad(registry: CommandRegistry) {
 }
 
 internal fun computeReflectionsScan(basePackage: String): ReflectionsResult {
-    val reflections = Reflections(basePackage)
+    val commands = LinkedHashSet<Class<out ICommand>>()
+    val commandProviders = LinkedHashSet<Class<out ICommandProvider>>()
 
-    val commandScan = reflections
-        .getSubTypesOf(classOf<ICommand>())
-        .filterTo(LinkedHashSet()) { it.isAnnotationPresent(classOf<Command>()) }
+    FastClasspathScanner(basePackage)
+        .matchClassesImplementing<ICommand>(classOf()) {
+            if (it.isAnnotationPresent(classOf<Command>())) commands.add(it)
+        }
+        .matchClassesImplementing<ICommandProvider>(classOf()) {
+            if (it.isAnnotationPresent(classOf<CommandProvider>())) commandProviders.add(it)
+        }
+        .scan()
 
-    val commandProviders = reflections
-        .getSubTypesOf(classOf<ICommandProvider>())
-        .filterTo(LinkedHashSet()) { it.isAnnotationPresent(classOf<CommandProvider>()) }
-
-    return ReflectionsResult(commandScan, commandProviders)
+    return ReflectionsResult(commands, commandProviders)
 }
 
 internal data class ReflectionsResult(

@@ -1,7 +1,7 @@
 package pw.aru.utils
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder
 import pw.aru.utils.TaskType.*
+import pw.aru.utils.extensions.threadFactory
 import java.util.concurrent.Future
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.ScheduledThreadPoolExecutor
@@ -14,19 +14,9 @@ object TaskManager {
 
     init {
         val processors = minOf(Runtime.getRuntime().availableProcessors(), 4)
-
-        PRIORITY_SCHEDULER = ScheduledThreadPoolExecutor(
-            processors,
-            ThreadFactoryBuilder().setNameFormat("Priority Task Thread-%d").build()
-        )
-        COMMON_SCHEDULER = ScheduledThreadPoolExecutor(
-            processors / 2,
-            ThreadFactoryBuilder().setNameFormat("Common Task Thread-%d").build()
-        )
-        BUNK_SCHEDULER = ScheduledThreadPoolExecutor(
-            processors / 4,
-            ThreadFactoryBuilder().setNameFormat("Bunk Task Thread-%d").build()
-        )
+        PRIORITY_SCHEDULER = ScheduledThreadPoolExecutor(processors, threadFactory(nameFormat = "Priority Task Thread-%d"))
+        COMMON_SCHEDULER = ScheduledThreadPoolExecutor(processors / 2, threadFactory(nameFormat = "Common Task Thread-%d"))
+        BUNK_SCHEDULER = ScheduledThreadPoolExecutor(processors / 4, threadFactory(nameFormat = "Bunk Task Thread-%d"))
     }
 
     fun scheduler(type: TaskType) = when (type) {

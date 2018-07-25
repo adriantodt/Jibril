@@ -17,17 +17,17 @@ repositories {
 
 dependencies {
     //Source of memes
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    compile "org.jetbrains.kotlin:kotlin-reflect"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.2.51"
+    compile "org.jetbrains.kotlin:kotlin-reflect:1.2.51"
 
     //Client and ID generator
     compile 'redis.clients:jedis:2.9.0'
     compile 'pw.aru.snowflake:snowflake-local:1.0'
 
     //Data Conversion Stack
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.0'
-    compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.0'
-    compile 'de.undercouch:bson4jackson:2.9.0'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.6'
+    compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.6'
+    compile 'de.undercouch:bson4jackson:2.9.2'
 }
 
 compileKotlin {

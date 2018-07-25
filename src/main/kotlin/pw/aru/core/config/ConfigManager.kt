@@ -24,7 +24,7 @@ object ConfigManager {
     private val file = File("aru.properties")
     private val backupFile = File("aru.properties.bkp")
 
-    private fun save(config: AruConfig) = file.write(
+    private fun save(config: AruConfig) = file.writeText(
         Properties().apply {
             putAll(mapper.convertValue<Map<String, String>>(config))
         }.storeToString("Aru Config")

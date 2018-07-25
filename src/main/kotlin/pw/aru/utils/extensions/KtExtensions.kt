@@ -6,8 +6,13 @@ import redis.clients.util.Pool
 import java.io.Closeable
 import java.util.*
 import java.util.concurrent.Future
+import java.util.concurrent.ThreadFactory
 import java.util.concurrent.ThreadLocalRandom
+import java.util.concurrent.atomic.AtomicLong
 import java.util.function.Consumer
+import kotlin.concurrent.thread
+
+
 
 inline fun <reified T> classOf() = T::class.java
 
@@ -44,3 +49,15 @@ inline fun <E> randomOf(vararg objects: E): E = objects.random()
 inline fun <E> Random.anyOf(vararg objects: E): E = objects.random(this)
 
 inline fun <T : Closeable?, R> Pool<T>.useResource(block: (T) -> R) = resource.use(block)
+
+fun threadFactory(
+    isDaemon: Boolean = false,
+    contextClassLoader: ClassLoader? = null,
+    nameFormat: String? = null,
+    priority: Int = -1
+): ThreadFactory {
+    val count = if (nameFormat != null) AtomicLong(0) else null
+    return ThreadFactory {
+        thread(false, isDaemon, contextClassLoader, nameFormat?.format(count!!.getAndIncrement()), priority, it::run)
+    }
+}

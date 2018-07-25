@@ -7,11 +7,13 @@ plugins {
     //Adds an Executable Manifest
     id 'application'
     //Creates FatJars
-    id 'com.github.johnrengelman.shadow' version '2.0.3'
+    id 'com.github.johnrengelman.shadow' version '2.0.4'
+    //Version checking
+    id "com.github.ben-manes.versions" version "0.20.0"
 }
 
 group = 'pw.aru'
-version = '2.0.1'
+version = '2.1-dev'
 mainClassName = 'pw.aru.Bootstrap'
 
 // Minified Splash
@@ -54,18 +56,13 @@ dependencies {
     compile 'pw.aru.hungergames:hg-engine:1.0'
     compile 'pw.aru.hungergames:hg-loader:1.0'
 
-    //Groups WILL change
-    //compile 'xyz.cuteclouds:HungerGames:1.0.2'
-
     //Helping stuff
-    compile 'com.google.guava:guava:25.1-jre'
     compile 'org.apache.commons:commons-lang3:3.7'
     compile 'org.apache-extras.beanshell:bsh:2.0b6'
 
     //Scanning and Injections
-    //compile 'io.github.lukehutch:fast-classpath-scanner:3.1.12'
-    compile 'org.reflections:reflections:0.9.11'
-    compile 'org.kodein.di:kodein-di-generic-jvm:5.0.0'
+    compile 'io.github.lukehutch:fast-classpath-scanner:3.1.12'
+    compile 'org.kodein.di:kodein-di-generic-jvm:5.2.0'
     compile 'pw.aru.kt:kodein-jit-bindings:1.1.1'
 
     //Logging
@@ -112,3 +109,4 @@ tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
 task cleanDistArchives(type: Delete) { delete files(distTar, distZip, jar) }
 [jar, distZip, distTar].each { it.with { classifier = "trash"; finalizedBy cleanDistArchives } }
 shadowJar.classifier = ""
+dependencyUpdates.revision = "release"

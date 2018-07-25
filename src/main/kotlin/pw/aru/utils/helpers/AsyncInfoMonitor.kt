@@ -4,7 +4,6 @@ import com.sun.management.OperatingSystemMXBean
 import mu.KLogging
 import pw.aru.utils.TaskManager.task
 import pw.aru.utils.TaskType
-import pw.aru.utils.extensions.floor
 import java.lang.management.ManagementFactory
 import java.util.concurrent.TimeUnit
 
@@ -85,4 +84,7 @@ object AsyncInfoMonitor : KLogging() {
     operator fun invoke() {
         logger.info { "AsyncInfoMonitor started!" }
     }
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun floor(d: Double, factor: Double = 1.0) = Math.floor(d * factor) / factor
 }
