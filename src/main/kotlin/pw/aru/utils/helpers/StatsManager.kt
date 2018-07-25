@@ -51,17 +51,17 @@ open class StatsManager<T> {
             return
         }
 
-        commands.entries
-            .map { it.key to it.value.get() }
-            .filter { it.second > 0 }
-            .sortedByDescending(Pair<T, Int>::second)
-            .take(12)
-            .forEach { (k, v) ->
-                val percent = v * 100 / total
-                builder.addField(
-                    k.toString(), "${bar(percent, 15)} $percent% ($v)", true
-                )
-            }
+        builder.setDescription(
+            commands.entries
+                .map { it.key to it.value.get() }
+                .filter { it.second > 0 }
+                .sortedByDescending(Pair<T, Int>::second)
+                .take(24)
+                .joinToString("\n") { (k, v) ->
+                    val percent = v * 100 / total
+                    "\u25AB %s - %d%% (%d)".format(k, percent, v)
+                }
+        )
     }
 
     fun log(obj: T) {
@@ -98,7 +98,7 @@ open class StatsManager<T> {
                 .take(5)
                 .joinToString("\n") { (k, v) ->
                     val percent = Math.round(v.toFloat() * 100 / total)
-                    "${bar(percent, 15)} $percent% **$k** ($v)"
+                    "\u25AB %s - %d%% (%d)".format(k, percent, v)
                 }
     }
 }

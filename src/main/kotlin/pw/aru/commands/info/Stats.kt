@@ -95,9 +95,9 @@ class Stats
         }
     }
 
-    private fun <T> statsManager(m: StatsManager<T>, title: String, event: GuildMessageReceivedEvent, arg: String?) {
+    private fun <T> statsManager(m: StatsManager<T>, title: String, event: GuildMessageReceivedEvent, arg: String) {
         when (arg) {
-            null -> statsManagerResume(m, title, event)
+            "" -> statsManagerResume(m, title, event)
             "total", "t" -> detailedStatsManager(m, title, event, "Total", TOTAL)
             "daily", "d", "dialy", "day" -> detailedStatsManager(m, title, event, "Today", DAY)
             "hourly", "h", "hour" -> detailedStatsManager(m, title, event, "This Hour", HOUR)
