@@ -1,40 +1,44 @@
 package pw.aru.commands.games
 
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import pw.aru.commands.games.hungergames.GameManager
 import pw.aru.commands.games.lobby.LobbyManager
+import pw.aru.commands.games.manager.GameManager
 import pw.aru.core.categories.Categories
-import pw.aru.core.commands.ArgsCommand
 import pw.aru.core.commands.Command
-import pw.aru.core.parser.Args
+import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.ERROR
 import pw.aru.utils.emotes.SUCCESS
-import pw.aru.utils.extensions.*
+import pw.aru.utils.extensions.baseEmbed
+import pw.aru.utils.extensions.embed
+import pw.aru.utils.extensions.field
+import pw.aru.utils.extensions.withPrefix
 
 @Command("gamehub", "gh")
-class GameHub : ArgsCommand() {
+class GameHub : ICommand {
     override val category = Categories.GAMES
 
     private val games: MutableMap<String, GameCreator> = HashMap()
 
-    override fun call(event: GuildMessageReceivedEvent, args: Args) {
+    override fun CommandContext.call() {
+        val args = parseable()
+
         val option = args.takeString()
 
         when (option) {
             "list" -> {
             }
 
-            "new" -> newLobby(event)
-            "join" -> joinLobby(event)
-            "leave" -> leaveLobby(event)
-            "start", "play" -> playGame(event, args.takeRemainingStrings())
-            "lobby", "" -> lobby(event)
+            "new" -> newLobby()
+            "join" -> joinLobby()
+            "leave" -> leaveLobby()
+            "start", "play" -> playGame(args.takeRemaining())
+            "lobby", "" -> lobby()
             else -> showHelp()
         }
     }
 
-    private fun newLobby(event: GuildMessageReceivedEvent) {
+    private fun CommandContext.newLobby() {
         val lobby = LobbyManager.getOrCreateLobby(event.channel, event.member)
         val created = lobby.adminId == event.author.id
 
@@ -48,7 +52,7 @@ class GameHub : ArgsCommand() {
         ).queue()
     }
 
-    private fun joinLobby(event: GuildMessageReceivedEvent) {
+    private fun CommandContext.joinLobby() {
         val lobby = LobbyManager.getLobby(event.channel)
         when {
             lobby == null -> event.channel.sendMessage(
@@ -71,7 +75,7 @@ class GameHub : ArgsCommand() {
         }
     }
 
-    private fun leaveLobby(event: GuildMessageReceivedEvent) {
+    private fun CommandContext.leaveLobby() {
         val lobby = LobbyManager.getLobby(event.channel)
 
         when {
@@ -94,7 +98,7 @@ class GameHub : ArgsCommand() {
         }
     }
 
-    private fun playGame(event: GuildMessageReceivedEvent, args: String) {
+    private fun CommandContext.playGame(args: String) {
         val lobby = LobbyManager.getLobby(event.channel)
 
         if (lobby == null) {
@@ -107,11 +111,18 @@ class GameHub : ArgsCommand() {
             return
         }
 
+        val creator = games[args]
+
+        if (creator == null) {
+            event.channel.sendMessage("$ERROR There's no game named ``$args``!").queue()
+            return
+        }
+
         LobbyManager.removeLobby(event.channel)
-        GameManager.newGame(event.channel, lobby)
+        GameManager.newGame(event.channel, lobby, creator)
     }
 
-    private fun lobby(event: GuildMessageReceivedEvent) {
+    private fun CommandContext.lobby() {
         val lobby = LobbyManager.getLobby(event.channel)
 
         if (lobby == null) {
@@ -126,16 +137,16 @@ class GameHub : ArgsCommand() {
             embed {
                 baseEmbed(event, "HungerGames | ${event.guild.getMemberById(lobby.adminId).effectiveName}'s Lobby")
 
-                field("Players:", limitedToString(lobby.players.map { "**${it.effectiveName}**" }.sorted()))
+                field("Players:", lobby.players.map { "**${it.effectiveName}**" }.sorted().limitedToString())
             }
         ).queue()
     }
 
-    private fun limitedToString(it: List<String>): String {
-        if (it.isEmpty()) return "None"
+    private fun List<String>.limitedToString(): String {
+        if (isEmpty()) return "None"
         else {
             val builder = StringBuilder()
-            val iterator = it.listIterator()
+            val iterator = listIterator()
 
             while (iterator.hasNext()) {
                 val next = iterator.next()
@@ -144,7 +155,7 @@ class GameHub : ArgsCommand() {
                     builder.append(next)
                     if (iterator.hasNext()) builder.append(", ")
                 } else {
-                    builder.append("more ").append(it.size - iterator.nextIndex()).append("...")
+                    builder.append("more ").append(size - iterator.nextIndex()).append("...")
                     break
                 }
             }

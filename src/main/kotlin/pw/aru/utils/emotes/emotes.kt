@@ -91,6 +91,7 @@ const val CAR = "\uD83C\uDFCE"
 const val POKE = "\uD83D\uDC49"
 const val TEXT_SHRUG = "¯\\\\\\_(ツ)\\_/¯"
 const val PUNCH = "\uD83D\uDC4A"
+const val BANG = "❗"
 
 const val LOADING = "<a:loading:452839911377338378>"
 const val STREAMING = "<a:streaming:403963064942329857>"
