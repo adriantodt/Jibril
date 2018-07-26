@@ -18,14 +18,14 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
     private val cache = URLCache(httpClient, File("url_cache"))
 
     /*
-    types.rejected: [
-        bang, delet_this, nani
-    ]
     types: [
-        highfive, punch, slap, teehee, tickle,
-
         deredere, greet, insult, sleepy,
         sumfuk, trap, triggered, waifu_insult, wasted
+    ]
+    types.rejected: [
+        bang,       // Reason: Not good enough to do a "shoot" command, and might break Discord ToS
+        delet_this, // Reason: Not much sense at all neither funny
+        nani        // Reason: Only Hotoku no Ken memes, not funny tbh
     ]
      */
 
@@ -53,6 +53,54 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
                 "$POKE *Pokes~*",
                 "$POKE *Pokes you~*",
                 "$POKE Eeh..? T-that's awkward, stop!"
+            )
+        )
+
+        WeebActionCommand(
+            category, provider, registry, cache,
+            WeebCommandInfo(listOf("highfive"), "Highfive Command", "Highfives the mentioned users."),
+            GetImage(type = "highfive", fileType = GIF),
+            ActionLines(
+                "$HIGHFIVE {author} is high-fiving {mentions}",
+                "$HIGHFIVE *Highfives~*",
+                "$HIGHFIVE *Highfives you~*",
+                "$HIGHFIVE Oh, eh.. *~high-fives back~* Hai!"
+            )
+        )
+
+        WeebActionCommand(
+            category, provider, registry, cache,
+            WeebCommandInfo(listOf("tease", "teehee"), "Tease Command", "Teases the mentioned users."),
+            GetImage(type = "teehee", fileType = GIF),
+            ActionLines(
+                "$TEEHEE {mentions}, {author} is teasing you",
+                "$TEEHEE *Teases~*",
+                "$TEEHEE *Teases you~*",
+                "$TEEHEE Eeh..? T-that's awkward, stop!"
+            )
+        )
+
+        WeebActionCommand(
+            category, provider, registry, cache,
+            WeebCommandInfo(listOf("tickle"), "Tickle Command", "Tickles the mentioned users."),
+            GetImage(type = "teehee", fileType = GIF),
+            ActionLines(
+                "$TEEHEE {mentions}, {author} is tickling you",
+                "$TEEHEE *Tickles~*",
+                "$TEEHEE *Tickles you~*",
+                "$TEEHEE Eeh..? T-that's awkward, stop!"
+            )
+        )
+
+        WeebActionCommand(
+            category, provider, registry, cache,
+            WeebCommandInfo(listOf("slap"), "Slap Command", "Slaps the mentioned users."),
+            GetImage(type = "slap", fileType = GIF),
+            ActionLines(
+                "$EVIL {mentions}, you have been slapped by {author}",
+                "$EVIL *Slaps~*",
+                "$EVIL *Slaps you~*",
+                "$EVIL Eeh..? *~gets slapped~* Y-you BAKA! $CRY"
             )
         )
 
@@ -89,6 +137,18 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
                 "$CUDDLE *Cuddles~*",
                 "$CUDDLE *Cuddles you~*",
                 "$CUDDLE Oh, eh.. *~gets cuddled~* T-thanks~"
+            )
+        )
+
+        WeebActionCommand(
+            category, provider, registry, cache,
+            WeebCommandInfo(listOf("punch"), "Punch Command", "Punches the mentioned users."),
+            GetImage(type = "punch", fileType = GIF),
+            ActionLines(
+                "$PUNCH {mentions}, you have been punched by {author}",
+                "$PUNCH *Punches~*",
+                "$PUNCH *Punches you~*",
+                "$PUNCH Eeh..? *~gets punched~* Y-you BAKA! $CRY"
             )
         )
 
