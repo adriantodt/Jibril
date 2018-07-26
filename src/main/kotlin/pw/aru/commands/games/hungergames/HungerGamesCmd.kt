@@ -4,7 +4,6 @@ import com.jagrosh.jdautilities.commons.utils.FinderUtil
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.commands.games.lobby.LobbyManager
 import pw.aru.core.categories.Categories
-import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.utils.commands.HelpFactory
@@ -18,7 +17,6 @@ import pw.aru.utils.extensions.toSmartString
 import pw.aru.utils.extensions.usage
 import java.util.*
 
-@Command("hg", "hungergames")
 class HungerGamesCmd : ICommand, ICommand.HelpHandler {
     override val category = Categories.GAMES
 

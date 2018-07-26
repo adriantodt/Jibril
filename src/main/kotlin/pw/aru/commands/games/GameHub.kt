@@ -1,10 +1,10 @@
 package pw.aru.commands.games
 
-import pw.aru.commands.games.lobby.LobbyManager
 import pw.aru.commands.games.manager.GameManager
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.ERROR
@@ -15,10 +15,12 @@ import pw.aru.utils.extensions.field
 import pw.aru.utils.extensions.withPrefix
 
 @Command("gamehub", "gh")
-class GameHub : ICommand {
+@UseFullInjector()
+class GameHub(private val gameManager: GameManager) : ICommand {
     override val category = Categories.GAMES
 
     private val games: MutableMap<String, GameCreator> = HashMap()
+    private val lobbyManager = gameManager.lobbyManager
 
     override fun CommandContext.call() {
         val args = parseable()
@@ -39,7 +41,7 @@ class GameHub : ICommand {
     }
 
     private fun CommandContext.newLobby() {
-        val lobby = LobbyManager.getOrCreateLobby(event.channel, event.member)
+        val lobby = lobbyManager.getOrCreateLobby(event.channel, event.member)
         val created = lobby.adminId == event.author.id
 
         event.channel.sendMessage(
@@ -53,7 +55,7 @@ class GameHub : ICommand {
     }
 
     private fun CommandContext.joinLobby() {
-        val lobby = LobbyManager.getLobby(event.channel)
+        val lobby = lobbyManager.getLobby(event.channel)
         when {
             lobby == null -> event.channel.sendMessage(
                 "$ERROR S-sorry, but there's no lobby here!\n" +
@@ -76,13 +78,13 @@ class GameHub : ICommand {
     }
 
     private fun CommandContext.leaveLobby() {
-        val lobby = LobbyManager.getLobby(event.channel)
+        val lobby = lobbyManager.getLobby(event.channel)
 
         when {
             lobby == null -> event.channel.sendMessage("$ERROR There's no lobby, silly!").queue()
 
             lobby.adminId == event.author.id -> {
-                LobbyManager.removeLobby(event.channel)
+                lobbyManager.removeLobby(event.channel)
 
                 event.channel.sendMessage("$SUCCESS **${event.member.effectiveName}** closed their lobby.").queue()
             }
@@ -99,7 +101,7 @@ class GameHub : ICommand {
     }
 
     private fun CommandContext.playGame(args: String) {
-        val lobby = LobbyManager.getLobby(event.channel)
+        val lobby = lobbyManager.getLobby(event.channel)
 
         if (lobby == null) {
             event.channel.sendMessage("$ERROR There's no lobby for me to start a game, silly!").queue()
@@ -118,12 +120,12 @@ class GameHub : ICommand {
             return
         }
 
-        LobbyManager.removeLobby(event.channel)
-        GameManager.newGame(event.channel, lobby, creator)
+        lobbyManager.removeLobby(event.channel)
+        gameManager.newGame(event.channel, lobby, creator)
     }
 
     private fun CommandContext.lobby() {
-        val lobby = LobbyManager.getLobby(event.channel)
+        val lobby = lobbyManager.getLobby(event.channel)
 
         if (lobby == null) {
             event.channel.sendMessage(

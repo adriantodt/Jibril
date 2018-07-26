@@ -2,6 +2,7 @@ package pw.aru.commands.games
 
 import net.dv8tion.jda.core.entities.TextChannel
 import pw.aru.commands.games.lobby.Lobby
+import pw.aru.commands.games.manager.GameManager
 
 interface Game {
     val channel: TextChannel
@@ -11,9 +12,7 @@ interface Game {
 interface GameCreator {
     val description: GameDescription
 
-    fun check(textChannel: TextChannel, lobby: Lobby): Boolean
-
-    fun create(textChannel: TextChannel, lobby: Lobby): Game
+    fun create(manager: GameManager, channel: TextChannel, lobby: Lobby): Game
 }
 
 data class GameDescription(

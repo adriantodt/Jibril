@@ -8,7 +8,7 @@ import java.util.*
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit.MINUTES
 
-object LobbyManager {
+class LobbyManager {
     private val lobbies = LinkedHashMap<String, Lobby>()
     private val scheduledRemovals = LinkedHashMap<String, ScheduledFuture<*>>()
 

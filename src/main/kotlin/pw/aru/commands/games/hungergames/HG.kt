@@ -1,6 +1,8 @@
 package pw.aru.commands.games.hungergames
 
 import net.dv8tion.jda.core.entities.TextChannel
+import pw.aru.commands.games.hg.DiscordGuestTribute
+import pw.aru.commands.games.hg.DiscordTribute
 import pw.aru.hungergames.HungerGames
 import pw.aru.hungergames.HungerGamesBuilder
 import pw.aru.hungergames.data.SimpleTribute

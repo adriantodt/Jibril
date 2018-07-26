@@ -9,6 +9,7 @@ import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.hooks.EventListener
+import net.dv8tion.jda.core.requests.restaction.MessageAction
 
 //Builders
 
@@ -33,6 +34,8 @@ inline operator fun DefaultShardManagerBuilder.plusAssign(listener: Any) {
 inline fun MessageBuilder.embed(embed: EmbedBuilder = EmbedBuilder(), init: EmbedBuilder.() -> Unit) {
     setEmbed(embed.also(init).build())
 }
+
+inline fun MessageChannel.sendEmbed(embed: EmbedBuilder = EmbedBuilder(), init: EmbedBuilder.() -> Unit): MessageAction = sendMessage(embed.also(init).build())
 
 //Extras
 
