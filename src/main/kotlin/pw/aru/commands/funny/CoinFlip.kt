@@ -1,9 +1,9 @@
 package pw.aru.commands.funny
 
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.COIN_HEADS
 import pw.aru.utils.emotes.COIN_TAILS
@@ -20,14 +20,14 @@ class CoinFlip : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
         "Oh, I love doing this!"
     )
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
-        event.channel.sendMessage("*${sThrow.random()}*\n${if (threadLocalRandom().nextBoolean()) heads else tails}").queue()
+    override fun CommandContext.call() {
+        send("*${sThrow.random()}*\n${if (threadLocalRandom().nextBoolean()) heads else tails}").queue()
     }
 
-    override fun discreteCall(event: GuildMessageReceivedEvent, args: String, outer: String) {
+    override fun CommandContext.discreteCall(outer: String) {
         val toSend = outer.replace('\n', ' ').stripFormatting()
 
-        event.channel.sendMessage("**$toSend**\n${if (threadLocalRandom().nextBoolean()) heads else tails}").queue()
+        send("**$toSend**\n${if (threadLocalRandom().nextBoolean()) heads else tails}").queue()
     }
 
     override val helpHandler = HelpFactory("CoinFlip Command") {

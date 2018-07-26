@@ -1,12 +1,10 @@
 package pw.aru.commands.utils
 
 import com.jagrosh.jdautilities.commons.utils.FinderUtil
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Categories
-import pw.aru.core.commands.ArgsCommand
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
-import pw.aru.core.parser.Args
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.utils.Colors
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.THINKING
@@ -19,12 +17,13 @@ import javax.imageio.ImageIO
 import kotlin.math.absoluteValue
 
 @Command("color")
-class ColorCommand : ArgsCommand(), ICommand.HelpDialogProvider {
+class ColorCommand : ICommand, ICommand.HelpDialogProvider {
     override val category = Categories.UTILS
 
-    override fun call(event: GuildMessageReceivedEvent, args: Args) {
-        val arg = args.takeString()
+    override fun CommandContext.call() {
+        val args = parseable()
 
+        val arg = args.takeString()
         if (arg.isEmpty()) return showHelp()
 
         val color: Color = when (arg) {
@@ -69,17 +68,17 @@ class ColorCommand : ArgsCommand(), ICommand.HelpDialogProvider {
                 with(threadLocalRandom()) { Color.getHSBColor(nextFloat(), nextFloat(), nextFloat()) }
             }
             "member" -> {
-                event.member.color ?: Color.white
+                author.color ?: Color.white
             }
             else -> {
                 val raw = args.raw
                 if (raw.startsWith("#") || raw.startsWith("0x")) {
                     Color.decode(raw)
                 } else {
-                    val members = FinderUtil.findMembers(raw, event.guild)
+                    val members = FinderUtil.findMembers(raw, guild)
 
                     if (members.isNotEmpty()) {
-                        if (members.size > 1) return event.channel.sendMessage(
+                        if (members.size > 1) return send(
                             arrayOf(
                                 "$THINKING Well, I found too many users. How about refining your search?",
                                 "**Users found**: ${members.joinToString(", ") { it.user.discordTag }}"
@@ -103,7 +102,7 @@ class ColorCommand : ArgsCommand(), ICommand.HelpDialogProvider {
         val rgbHex = "0x${(color.rgb and 0xffffff).toString(16)}"
         val file = "$rgbHex.png"
 
-        val embed = embed {
+        sendEmbed {
             setColor(color)
             setTitle("Here's your color!")
             setThumbnail("attachment://$file")
@@ -142,9 +141,7 @@ class ColorCommand : ArgsCommand(), ICommand.HelpDialogProvider {
                 hsv,
                 "```"
             )
-        }
-
-        event.channel.sendMessage(embed).addFile(generate(color), file).queue()
+        }.addFile(generate(color), file).queue()
     }
 
     override val helpHandler = HelpFactory("Color Command") {

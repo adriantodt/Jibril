@@ -1,11 +1,11 @@
 package pw.aru.commands.info
 
 import mu.KLogging
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.utils.TaskManager.task
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.ERROR
@@ -52,16 +52,16 @@ class Help(private val registry: CommandRegistry) : ICommand, ICommand.HelpDialo
         "I wonder if this is what you are looking for..."
     )
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
+    override fun CommandContext.call() {
         if (args.isEmpty()) {
-            botHelp(event)
+            botHelp()
         } else {
-            findHelp(event, args.trim().toLowerCase())
+            findHelp(args.trim().toLowerCase())
         }
     }
 
-    private fun botHelp(event: GuildMessageReceivedEvent) {
-        embed {
+    private fun CommandContext.botHelp() {
+        sendEmbed {
             baseEmbed(event, "Aru! | Help")
 
             description(
@@ -93,10 +93,10 @@ class Help(private val registry: CommandRegistry) : ICommand, ICommand.HelpDialo
                     inline = false
                 )
             }
-        }.send(event).queue()
+        }.queue()
     }
 
-    private fun findHelp(event: GuildMessageReceivedEvent, args: String) {
+    private fun CommandContext.findHelp(args: String) {
         registry.commands.ifContains(args) {
             onHelp(it, event)
             return
@@ -107,7 +107,7 @@ class Help(private val registry: CommandRegistry) : ICommand, ICommand.HelpDialo
             return
         }
 
-        event.channel.sendMessage("$ERROR There's no command or category with that name!").queue()
+        send("$ERROR There's no command or category with that name!").queue()
     }
 
     override val helpHandler: ICommand.HelpDialog

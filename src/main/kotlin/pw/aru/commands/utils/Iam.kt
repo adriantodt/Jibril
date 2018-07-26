@@ -7,6 +7,7 @@ import pw.aru.commands.utils.Iam.iam
 import pw.aru.commands.utils.Iam.iamnot
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.db.AruDB
 import pw.aru.db.entities.GuildSettings
 import pw.aru.utils.emotes.ERROR
@@ -15,13 +16,13 @@ import pw.aru.utils.emotes.SUCCESS
 //@Command("iam")
 class IamCmd(private val db: AruDB) : ICommand {
     override val category = Categories.UTILS
-    override fun call(event: GuildMessageReceivedEvent, args: String) = iam(db, event, args)
+    override fun CommandContext.call() = iam(db, event, args)
 }
 
 //@Command("iamnot")
 class IamNotCmd(private val db: AruDB) : ICommand {
     override val category = Categories.UTILS
-    override fun call(event: GuildMessageReceivedEvent, args: String) = iamnot(db, event, args)
+    override fun CommandContext.call() = iamnot(db, event, args)
 }
 
 object Iam {

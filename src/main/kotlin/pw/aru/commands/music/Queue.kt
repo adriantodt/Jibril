@@ -1,10 +1,10 @@
 package pw.aru.commands.music
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
 import pw.aru.core.music.musicLength
@@ -17,14 +17,14 @@ import pw.aru.utils.extensions.*
 @Command("queue", "q")
 @UseFullInjector
 class Queue(musicManager: MusicManager) : MusicCommand(musicManager), ICommand.HelpDialogProvider {
-    override fun run(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
+    override fun CommandContext.call(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
         val queue = musicPlayer.queue
         val lastPage = queue.size / 5
         val page = (if (args.isEmpty()) 1 else args.toIntOrNull() ?: return showHelp())
             .minus(1)
             .coerceIn(0, lastPage)
 
-        embed {
+        sendEmbed {
             baseEmbed(event, "Queue for guild ${event.guild.name}", image = event.guild.iconUrl)
 
             field(
@@ -62,7 +62,7 @@ class Queue(musicManager: MusicManager) : MusicCommand(musicManager), ICommand.H
             )
 
             footer("Page ${page.plus(1)} of ${lastPage.plus(1)} | Requested by ${event.member.effectiveName}", event.author.effectiveAvatarUrl)
-        }.send(event).queue()
+        }.queue()
     }
 
     override val helpHandler = HelpFactory("Queue Command") {

@@ -1,10 +1,10 @@
 package pw.aru.commands.music
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
 import pw.aru.utils.commands.HelpFactory
@@ -13,9 +13,8 @@ import pw.aru.utils.emotes.SUCCESS
 @Command("skip")
 @UseFullInjector
 class Skip(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "voteskip", true), ICommand.HelpDialogProvider {
-
-    override fun action(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
-        event.channel.sendMessage(
+    override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
+        send(
             "$SUCCESS Skipping this song..."
         ).queue()
         musicPlayer.startNext(true)
@@ -40,20 +39,20 @@ class Skip(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "v
 class VoteSkip(musicManager: MusicManager) : MusicVotingCommand(musicManager), ICommand.HelpDialogProvider {
     override fun getVotes(musicPlayer: GuildMusicPlayer) = musicPlayer.voteSkips
 
-    override fun onVoteAdded(event: GuildMessageReceivedEvent, votesLeft: Int) {
-        event.channel.sendMessage(
+    override fun CommandContext.onVoteAdded(votesLeft: Int) {
+        send(
             "$SUCCESS Your vote to skip the music has been added. More $votesLeft votes are required to skip."
         ).queue()
     }
 
-    override fun onVoteRemoved(event: GuildMessageReceivedEvent, votesLeft: Int) {
-        event.channel.sendMessage(
+    override fun CommandContext.onVoteRemoved(votesLeft: Int) {
+        send(
             "$SUCCESS Your vote to skip the music has been removed. More $votesLeft votes are required to skip."
         ).queue()
     }
 
-    override fun onVotesReached(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
-        event.channel.sendMessage("$SUCCESS Enough votes reached! Skipping this song...").queue()
+    override fun CommandContext.onVotesReached(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
+        send("$SUCCESS Enough votes reached! Skipping this song...").queue()
         musicPlayer.startNext(true)
     }
 

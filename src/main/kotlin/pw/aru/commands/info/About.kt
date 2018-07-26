@@ -1,11 +1,11 @@
 package pw.aru.commands.info
 
 import net.dv8tion.jda.bot.sharding.ShardManager
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.utils.AruColors
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.extensions.*
@@ -15,10 +15,10 @@ import pw.aru.utils.extensions.*
 class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDialogProvider {
     override val category = Categories.INFO
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
+    override fun CommandContext.call() {
         when (args) {
-            "credits", "credit" -> credits(event)
-            "aru", "me", "bot", "" -> about(event)
+            "credits", "credit" -> credits()
+            "aru", "me", "bot", "" -> about()
             else -> showHelp()
         }
     }
@@ -28,8 +28,8 @@ class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDia
         return "**${user.name}#${user.discriminator}**"
     }
 
-    private fun credits(event: GuildMessageReceivedEvent) {
-        embed {
+    private fun CommandContext.credits() {
+        sendEmbed {
             baseEmbed(event, "Aru! | Credits")
             thumbnail("https://assets.aru.pw/img/aru_avatar.jpg")
             field(
@@ -42,11 +42,11 @@ class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDia
                     "\u25AB Image and Action Commands powered by https://weeb.sh/"
                 )
             )
-        }.send(event).queue()
+        }.queue()
     }
 
-    private fun about(event: GuildMessageReceivedEvent) {
-        embed {
+    private fun CommandContext.about() {
+        sendEmbed {
             baseEmbed(event, name = "Aru! | About", color = AruColors.primary)
             thumbnail("https://assets.aru.pw/img/aru_avatar.jpg")
             description(
@@ -66,7 +66,7 @@ class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDia
                 "Invite link: https://add.aru.pw/ | Requested by ${event.member.effectiveName}",
                 event.jda.selfUser.effectiveAvatarUrl
             )
-        }.send(event).queue()
+        }.queue()
 
     }
 

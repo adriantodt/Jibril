@@ -1,9 +1,9 @@
 package pw.aru.commands.info
 
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.PING_PONG
 import pw.aru.utils.extensions.random
@@ -18,11 +18,11 @@ class Ping : ICommand, ICommand.HelpDialogProvider {
         "Aw, I lost! *Discord is too fast.*"
     )
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
+    override fun CommandContext.call() {
         val start = currentTimeMillis()
         event.channel.sendTyping().queue {
             val ping = currentTimeMillis() - start
-            event.channel.sendMessage(
+            send(
                 "$PING_PONG ${messages.random()}\n**Ping**: API - `${ping}ms` | Websocket - `${event.jda.ping}ms`"
             ).queue()
         }

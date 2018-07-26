@@ -1,8 +1,8 @@
 package pw.aru.core
 
 import mu.KLogging
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.placeholder.PlaceholderCommand
 import pw.aru.core.commands.placeholder.ReRoutingPlaceholderCommand
 import pw.aru.utils.extensions.classOf
@@ -58,13 +58,13 @@ class CommandRegistry {
         lookup[command] = keys
     }
 
-    fun registerOverride(names: Array<out String>, command: ICommand): List<Pair<GuildMessageReceivedEvent, String>> {
+    fun registerOverride(names: Array<out String>, command: ICommand): List<CommandContext> {
         sanityChecks(command, names)
         val keys = names.map(String::toLowerCase).distinct().toTypedArray()
 
         val placeholder = commands[keys[0]]
 
-        val logs: List<Pair<GuildMessageReceivedEvent, String>> = when (placeholder) {
+        val logs: List<CommandContext> = when (placeholder) {
             is ReRoutingPlaceholderCommand -> placeholder.queue
             is PlaceholderCommand -> emptyList()
             else -> throw IllegalStateException("Command is not a placeholder")

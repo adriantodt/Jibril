@@ -2,21 +2,21 @@ package pw.aru.commands.info
 
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.entities.ISnowflake
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.Aru
 import pw.aru.core.CommandProcessor
 import pw.aru.core.categories.Categories
-import pw.aru.core.commands.ArgsCommand
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.music.MusicManager
-import pw.aru.core.parser.Args
 import pw.aru.exported.aru_version
 import pw.aru.utils.commands.EmbedFirst
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.LOADING
-import pw.aru.utils.extensions.*
+import pw.aru.utils.extensions.baseEmbed
+import pw.aru.utils.extensions.field
+import pw.aru.utils.extensions.format
 import pw.aru.utils.helpers.AsyncInfoMonitor.availableProcessors
 import pw.aru.utils.helpers.AsyncInfoMonitor.cpuUsage
 import pw.aru.utils.helpers.AsyncInfoMonitor.freeMemory
@@ -41,20 +41,22 @@ class Stats
     private val shardManager: ShardManager,
     private val musicManager: MusicManager,
     private val processor: CommandProcessor
-) : ArgsCommand(), ICommand.HelpDialogProvider {
+) : ICommand, ICommand.HelpDialogProvider {
     override val category = Categories.INFO
 
-    override fun call(event: GuildMessageReceivedEvent, args: Args) {
+    override fun CommandContext.call() {
+        val args = parseable()
+
         when (args.takeString()) {
-            "server", "s" -> serverStats(event)
-            "", "discord", "d" -> discordStats(event)
-            "cmds", "cmd", "commands", "c" -> statsManager(CommandStatsManager, "Command Stats", event, args.takeString())
-            "guilds", "guild", "g" -> statsManager(GuildStatsManager, "Guild Stats", event, args.takeString())
+            "server", "s" -> serverStats()
+            "", "discord", "d" -> discordStats()
+            "cmds", "cmd", "commands", "c" -> statsManager(CommandStatsManager, "Command Stats", args.takeString())
+            "guilds", "guild", "g" -> statsManager(GuildStatsManager, "Guild Stats", args.takeString())
             else -> showHelp()
         }
     }
 
-    private fun discordStats(event: GuildMessageReceivedEvent) {
+    private fun CommandContext.discordStats() {
         EmbedFirst(event) {
             baseEmbed(event, "Aru! | Discord Stats")
             field("Uptime:", Aru.uptime)
@@ -95,35 +97,35 @@ class Stats
         }
     }
 
-    private fun <T> statsManager(m: StatsManager<T>, title: String, event: GuildMessageReceivedEvent, arg: String) {
+    private fun <T> CommandContext.statsManager(m: StatsManager<T>, title: String, arg: String) {
         when (arg) {
-            "" -> statsManagerResume(m, title, event)
-            "total", "t" -> detailedStatsManager(m, title, event, TOTAL)
-            "daily", "d", "dialy", "day" -> detailedStatsManager(m, title, event, DAY)
-            "hourly", "h", "hour" -> detailedStatsManager(m, title, event, HOUR)
-            "now", "n", "minute", "min", "m" -> detailedStatsManager(m, title, event, MINUTE)
+            "" -> statsManagerResume(m, title)
+            "total", "t" -> detailedStatsManager(m, title, TOTAL)
+            "daily", "d", "dialy", "day" -> detailedStatsManager(m, title, DAY)
+            "hourly", "h", "hour" -> detailedStatsManager(m, title, HOUR)
+            "now", "n", "minute", "min", "m" -> detailedStatsManager(m, title, MINUTE)
             else -> showHelp()
         }
     }
 
-    private fun <T> statsManagerResume(m: StatsManager<T>, title: String, event: GuildMessageReceivedEvent) {
-        embed {
+    private fun <T> CommandContext.statsManagerResume(m: StatsManager<T>, title: String) {
+        sendEmbed {
             baseEmbed(event, title)
             arrayOf(MINUTE, HOUR, DAY, TOTAL).forEach {
                 field(it.name, m.resume(it))
             }
-        }.send(event).queue()
+        }.queue()
     }
 
-    private fun <T> detailedStatsManager(m: StatsManager<T>, title: String, event: GuildMessageReceivedEvent, type: Type) {
-        embed {
+    private fun <T> CommandContext.detailedStatsManager(m: StatsManager<T>, title: String, type: Type) {
+        sendEmbed {
             baseEmbed(event, "$title | ${type.display}")
             m.fillEmbed(this, type)
-        }.send(event).queue()
+        }.queue()
     }
 
-    private fun serverStats(event: GuildMessageReceivedEvent) {
-        embed {
+    private fun CommandContext.serverStats() {
+        sendEmbed {
             baseEmbed(event, "Aru! | Server Stats")
             field(
                 "Resource Usage:",
@@ -142,7 +144,7 @@ class Stats
                     "\u25AB **CPU Usage**: ${vpsCpuUsage.format("%.2f")}%"
                 )
             )
-        }.send(event).queue()
+        }.queue()
     }
 
     override val helpHandler = HelpFactory("Stats Command") {

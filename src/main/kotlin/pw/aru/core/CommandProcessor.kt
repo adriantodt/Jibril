@@ -5,6 +5,7 @@ import net.dv8tion.jda.core.Permission.*
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.Aru.prefixes
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.db.AruDB
 import pw.aru.db.entities.GuildSettings
 import pw.aru.snow64.Snow64
@@ -112,7 +113,9 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
     private fun runCommand(command: ICommand, event: GuildMessageReceivedEvent, args: String) {
         commandCount++
         try {
-            command.call(event, args)
+            with(command) {
+                CommandContext(event, args).call()
+            }
         } catch (e: Exception) {
             try {
                 handleException(command, event, e)
@@ -148,7 +151,9 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
     private fun runDiscreteCommand(command: ICommand.Discrete, event: GuildMessageReceivedEvent, args: String, outer: String) {
         commandCount++
         try {
-            command.discreteCall(event, args, outer)
+            with(command) {
+                CommandContext(event, args).discreteCall(outer)
+            }
         } catch (e: Exception) {
             try {
                 handleException(command, event, e)

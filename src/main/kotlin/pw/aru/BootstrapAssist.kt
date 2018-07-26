@@ -263,8 +263,12 @@ internal fun replacePlaceholderCommands(injector: DKodein, registry: CommandRegi
             val meta = it.getAnnotation(classOf<Command>())
             val command = jit.newInstance(it)
 
-            for ((event, args) in registry.registerOverride(meta.value, command)) {
-                map.getOrPut(event.guild.idLong, ::ArrayList) += { command.call(event, args) }
+            for (context in registry.registerOverride(meta.value, command)) {
+                map.getOrPut(context.event.guild.idLong, ::ArrayList) += {
+                    command.run {
+                        context.call()
+                    }
+                }
             }
         } catch (e: Exception) {
             println("$it\n$e")

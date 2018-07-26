@@ -7,6 +7,7 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.CommandPermission.BOT_DEVELOPER
 import pw.aru.core.commands.CommandPermission.SERVER_ADMIN
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.utils.emotes.EYES
 import pw.aru.utils.extensions.random
 import java.text.MessageFormat
@@ -20,8 +21,8 @@ class Greeting : ICommand, ICommand.HelpHandler {
 
     override val category: Category? = null
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
-        event.channel.sendMessage(random(event.member).format(arrayOf(event.member.effectiveName))).queue()
+    override fun CommandContext.call() {
+        send(random(event.member).format(arrayOf(event.member.effectiveName))).queue()
     }
 
     companion object {

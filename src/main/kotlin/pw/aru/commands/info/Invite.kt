@@ -1,20 +1,23 @@
 package pw.aru.commands.info
 
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.utils.AruColors
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.SMILE2
-import pw.aru.utils.extensions.*
+import pw.aru.utils.extensions.baseEmbed
+import pw.aru.utils.extensions.description
+import pw.aru.utils.extensions.field
+import pw.aru.utils.extensions.thumbnail
 
 @Command("invite", "links", "hangout")
 class Invite : ICommand, ICommand.HelpDialogProvider {
     override val category = Categories.INFO
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
-        embed {
+    override fun CommandContext.call() {
+        sendEmbed {
             baseEmbed(event, name = "Aru! | Invite", color = AruColors.primary)
 
             thumbnail("https://assets.aru.pw/img/aru_avatar.jpg")
@@ -32,7 +35,7 @@ class Invite : ICommand, ICommand.HelpDialogProvider {
             field("Need support? Join my Server!", "https://support.aru.pw/")
             field("Wanna support a poor angel?", "https://patreon.aru.pw/")
 
-        }.send(event).queue()
+        }.queue()
     }
 
     override val helpHandler = HelpFactory("Invite and other Links") {
