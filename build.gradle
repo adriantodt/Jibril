@@ -13,7 +13,7 @@ plugins {
 }
 
 group = 'pw.aru'
-version = '2.1-dev'
+version = '2.1'
 mainClassName = 'pw.aru.Bootstrap'
 
 // Minified Splash
