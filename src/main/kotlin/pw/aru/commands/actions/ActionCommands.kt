@@ -458,6 +458,12 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
             GetImage(type = "rem")
         )
 
+        CustomImageCommand(
+            category, registry, cache,
+            CustomCommandInfo(listOf("jibril"), "Jibril Command", "Sends a random Jibril image.", "jibril.gif"),
+            File("assets/aru/images/jibril.txt").readLines()
+        )
+
         WeebImageCommand(
             category, provider, registry, cache,
             WeebCommandInfo(listOf("megumin"), "Megumin Command", "Sends a random Megumin image."),
