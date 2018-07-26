@@ -1,4 +1,4 @@
-package pw.aru.commands.games.lobby
+package pw.aru.commands.games.manager.lobby
 
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.entities.Member

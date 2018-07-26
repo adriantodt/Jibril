@@ -1,12 +1,8 @@
 package pw.aru.commands.games.hungergames
 
 import com.jagrosh.jdautilities.commons.utils.FinderUtil
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import pw.aru.commands.games.lobby.LobbyManager
-import pw.aru.core.categories.Categories
-import pw.aru.core.commands.ICommand
+import pw.aru.commands.games.manager.lobby.LobbyManager
 import pw.aru.core.commands.context.CommandContext
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.commands.HelpFactory.Companion.prefix
 import pw.aru.utils.emotes.CONFUSED
 import pw.aru.utils.emotes.ERROR
@@ -14,37 +10,9 @@ import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.extensions.baseEmbed
 import pw.aru.utils.extensions.field
 import pw.aru.utils.extensions.toSmartString
-import pw.aru.utils.extensions.usage
 import java.util.*
 
-class HungerGamesCmd : ICommand, ICommand.HelpHandler {
-    override val category = Categories.GAMES
-
-    override fun CommandContext.call() {
-        val args = parseable()
-
-        if (GameManager.isGameRunning(event.channel)) {
-            when (args.takeString()) {
-                "cancel", "end", "finish" -> finishGame()
-                else -> showHelp()
-            }
-        } else {
-            when (args.takeString()) {
-                "new" -> newLobby()
-                "join" -> joinLobby()
-                "leave" -> leaveLobby()
-                "addguests", "addguest" -> addGuests(args.takeRemaining())
-                "addall" -> addAllGuests()
-                "rmguests", "rmguest" -> rmGuests(args.takeRemaining())
-                "clearguests" -> clearGuests()
-            //  "configs" -> { }
-                "start" -> startGame()
-                "", "lobby" -> lobby()
-                else -> showHelp()
-            }
-        }
-    }
-
+class HungerGamesCmd {
     private fun CommandContext.finishGame() {
         val game = GameManager.getGame(event.channel)
 
@@ -292,45 +260,5 @@ class HungerGamesCmd : ICommand, ICommand.HelpHandler {
 
             return builder.toString()
         }
-    }
-
-    override fun onHelp(event: GuildMessageReceivedEvent) {
-        if (GameManager.isGameRunning(event.channel)) {
-            event.channel.sendMessage(inGameHelp).queue()
-        } else {
-            event.channel.sendMessage(lobbyHelp.onHelp(event)).queue()
-        }
-    }
-
-    private val inGameHelp = arrayOf(
-        "**HungerGames** - **In-game**",
-        //"hg next".usage("Shows next event."),
-        //"hg <end/finish>".usage("Ends the game."),
-        //"hg cancel".usage("Abruptly ends the game.")
-        "hg <end/finish/cancel>".usage("Ends the game.")
-    ).joinToString("\n\n")
-
-    private val lobbyHelp = HelpFactory("HungerGames") {
-        aliases("hungergames")
-        usage("hg new", "Creates a new game lobby.")
-        usage("hg join", "Joins a existing lobby.")
-        usage("hg addguests", "Adds guests to the lobby. (You must be the lobby's creator)")
-        usage("hg rmguests", "Remove guests to the lobby. (You must be the lobby's creator)")
-        usage("hg addall", "Add ALL members from the server as guests of the lobby. (You must be the lobby's creator)")
-        usage("hg clearguests", "Remove all guests from the loobby. (You must be the lobby's creator)")
-        //usage("hg configs", "Setup the lobby configs. (You must be the lobby's creator)")
-        usage("hg start", "Starts a new game. (You must be the lobby's creator)")
-
-        /**
-        "new" -> newLobby(event)
-        "join" -> joinLobby(event)
-        "leave" -> leaveLobby(event)
-        "addguests", "addguest" -> addGuests(event, args)
-        "addall" -> addAllGuests(event)
-        "rmguests", "rmguest" -> rmGuests(event, args)
-        "clearguests" -> clearGuests(event)
-        "start" -> startGame(event)
-        null, "", "lobby" -> lobby(event)
-         */
     }
 }

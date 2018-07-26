@@ -1,5 +1,6 @@
 package pw.aru.commands.games.hungergames
 
+import net.dv8tion.jda.core.entities.Member
 import net.dv8tion.jda.core.entities.TextChannel
 import pw.aru.commands.games.hg.DiscordGuestTribute
 import pw.aru.commands.games.hg.DiscordTribute
@@ -8,8 +9,6 @@ import pw.aru.hungergames.HungerGamesBuilder
 import pw.aru.hungergames.data.SimpleTribute
 import pw.aru.hungergames.events.EventFormatter
 import pw.aru.hungergames.game.Actions
-import pw.aru.hungergames.game.HarmfulAction
-import pw.aru.hungergames.game.HarmlessAction
 import pw.aru.hungergames.game.Phase
 import pw.aru.hungergames.loader.loadFile
 import pw.aru.hungergames.loader.parseHarmfulActions
@@ -18,35 +17,39 @@ import pw.aru.hungergames.phases.*
 import java.io.File
 
 object HG {
-    val actions: Actions by lazy {
+    private val actions: Actions by lazy {
+        fun harmlessActions(file: String) = parseHarmlessActions(loadFile(File(file)))
+        fun harmfulActions(file: String) = parseHarmfulActions(loadFile(File(file)))
+
         Actions(
+            //Bloodbath
             bloodbathHarmless = harmlessActions("assets/hungergames/events/bloodbath_harmless.txt"),
             bloodbathHarmful = harmfulActions("assets/hungergames/events/bloodbath_harmful.txt"),
+            //Day
             dayHarmless = harmlessActions("assets/hungergames/events/day_harmless.txt"),
             dayHarmful = harmfulActions("assets/hungergames/events/day_harmful.txt"),
+            //Night
             nightHarmless = harmlessActions("assets/hungergames/events/night_harmless.txt"),
             nightHarmful = harmfulActions("assets/hungergames/events/night_harmful.txt"),
+            //Feast
             feastHarmless = harmlessActions("assets/hungergames/events/feast_harmless.txt"),
             feastHarmful = harmfulActions("assets/hungergames/events/feast_harmful.txt")
         )
     }
 
-    fun buildHg(lobby: Lobby): HungerGames {
+    fun buildHg(players: LinkedHashSet<Member>, playerGuests: LinkedHashSet<Member>, guests: LinkedHashSet<String>, threshold: Double): HungerGames {
         return HungerGamesBuilder()
             .actions(actions)
             .addTributes(
                 listOf(
-                    lobby.players.map(::DiscordTribute),
-                    lobby.playerGuests.map(::DiscordGuestTribute),
-                    lobby.guests.map(::SimpleTribute)
+                    players.map(::DiscordTribute),
+                    playerGuests.map(::DiscordGuestTribute),
+                    guests.map(::SimpleTribute)
                 ).flatten()
             )
-            .threshold(lobby.threshold)
+            .threshold(threshold)
             .build()
     }
-
-    private fun harmlessActions(file: String): List<HarmlessAction> = parseHarmlessActions(loadFile(File(file)))
-    private fun harmfulActions(file: String): List<HarmfulAction> = parseHarmfulActions(loadFile(File(file)))
 
     private val formatter: EventFormatter = EventFormatter {
         "**${it.name}** ``(${if (it.kills == 1) "1 kill" else it.kills.toString() + " kills"})``"
@@ -61,7 +64,7 @@ object HG {
             .map { it.map { it.value } }
     }
 
-    fun handleHg(hungerGames: HungerGames, channel: TextChannel) {
+    fun HungerGames.handle(channel: TextChannel) {
         fun send(vararg messages: Any?) {
             channel.sendMessage(messages.joinToString("\n", transform = Any?::toString)).queue()
         }
@@ -69,7 +72,7 @@ object HG {
         fun quickYield() = Thread.sleep(2500)
         fun yield() = Thread.sleep(15000)
 
-        for (e: Phase in hungerGames.newGame()) {
+        for (e: Phase in newGame()) {
             when (e) {
                 is Bloodbath -> {
                     send("=-=- **The Bloodbath** -=-=")
