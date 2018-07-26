@@ -19,13 +19,13 @@ class Avatar : ICommand, ICommand.HelpDialogProvider {
 
     override fun CommandContext.call() {
         val user = if (args.isEmpty()) {
-            event.member
+            author
         } else {
-            val list = FinderUtil.findMembers(args, event.guild)
+            val list = FinderUtil.findMembers(args, guild)
             if (list.isEmpty()) {
-                return event.channel.sendMessage("$ERROR Aw, I couldn't find a member with that name $DISAPPOINTED").queue()
+                return send("$ERROR Aw, I couldn't find a member with that name $DISAPPOINTED").queue()
             } else if (list.size > 1) {
-                return event.channel.sendMessage(
+                return send(
                     arrayOf(
                         "$THINKING Well, I found too many users. How about refining your search?",
                         "**Users found**: ${list.joinToString(", ") { it.user.discordTag }}"
@@ -35,7 +35,7 @@ class Avatar : ICommand, ICommand.HelpDialogProvider {
             list.first()
         }.user
 
-        event.channel.sendMessage(
+        send(
             "$SUCCESS Avatar for **${user.discordTag}**:\n${user.effectiveAvatarUrl}"
         ).queue()
     }

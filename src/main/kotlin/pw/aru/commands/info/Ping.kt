@@ -22,7 +22,7 @@ class Ping : ICommand, ICommand.HelpDialogProvider {
         val start = currentTimeMillis()
         event.channel.sendTyping().queue {
             val ping = currentTimeMillis() - start
-            event.channel.sendMessage(
+            send(
                 "$PING_PONG ${messages.random()}\n**Ping**: API - `${ping}ms` | Websocket - `${event.jda.ping}ms`"
             ).queue()
         }

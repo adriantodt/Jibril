@@ -26,7 +26,7 @@ abstract class MusicCommand(val musicManager: MusicManager) : ICommand {
         val currentTrack = musicPlayer.currentTrack
 
         if (currentTrack == null) {
-            event.channel.sendMessage(
+            send(
                 "$CONFUSED But I'm not playing anything..."
             ).queue()
             return
@@ -45,12 +45,12 @@ abstract class MusicActionCommand(manager: MusicManager) : MusicCommand(manager)
         val voiceState = event.member.voiceState
 
         if (!voiceState.inVoiceChannel()) {
-            event.channel.sendMessage("$X You need to be connected to a Voice Channel to use this command!").queue()
+            send("$X You need to be connected to a Voice Channel to use this command!").queue()
             return
         }
 
         if (voiceState.channel != musicPlayer.currentChannel) {
-            event.channel.sendMessage(
+            send(
                 "$X You're not in the same voice channel as I am..."
             ).queue()
             return
@@ -85,7 +85,7 @@ abstract class MusicPermissionCommand(
         if (checkPermissions(event, musicPlayer, userQueued)) {
             actionWithPerms(musicPlayer, currentTrack)
         } else {
-            event.channel.sendMessage(
+            send(
                 "$STOP B-baka, I'm not allowed to let you do that!" +
                     if (alternate == null) "" else "\n\n$THINKING Maybe you meant ``${alternate.withPrefix()}`` instead?"
             ).queue()
@@ -96,17 +96,17 @@ abstract class MusicPermissionCommand(
 }
 
 abstract class MusicVotingCommand(manager: MusicManager) : MusicActionCommand(manager) {
-    open fun getRequiredVotes(voiceChannel: VoiceChannel) = (voiceChannel.humanUsers * 0.6).toInt()
-    open fun checkRequirements(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) = true
+    open fun CommandContext.checkRequirements(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) = true
+
     abstract fun getVotes(musicPlayer: GuildMusicPlayer): TLongList
+    open fun getRequiredVotes(voiceChannel: VoiceChannel) = (voiceChannel.humanUsers * 0.6).toInt()
 
     abstract fun CommandContext.onVoteAdded(votesLeft: Int)
     abstract fun CommandContext.onVoteRemoved(votesLeft: Int)
     abstract fun CommandContext.onVotesReached(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String)
 
     override fun CommandContext.action(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
-
-        if (!checkRequirements(event, musicPlayer, currentTrack, args)) return
+        if (!checkRequirements(musicPlayer, currentTrack)) return
         val votes = getVotes(musicPlayer)
         val voiceChannel = musicPlayer.currentChannel!!
         val requiredVotes = getRequiredVotes(voiceChannel)

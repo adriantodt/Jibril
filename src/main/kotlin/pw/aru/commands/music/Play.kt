@@ -41,18 +41,18 @@ sealed class PlayCommand(
         val args = parseable()
 
         if (!event.member.voiceState.inVoiceChannel()) {
-            event.channel.sendMessage("$X You need to be connected to a Voice Channel to use this command!").queue()
+            send("$X You need to be connected to a Voice Channel to use this command!").queue()
             return
         }
 
         if (!event.guild.selfMember.hasPermission(event.channel, MESSAGE_ADD_REACTION)) {
-            event.channel.sendMessage("$X Hey, I need the **${MESSAGE_ADD_REACTION.name}** permission in order to do that!").queue()
+            send("$X Hey, I need the **${MESSAGE_ADD_REACTION.name}** permission in order to do that!").queue()
             return
         }
 
         val musicPlayer = musicManager[event.guild]
         if (playNow && !checkPermissions(event, musicPlayer, true)) {
-            event.channel.sendMessage(
+            send(
                 "$STOP B-baka, I'm not allowed to let you do that!\n\n$THINKING Maybe you meant ``${(if (force) "forceplaynext" else "playnext").withPrefix()}`` instead?"
             ).queue()
             return

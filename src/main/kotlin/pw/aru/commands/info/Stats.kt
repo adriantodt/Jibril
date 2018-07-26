@@ -14,7 +14,9 @@ import pw.aru.exported.aru_version
 import pw.aru.utils.commands.EmbedFirst
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.LOADING
-import pw.aru.utils.extensions.*
+import pw.aru.utils.extensions.baseEmbed
+import pw.aru.utils.extensions.field
+import pw.aru.utils.extensions.format
 import pw.aru.utils.helpers.AsyncInfoMonitor.availableProcessors
 import pw.aru.utils.helpers.AsyncInfoMonitor.cpuUsage
 import pw.aru.utils.helpers.AsyncInfoMonitor.freeMemory
@@ -107,23 +109,23 @@ class Stats
     }
 
     private fun <T> CommandContext.statsManagerResume(m: StatsManager<T>, title: String) {
-        embed {
+        sendEmbed {
             baseEmbed(event, title)
             arrayOf(MINUTE, HOUR, DAY, TOTAL).forEach {
                 field(it.name, m.resume(it))
             }
-        }.send(event).queue()
+        }.queue()
     }
 
     private fun <T> CommandContext.detailedStatsManager(m: StatsManager<T>, title: String, type: Type) {
-        embed {
+        sendEmbed {
             baseEmbed(event, "$title | ${type.display}")
             m.fillEmbed(this, type)
-        }.send(event).queue()
+        }.queue()
     }
 
     private fun CommandContext.serverStats() {
-        embed {
+        sendEmbed {
             baseEmbed(event, "Aru! | Server Stats")
             field(
                 "Resource Usage:",
@@ -142,7 +144,7 @@ class Stats
                     "\u25AB **CPU Usage**: ${vpsCpuUsage.format("%.2f")}%"
                 )
             )
-        }.send(event).queue()
+        }.queue()
     }
 
     override val helpHandler = HelpFactory("Stats Command") {

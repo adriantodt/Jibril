@@ -17,7 +17,7 @@ class Choose : ICommand, ICommand.HelpDialogProvider {
 
         if (options.isEmpty()) return showHelp()
 
-        event.channel.sendMessage("$THINKING Hmmm... I choose `${options.random()}`!").queue()
+        send("$THINKING Hmmm... I choose `${options.random()}`!").queue()
     }
 
     override val helpHandler = HelpFactory("Choose Command") {

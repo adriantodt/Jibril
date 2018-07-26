@@ -78,7 +78,7 @@ class DevCmd
             RestAction.DEFAULT_FAILURE = disabledCallsiteConsumer
         }
 
-        event.channel.sendMessage("$SUCCESS Callsite Mode: $enable").queue()
+        send("$SUCCESS Callsite Mode: $enable").queue()
     }
 
     private val adminJokes = arrayOf(
@@ -88,7 +88,7 @@ class DevCmd
     )
 
     private fun CommandContext.adminCheck() {
-        embed {
+        sendEmbed {
             baseEmbed(event, "Aru! | DevTools")
             thumbnail("https://assets.aru.pw/img/yes.png")
 
@@ -96,7 +96,7 @@ class DevCmd
                 "*${adminJokes.random()}* **${event.member.effectiveName}** is one of my developers${randomOf(".", "!")}"
             )
 
-        }.send(event).queue()
+        }.queue()
     }
 
     private fun CommandContext.weebsh(args: Args) {
@@ -111,7 +111,7 @@ class DevCmd
 
         val imageTypes = weebSh.imageProvider.imageTypes.submit()
         val imageTags = weebSh.imageProvider.imageTags.submit()
-        embed {
+        sendEmbed {
             baseEmbed(event, "Aru! | Weeb.sh Debug")
             thumbnail("https://assets.aru.pw/img/yes.png")
 
@@ -126,15 +126,15 @@ class DevCmd
                 imageTags().sorted().joinToString(" "),
                 "```"
             )
-        }.send(event).queue()
+        }.queue()
     }
 
     private fun CommandContext.weebshGet(img: GetImage, nsfw: NsfwFilter?) {
         weebSh.imageProvider.getRandomImage(img.type, img.tags, null, nsfw, img.fileType).async {
             if (it == null) {
-                event.channel.sendMessage("$CONFUSED No images found... ").queue()
+                send("$CONFUSED No images found... ").queue()
             } else {
-                embed {
+                sendEmbed {
                     baseEmbed(event, "Aru! | Weeb.sh Debug")
                     image(it.url)
                     description(
@@ -142,7 +142,7 @@ class DevCmd
                         "Tags: ${it.tags.joinToString(", ", "[", "]") { "Tag[name=${it.name}, user=${it.user}]" }}",
                         "Account: ${it.account}"
                     )
-                }.send(event).queue()
+                }.queue()
             }
         }
     }
@@ -151,7 +151,7 @@ class DevCmd
         try {
             dblPoster.postStats()
             dpwPoster.postStats()
-            event.channel.sendMessage(sleepQuotes.random()).complete()
+            send(sleepQuotes.random()).complete()
         } catch (ignored: Exception) {
         }
 
@@ -167,7 +167,7 @@ class DevCmd
     }
 
     private fun CommandContext.listEvals(persistent: Boolean) {
-        embed {
+        sendEmbed {
             baseEmbed(event, "DevConsole | Available Evaluators")
 
             description(
@@ -175,7 +175,7 @@ class DevCmd
                     .asSequence()
                     .joinToString("\n\n") { (k, v) -> "``$k`` - ${v.javaClass.simpleName}" }
             )
-        }.send(event).queue()
+        }.queue()
     }
 
     private val evaluatingQuotes = arrayOf(

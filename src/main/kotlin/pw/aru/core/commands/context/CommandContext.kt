@@ -3,6 +3,7 @@ package pw.aru.core.commands.context
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.Permission
+import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.requests.restaction.MessageAction
 import pw.aru.core.parser.Args
@@ -13,6 +14,18 @@ data class CommandContext(
     val event: GuildMessageReceivedEvent,
     val args: String
 ) {
+    val message: Message
+        get() = event.message
+
+    val author: Member
+        get() = event.member
+
+    val channel: TextChannel
+        get() = event.channel
+
+    val guild: Guild
+        get() = event.guild
+
     fun parseable() = Args(args)
 
     fun showHelp(): Unit = throw CommandExceptions.ShowHelp
@@ -22,6 +35,8 @@ data class CommandContext(
     fun sendMessage(builder: MessageBuilder = MessageBuilder(), init: MessageBuilder.() -> Unit): MessageAction = event.channel.sendMessage(message(builder, init))
 
     fun send(text: CharSequence): MessageAction = event.channel.sendMessage(text)
+
+    fun send(embed: MessageEmbed): MessageAction = event.channel.sendMessage(embed)
 
     fun requireNSFW(): Boolean {
         if (!event.channel.isNSFW) {

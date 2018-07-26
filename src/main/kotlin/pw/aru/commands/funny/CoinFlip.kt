@@ -21,13 +21,13 @@ class CoinFlip : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
     )
 
     override fun CommandContext.call() {
-        event.channel.sendMessage("*${sThrow.random()}*\n${if (threadLocalRandom().nextBoolean()) heads else tails}").queue()
+        send("*${sThrow.random()}*\n${if (threadLocalRandom().nextBoolean()) heads else tails}").queue()
     }
 
     override fun CommandContext.discreteCall(outer: String) {
         val toSend = outer.replace('\n', ' ').stripFormatting()
 
-        event.channel.sendMessage("**$toSend**\n${if (threadLocalRandom().nextBoolean()) heads else tails}").queue()
+        send("**$toSend**\n${if (threadLocalRandom().nextBoolean()) heads else tails}").queue()
     }
 
     override val helpHandler = HelpFactory("CoinFlip Command") {

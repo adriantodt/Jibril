@@ -22,7 +22,7 @@ class Greeting : ICommand, ICommand.HelpHandler {
     override val category: Category? = null
 
     override fun CommandContext.call() {
-        event.channel.sendMessage(random(event.member).format(arrayOf(event.member.effectiveName))).queue()
+        send(random(event.member).format(arrayOf(event.member.effectiveName))).queue()
     }
 
     companion object {

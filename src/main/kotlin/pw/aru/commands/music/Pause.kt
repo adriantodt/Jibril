@@ -1,7 +1,6 @@
 package pw.aru.commands.music
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
@@ -20,14 +19,14 @@ import pw.aru.utils.extensions.withPrefix
 class Pause(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "votepause"), ICommand.HelpDialogProvider {
     override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
         if (musicPlayer.audioPlayer.isPaused) {
-            event.channel.sendMessage(
+            send(
                 "$X The music is already paused, silly!\n\n$THINKING Maybe you want to resume the music with ``${"resume".withPrefix()}``, instead?"
             ).queue()
             return
         }
 
         musicPlayer.audioPlayer.isPaused = true
-        event.channel.sendMessage("$PAUSE Music Paused.\nType `${"resume".withPrefix()}` to resume the player.").queue()
+        send("$PAUSE Music Paused.\nType `${"resume".withPrefix()}` to resume the player.").queue()
     }
 
     override val helpHandler = HelpFactory("Pause Command") {
@@ -48,9 +47,9 @@ class Pause(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "
 @Command("votepause")
 @UseFullInjector
 class VotePause(musicManager: MusicManager) : MusicVotingCommand(musicManager), ICommand.HelpDialogProvider {
-    override fun checkRequirements(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String): Boolean {
+    override fun CommandContext.checkRequirements(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack): Boolean {
         if (musicPlayer.audioPlayer.isPaused) {
-            event.channel.sendMessage(
+            send(
                 "$X The music is already paused, silly!\n\n$THINKING Maybe you want to resume the music with ``${"voteresume".withPrefix()}``, instead?"
             ).queue()
             return false

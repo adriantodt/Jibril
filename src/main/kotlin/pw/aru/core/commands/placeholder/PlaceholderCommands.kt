@@ -10,7 +10,7 @@ object PlaceholderCommand : ICommand {
     override val category: Category? = null
 
     override fun CommandContext.call() {
-        event.channel.sendMessage("$LOADING Sorry, but I'm still booting up! This command will be available in a minute or so!").queue()
+        send("$LOADING Sorry, but I'm still booting up! This command will be available in a minute or so!").queue()
     }
 }
 
@@ -22,6 +22,6 @@ class ReRoutingPlaceholderCommand : ICommand {
     override fun CommandContext.call() {
         queue += this
 
-        event.channel.sendMessage("$LOADING Wait just a bit, your command will be processed very soon!").queue()
+        send("$LOADING Wait just a bit, your command will be processed very soon!").queue()
     }
 }

@@ -8,9 +8,7 @@ import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.hooks.EventListener
-import net.dv8tion.jda.core.requests.restaction.MessageAction
 
 //Builders
 
@@ -36,12 +34,6 @@ inline fun MessageBuilder.embed(embed: EmbedBuilder = EmbedBuilder(), init: Embe
     setEmbed(embed.also(init).build())
 }
 
-//Senders
-
-inline fun MessageChannel.sendEmbed(embed: EmbedBuilder = EmbedBuilder(), init: EmbedBuilder.() -> Unit): MessageAction = sendMessage(embed(embed, init))
-
-inline fun MessageChannel.sendMessage(message: MessageBuilder = MessageBuilder(), init: MessageBuilder.() -> Unit): MessageAction = sendMessage(message(message, init))
-
 //Extras
 
 inline val User.discordTag: String
@@ -58,11 +50,3 @@ inline val Member.isValid: Boolean
 
 inline val VoiceChannel.humanUsers: Int
     get() = members.count { !it.user.isBot }
-
-inline fun MessageEmbed.send(e: GuildMessageReceivedEvent) = send(e.channel)
-
-inline fun MessageEmbed.send(c: MessageChannel): MessageAction = c.sendMessage(this)
-
-inline fun Message.send(e: GuildMessageReceivedEvent) = send(e.channel)
-
-inline fun Message.send(c: MessageChannel): MessageAction = c.sendMessage(this)

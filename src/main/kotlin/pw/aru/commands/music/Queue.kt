@@ -24,7 +24,7 @@ class Queue(musicManager: MusicManager) : MusicCommand(musicManager), ICommand.H
             .minus(1)
             .coerceIn(0, lastPage)
 
-        embed {
+        sendEmbed {
             baseEmbed(event, "Queue for guild ${event.guild.name}", image = event.guild.iconUrl)
 
             field(
@@ -62,7 +62,7 @@ class Queue(musicManager: MusicManager) : MusicCommand(musicManager), ICommand.H
             )
 
             footer("Page ${page.plus(1)} of ${lastPage.plus(1)} | Requested by ${event.member.effectiveName}", event.author.effectiveAvatarUrl)
-        }.send(event).queue()
+        }.queue()
     }
 
     override val helpHandler = HelpFactory("Queue Command") {

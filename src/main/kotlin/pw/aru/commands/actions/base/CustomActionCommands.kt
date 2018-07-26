@@ -37,8 +37,7 @@ class CustomImageCommand(
     override fun CommandContext.call() {
         if (info.nsfw && !requireNSFW()) return
 
-        val author = event.member
-        event.channel
+        channel
             .sendFile(cache.cacheToFile(images.random()), info.fileName)
             .append(messages.randomOrNull()?.replaceEach("{author}" to "**${author.effectiveName}**") ?: "")
             .queue()
@@ -69,8 +68,7 @@ class CustomActionCommand(
     override fun CommandContext.call() {
         if (info.nsfw && !requireNSFW()) return
 
-        val author = event.member
-        val mentions = event.message.mentionedMembers
+        val mentions = message.mentionedMembers
 
         val f = when {
             mentions.isEmpty() -> lines.noTargets
@@ -79,9 +77,9 @@ class CustomActionCommand(
             else -> lines.anyTarget
         }
 
-        event.channel
-            .sendMessage(f.replaceEach("{author}" to "**${author.effectiveName}**", "{mentions}" to mentions.toSmartString { "**${it.effectiveName}**" }))
-            .addFile(cache.cacheToFile(images.random()), info.fileName)
+        channel
+            .sendFile(cache.cacheToFile(images.random()), info.fileName)
+            .append(f.replaceEach("{author}" to "**${author.effectiveName}**", "{mentions}" to mentions.toSmartString { "**${it.effectiveName}**" }))
             .queue()
     }
 

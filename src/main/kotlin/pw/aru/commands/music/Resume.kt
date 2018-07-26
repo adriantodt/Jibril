@@ -1,7 +1,6 @@
 package pw.aru.commands.music
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
@@ -20,14 +19,14 @@ import pw.aru.utils.extensions.withPrefix
 class Resume(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "voteresume"), ICommand.HelpDialogProvider {
     override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
         if (!musicPlayer.audioPlayer.isPaused) {
-            event.channel.sendMessage(
+            send(
                 "$X The music is already playing, silly!\n\n$THINKING Maybe you want to pause the music with ``${"pause".withPrefix()}``, instead?"
             ).queue()
             return
         }
 
         musicPlayer.audioPlayer.isPaused = false
-        event.channel.sendMessage("$PLAY Music resumed.").queue()
+        send("$PLAY Music resumed.").queue()
     }
 
     override val helpHandler = HelpFactory("Resume Command") {
@@ -48,9 +47,9 @@ class Resume(musicManager: MusicManager) : MusicPermissionCommand(musicManager, 
 @Command("voteresume")
 @UseFullInjector
 class VoteResume(musicManager: MusicManager) : MusicVotingCommand(musicManager), ICommand.HelpDialogProvider {
-    override fun checkRequirements(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String): Boolean {
+    override fun CommandContext.checkRequirements(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack): Boolean {
         if (!musicPlayer.audioPlayer.isPaused) {
-            event.channel.sendMessage(
+            send(
                 "$X The music is already playing, silly!\n\n$THINKING Maybe you want to pause the music with ``${"votepause".withPrefix()}``, instead?"
             ).queue()
             return false

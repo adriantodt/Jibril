@@ -37,15 +37,15 @@ class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
     }
 
     override fun CommandContext.call() {
-        event.channel.sendMessage("$GAME_DIE **${event.member.effectiveName}**, ${resolveRoll(args)}").queue()
+        send("$GAME_DIE **${event.member.effectiveName}**, ${resolveRoll(args)}").queue()
     }
 
     override fun CommandContext.discreteCall(outer: String) {
         val toSend = outer.replace('\n', ' ').stripFormatting().trim()
 
-        if (toSend.isEmpty()) CommandContext(event, args).call()
+        if (toSend.isEmpty()) return call()
 
-        event.channel.sendMessage("**$toSend**\n$GAME_DIE ${resolveRoll(args)}").queue()
+        send("**$toSend**\n$GAME_DIE ${resolveRoll(args)}").queue()
     }
 
     private fun Number.toPrettyString(): String = when (this) {

@@ -18,7 +18,7 @@ class Stop(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "v
 
         musicPlayer.stop()
 
-        event.channel.sendMessage(
+        send(
             "$SUCCESS Stopped the current track and removed $size tracks from the queue."
         ).queue()
     }

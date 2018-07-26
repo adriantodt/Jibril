@@ -18,7 +18,7 @@ class Volume(musicManager: MusicManager) : MusicCommand(musicManager), ICommand.
 
     override fun CommandContext.call(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
         if (args.isEmpty()) {
-            event.channel.sendMessage("$VOLUME Volume: **${musicPlayer.audioPlayer.volume}/150**").queue()
+            send("$VOLUME Volume: **${musicPlayer.audioPlayer.volume}/150**").queue()
             return
         }
         with(setter) {
@@ -49,7 +49,7 @@ class Volume(musicManager: MusicManager) : MusicCommand(musicManager), ICommand.
 
             musicPlayer.audioPlayer.volume = volume
 
-            event.channel.sendMessage("$SUCCESS Volume set to **$volume/150**.").queue()
+            send("$SUCCESS Volume set to **$volume/150**.").queue()
         }
     }
 }

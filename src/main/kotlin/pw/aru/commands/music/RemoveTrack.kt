@@ -38,7 +38,7 @@ class RemoveTrack(musicManager: MusicManager) : MusicPermissionCommand(musicMana
                 val range = args.split("[-~]")
 
                 if (range.size != 2) {
-                    event.channel.sendMessage("$ERROR ``$param`` is not a valid range!").queue()
+                    send("$ERROR ``$param`` is not a valid range!").queue()
                     return
                 }
 
@@ -47,18 +47,18 @@ class RemoveTrack(musicManager: MusicManager) : MusicPermissionCommand(musicMana
                     val iEnd = range[1].toInt() - 1
 
                     if (iStart < 0 || iStart >= list.size) {
-                        event.channel.sendMessage("$ERROR There isn't a queued track at the position ``$iStart``!").queue()
+                        send("$ERROR There isn't a queued track at the position ``$iStart``!").queue()
                         return
                     }
 
                     if (iEnd < 0 || iEnd >= list.size) {
-                        event.channel.sendMessage("$ERROR There isn't a queued track at the position ``$iEnd``!").queue()
+                        send("$ERROR There isn't a queued track at the position ``$iEnd``!").queue()
                         return
                     }
 
                     (iStart..iEnd).forEach { selected.add(it) }
                 } catch (ex: NumberFormatException) {
-                    event.channel.sendMessage("$ERROR ``$param`` is not a valid range!").queue()
+                    send("$ERROR ``$param`` is not a valid range!").queue()
                     return
                 }
 
@@ -67,13 +67,13 @@ class RemoveTrack(musicManager: MusicManager) : MusicPermissionCommand(musicMana
                     val i = Integer.parseInt(args) - 1
 
                     if (i < 0 || i >= list.size) {
-                        event.channel.sendMessage("$ERROR There isn't a queued track at the position ``$i``!").queue()
+                        send("$ERROR There isn't a queued track at the position ``$i``!").queue()
                         return
                     }
 
                     selected.add(i)
                 } catch (ex: NumberFormatException) {
-                    event.channel.sendMessage("$ERROR ``$arg`` is not a valid number or range!").queue()
+                    send("$ERROR ``$arg`` is not a valid number or range!").queue()
                     return
                 }
             }
@@ -81,7 +81,7 @@ class RemoveTrack(musicManager: MusicManager) : MusicPermissionCommand(musicMana
 
         musicPlayer.queue = list.filterIndexedTo(LinkedBlockingDeque()) { index, _ -> !selected.contains(index) }
 
-        event.channel.sendMessage("$SUCCESS Removed **${selected.size()}** track(s) from the queue.").queue()
+        send("$SUCCESS Removed **${selected.size()}** track(s) from the queue.").queue()
     }
 
     override val helpHandler = HelpFactory("RemoveTrack Command") {

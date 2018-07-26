@@ -16,7 +16,7 @@ import java.util.concurrent.LinkedBlockingDeque
 class Shuffle(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "voteshuffle"), ICommand.HelpDialogProvider {
     override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
         musicPlayer.queue = LinkedBlockingDeque(musicPlayer.queue.shuffled())
-        event.channel.sendMessage("$SUCCESS Queue shuffled!").queue()
+        send("$SUCCESS Queue shuffled!").queue()
     }
 
     override val helpHandler = HelpFactory("Shuffle Command") {

@@ -32,7 +32,7 @@ class Repeat(musicManager: MusicManager) : MusicPermissionCommand(musicManager),
 
         musicPlayer.repeatMode = mode
 
-        event.channel.sendMessage(
+        send(
             "$SUCCESS Repeat mode set to `${mode.name.toLowerCase()}`!"
         ).queue()
     }

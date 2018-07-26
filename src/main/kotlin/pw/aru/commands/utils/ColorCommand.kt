@@ -68,17 +68,17 @@ class ColorCommand : ICommand, ICommand.HelpDialogProvider {
                 with(threadLocalRandom()) { Color.getHSBColor(nextFloat(), nextFloat(), nextFloat()) }
             }
             "member" -> {
-                event.member.color ?: Color.white
+                author.color ?: Color.white
             }
             else -> {
                 val raw = args.raw
                 if (raw.startsWith("#") || raw.startsWith("0x")) {
                     Color.decode(raw)
                 } else {
-                    val members = FinderUtil.findMembers(raw, event.guild)
+                    val members = FinderUtil.findMembers(raw, guild)
 
                     if (members.isNotEmpty()) {
-                        if (members.size > 1) return event.channel.sendMessage(
+                        if (members.size > 1) return send(
                             arrayOf(
                                 "$THINKING Well, I found too many users. How about refining your search?",
                                 "**Users found**: ${members.joinToString(", ") { it.user.discordTag }}"
@@ -102,7 +102,7 @@ class ColorCommand : ICommand, ICommand.HelpDialogProvider {
         val rgbHex = "0x${(color.rgb and 0xffffff).toString(16)}"
         val file = "$rgbHex.png"
 
-        val embed = embed {
+        sendEmbed {
             setColor(color)
             setTitle("Here's your color!")
             setThumbnail("attachment://$file")
@@ -141,9 +141,7 @@ class ColorCommand : ICommand, ICommand.HelpDialogProvider {
                 hsv,
                 "```"
             )
-        }
-
-        event.channel.sendMessage(embed).addFile(generate(color), file).queue()
+        }.addFile(generate(color), file).queue()
     }
 
     override val helpHandler = HelpFactory("Color Command") {

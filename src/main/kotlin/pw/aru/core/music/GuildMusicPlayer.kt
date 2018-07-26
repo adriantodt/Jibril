@@ -106,7 +106,7 @@ class GuildMusicPlayer(private val shardManager: ShardManager, val musicManager:
         val info = track.trackData
         val channel = info.textChannel
         if (channel?.canTalk() == true) {
-            nowPlayingEmbed(track).send(channel).queue { info.messageId = it.idLong }
+            channel.sendMessage(nowPlayingEmbed(track)).queue { info.messageId = it.idLong }
         }
     }
 

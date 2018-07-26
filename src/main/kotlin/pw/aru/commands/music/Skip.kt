@@ -14,7 +14,7 @@ import pw.aru.utils.emotes.SUCCESS
 @UseFullInjector
 class Skip(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "voteskip", true), ICommand.HelpDialogProvider {
     override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
-        event.channel.sendMessage(
+        send(
             "$SUCCESS Skipping this song..."
         ).queue()
         musicPlayer.startNext(true)

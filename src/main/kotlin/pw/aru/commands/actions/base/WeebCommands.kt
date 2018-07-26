@@ -47,11 +47,11 @@ sealed class WeebCommand(
     override fun CommandContext.call() {
         val args = parseable()
 
-        val nsfw = if (event.channel.isNSFW) if (args.takeString() == "nsfw") ONLY_NSFW else ALLOW_NSFW else NO_NSFW
+        val nsfw = if (channel.isNSFW) if (args.takeString() == "nsfw") ONLY_NSFW else ALLOW_NSFW else NO_NSFW
 
         provider.getRandomImage(img.type, img.tags, null, nsfw, img.fileType).async {
             if (it == null) {
-                event.channel.sendMessage("$CONFUSED No images found... ").queue()
+                send("$CONFUSED No images found... ").queue()
             } else {
                 onImage(it)
             }
@@ -72,8 +72,7 @@ class WeebImageCommand(
     private val messages: List<String> = emptyList()
 ) : WeebCommand(category, provider, registry, cache, info, img) {
     override fun CommandContext.onImage(image: Image) {
-        val author = event.member
-        event.channel
+        channel
             .sendFile(cache.cacheToFile(image.url), image.name)
             .append(messages.randomOrNull()?.replaceEach("{author}" to "**${author.effectiveName}**") ?: "")
             .queue()
@@ -100,7 +99,6 @@ class WeebActionCommand(
     private val lines: ActionLines
 ) : WeebCommand(category, provider, registry, cache, info, img) {
     override fun CommandContext.onImage(image: Image) {
-        val author = event.member
         val mentions = event.message.mentionedMembers
 
         val f = when {
@@ -110,9 +108,9 @@ class WeebActionCommand(
             else -> lines.anyTarget
         }
 
-        event.channel
-            .sendMessage(f.replaceEach("{author}" to "**${author.effectiveName}**", "{mentions}" to mentions.toSmartString { "**${it.effectiveName}**" }))
-            .addFile(cache.cacheToFile(image.url), image.name)
+        channel
+            .sendFile(cache.cacheToFile(image.url), image.name)
+            .append(f.replaceEach("{author}" to "**${author.effectiveName}**", "{mentions}" to mentions.toSmartString { "**${it.effectiveName}**" }))
             .queue()
     }
 
