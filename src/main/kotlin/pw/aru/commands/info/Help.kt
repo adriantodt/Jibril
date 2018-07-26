@@ -6,6 +6,7 @@ import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.utils.TaskManager.task
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.ERROR
@@ -52,7 +53,7 @@ class Help(private val registry: CommandRegistry) : ICommand, ICommand.HelpDialo
         "I wonder if this is what you are looking for..."
     )
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
+    override fun CommandContext.call() {
         if (args.isEmpty()) {
             botHelp(event)
         } else {

@@ -1,11 +1,11 @@
 package pw.aru.commands.utils
 
 import com.jagrosh.jdautilities.commons.utils.FinderUtil
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Categories
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.DISAPPOINTED
 import pw.aru.utils.emotes.ERROR
@@ -17,7 +17,7 @@ import pw.aru.utils.extensions.discordTag
 class Avatar : ICommand, ICommand.HelpDialogProvider {
     override val category: Category = Categories.UTILS
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
+    override fun CommandContext.call() {
         val user = if (args.isEmpty()) {
             event.member
         } else {

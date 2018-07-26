@@ -3,14 +3,15 @@ package pw.aru.core.commands
 import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Category
+import pw.aru.core.commands.context.CommandContext
 
 interface ICommand {
     val category: Category?
 
-    fun call(event: GuildMessageReceivedEvent, args: String)
+    fun CommandContext.call()
 
     interface Discrete : ICommand {
-        fun discreteCall(event: GuildMessageReceivedEvent, args: String, outer: String)
+        fun CommandContext.discreteCall(outer: String)
     }
 
     interface Permission {
@@ -40,6 +41,4 @@ interface ICommand {
     interface PostLoad {
         fun postLoad()
     }
-
-    interface Invisible
 }

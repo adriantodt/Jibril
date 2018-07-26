@@ -7,6 +7,7 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.CommandPermission
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
 import pw.aru.core.music.trackData
@@ -20,7 +21,7 @@ import pw.aru.utils.extensions.withPrefix
 abstract class MusicCommand(val musicManager: MusicManager) : ICommand {
     override val category = Categories.MUSIC
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
+    override fun CommandContext.call() {
         val musicPlayer = musicManager.get(event.guild)
         val currentTrack = musicPlayer.currentTrack
 
@@ -31,16 +32,16 @@ abstract class MusicCommand(val musicManager: MusicManager) : ICommand {
             return
         }
 
-        run(event, musicPlayer, currentTrack, args)
+        call(musicPlayer, currentTrack)
     }
 
-    abstract fun run(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String)
+    abstract fun CommandContext.call(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack)
 }
 
 abstract class MusicActionCommand(manager: MusicManager) : MusicCommand(manager) {
     override val category = Categories.MUSIC
 
-    override fun run(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
+    override fun CommandContext.call(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
         val voiceState = event.member.voiceState
 
         if (!voiceState.inVoiceChannel()) {
@@ -55,10 +56,10 @@ abstract class MusicActionCommand(manager: MusicManager) : MusicCommand(manager)
             return
         }
 
-        call(event, musicPlayer, currentTrack, args)
+        action(musicPlayer, currentTrack)
     }
 
-    abstract fun call(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String)
+    abstract fun CommandContext.action(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack)
 }
 
 abstract class MusicPermissionCommand(
@@ -80,9 +81,9 @@ abstract class MusicPermissionCommand(
         }
     }
 
-    override fun call(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
+    override fun CommandContext.action(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
         if (checkPermissions(event, musicPlayer, userQueued)) {
-            action(event, musicPlayer, currentTrack, args)
+            actionWithPerms(musicPlayer, currentTrack)
         } else {
             event.channel.sendMessage(
                 "$STOP B-baka, I'm not allowed to let you do that!" +
@@ -91,7 +92,7 @@ abstract class MusicPermissionCommand(
         }
     }
 
-    abstract fun action(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String)
+    abstract fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack)
 }
 
 abstract class MusicVotingCommand(manager: MusicManager) : MusicActionCommand(manager) {
@@ -99,11 +100,11 @@ abstract class MusicVotingCommand(manager: MusicManager) : MusicActionCommand(ma
     open fun checkRequirements(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) = true
     abstract fun getVotes(musicPlayer: GuildMusicPlayer): TLongList
 
-    abstract fun onVoteAdded(event: GuildMessageReceivedEvent, votesLeft: Int)
-    abstract fun onVoteRemoved(event: GuildMessageReceivedEvent, votesLeft: Int)
-    abstract fun onVotesReached(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String)
+    abstract fun CommandContext.onVoteAdded(votesLeft: Int)
+    abstract fun CommandContext.onVoteRemoved(votesLeft: Int)
+    abstract fun CommandContext.onVotesReached(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String)
 
-    override fun call(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
+    override fun CommandContext.action(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
 
         if (!checkRequirements(event, musicPlayer, currentTrack, args)) return
         val votes = getVotes(musicPlayer)
@@ -120,13 +121,13 @@ abstract class MusicVotingCommand(manager: MusicManager) : MusicActionCommand(ma
 
         if (votes.size() >= requiredVotes) {
             votes.clear()
-            onVotesReached(event, musicPlayer, currentTrack, args)
+            onVotesReached(musicPlayer, currentTrack, args)
         } else {
             val votesLeft = requiredVotes - votes.size()
             if (removed) {
-                onVoteRemoved(event, votesLeft)
+                onVoteRemoved(votesLeft)
             } else {
-                onVoteAdded(event, votesLeft)
+                onVoteAdded(votesLeft)
             }
         }
     }

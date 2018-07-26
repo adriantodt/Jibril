@@ -1,9 +1,9 @@
 package pw.aru.commands.info
 
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.utils.AruColors
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.SMILE2
@@ -13,7 +13,7 @@ import pw.aru.utils.extensions.*
 class Invite : ICommand, ICommand.HelpDialogProvider {
     override val category = Categories.INFO
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
+    override fun CommandContext.call() {
         embed {
             baseEmbed(event, name = "Aru! | Invite", color = AruColors.primary)
 

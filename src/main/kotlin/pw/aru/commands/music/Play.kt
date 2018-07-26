@@ -6,17 +6,19 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.commands.music.MusicPermissionCommand.Companion.checkPermissions
 import pw.aru.core.categories.Categories
 import pw.aru.core.categories.Category
-import pw.aru.core.commands.*
+import pw.aru.core.commands.Command
+import pw.aru.core.commands.CommandPermission
+import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.UseFullInjector
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.music.MusicManager
 import pw.aru.core.music.MusicRequester
-import pw.aru.core.parser.Args
 import pw.aru.core.parser.tryTakeInt
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.ERROR2
 import pw.aru.utils.emotes.STOP
 import pw.aru.utils.emotes.THINKING
 import pw.aru.utils.emotes.X
-import pw.aru.utils.extensions.showHelp
 import pw.aru.utils.extensions.withPrefix
 import java.net.URL
 import java.util.concurrent.TimeUnit
@@ -27,7 +29,7 @@ sealed class PlayCommand(
     private val force: Boolean,
     private val next: Boolean,
     private val playNow: Boolean
-) : ArgsCommand(), ICommand.HelpDialogProvider {
+) : ICommand, ICommand.HelpDialogProvider {
     override val category: Category = Categories.MUSIC
 
     private val replacers = listOf(
@@ -35,7 +37,9 @@ sealed class PlayCommand(
         listOf("youtube:", "youtube ", "yt:", "yt ") to "ytsearch:"
     )
 
-    override fun call(event: GuildMessageReceivedEvent, args: Args) {
+    override fun CommandContext.call() {
+        val args = parseable()
+
         if (!event.member.voiceState.inVoiceChannel()) {
             event.channel.sendMessage("$X You need to be connected to a Voice Channel to use this command!").queue()
             return

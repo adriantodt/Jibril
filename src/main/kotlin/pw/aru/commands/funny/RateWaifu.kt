@@ -1,9 +1,9 @@
 package pw.aru.commands.funny
 
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.ERROR
 import pw.aru.utils.emotes.THINKING
@@ -12,7 +12,7 @@ import pw.aru.utils.emotes.THINKING
 class RateWaifu : ICommand, ICommand.HelpDialogProvider {
     override val category = Categories.FUN
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
+    override fun CommandContext.call() {
         if (event.message.mentionedUsers.size > 1) {
             event.channel.sendMessage("$ERROR Too many waifus to rate! Don't mention more than one user at a time.").queue()
             return

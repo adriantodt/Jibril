@@ -5,6 +5,7 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
 import pw.aru.utils.commands.HelpFactory
@@ -17,7 +18,7 @@ import pw.aru.utils.extensions.withPrefix
 @Command("resume")
 @UseFullInjector
 class Resume(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "voteresume"), ICommand.HelpDialogProvider {
-    override fun action(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
+    override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
         if (!musicPlayer.audioPlayer.isPaused) {
             event.channel.sendMessage(
                 "$X The music is already playing, silly!\n\n$THINKING Maybe you want to pause the music with ``${"pause".withPrefix()}``, instead?"
@@ -60,21 +61,17 @@ class VoteResume(musicManager: MusicManager) : MusicVotingCommand(musicManager),
 
     override fun getVotes(musicPlayer: GuildMusicPlayer) = musicPlayer.votePauses
 
-    override fun onVoteAdded(event: GuildMessageReceivedEvent, votesLeft: Int) {
-        event.channel.sendMessage(
-            "$SUCCESS Your vote to resume the music has been added. More $votesLeft votes are required to resume."
-        ).queue()
+    override fun CommandContext.onVoteAdded(votesLeft: Int) {
+        send("$SUCCESS Your vote to resume the music has been added. More $votesLeft votes are required to resume.").queue()
     }
 
-    override fun onVoteRemoved(event: GuildMessageReceivedEvent, votesLeft: Int) {
-        event.channel.sendMessage(
-            "$SUCCESS Your vote to resume the music has been removed. More $votesLeft votes are required to resume."
-        ).queue()
+    override fun CommandContext.onVoteRemoved(votesLeft: Int) {
+        send("$SUCCESS Your vote to resume the music has been removed. More $votesLeft votes are required to resume.").queue()
     }
 
-    override fun onVotesReached(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
-        event.channel.sendMessage("$SUCCESS Enough votes reached! Music resumed.").queue()
+    override fun CommandContext.onVotesReached(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
         musicPlayer.audioPlayer.isPaused = false
+        send("$SUCCESS Enough votes reached! Music resumed.").queue()
     }
 
     override val helpHandler = HelpFactory("VoteResume Command") {

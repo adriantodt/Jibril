@@ -7,14 +7,17 @@ import com.github.natanbc.weeb4j.image.NsfwFilter
 import mu.KLogging
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.entities.MessageEmbed
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.requests.RestAction
 import net.dv8tion.jda.core.utils.JDALogger
 import okhttp3.OkHttpClient
 import pw.aru.Aru.sleepQuotes
 import pw.aru.commands.actions.base.GetImage
 import pw.aru.core.categories.Categories
-import pw.aru.core.commands.*
+import pw.aru.core.commands.Command
+import pw.aru.core.commands.CommandPermission
+import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.UseFullInjector
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.parser.Args
 import pw.aru.db.AruDB
 import pw.aru.utils.Colors
@@ -39,21 +42,23 @@ class DevCmd
     private val weebSh: Weeb4J,
     private val dblPoster: DBLPoster,
     private val dpwPoster: DBotsPoster
-) : ArgsCommand(), ICommand.Permission, ICommand.HelpDialogProvider {
+) : ICommand, ICommand.Permission, ICommand.HelpDialogProvider {
     companion object : KLogging()
 
     override val category = Categories.DEVELOPER
     override val permission = CommandPermission.BOT_DEVELOPER
 
-    override fun call(event: GuildMessageReceivedEvent, args: Args) {
+    override fun CommandContext.call() {
+        val args = parseable()
+
         when (args.takeString()) {
-            "shutdown" -> shutdown(event)
-            "eval", "run" -> eval(event, false, args.takeRemaining())
-            "peval", "prun" -> eval(event, true, args.takeRemaining())
-            "enablecallsite" -> callsite(event, true)
-            "disablecallsite" -> callsite(event, false)
-            "weebsh" -> weebsh(event, args)
-            "", "check" -> adminCheck(event)
+            "shutdown" -> shutdown()
+            "eval", "run" -> eval(false, args.takeRemaining())
+            "peval", "prun" -> eval(true, args.takeRemaining())
+            "enablecallsite" -> callsite(true)
+            "disablecallsite" -> callsite(false)
+            "weebsh" -> weebsh(args)
+            "", "check" -> adminCheck()
             else -> showHelp()
         }
     }
@@ -63,7 +68,7 @@ class DevCmd
         JDALogger.getLog(RestAction::class.java).error("RestAction queue returned failure", it)
     }
 
-    private fun callsite(event: GuildMessageReceivedEvent, enable: Boolean) {
+    private fun CommandContext.callsite(enable: Boolean) {
         RestAction.setPassContext(enable)
 
         if (enable) {
@@ -82,7 +87,7 @@ class DevCmd
         "Them? Yeah,"
     )
 
-    private fun adminCheck(event: GuildMessageReceivedEvent) {
+    private fun CommandContext.adminCheck() {
         embed {
             baseEmbed(event, "Aru! | DevTools")
             thumbnail("https://assets.aru.pw/img/yes.png")
@@ -94,14 +99,14 @@ class DevCmd
         }.send(event).queue()
     }
 
-    private fun weebsh(event: GuildMessageReceivedEvent, args: Args) {
+    private fun CommandContext.weebsh(args: Args) {
         val type = if (args.matchNextString("-type"::equals)) args.takeString() else null
         val tags = if (args.matchNextString("-tags"::equals)) args.takeString().split(',') else null
         val ext = if (args.matchNextString("-ext"::equals)) FileType.valueOf(args.takeString().toUpperCase()) else null
         val nsfw = if (args.matchNextString("-nsfw"::equals)) NsfwFilter.valueOf(("${args.takeString()}_NSFW").toUpperCase()) else null
 
         if (type != null || tags != null) {
-            return weebshGet(event, GetImage(type, tags, ext), nsfw)
+            return weebshGet(GetImage(type, tags, ext), nsfw)
         }
 
         val imageTypes = weebSh.imageProvider.imageTypes.submit()
@@ -124,7 +129,7 @@ class DevCmd
         }.send(event).queue()
     }
 
-    private fun weebshGet(event: GuildMessageReceivedEvent, img: GetImage, nsfw: NsfwFilter?) {
+    private fun CommandContext.weebshGet(img: GetImage, nsfw: NsfwFilter?) {
         weebSh.imageProvider.getRandomImage(img.type, img.tags, null, nsfw, img.fileType).async {
             if (it == null) {
                 event.channel.sendMessage("$CONFUSED No images found... ").queue()
@@ -142,7 +147,7 @@ class DevCmd
         }
     }
 
-    private fun shutdown(event: GuildMessageReceivedEvent) {
+    private fun CommandContext.shutdown() {
         try {
             dblPoster.postStats()
             dpwPoster.postStats()
@@ -161,7 +166,7 @@ class DevCmd
         Evaluators.newPersistentEvaluatorsMap(shardManager, db)
     }
 
-    private fun listEvals(event: GuildMessageReceivedEvent, persistent: Boolean) {
+    private fun CommandContext.listEvals(persistent: Boolean) {
         embed {
             baseEmbed(event, "DevConsole | Available Evaluators")
 
@@ -181,9 +186,9 @@ class DevCmd
         "Recursively interpreting code..."
     )
 
-    private fun eval(event: GuildMessageReceivedEvent, persistent: Boolean, args: String) {
+    private fun CommandContext.eval(persistent: Boolean, args: String) {
         val (eval, code) = with(args.split(" ", limit = 2)) { get(0) to getOrElse(1) { "" } }
-        if (eval.isEmpty()) return listEvals(event, persistent)
+        if (eval.isEmpty()) return listEvals(persistent)
 
         val evaluator = (if (persistent) pEvals else sEvals)[eval] ?: return showHelp()
 

@@ -1,13 +1,16 @@
 package pw.aru.commands.actions.base
 
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.ICommand.HelpDialogProvider
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.utils.caches.URLCache
 import pw.aru.utils.commands.HelpFactory
-import pw.aru.utils.extensions.*
+import pw.aru.utils.extensions.random
+import pw.aru.utils.extensions.randomOrNull
+import pw.aru.utils.extensions.replaceEach
+import pw.aru.utils.extensions.toSmartString
 
 data class CustomCommandInfo(
     val names: List<String>,
@@ -31,8 +34,8 @@ class CustomImageCommand(
         registry.register(info.names.toTypedArray(), this)
     }
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
-        if (info.nsfw && !requireNsfw(event)) return
+    override fun CommandContext.call() {
+        if (info.nsfw && !requireNSFW()) return
 
         val author = event.member
         event.channel
@@ -63,8 +66,8 @@ class CustomActionCommand(
         registry.register(info.names.toTypedArray(), this)
     }
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
-        if (info.nsfw && !requireNsfw(event)) return
+    override fun CommandContext.call() {
+        if (info.nsfw && !requireNSFW()) return
 
         val author = event.member
         val mentions = event.message.mentionedMembers

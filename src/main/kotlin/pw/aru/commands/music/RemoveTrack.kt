@@ -2,11 +2,11 @@ package pw.aru.commands.music
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import gnu.trove.set.hash.TIntHashSet
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import org.apache.commons.lang3.StringUtils.replaceEach
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
 import pw.aru.utils.commands.HelpFactory
@@ -17,7 +17,7 @@ import java.util.concurrent.LinkedBlockingDeque
 @Command("removetrack", "removesong")
 @UseFullInjector
 class RemoveTrack(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "voteshuffle"), ICommand.HelpDialogProvider {
-    override fun action(event: GuildMessageReceivedEvent, musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
+    override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
         val list = musicPlayer.queue.toList()
 
         val selected = TIntHashSet()

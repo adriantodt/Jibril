@@ -6,6 +6,7 @@ import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.utils.AruColors
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.extensions.*
@@ -15,7 +16,7 @@ import pw.aru.utils.extensions.*
 class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDialogProvider {
     override val category = Categories.INFO
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
+    override fun CommandContext.call() {
         when (args) {
             "credits", "credit" -> credits(event)
             "aru", "me", "bot", "" -> about(event)

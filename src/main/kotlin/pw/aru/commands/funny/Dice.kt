@@ -1,10 +1,10 @@
 package pw.aru.commands.funny
 
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.commands.funny.dice.AruDice
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.dice.exceptions.EvaluationException
 import pw.aru.dice.exceptions.SyntaxException
 import pw.aru.utils.commands.HelpFactory
@@ -36,14 +36,14 @@ class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
         }
     }
 
-    override fun call(event: GuildMessageReceivedEvent, args: String) {
+    override fun CommandContext.call() {
         event.channel.sendMessage("$GAME_DIE **${event.member.effectiveName}**, ${resolveRoll(args)}").queue()
     }
 
-    override fun discreteCall(event: GuildMessageReceivedEvent, args: String, outer: String) {
+    override fun CommandContext.discreteCall(outer: String) {
         val toSend = outer.replace('\n', ' ').stripFormatting().trim()
 
-        if (toSend.isEmpty()) call(event, args)
+        if (toSend.isEmpty()) CommandContext(event, args).call()
 
         event.channel.sendMessage("**$toSend**\n$GAME_DIE ${resolveRoll(args)}").queue()
     }

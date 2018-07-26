@@ -5,10 +5,9 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.commands.games.hungergames.GameManager
 import pw.aru.commands.games.hungergames.LobbyManager
 import pw.aru.core.categories.Categories
-import pw.aru.core.commands.ArgsCommand
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
-import pw.aru.core.parser.Args
+import pw.aru.core.commands.context.CommandContext
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.commands.HelpFactory.Companion.prefix
 import pw.aru.utils.emotes.CONFUSED
@@ -18,33 +17,35 @@ import pw.aru.utils.extensions.*
 import java.util.*
 
 @Command("hg", "hungergames")
-class HungerGamesCmd : ArgsCommand(), ICommand.HelpHandler, ICommand.Invisible {
+class HungerGamesCmd : ICommand, ICommand.HelpHandler {
     override val category = Categories.GAMES
 
-    override fun call(event: GuildMessageReceivedEvent, args: Args) {
+    override fun CommandContext.call() {
+        val args = parseable()
+
         if (GameManager.isGameRunning(event.channel)) {
             when (args.takeString()) {
-                "cancel", "end", "finish" -> finishGame(event)
+                "cancel", "end", "finish" -> finishGame()
                 else -> showHelp()
             }
         } else {
             when (args.takeString()) {
-                "new" -> newLobby(event)
-                "join" -> joinLobby(event)
-                "leave" -> leaveLobby(event)
-                "addguests", "addguest" -> addGuests(event, args.takeRemaining())
-                "addall" -> addAllGuests(event)
+                "new" -> newLobby()
+                "join" -> joinLobby()
+                "leave" -> leaveLobby()
+                "addguests", "addguest" -> addGuests(args.takeRemaining())
+                "addall" -> addAllGuests()
                 "rmguests", "rmguest" -> rmGuests(event, args.takeRemaining())
-                "clearguests" -> clearGuests(event)
+                "clearguests" -> clearGuests()
             //  "configs" -> { }
-                "start" -> startGame(event)
-                "", "lobby" -> lobby(event)
+                "start" -> startGame()
+                "", "lobby" -> lobby()
                 else -> showHelp()
             }
         }
     }
 
-    private fun finishGame(event: GuildMessageReceivedEvent) {
+    private fun CommandContext.finishGame() {
         val game = GameManager.getGame(event.channel)
 
         if (game == null) {
@@ -61,7 +62,7 @@ class HungerGamesCmd : ArgsCommand(), ICommand.HelpHandler, ICommand.Invisible {
         event.channel.sendMessage("$SUCCESS Game stopped.").queue()
     }
 
-    private fun newLobby(event: GuildMessageReceivedEvent) {
+    private fun CommandContext.newLobby() {
         val lobby = LobbyManager.getOrCreateLobby(event.channel, event.member)
         val created = lobby.adminId == event.author.id
 
@@ -75,7 +76,7 @@ class HungerGamesCmd : ArgsCommand(), ICommand.HelpHandler, ICommand.Invisible {
         ).queue()
     }
 
-    private fun joinLobby(event: GuildMessageReceivedEvent) {
+    private fun CommandContext.joinLobby() {
         val lobby = LobbyManager.getLobby(event.channel)
         when {
             lobby == null -> event.channel.sendMessage(
@@ -99,7 +100,7 @@ class HungerGamesCmd : ArgsCommand(), ICommand.HelpHandler, ICommand.Invisible {
         }
     }
 
-    private fun leaveLobby(event: GuildMessageReceivedEvent) {
+    private fun CommandContext.leaveLobby() {
         val lobby = LobbyManager.getLobby(event.channel)
 
         when {
@@ -129,7 +130,7 @@ class HungerGamesCmd : ArgsCommand(), ICommand.HelpHandler, ICommand.Invisible {
         }
     }
 
-    private fun addGuests(event: GuildMessageReceivedEvent, args: String) {
+    private fun CommandContext.addGuests(args: String) {
         val lobby = LobbyManager.getLobby(event.channel)
 
         if (lobby == null) {
@@ -164,7 +165,7 @@ class HungerGamesCmd : ArgsCommand(), ICommand.HelpHandler, ICommand.Invisible {
         event.channel.sendMessage("$SUCCESS Added $display as guests!").queue()
     }
 
-    private fun addAllGuests(event: GuildMessageReceivedEvent) {
+    private fun CommandContext.addAllGuests() {
         val lobby = LobbyManager.getLobby(event.channel)
 
         if (lobby == null) {
@@ -180,7 +181,7 @@ class HungerGamesCmd : ArgsCommand(), ICommand.HelpHandler, ICommand.Invisible {
         lobby.playerGuests.addAll(event.guild.members.filterNot(lobby.players::contains))
     }
 
-    private fun rmGuests(event: GuildMessageReceivedEvent, args: String) {
+    private fun CommandContext.rmGuests(event: GuildMessageReceivedEvent, args: String) {
         val lobby = LobbyManager.getLobby(event.channel)
 
         if (lobby == null) {
@@ -218,7 +219,7 @@ class HungerGamesCmd : ArgsCommand(), ICommand.HelpHandler, ICommand.Invisible {
         event.channel.sendMessage("$SUCCESS Removed the guests $display!").queue()
     }
 
-    private fun clearGuests(event: GuildMessageReceivedEvent) {
+    private fun CommandContext.clearGuests() {
         val lobby = LobbyManager.getLobby(event.channel)
 
         if (lobby == null) {
@@ -235,7 +236,7 @@ class HungerGamesCmd : ArgsCommand(), ICommand.HelpHandler, ICommand.Invisible {
         lobby.guests.clear()
     }
 
-    private fun startGame(event: GuildMessageReceivedEvent) {
+    private fun CommandContext.startGame() {
         val lobby = LobbyManager.getLobby(event.channel)
 
         if (lobby == null) {
@@ -252,7 +253,7 @@ class HungerGamesCmd : ArgsCommand(), ICommand.HelpHandler, ICommand.Invisible {
         GameManager.newGame(event.channel, lobby)
     }
 
-    private fun lobby(event: GuildMessageReceivedEvent) {
+    private fun CommandContext.lobby() {
         val lobby = LobbyManager.getLobby(event.channel)
 
         if (lobby == null) {
