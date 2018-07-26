@@ -20,7 +20,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
     /*
     types: [
         deredere, greet, insult, sleepy,
-        sumfuk, trap, triggered, waifu_insult, wasted
+        sumfuk, triggered, waifu_insult, wasted
     ]
     types.rejected: [
         bang,       // Reason: Not good enough to do a "shoot" command, and might break Discord ToS
@@ -460,7 +460,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
 
         CustomImageCommand(
             category, registry, cache,
-            CustomCommandInfo(listOf("jibril"), "Jibril Command", "Sends a random Jibril image.", "jibril.gif"),
+            CustomCommandInfo(listOf("jibril"), "Jibril Command", "jibril.gif", "Sends a random Jibril image."),
             File("assets/aru/images/jibril.txt").readLines()
         )
 
@@ -468,6 +468,13 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
             category, provider, registry, cache,
             WeebCommandInfo(listOf("megumin"), "Megumin Command", "Sends a random Megumin image."),
             GetImage(type = "megumin")
+        )
+
+
+        WeebImageCommand(
+            category, provider, registry, cache,
+            WeebCommandInfo(listOf("trap"), "Trap Command", "Sends a random trap image."),
+            GetImage(type = "trap")
         )
 
         WeebImageCommand(

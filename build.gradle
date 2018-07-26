@@ -13,7 +13,7 @@ plugins {
 }
 
 group = 'pw.aru'
-version = '2.1'
+version = '2.1.1'
 mainClassName = 'pw.aru.Bootstrap'
 
 // Minified Splash
@@ -99,8 +99,7 @@ const val user_agent = "JDA/DiscordBot (Aru! ${version})"
 //BELOW: TASKS AND CONFIGS YOU PROBABLY DON'T NEED TO TWEAK MORE THAN ONCE IN A LIFETIME
 
 task packAssets(type: Zip) { baseName = 'assets'; from file('./assets'); destinationDir = file('build/assets'); version = '' }
-processResources.dependsOn packAssets
-task wrapper(type: Wrapper) { gradleVersion = '4.6' }
+task wrapper(type: Wrapper) { gradleVersion = '4.9' }
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 [compileKotlin, compileTestKotlin].each { it.kotlinOptions.jvmTarget = "1.8" }
