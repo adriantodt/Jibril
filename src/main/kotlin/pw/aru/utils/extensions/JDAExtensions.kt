@@ -36,6 +36,12 @@ inline fun MessageBuilder.embed(embed: EmbedBuilder = EmbedBuilder(), init: Embe
     setEmbed(embed.also(init).build())
 }
 
+//Senders
+
+inline fun MessageChannel.sendEmbed(embed: EmbedBuilder = EmbedBuilder(), init: EmbedBuilder.() -> Unit): MessageAction = sendMessage(embed(embed, init))
+
+inline fun MessageChannel.sendMessage(message: MessageBuilder = MessageBuilder(), init: MessageBuilder.() -> Unit): MessageAction = sendMessage(message(message, init))
+
 //Extras
 
 inline val User.discordTag: String

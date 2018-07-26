@@ -98,10 +98,10 @@ class Stats
     private fun <T> statsManager(m: StatsManager<T>, title: String, event: GuildMessageReceivedEvent, arg: String) {
         when (arg) {
             "" -> statsManagerResume(m, title, event)
-            "total", "t" -> detailedStatsManager(m, title, event, "Total", TOTAL)
-            "daily", "d", "dialy", "day" -> detailedStatsManager(m, title, event, "Today", DAY)
-            "hourly", "h", "hour" -> detailedStatsManager(m, title, event, "This Hour", HOUR)
-            "now", "n", "minute", "min", "m" -> detailedStatsManager(m, title, event, "Now", MINUTE)
+            "total", "t" -> detailedStatsManager(m, title, event, TOTAL)
+            "daily", "d", "dialy", "day" -> detailedStatsManager(m, title, event, DAY)
+            "hourly", "h", "hour" -> detailedStatsManager(m, title, event, HOUR)
+            "now", "n", "minute", "min", "m" -> detailedStatsManager(m, title, event, MINUTE)
             else -> showHelp()
         }
     }
@@ -109,16 +109,15 @@ class Stats
     private fun <T> statsManagerResume(m: StatsManager<T>, title: String, event: GuildMessageReceivedEvent) {
         embed {
             baseEmbed(event, title)
-            addField("Now", m.resume(MINUTE), false)
-            addField("This Hour", m.resume(HOUR), false)
-            addField("Today", m.resume(DAY), false)
-            addField("Total", m.resume(TOTAL), false)
+            arrayOf(MINUTE, HOUR, DAY, TOTAL).forEach {
+                field(it.name, m.resume(it))
+            }
         }.send(event).queue()
     }
 
-    private fun <T> detailedStatsManager(m: StatsManager<T>, title: String, event: GuildMessageReceivedEvent, display: String, type: Type) {
+    private fun <T> detailedStatsManager(m: StatsManager<T>, title: String, event: GuildMessageReceivedEvent, type: Type) {
         embed {
-            baseEmbed(event, "$title | $display")
+            baseEmbed(event, "$title | ${type.display}")
             m.fillEmbed(this, type)
         }.send(event).queue()
     }
@@ -130,17 +129,17 @@ class Stats
                 "Resource Usage:",
                 arrayOf(
                     "\u25AB **Threads**: $threadCount",
-                    "\u25AB **RAM**: ${totalMemory - freeMemory}MB/${maxMemory}MB",
-                    "\u25AB **Allocated Memory**: ${totalMemory}MB (${freeMemory}MB remaining)",
-                    "\u25AB **CPU Usage**: $cpuUsage%"
+                    "\u25AB **RAM**: ${(totalMemory - freeMemory).format("%.2f")}MB/${maxMemory.format("%.2f")}MB",
+                    "\u25AB **Allocated Memory**: ${totalMemory.format("%.2f")}MB (${freeMemory.format("%.2f")}MB remaining)",
+                    "\u25AB **CPU Usage**: ${cpuUsage.format("%.2f")}%"
                 )
             )
             field(
                 "Server:",
                 arrayOf(
-                    "\u25AB **RAM** (Total/Free/Used): ${vpsMaxMemory}GB/${vpsFreeMemory}GB/${vpsUsedMemory}GB",
-                    "\u25AB **CPU Cores**: $availableProcessors cores",
-                    "\u25AB **CPU Usage**: $vpsCpuUsage%"
+                    "\u25AB **RAM** (Total/Free/Used): ${vpsMaxMemory.format("%.2f")}GB/${vpsFreeMemory.format("%.2f")}GB/${vpsUsedMemory.format("%.2f")}GB",
+                    "\u25AB **CPU Cores**: ${availableProcessors.format("%.2f")} cores",
+                    "\u25AB **CPU Usage**: ${vpsCpuUsage.format("%.2f")}%"
                 )
             )
         }.send(event).queue()
@@ -153,6 +152,6 @@ class Stats
         usage("stats <cmds/cmd/commands/c>", "Shows this session's commands stats.")
         usage("stats <cmds/cmd/commands/c> <now/hourly/dialy/total>", "Shows detailed info about command usage.")
         usage("stats <guilds/guild/g>", "Shows this session's guild join/leave stats.")
-        usage("stats<guilds/guild/g> <now/hourly/dialy/total>", "Shows detailed info about guild join/leave events.")
+        usage("stats <guilds/guild/g> <now/hourly/dialy/total>", "Shows detailed info about guild join/leave events.")
     }
 }
