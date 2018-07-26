@@ -7,12 +7,17 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.CommandPermission.BOT_DEVELOPER
 import pw.aru.core.commands.CommandPermission.SERVER_ADMIN
 import pw.aru.core.commands.ICommand
+import pw.aru.utils.emotes.EYES
 import pw.aru.utils.extensions.random
 import java.text.MessageFormat
 import java.util.*
 
 @Command("hi", "hai", "hello")
-class Greeting : ICommand {
+class Greeting : ICommand, ICommand.HelpHandler {
+    override fun onHelp(event: GuildMessageReceivedEvent) {
+        event.channel.sendMessage(EYES).queue()
+    }
+
     override val category: Category? = null
 
     override fun call(event: GuildMessageReceivedEvent, args: String) {
