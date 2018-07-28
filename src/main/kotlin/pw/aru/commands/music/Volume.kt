@@ -43,12 +43,10 @@ class Volume(musicManager: MusicManager) : MusicCommand(musicManager), ICommand.
         seeAlso("play", "queue", "pause")
     }
 
-    private class SetVolume(musicManager: MusicManager) : MusicPermissionCommand(musicManager) {
+    private class SetVolume(musicManager: MusicManager) : MusicPermissionCommand(musicManager, userQueued = true) {
         override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
             val volume = (args.toIntOrNull() ?: return showHelp()).coerceIn(1, 150)
-
             musicPlayer.audioPlayer.volume = volume
-
             send("$SUCCESS Volume set to **$volume/150**.").queue()
         }
     }

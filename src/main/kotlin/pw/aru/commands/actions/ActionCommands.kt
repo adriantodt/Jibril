@@ -386,7 +386,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
 
         CustomActionCommand(
             category, registry, cache,
-            CustomCommandInfo(listOf("bloodsuck", "vampire"), "Bloodsuck Command", "Sucks the blood of the mentioned users.", "bloodsuck.gif"),
+            CustomCommandInfo(listOf("bloodsuck", "vampire"), "Bloodsuck Command", "bloodsuck.gif", "Sucks the blood of the mentioned users."),
             File("assets/aru/actions/bloodsuck.txt").readLines(),
             ActionLines(
                 "$BITE {mentions}, {author} is sucking your blood",
@@ -396,6 +396,17 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
             )
         )
 
+        CustomActionCommand(
+            category, registry, cache,
+            CustomCommandInfo(listOf("fuck"), "Fuck Command", "fuck.gif", "Fucks the mentioned users... Hey, that's lewd!", nsfw = true),
+            File("assets/aru/actions/fuck.txt").readLines(),
+            ActionLines(
+                "$FUCK {author} is fucking {mentions}",
+                "$FUCK *Fucks~*",
+                "$FUCK *Fucks you~* Lewdie~",
+                "$FUCK Eeh..? That's lewd! Bakaaa!"
+            )
+        )
     }
 
     private fun imageCommands(registry: CommandRegistry) {

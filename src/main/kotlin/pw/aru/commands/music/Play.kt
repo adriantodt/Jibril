@@ -1,5 +1,6 @@
 package pw.aru.commands.music
 
+import bsh.ParserConstants.BANG
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import net.dv8tion.jda.core.Permission.MESSAGE_ADD_REACTION
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
@@ -63,7 +64,13 @@ sealed class PlayCommand(
         if (args.matchNextString("--vol"::equals)) {
             val vol = args.tryTakeInt()
             if (vol != null) {
-                musicPlayer.audioPlayer.volume = vol
+                if (checkPermissions(event, musicPlayer, true)) {
+                    send(
+                        "$BANG Volume will not be changed since as you don't have the permission to change it."
+                    ).queue()
+                } else {
+                    musicPlayer.audioPlayer.volume = vol
+                }
             }
         }
 
