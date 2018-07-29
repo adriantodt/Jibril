@@ -6,6 +6,7 @@ import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.music.GuildMusicPlayer
+import pw.aru.core.music.GuildMusicPlayer.RepeatMode.*
 import pw.aru.core.music.MusicManager
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.SUCCESS
@@ -15,18 +16,10 @@ import pw.aru.utils.emotes.SUCCESS
 class Repeat(musicManager: MusicManager) : MusicPermissionCommand(musicManager), ICommand.HelpDialogProvider {
     override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
         val mode = when (args) {
-            "" -> {
-                musicPlayer.repeatMode.cycleNext()
-            }
-            "none", "disable", "false", "n" -> {
-                GuildMusicPlayer.RepeatMode.NONE
-            }
-            "song", "music", "current", "playing", "true", "s" -> {
-                GuildMusicPlayer.RepeatMode.SONG
-            }
-            "queue", "playlist", "list", "q" -> {
-                GuildMusicPlayer.RepeatMode.QUEUE
-            }
+            "" -> musicPlayer.repeatMode.cycleNext()
+            "none", "disable", "false", "n" -> NONE
+            "song", "music", "current", "playing", "true", "s" -> SONG
+            "queue", "playlist", "list", "q" -> QUEUE
             else -> return showHelp()
         }
 

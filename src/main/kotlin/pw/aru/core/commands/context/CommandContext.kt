@@ -62,7 +62,7 @@ data class CommandContext(
             event.channel.sendMessage(
                 arrayOf(
                     "$X For this command to work, I need the following permissions:",
-                    perms.joinToString("\n") { (perm, enabled) -> "${if (enabled) "✅" else "❎"} **${perm.name}**" },
+                    perms.joinToString("\n") { (perm, enabled) -> "${if (enabled) "✅" else "❎"} **${perm.getName()}**" },
                     "",
                     if (guildCheck) ERROR_CHANNEL_PERMS else ERROR_GUILD_PERMS,
                     "If you need help on doing that, check my support server: ``https://support.aru.pw/``"

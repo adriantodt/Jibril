@@ -37,7 +37,7 @@ class Args(val raw: String) {
         return p
     }
 
-    fun <T> matchAny(vararg pairs: Pair<T, (String) -> Boolean>): Set<T> {
+    fun <T> validateMatches(vararg pairs: Pair<T, (String) -> Boolean>): Set<T> {
         val map = pairs.toMap(LinkedHashMap())
         val validKeys = LinkedHashSet<T>()
 

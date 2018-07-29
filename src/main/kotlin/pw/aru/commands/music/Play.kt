@@ -12,14 +12,17 @@ import pw.aru.core.commands.CommandPermission
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.music.GuildMusicPlayer.RepeatMode.*
 import pw.aru.core.music.MusicManager
 import pw.aru.core.music.MusicRequester
+import pw.aru.core.parser.parseOptions
 import pw.aru.core.parser.tryTakeInt
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.ERROR2
 import pw.aru.utils.emotes.STOP
 import pw.aru.utils.emotes.THINKING
 import pw.aru.utils.emotes.X
+import pw.aru.utils.extensions.usage
 import pw.aru.utils.extensions.withPrefix
 import java.net.URL
 import java.util.concurrent.TimeUnit
@@ -59,20 +62,39 @@ sealed class PlayCommand(
             return
         }
 
-        val isDev = CommandPermission.BOT_DEVELOPER.test(event.member)
+        args.parseOptions {
+            option("--vol") {
+                val vol = tryTakeInt()
+                if (vol != null) {
+                    if (!checkPermissions(event, musicPlayer, true)) {
+                        send(
+                            "$BANG Volume will not be changed since as you don't have the permission to change it."
+                        ).queue()
+                    } else {
+                        musicPlayer.audioPlayer.volume = vol
+                    }
+                }
+            }
 
-        if (args.matchNextString("--vol"::equals)) {
-            val vol = args.tryTakeInt()
-            if (vol != null) {
-                if (checkPermissions(event, musicPlayer, true)) {
+            option("--repeat") {
+                if (!checkPermissions(event, musicPlayer, false)) {
                     send(
-                        "$BANG Volume will not be changed since as you don't have the permission to change it."
+                        "$BANG Repeat mode will not be changed since as you don't have the permission to change it."
                     ).queue()
                 } else {
-                    musicPlayer.audioPlayer.volume = vol
+                    val mode = when (takeString()) {
+                        "none", "disable", "false", "n" -> NONE
+                        "song", "music", "current", "playing", "true", "s" -> SONG
+                        "queue", "playlist", "list", "q" -> QUEUE
+                        else -> null
+                    }
+
+                    if (mode != null) musicPlayer.repeatMode = mode
                 }
             }
         }
+
+        val isDev = CommandPermission.BOT_DEVELOPER.test(event.member)
 
         if (args.isEmpty()) {
             val attachments = event.message.attachments.filter { !it.isImage }
@@ -141,6 +163,13 @@ class Play(musicManager: MusicManager) : PlayCommand(musicManager, false, false,
         usage("play [youtube/yt] <search term>", "Searches for the video in Youtube.")
         usage("play <soundcloud/sc> <search term>", "Searches for the song in SoundCloud.")
 
+        note(
+            "**Magic Prefixes**:",
+            "play --vol <volume> ...".usage("Sets the volume of the player."),
+            "play --repeat <mode> ...".usage("Sets the repeat mode of the player."),
+            "(You need the permissions to set the volume or the repeat mode)"
+        )
+
         seeAlso("playnow", "playnext", "forceplay", "forceplaynow", "forceplaynext")
     }
 }
@@ -163,6 +192,13 @@ class ForcePlay(musicManager: MusicManager) : PlayCommand(musicManager, true, fa
         usage("forceplay [youtube/yt] <search term>", "Searches for the video in Youtube and adds the first result.")
         usage("forceplay <soundcloud/sc> <search term>", "Searches for the song in SoundCloud and adds the first result.")
 
+        note(
+            "**Magic Prefixes**:",
+            "forceplay --vol <volume> ...".usage("Sets the volume of the player."),
+            "forceplay --repeat <mode> ...".usage("Sets the repeat mode of the player."),
+            "(You need the permissions to set the volume or the repeat mode)"
+        )
+
         seeAlso("play", "playnow", "playnext", "forceplaynow", "forceplaynext")
     }
 }
@@ -183,6 +219,13 @@ class PlayNext(musicManager: MusicManager) : PlayCommand(musicManager, false, tr
         usage("playnext <song url>", "Loads and plays the song from the URL.")
         usage("playnext [youtube/yt] <search term>", "Searches for the video in Youtube.")
         usage("playnext <soundcloud/sc> <search term>", "Searches for the song in SoundCloud.")
+
+        note(
+            "**Magic Prefixes**:",
+            "playnext --vol <volume> ...".usage("Sets the volume of the player."),
+            "playnext --repeat <mode> ...".usage("Sets the repeat mode of the player."),
+            "(You need the permissions to set the volume or the repeat mode)"
+        )
 
         seeAlso("play", "playnow", "forceplay", "forceplaynow", "forceplaynext")
     }
@@ -206,6 +249,13 @@ class ForcePlayNext(musicManager: MusicManager) : PlayCommand(musicManager, true
         usage("forceplaynext [youtube/yt] <search term>", "Searches for the video in Youtube and adds the first result.")
         usage("forceplaynext <soundcloud/sc> <search term>", "Searches for the song in SoundCloud and adds the first result.")
 
+        note(
+            "**Magic Prefixes**:",
+            "forceplaynext --vol <volume> ...".usage("Sets the volume of the player."),
+            "forceplaynext --repeat <mode> ...".usage("Sets the repeat mode of the player."),
+            "(You need the permissions to set the volume or the repeat mode)"
+        )
+
         seeAlso("play", "playnow", "playnext", "forceplay", "forceplaynow")
     }
 }
@@ -221,10 +271,17 @@ class PlayNow(musicManager: MusicManager) : PlayCommand(musicManager, false, tru
             "If I'm already playing a song, this command will add the song to the begin of the queue."
         )
 
-        usage("playnext", "+ attachment", "Loads and plays the song from the attachment.")
-        usage("playnext <song url>", "Loads and plays the song from the URL.")
-        usage("playnext [youtube/yt] <search term>", "Searches for the video in Youtube.")
-        usage("playnext <soundcloud/sc> <search term>", "Searches for the song in SoundCloud.")
+        usage("playnow", "+ attachment", "Loads and plays the song from the attachment.")
+        usage("playnow <song url>", "Loads and plays the song from the URL.")
+        usage("playnow [youtube/yt] <search term>", "Searches for the video in Youtube.")
+        usage("playnow <soundcloud/sc> <search term>", "Searches for the song in SoundCloud.")
+
+        note(
+            "**Magic Prefixes**:",
+            "playnow --vol <volume> ...".usage("Sets the volume of the player."),
+            "playnow --repeat <mode> ...".usage("Sets the repeat mode of the player."),
+            "(You need the permissions to set the volume or the repeat mode)"
+        )
 
         seeAlso("play", "playnext", "forceplay", "forceplaynow", "forceplaynext")
     }
@@ -242,10 +299,17 @@ class ForcePlayNow(musicManager: MusicManager) : PlayCommand(musicManager, true,
             "Instead of opening a dialog in a search result, this command adds the first result instead."
         )
 
-        usage("forceplaynext", "+ attachment", "Loads and plays the song from the attachment.")
-        usage("forceplaynext <song url>", "Loads and plays the song from the URL.")
-        usage("forceplaynext [youtube/yt] <search term>", "Searches for the video in Youtube and adds the first result.")
-        usage("forceplaynext <soundcloud/sc> <search term>", "Searches for the song in SoundCloud and adds the first result.")
+        usage("forceplaynow", "+ attachment", "Loads and plays the song from the attachment.")
+        usage("forceplaynow <song url>", "Loads and plays the song from the URL.")
+        usage("forceplaynow [youtube/yt] <search term>", "Searches for the video in Youtube and adds the first result.")
+        usage("forceplaynow <soundcloud/sc> <search term>", "Searches for the song in SoundCloud and adds the first result.")
+
+        note(
+            "**Magic Prefixes**:",
+            "forceplaynow --vol <volume> ...".usage("Sets the volume of the player."),
+            "forceplaynow --repeat <mode> ...".usage("Sets the repeat mode of the player."),
+            "(You need the permissions to set the volume or the repeat mode)"
+        )
 
         seeAlso("play", "playnow", "playnext", "forceplay", "forceplaynext")
     }

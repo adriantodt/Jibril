@@ -72,7 +72,7 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
             arrayOf(
                 "$STOP **Stop there!**",
                 "I **require** the following permissions to work:",
-                perms.joinToString("\n") { (perm, enabled) -> "${if (enabled) "✅" else "❎"} **${perm.name}**" },
+                perms.joinToString("\n") { (perm, enabled) -> "${if (enabled) "✅" else "❎"} **${perm.getName()}**" },
                 "Sadly, I have to refuse all commands until you give me that permission. $DISAPPOINTED",
                 "",
                 if (guildCheck) ERROR_CHANNEL_PERMS else ERROR_GUILD_PERMS,

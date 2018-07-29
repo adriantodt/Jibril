@@ -72,7 +72,7 @@ class CustomActionCommand(
 
         val f = when {
             mentions.isEmpty() -> lines.noTargets
-            mentions.all { it == event.message.author } -> lines.targetsYou
+            mentions.all { it == event.message.member } -> lines.targetsYou
             mentions.all { it == event.guild.selfMember } -> lines.targetsMe
             else -> lines.anyTarget
         }
