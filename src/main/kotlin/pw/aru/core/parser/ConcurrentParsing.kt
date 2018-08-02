@@ -6,7 +6,7 @@ internal fun Args.runOptions(list: List<Pair<(String) -> Boolean, Args.() -> Uni
     val map = list.toMap(LinkedHashMap())
 
     while (true) {
-        val (key, value) = map.entries.firstOrNull { matchNextString(it.key) } ?: continue
+        val (key, value) = map.entries.firstOrNull { matchNextString(it.key) } ?: return
         map.remove(key)
         value()
     }
