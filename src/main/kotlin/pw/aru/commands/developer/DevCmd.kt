@@ -19,6 +19,7 @@ import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.parser.Args
+import pw.aru.core.parser.parseAndCreate
 import pw.aru.db.AruDB
 import pw.aru.utils.Colors
 import pw.aru.utils.api.DBLPoster
@@ -100,13 +101,17 @@ class DevCmd
     }
 
     private fun CommandContext.weebsh(args: Args) {
-        val type = if (args.matchNextString("-type"::equals)) args.takeString() else null
-        val tags = if (args.matchNextString("-tags"::equals)) args.takeString().split(',') else null
-        val ext = if (args.matchNextString("-ext"::equals)) FileType.valueOf(args.takeString().toUpperCase()) else null
-        val nsfw = if (args.matchNextString("-nsfw"::equals)) NsfwFilter.valueOf(("${args.takeString()}_NSFW").toUpperCase()) else null
+        val (image, nsfw) = args.parseAndCreate<Pair<GetImage, NsfwFilter?>> {
+            val type = option("-type") { takeString() }
+            val tags = option("-tags") { takeString().split(',') }
+            val ext = option("-ext") { FileType.valueOf(takeString().toUpperCase()) }
+            val nsfw = option("-nsfw") { NsfwFilter.valueOf(("${takeString()}_NSFW").toUpperCase()) }
 
-        if (type != null || tags != null) {
-            return weebshGet(GetImage(type, tags, ext), nsfw)
+            creator { GetImage(type.resourceOrNull, tags.resourceOrNull, ext.resourceOrNull) to nsfw.resourceOrNull }
+        }
+
+        if (image.isNotEmpty()) {
+            return weebshGet(image, nsfw)
         }
 
         val imageTypes = weebSh.imageProvider.imageTypes.submit()

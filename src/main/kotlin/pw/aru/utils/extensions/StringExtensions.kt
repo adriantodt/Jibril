@@ -81,8 +81,7 @@ fun String.replaceEach(vararg list: Pair<String, String>): String {
     return buf.toString()
 }
 
-fun String.initials(): String = StringBuilder().let { b -> codePoints().filter(::isUpperCase).forEach { b.appendCodePoint(it) } }.toString()
-
+fun String.initials(): String = filter(Char::isUpperCase)
 fun String.capitalize(): String = if (isEmpty()) this else "${toUpperCase(this[0])}${substring(1)}"
 
 private val regexRegex = Regex("[\\-\\[\\]/{}()*+?.\\\\^$|]")

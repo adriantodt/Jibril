@@ -58,7 +58,7 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
         }
     }
 
-    val permissions = arrayOf(MESSAGE_EMBED_LINKS, MESSAGE_ADD_REACTION, MESSAGE_EXT_EMOJI)
+    val permissions = arrayOf(MESSAGE_EMBED_LINKS, MESSAGE_ATTACH_FILES, MESSAGE_ADD_REACTION, MESSAGE_EXT_EMOJI)
     private fun checkPermissions(event: GuildMessageReceivedEvent): Boolean {
         val self = event.guild.selfMember
         val channel = event.channel
@@ -76,7 +76,7 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
                 "Sadly, I have to refuse all commands until you give me that permission. $DISAPPOINTED",
                 "",
                 if (guildCheck) ERROR_CHANNEL_PERMS else ERROR_GUILD_PERMS,
-                "If you need help on doing that, check my support server: ``https://support.aru.pw/``"
+                "If you need help on doing that, check my support server: `https://support.aru.pw/`"
             ).joinToString("\n")
         ).queue()
 
@@ -172,12 +172,12 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
             try {
                 c.handle(event, e)
             } catch (e2: Exception) {
-                reportException(c, event, e, if (e != e2) e2 else null)
+                reportException(event, e, if (e != e2) e2 else null)
             }
             return
         }
 
-        reportException(c, event, e)
+        reportException(event, e)
     }
 
     private val errorQuotes = listOf(
@@ -186,33 +186,28 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
         "What am I supposed to do with an error? Because I got one."
     )
 
-    private fun reportException(c: ICommand, event: GuildMessageReceivedEvent, e: Exception, h: Exception? = null) {
+    private fun reportException(event: GuildMessageReceivedEvent, e: Exception, h: Exception? = null) {
+
         val errorId = e.simpleName().initials() + "#" + Snow64.fromSnowflake(event.message.idLong)
 
         logger.error(e) {
-            "**ERROR REPORTED**\n**ErrorID**: `$errorId`\n**Type**: `${e.javaClass.simpleName}`\n**Command**: ``${event.message.contentRaw}`\n"
+            "**ERROR REPORTED**\n" +
+                "**ErrorID**: `$errorId`\n" +
+                "**TextChannel**: `${event.channel}`\n" +
+                "**Guild**: `${event.guild}`\n" +
+                "**Type**: `${e.javaClass.simpleName}`\n" +
+                "**Command**: ``${event.message.contentRaw}``"
         }
 
-        if (h != null) logger.error(h) {
-            "(ErrorID `$errorId`'s underlying exception)\nType: ``${h.javaClass.simpleName}``\n"
+        if (h != null) {
+            logger.error(h) {
+                "(ErrorID `$errorId`'s underlying exception)\n" +
+                    "Type: `${h.javaClass.simpleName}`"
+            }
+        } else {
+            event.channel.sendMessage(
+                "$WORRIED ${errorQuotes.random()}\n\n$TALKING Eh, do you mind reporting this to my developers? (Check out `${"hangout".withPrefix()}`)\n$PENCIL **Error ID**: `$errorId`"
+            ).queue()
         }
-
-        //when (e) {
-        //    is SyntaxException -> {
-        //        event.channel.sendMessage(
-        //            "$ERROR S-sorry, the page caught fire. Please, forgive me!\n(ErrorID: `$errorId`)"
-        //        ).queue()
-        //    }
-        //    is ReqlError -> {
-        //        event.channel.sendMessage(
-        //            "$ERROR W-wha? I think I lost my notebook. W-we're still friends, right?\n(ErrorID: `$errorId`)"
-        //        ).queue()
-        //    }
-        //    else -> {
-        event.channel.sendMessage(
-            "$WORRIED ${errorQuotes.random()}\n\n$TALKING Eh, do you mind reporting this to my developers? (Check out `${"hangout".withPrefix()}`)\n$PENCIL **Error ID**: `$errorId`"
-        ).queue()
-        //    }
-        //}
     }
 }

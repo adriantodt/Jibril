@@ -59,7 +59,7 @@ fun onHelp(category: Category, event: GuildMessageReceivedEvent) {
     event.channel.sendMessage("$ERROR Heh. Sorry, but the category doesn't provide any help. I can still pat you, right?").queue()
 }
 
-const val ERROR_GUILD_PERMS = "You can **easily** fix that by re-inviting me with the following link: ``https://add.aru.pw/``"
+const val ERROR_GUILD_PERMS = "You can **easily** fix that by re-inviting me with the following link: `https://add.aru.pw/`"
 const val ERROR_CHANNEL_PERMS = "Fix the **current channel**'s permissions and enable me the missing permissions shown above."
 const val ERROR_CHANNEL_NOT_NSFW = "For this ccommand to work, set this text channel to **NSFW**."
 

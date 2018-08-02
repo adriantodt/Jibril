@@ -26,7 +26,10 @@ data class GetImage(
     val type: String? = null,
     val tags: List<String>? = null,
     val fileType: FileType? = null
-)
+) {
+    fun isEmpty() = type.isNullOrEmpty() && (tags == null || tags.isEmpty()) && fileType != null
+    fun isNotEmpty() = !isEmpty()
+}
 
 sealed class WeebCommand(
     override val category: Category,
