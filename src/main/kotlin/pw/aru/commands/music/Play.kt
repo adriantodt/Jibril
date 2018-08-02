@@ -77,12 +77,13 @@ sealed class PlayCommand(
             }
 
             option("--repeat") {
+                val repeat = takeString()
                 if (!checkPermissions(event, musicPlayer, false)) {
                     send(
                         "$BANG Repeat mode will not be changed since as you don't have the permission to change it."
                     ).queue()
                 } else {
-                    val mode = when (takeString()) {
+                    val mode = when (repeat) {
                         "none", "disable", "false", "n" -> NONE
                         "song", "music", "current", "playing", "true", "s" -> SONG
                         "queue", "playlist", "list", "q" -> QUEUE

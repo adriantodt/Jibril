@@ -38,6 +38,7 @@ class GuildMusicPlayer(private val shardManager: ShardManager, val musicManager:
     val voteStops: TLongList = TLongArrayList()
     val voteShuffles: TLongList = TLongArrayList()
     val votePauses: TLongList = TLongArrayList()
+    val voteClearQueue: TLongList = TLongArrayList()
     var repeatMode: RepeatMode = RepeatMode.NONE
 
     private var disconnectTask: Future<*>? = null
