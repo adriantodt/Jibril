@@ -29,11 +29,11 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
     ]
      */
 
-    private fun actionCommands(registry: CommandRegistry) {
+    override fun provide(r: CommandRegistry) {
         val category = Categories.ACTION
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("pat"), "Pat Command", "Pats the mentioned users."),
             GetImage(type = "pat", fileType = GIF),
             ActionLines(
@@ -45,7 +45,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("poke"), "Poke Command", "Pokes the mentioned users."),
             GetImage(type = "poke", fileType = GIF),
             ActionLines(
@@ -57,7 +57,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("highfive"), "Highfive Command", "Highfives the mentioned users."),
             GetImage(type = "highfive", fileType = GIF),
             ActionLines(
@@ -69,7 +69,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("tease", "teehee"), "Tease Command", "Teases the mentioned users."),
             GetImage(type = "teehee", fileType = GIF),
             ActionLines(
@@ -81,7 +81,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("tickle"), "Tickle Command", "Tickles the mentioned users."),
             GetImage(type = "teehee", fileType = GIF),
             ActionLines(
@@ -93,7 +93,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("slap"), "Slap Command", "Slaps the mentioned users."),
             GetImage(type = "slap", fileType = GIF),
             ActionLines(
@@ -105,7 +105,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("smile"), "Smile Command", "Smiles at the mentioned users."),
             GetImage(type = "smile", fileType = GIF),
             ActionLines(
@@ -117,7 +117,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("pout"), "Pout Command", "Pouts at the mentioned users."),
             GetImage(type = "pout", fileType = GIF),
             ActionLines(
@@ -129,7 +129,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("cuddle"), "Cuddle Command", "Cuddles the mentioned users."),
             GetImage(type = "cuddle", fileType = GIF),
             ActionLines(
@@ -141,7 +141,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("punch"), "Punch Command", "Punches the mentioned users."),
             GetImage(type = "punch", fileType = GIF),
             ActionLines(
@@ -153,7 +153,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("holdhands", "holdhand"), "Hold Hands Command", "Holds the hands of the mentioned users."),
             GetImage(type = "handholding", fileType = GIF),
             ActionLines(
@@ -165,7 +165,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("hug"), "Hug Command", "Hugs the mentioned users."),
             GetImage(type = "hug", fileType = GIF),
             ActionLines(
@@ -177,7 +177,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         CustomActionCommand(
-            category, registry, cache,
+            category, r, cache,
             CustomCommandInfo(listOf("nuzzle"), "Nuzzle Command", "Nuzzles the mentioned users.", "nuzzle.gif"),
             File("assets/aru/actions/nuzzle.txt").readLines(),
             ActionLines(
@@ -189,7 +189,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("kiss"), "Kiss Command", "Kisses the mentioned users."),
             GetImage(type = "kiss", fileType = GIF),
             ActionLines(
@@ -201,7 +201,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("lick"), "Lick Command", "Licks the mentioned users."),
             GetImage(type = "lick", fileType = GIF),
             ActionLines(
@@ -213,7 +213,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("bite"), "Bite Command", "Bite the mentioned users."),
             GetImage(type = "bite", fileType = GIF),
             ActionLines(
@@ -225,7 +225,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("stare"), "Stare Command", "Stares the mentioned users."),
             GetImage(type = "stare", fileType = GIF),
             ActionLines(
@@ -237,7 +237,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("cry"), "Cry Command", "It's okay to cry."),
             GetImage(type = "cry", fileType = GIF),
             ActionLines(
@@ -249,7 +249,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("smug"), "Smug Command", "It's never late enough to be smug."),
             GetImage(type = "smug", fileType = GIF),
             ActionLines(
@@ -261,7 +261,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("wag", "tail", "tailwag", "wagtail"), "Wag Tail Command", "Wags tails at the mentioned users."),
             GetImage(type = "wag", fileType = GIF),
             ActionLines(
@@ -273,48 +273,48 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebImageCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("blush"), "Blush Command", "When it's just too much for you to handle."),
             GetImage(type = "banghead", fileType = GIF),
             listOf("$BLUSH {author} is slowly turning into a tomato")
         )
 
         WeebImageCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("dance"), "Dance Command", "Sends a random dance image."),
             GetImage(type = "dance", fileType = GIF),
             listOf("$DANCE {author} is dancing $DANCE2")
         )
 
         WeebImageCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("facedesk", "banghead"), "Facedesk Command", "When it's just too much to handle."),
             GetImage(type = "banghead", fileType = GIF),
             listOf("$TALKING *Facedesks~*")
         )
 
         WeebImageCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("drift"), "Drift Command", "*Initial D intensifies.*"),
             GetImage(type = "initial_d", fileType = GIF),
             listOf("$CAR *Drifts in japanese~*")
         )
 
         WeebImageCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("thinking"), "Thinking Command", "Sends a random thinking image."),
             GetImage(type = "thinking")
         )
 
 
         WeebImageCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("nom"), "Nom Command", "Sends a random nom image."),
             GetImage(type = "nom")
         )
 
         WeebImageCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("thumbsup", "thumps"), "Thumbs Up Command", "Sends a random Thumbs Up image."),
             GetImage(type = "thumbsup"),
             listOf(
@@ -328,7 +328,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("lewd"), "Lewd Command", "T-that's lewd!"),
             GetImage(type = "lewd"),
             ActionLines(
@@ -340,19 +340,19 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebImageCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("owo"), "OwO Command", "What's this?"),
             GetImage(type = "owo")
         )
 
         WeebImageCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("dab"), "Dabs Command", "Sends a random dab image."),
             GetImage(type = "dab")
         )
 
         WeebActionCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("shrug"), "Shrug Command", "Sends a random shrug image."),
             GetImage(type = "shrug", fileType = GIF),
             ActionLines(
@@ -364,7 +364,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         WeebImageCommand(
-            category, provider, registry, cache,
+            category, provider, r, cache,
             WeebCommandInfo(listOf("awoo", "awo", "awooo", "awoooo"), "Awoo Command", "Sends a random awoo!"),
             GetImage(type = "awoo", fileType = GIF),
             listOf(
@@ -373,7 +373,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         CustomActionCommand(
-            category, registry, cache,
+            category, r, cache,
             CustomCommandInfo(listOf("meow"), "Meow Command", "Meows at the mentioned users.", "meow.gif"),
             File("assets/aru/actions/meow.txt").readLines(),
             ActionLines(
@@ -385,7 +385,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         CustomActionCommand(
-            category, registry, cache,
+            category, r, cache,
             CustomCommandInfo(listOf("beg"), "Beg Command", "beg.gif", "Begs the mentioned users."),
             File("assets/aru/actions/beg.txt").readLines(),
             ActionLines(
@@ -395,9 +395,9 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
                 "$FUCK Eeh..? Why are you begging me? uwu"
             )
         )
-        
+
         CustomActionCommand(
-            category, registry, cache,
+            category, r, cache,
             CustomCommandInfo(listOf("bloodsuck", "vampire"), "Bloodsuck Command", "bloodsuck.gif", "Sucks the blood of the mentioned users."),
             File("assets/aru/actions/bloodsuck.txt").readLines(),
             ActionLines(
@@ -409,7 +409,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
 
         CustomActionCommand(
-            category, registry, cache,
+            category, r, cache,
             CustomCommandInfo(listOf("fuck"), "Fuck Command", "fuck.gif", "Fucks the mentioned users... Hey, that's lewd!", nsfw = true),
             File("assets/aru/actions/fuck.txt").readLines(),
             ActionLines(
@@ -421,112 +421,4 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
         )
     }
 
-    private fun imageCommands(registry: CommandRegistry) {
-        val category = Categories.IMAGE
-
-        WeebImageCommand(
-            category, provider, registry, cache,
-            WeebCommandInfo(listOf("cat"), "Cat Command", "Sends a random cat image."),
-            GetImage(type = "animal_cat"),
-            listOf(
-                "$CAT Aww, here, have a cat.",
-                "$CAT {author}, are you sad? Have a cat!",
-                "$CAT Meow.",
-                "$CAT {author}, I think you need a cat."
-            )
-        )
-
-        WeebImageCommand(
-            category, provider, registry, cache,
-            WeebCommandInfo(listOf("dog"), "Dog Command", "Sends a random dog image."),
-            GetImage(type = "animal_dog"),
-            listOf(
-                "$DOG Aww, here, have a dog.",
-                "$DOG {author}, are you sad? Have a dog!",
-                "$DOG Woof.",
-                "$DOG {author}, I think you need a dog."
-            )
-        )
-
-        WeebImageCommand(
-            category, provider, registry, cache,
-            WeebCommandInfo(listOf("catgirl", "neko"), "Catgirl Command", "Sends a random catgirl image."),
-            GetImage(type = "neko"),
-            listOf(
-                "$CAT Nyah~!"
-            )
-        )
-
-        WeebImageCommand(
-            category, provider, registry, cache,
-            WeebCommandInfo(listOf("hybrid", "kemonomimi"), "Hybrid (Kemonomimi) Command", "Sends a random kemonomimi image."),
-            GetImage(type = "kemonomimi")
-        )
-
-        WeebImageCommand(
-            category, provider, registry, cache,
-            WeebCommandInfo(listOf("astolfo"), "Astolfo Command", "Sends a random Astolfo image."),
-            GetImage(tags = listOf("astolfo"))
-        )
-
-        WeebImageCommand(
-            category, provider, registry, cache,
-            WeebCommandInfo(listOf("wan"), "Wan Command", "Sends a random Wan image."),
-            GetImage(tags = listOf("wan"))
-        )
-
-        WeebImageCommand(
-            category, provider, registry, cache,
-            WeebCommandInfo(listOf("rem"), "Rem Command", "Sends a random Rem image."),
-            GetImage(type = "rem")
-        )
-
-        CustomImageCommand(
-            category, registry, cache,
-            CustomCommandInfo(listOf("jibril"), "Jibril Command", "jibril.gif", "Sends a random Jibril image."),
-            File("assets/aru/images/jibril.txt").readLines()
-        )
-
-        WeebImageCommand(
-            category, provider, registry, cache,
-            WeebCommandInfo(listOf("megumin"), "Megumin Command", "Sends a random Megumin image."),
-            GetImage(type = "megumin")
-        )
-
-
-        WeebImageCommand(
-            category, provider, registry, cache,
-            WeebCommandInfo(listOf("trap"), "Trap Command", "Sends a random trap image."),
-            GetImage(type = "trap")
-        )
-
-        WeebImageCommand(
-            category, provider, registry, cache,
-            WeebCommandInfo(listOf("poi"), "Poi Command", "Sends a random Poi image."),
-            GetImage(type = "poi")
-        )
-
-        WeebImageCommand(
-            category, provider, registry, cache,
-            WeebCommandInfo(listOf("trapmemes"), "TrapMemes Command", "Sends a random trap meme."),
-            GetImage(tags = listOf("trap_memes"))
-        )
-
-        WeebImageCommand(
-            category, provider, registry, cache,
-            WeebCommandInfo(listOf("discordmemes"), "Discord Memes Command", "Sends a random discord meme."),
-            GetImage(type = "discord_memes")
-        )
-
-        WeebImageCommand(
-            category, provider, registry, cache,
-            WeebCommandInfo(listOf("jojo"), "JoJo Command", "Is that a fucking JoJo reference?"),
-            GetImage(type = "jojo")
-        )
-    }
-
-    override fun provide(r: CommandRegistry) {
-        actionCommands(r)
-        imageCommands(r)
-    }
 }
