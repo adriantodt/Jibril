@@ -34,12 +34,13 @@ class GuildMusicPlayer(private val shardManager: ShardManager, val musicManager:
 
     val audioPlayer: AudioPlayer = musicManager.userPlayerManager.createPlayer()
     var queue: BlockingDeque<AudioTrack> = LinkedBlockingDeque()
+    var repeatMode: RepeatMode = RepeatMode.NONE
+
     val voteSkips: TLongList = TLongArrayList()
     val voteStops: TLongList = TLongArrayList()
     val voteShuffles: TLongList = TLongArrayList()
     val votePauses: TLongList = TLongArrayList()
     val voteClearQueue: TLongList = TLongArrayList()
-    var repeatMode: RepeatMode = RepeatMode.NONE
 
     private var disconnectTask: Future<*>? = null
     private val guildId: Long = guild.idLong
@@ -166,13 +167,18 @@ class GuildMusicPlayer(private val shardManager: ShardManager, val musicManager:
     }
 
     fun stop() {
-        if (disconnectTask != null) disconnectTask!!.cancel(true)
-        this.queue.clear()
-        this.audioPlayer.stopTrack()
-        this.audioPlayer.isPaused = false
-        this.audioPlayer.volume = 100
+        //Cancel tasks
+        disconnectTask?.cancel(true)
+
+        queue.clear()
+        audioPlayer.stopTrack()
         disconnect(guild.audioManager)
         musicManager.cleanup(guild)
+
+        //Resource cleanup
+        disconnectTask = null
+        previousTrack = null
+        arrayOf(voteSkips, voteStops, voteShuffles, votePauses, voteClearQueue).forEach(TLongList::clear)
     }
 
     fun nowPlayingEmbed(currentTrack: AudioTrack, memberRequested: Member? = null) = embed {

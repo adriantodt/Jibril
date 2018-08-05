@@ -51,8 +51,8 @@ fun Args.parseOptions(options: OptionBuilder.() -> Unit) {
     runOptions(OptionBuilder().also(options).list)
 }
 
-fun <V> Args.parseAndCreate(options: OptionCreatorBuilder<V>.() -> Unit): V {
-    val builder = OptionCreatorBuilder<V>().also(options)
+fun <T> Args.parseAndCreate(options: OptionCreatorBuilder<T>.() -> Unit): T {
+    val builder = OptionCreatorBuilder<T>().also(options)
     runOptions(builder.builder.list)
     return builder.creator()
 }

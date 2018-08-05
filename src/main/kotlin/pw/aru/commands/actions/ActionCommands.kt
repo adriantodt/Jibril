@@ -386,6 +386,18 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J) : ICommandProvid
 
         CustomActionCommand(
             category, registry, cache,
+            CustomCommandInfo(listOf("beg"), "Beg Command", "beg.gif", "Begs the mentioned users."),
+            File("assets/aru/actions/beg.txt").readLines(),
+            ActionLines(
+                "$FUCK {author} is begging {mentions}",
+                "$FUCK *Begs~*",
+                "$FUCK *Begs you~*",
+                "$FUCK Eeh..? Why are you begging me? uwu"
+            )
+        )
+        
+        CustomActionCommand(
+            category, registry, cache,
             CustomCommandInfo(listOf("bloodsuck", "vampire"), "Bloodsuck Command", "bloodsuck.gif", "Sucks the blood of the mentioned users."),
             File("assets/aru/actions/bloodsuck.txt").readLines(),
             ActionLines(

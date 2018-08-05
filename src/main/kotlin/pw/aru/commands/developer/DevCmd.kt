@@ -12,6 +12,7 @@ import net.dv8tion.jda.core.utils.JDALogger
 import okhttp3.OkHttpClient
 import pw.aru.Aru.sleepQuotes
 import pw.aru.commands.actions.base.GetImage
+import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.CommandPermission
@@ -40,6 +41,7 @@ class DevCmd
     private val httpClient: OkHttpClient,
     shardManager: ShardManager,
     db: AruDB,
+    private val registry: CommandRegistry,
     private val weebSh: Weeb4J,
     private val dblPoster: DBLPoster,
     private val dpwPoster: DBotsPoster
@@ -59,6 +61,7 @@ class DevCmd
             "enablecallsite" -> callsite(true)
             "disablecallsite" -> callsite(false)
             "weebsh" -> weebsh(args)
+            "genwebyml" -> generateWebYaml()
             "", "check" -> adminCheck()
             else -> showHelp()
         }
@@ -238,6 +241,28 @@ class DevCmd
 
             footer("Evaluated by: ${event.author.name}", event.author.effectiveAvatarUrl)
         }
+    }
+
+    private fun CommandContext.generateWebYaml() {
+        val cmdsGroup = registry.lookup.entries.groupBy { it.key.category }
+        val builder = StringBuilder()
+        for (category in Categories.LIST) {
+            val cmds = cmdsGroup[category] ?: continue
+            if (cmds.isEmpty()) continue
+
+            builder += "- name: ${category.name.dropLast(1)}\n  list:\n"
+            for ((cmd, cmdNames) in cmds) {
+                builder += "    - cmd: ${cmdNames[0]}\n"
+                if (cmdNames.size > 1) {
+                    builder += "      alias: ${cmdNames.drop(1).joinToString(" ")}\n"
+                }
+                builder += "      desc: TODO\n"
+                builder += "\n"
+            }
+            builder += "\n"
+        }
+
+        send("**Commands.yml generated**: ${paste(httpClient, builder.toString())}").queue()
     }
 
     override val helpHandler = HelpFactory("Developer Command", permission) {
