@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.concurrent.Callable;
 
-public interface Resource<T> {
+public interface Resource<T> extends AutoCloseable {
     enum LoadState {
         NOT_LOADED, LOADING, AVAILABLE, UNAVAILABLE
     }
@@ -16,11 +16,21 @@ public interface Resource<T> {
     }
 
     static <T> Resource<T> of(Callable<T> callable) {
-        return new CallableResource<>(callable);
+        return new CallableResource<>(callable, false);
+    }
+
+    static <T> Resource<T> ofReloadable(Callable<T> callable) {
+        return new CallableResource<>(callable, true);
     }
 
     static <T> SettableResource<T> settable() {
         return new SettableResource<>();
+    }
+
+    static <T> SettableResource<T> ofSettable(T value) {
+        SettableResource<T> resource = settable();
+        resource.setResourceAvailable(value);
+        return resource;
     }
 
     @SuppressWarnings("unchecked")
@@ -47,5 +57,7 @@ public interface Resource<T> {
         return null;
     }
 
+    @Override
+    void close();
 }
 

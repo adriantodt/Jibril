@@ -9,8 +9,8 @@ import pw.aru.core.categories.Category
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.ICommand.HelpDialogProvider
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.*
 import pw.aru.utils.caches.URLCache
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.CONFUSED
 import pw.aru.utils.extensions.randomOrNull
 import pw.aru.utils.extensions.replaceEach
@@ -18,9 +18,11 @@ import pw.aru.utils.extensions.toSmartString
 
 data class WeebCommandInfo(
     val names: List<String>,
-    val name: String,
+    val commandName: String,
     val description: String
-)
+) {
+    val cmdName = names.first()
+}
 
 data class GetImage(
     val type: String? = null,
@@ -81,15 +83,14 @@ class WeebImageCommand(
             .queue()
     }
 
-    override val helpHandler = HelpFactory(info.name) {
-        val name = info.names.first()
-        aliases(*info.names.drop(1).toTypedArray())
-
-        usage(name, info.description)
-        usage("$name nsfw", "Only NSFW images. Might not find an image depending on the command.")
-
-        note("Powered by https://weeb.sh/")
-    }
+    override val helpHandler = Help(
+        CommandDescription(info.names, info.commandName),
+        Usage(
+            CommandUsage(info.cmdName, info.description),
+            CommandUsage("${info.cmdName} nsfw", "Only NSFW images. Might not find an image depending on the command.")
+        ),
+        Note("Powered by [weeb.sh](https://weeb.sh)")
+    )
 }
 
 class WeebActionCommand(
@@ -117,13 +118,12 @@ class WeebActionCommand(
             .queue()
     }
 
-    override val helpHandler = HelpFactory(info.name) {
-        val name = info.names.first()
-        aliases(*info.names.drop(1).toTypedArray())
-
-        usage("$name [mentions]", info.description)
-        usage("$name nsfw [mentions]", "Only NSFW images. Might not find an image depending on the command.")
-
-        note("Powered by https://weeb.sh/")
-    }
+    override val helpHandler = Help(
+        CommandDescription(info.names, info.commandName),
+        Usage(
+            CommandUsage("${info.cmdName} [mentions]", info.description),
+            CommandUsage("${info.cmdName} nsfw [mentions]", "Only NSFW images. Might not find an image depending on the command.")
+        ),
+        Note("Powered by [weeb.sh](https://weeb.sh)")
+    )
 }

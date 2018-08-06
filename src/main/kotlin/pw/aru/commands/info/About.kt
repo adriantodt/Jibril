@@ -6,8 +6,8 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.*
 import pw.aru.utils.AruColors
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.extensions.*
 
 @Command("about")
@@ -70,10 +70,12 @@ class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDia
 
     }
 
-    override val helpHandler = HelpFactory("About Command") {
-        description("Learn more about mee!")
-
-        usage("about [me/aru/bot]", "Let me introduce myself.")
-        usage("about credits", "A bit about the people that make me alive.")
-    }
+    override val helpHandler = Help(
+        CommandDescription(listOf("about"), "About Command"),
+        Description("Learn more about mee!"),
+        Usage(
+            CommandUsage("about [me/aru/bot]", "Let me introduce myself."),
+            CommandUsage("about credits", "A bit about the people that make me alive.")
+        )
+    )
 }

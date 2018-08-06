@@ -5,8 +5,8 @@ import pw.aru.core.categories.Category
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.ICommand.HelpDialogProvider
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.*
 import pw.aru.utils.caches.URLCache
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.extensions.random
 import pw.aru.utils.extensions.randomOrNull
 import pw.aru.utils.extensions.replaceEach
@@ -14,11 +14,13 @@ import pw.aru.utils.extensions.toSmartString
 
 data class CustomCommandInfo(
     val names: List<String>,
-    val name: String,
+    val commandName: String,
     val fileName: String,
     val description: String,
     val nsfw: Boolean = false
-)
+) {
+    val cmdName = names.first()
+}
 
 class CustomImageCommand(
     override val category: Category,
@@ -43,12 +45,13 @@ class CustomImageCommand(
             .queue()
     }
 
-    override val helpHandler = HelpFactory(info.name) {
-        val name = info.names.first()
-        aliases(*info.names.drop(1).toTypedArray())
-
-        usage(name, info.description)
-    }
+    override val helpHandler = Help(
+        CommandDescription(info.names, info.commandName),
+        Usage(
+            CommandUsage(info.cmdName, info.description)
+        ),
+        Note("This command is an exclusive of Aru! You can suggest more images [joining our support server!](https://support.aru.site)")
+    )
 }
 
 class CustomActionCommand(
@@ -83,11 +86,11 @@ class CustomActionCommand(
             .queue()
     }
 
-    override val helpHandler = HelpFactory(info.name) {
-        val name = info.names.first()
-        aliases(*info.names.drop(1).toTypedArray())
-
-        usage("$name [mentions]", info.description)
-    }
-
+    override val helpHandler = Help(
+        CommandDescription(info.names, info.commandName),
+        Usage(
+            CommandUsage("${info.cmdName} [mentions]", info.description)
+        ),
+        Note("This command is an exclusive of Aru! You can suggest more images [joining our support server!](https://support.aru.site)")
+    )
 }

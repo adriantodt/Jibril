@@ -4,7 +4,7 @@ import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
-import pw.aru.utils.commands.HelpFactory
+import pw.aru.core.commands.help.*
 import pw.aru.utils.emotes.THINKING
 import pw.aru.utils.extensions.random
 
@@ -20,9 +20,11 @@ class Choose : ICommand, ICommand.HelpDialogProvider {
         send("$THINKING Hmmm... I choose `${options.random()}`!").queue()
     }
 
-    override val helpHandler = HelpFactory("Choose Command") {
-        description("Decisions are though, huh?")
-
-        usage("choose <option 1>, <option 2>, [other options separated by comma...]", "Choose one of the options.")
-    }
+    override val helpHandler = Help(
+        CommandDescription(listOf("choose"), "Choose Command"),
+        Description("Decisions are though, huh? Let me choose between the options for you."),
+        Usage(
+            CommandUsage("choose <option 1>, <option 2>, [other options separated by comma...]", "Choose one of the options.")
+        )
+    )
 }

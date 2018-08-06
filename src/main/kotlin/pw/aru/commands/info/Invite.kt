@@ -4,8 +4,10 @@ import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.CommandDescription
+import pw.aru.core.commands.help.Description
+import pw.aru.core.commands.help.Help
 import pw.aru.utils.AruColors
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.SMILE2
 import pw.aru.utils.extensions.baseEmbed
 import pw.aru.utils.extensions.description
@@ -38,9 +40,8 @@ class Invite : ICommand, ICommand.HelpDialogProvider {
         }.queue()
     }
 
-    override val helpHandler = HelpFactory("Invite and other Links") {
-        aliases("links", "hangout")
-
-        description("Provides Useful Links like Invite and Support Server.")
-    }
+    override val helpHandler = Help(
+        CommandDescription(listOf("invite", "links", "hangout"), "Invite and other Links"),
+        Description("Provides Useful Links like Invite and Support Server.")
+    )
 }

@@ -6,7 +6,7 @@ import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
-import pw.aru.utils.commands.HelpFactory
+import pw.aru.core.commands.help.*
 import pw.aru.utils.emotes.DISAPPOINTED
 import pw.aru.utils.emotes.ERROR
 import pw.aru.utils.emotes.SUCCESS
@@ -40,10 +40,12 @@ class Avatar : ICommand, ICommand.HelpDialogProvider {
         ).queue()
     }
 
-    override val helpHandler = HelpFactory("Avatar Command") {
-        description("Gives the avatar URL of a specific user.")
-
-        usage("avatar", "Get your avatar link.")
-        usage("avatar <mention/nickname/name[#discriminator]>", "Get an user's avatar link.")
-    }
+    override val helpHandler = Help(
+        CommandDescription(listOf("avatar"), "Avatar Command"),
+        Description("Gives the avatar URL of a specific user."),
+        Usage(
+            CommandUsage("avatar", "Get your avatar link."),
+            CommandUsage("avatar <mention/nickname/name[#discriminator]>", "Get an user's avatar link.")
+        )
+    )
 }

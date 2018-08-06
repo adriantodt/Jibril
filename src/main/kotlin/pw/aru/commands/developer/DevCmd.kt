@@ -19,6 +19,10 @@ import pw.aru.core.commands.CommandPermission
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.CommandDescription
+import pw.aru.core.commands.help.CommandUsage
+import pw.aru.core.commands.help.Help
+import pw.aru.core.commands.help.Usage
 import pw.aru.core.parser.Args
 import pw.aru.core.parser.parseAndCreate
 import pw.aru.db.AruDB
@@ -26,7 +30,6 @@ import pw.aru.utils.Colors
 import pw.aru.utils.api.DBLPoster
 import pw.aru.utils.api.DBotsPoster
 import pw.aru.utils.commands.EmbedFirst
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.CONFUSED
 import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.extensions.*
@@ -105,12 +108,12 @@ class DevCmd
 
     private fun CommandContext.weebsh(args: Args) {
         val (image, nsfw) = args.parseAndCreate<Pair<GetImage, NsfwFilter?>> {
-            val type = option("-type") { takeString() }
-            val tags = option("-tags") { takeString().split(',') }
-            val ext = option("-ext") { FileType.valueOf(takeString().toUpperCase()) }
-            val nsfw = option("-nsfw") { NsfwFilter.valueOf(("${takeString()}_NSFW").toUpperCase()) }
+            val type by option("-type") { takeString() }
+            val tags by option("-tags") { takeString().split(',') }
+            val ext by option("-ext") { FileType.valueOf(takeString().toUpperCase()) }
+            val nsfw by option("-nsfw") { NsfwFilter.valueOf(("${takeString()}_NSFW").toUpperCase()) }
 
-            creator { GetImage(type.resourceOrNull, tags.resourceOrNull, ext.resourceOrNull) to nsfw.resourceOrNull }
+            creator { GetImage(type, tags, ext) to nsfw }
         }
 
         if (image.isNotEmpty()) {
@@ -265,11 +268,22 @@ class DevCmd
         send("**Commands.yml generated**: ${paste(httpClient, builder.toString())}").queue()
     }
 
-    override val helpHandler = HelpFactory("Developer Command", permission) {
-        aliases("devtools", "hack")
-        usage("dev [check]", "Checks if the user running this command is one of my developers.")
-        usage("dev shutdown", "Shutdowns the bot.")
-        usage("dev <eval/run> <engine> <code>", "Evals a piece of code.")
-        usage("dev <peval/prun> <engine> <code>", "Evals a piece of code in a persistent environiment.")
-    }
+    override val helpHandler = Help(
+        CommandDescription(listOf("dev", "devtools", "hack"), "Developer Command", permission),
+        Usage(
+            CommandUsage("dev [check]", "Checks if the user running this command is one of my developers."),
+            CommandUsage("dev shutdown", "Shutdowns the bot."),
+
+            CommandUsage("dev <eval/run> <engine> <code>", "Evals a piece of code."),
+            CommandUsage("dev <peval/prun> <engine> <code>", "Evals a piece of code in a persistent environiment."),
+
+            CommandUsage("dev enablecallsite", "Evals a piece of code in a persistent environiment."),
+            CommandUsage("dev disablecallsite", "Evals a piece of code in a persistent environiment."),
+
+            CommandUsage("dev weebsh", "Dumps Weeb.sh types and tags."),
+            CommandUsage("dev weebsh <[-type <value>] [-tags <values,...>] [-nsfw <value>] [-ext <value>]>", "Gets a random Weeb.sj image."),
+
+            CommandUsage("dev genwebyml", "Generates the base commands.yml file.")
+        )
+    )
 }

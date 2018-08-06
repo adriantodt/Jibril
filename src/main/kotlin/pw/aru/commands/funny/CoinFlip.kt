@@ -4,7 +4,9 @@ import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
-import pw.aru.utils.commands.HelpFactory
+import pw.aru.core.commands.help.CommandDescription
+import pw.aru.core.commands.help.Description
+import pw.aru.core.commands.help.Help
 import pw.aru.utils.emotes.COIN_HEADS
 import pw.aru.utils.emotes.COIN_TAILS
 import pw.aru.utils.extensions.random
@@ -30,10 +32,10 @@ class CoinFlip : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
         send("**$toSend**\n${if (threadLocalRandom().nextBoolean()) heads else tails}").queue()
     }
 
-    override val helpHandler = HelpFactory("CoinFlip Command") {
-        aliases("flip", "coin")
-        description("Have some fun, flip a coin.")
-    }
+    override val helpHandler = Help(
+        CommandDescription(listOf("coinflip", "flip", "coin"), "CoinFlip Command"),
+        Description("Have some fun, flip a coin.")
+    )
 
     companion object {
         private const val heads = "$COIN_HEADS Heads!"

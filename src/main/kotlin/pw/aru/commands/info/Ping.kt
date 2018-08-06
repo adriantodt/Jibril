@@ -4,7 +4,9 @@ import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
-import pw.aru.utils.commands.HelpFactory
+import pw.aru.core.commands.help.CommandDescription
+import pw.aru.core.commands.help.Description
+import pw.aru.core.commands.help.Help
 import pw.aru.utils.emotes.PING_PONG
 import pw.aru.utils.extensions.random
 import java.lang.System.currentTimeMillis
@@ -28,7 +30,8 @@ class Ping : ICommand, ICommand.HelpDialogProvider {
         }
     }
 
-    override val helpHandler = HelpFactory("Ping Command") {
-        description("**Plays Ping-Pong with Discord and finds out how much it takes to**.")
-    }
+    override val helpHandler = Help(
+        CommandDescription(listOf("ping"), "Ping Command"),
+        Description("**Plays Ping-Pong with Discord and finds out how much it takes to**.")
+    )
 }

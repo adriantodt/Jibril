@@ -14,7 +14,7 @@ import pw.aru.utils.helpers.CommandStatsManager
 import java.util.concurrent.TimeUnit
 
 @Command("help", "h")
-class Help(private val registry: CommandRegistry) : ICommand, ICommand.HelpDialogProvider {
+class HelpCommand(private val registry: CommandRegistry) : ICommand, ICommand.HelpDialogProvider {
     companion object : KLogging()
 
     override val category = Categories.INFO

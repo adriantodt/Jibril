@@ -9,10 +9,10 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.*
 import pw.aru.core.music.MusicManager
 import pw.aru.exported.aru_version
 import pw.aru.utils.commands.EmbedFirst
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.LOADING
 import pw.aru.utils.extensions.baseEmbed
 import pw.aru.utils.extensions.field
@@ -147,13 +147,16 @@ class Stats
         }.queue()
     }
 
-    override val helpHandler = HelpFactory("Stats Command") {
-        description("Shows this bot's stats.")
-        usage("stats [discord/d]", "Shows my general stats.")
-        usage("stats <server/s>", "Shows my server's stats.")
-        usage("stats <cmds/cmd/commands/c>", "Shows this session's commands stats.")
-        usage("stats <cmds/cmd/commands/c> <now/hourly/dialy/total>", "Shows detailed info about command usage.")
-        usage("stats <guilds/guild/g>", "Shows this session's guild join/leave stats.")
-        usage("stats <guilds/guild/g> <now/hourly/dialy/total>", "Shows detailed info about guild join/leave events.")
-    }
+    override val helpHandler = Help(
+        CommandDescription(listOf("stats"), "Stats Command"),
+        Description("Shows this bot's stats."),
+        Usage(
+            CommandUsage("stats [discord/d]", "Shows my general stats."),
+            CommandUsage("stats <server/s>", "Shows my server's stats."),
+            CommandUsage("stats <cmds/cmd/commands/c>", "Shows this session's commands stats."),
+            CommandUsage("stats <cmds/cmd/commands/c> <now/hourly/dialy/total>", "Shows detailed info about command usage."),
+            CommandUsage("stats <guilds/guild/g>", "Shows this session's guild join/leave stats."),
+            CommandUsage("stats <guilds/guild/g> <now/hourly/dialy/total>", "Shows detailed info about guild join/leave events.")
+        )
+    )
 }

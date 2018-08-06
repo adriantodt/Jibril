@@ -10,6 +10,7 @@ import pw.aru.utils.extensions.*
 import java.awt.Color
 import java.util.*
 
+@Deprecated("Use pw.aru.core.commands.help.Help now.")
 class HelpFactory(
     val name: String,
     private val permission: CommandPermission? = null,

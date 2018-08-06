@@ -38,9 +38,6 @@ fun EmbedBuilder.helpEmbed(
     image: String = event.jda.selfUser.effectiveAvatarUrl,
     color: Color? = event.member.color ?: AruColors.primary
 ) {
-    baseEmbed(event, name, url, image, color)
-    thumbnail("https://assets.aru.pw/img/help_thumbnail.png")
-    if (commandPermission != null) field("Permission Required:", commandPermission.toString(), false)
 }
 
 fun EmbedBuilder.author(name: String?, url: String? = null, iconUrl: String? = null) {

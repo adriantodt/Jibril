@@ -4,7 +4,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 class AvailableResource<T> implements Resource<T> {
-    private final T value;
+    private boolean closed = false;
+    private T value;
 
     AvailableResource(T value) {
         this.value = value;
@@ -13,12 +14,13 @@ class AvailableResource<T> implements Resource<T> {
     @Nonnull
     @Override
     public LoadState getLoadState() {
-        return LoadState.AVAILABLE;
+        return closed ? LoadState.UNAVAILABLE : LoadState.AVAILABLE;
     }
 
     @Nullable
     @Override
     public T getResource() throws IllegalStateException {
+        if (closed) throw new IllegalStateException("Resource is unavailable");
         return value;
     }
 
@@ -30,6 +32,12 @@ class AvailableResource<T> implements Resource<T> {
 
     @Override
     public boolean loadResource() {
-        return true;
+        return !closed;
+    }
+
+    @Override
+    public void close() {
+        closed = true;
+        value = null;
     }
 }

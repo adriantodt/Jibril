@@ -4,7 +4,7 @@ import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
-import pw.aru.utils.commands.HelpFactory
+import pw.aru.core.commands.help.*
 import pw.aru.utils.emotes.ERROR
 import pw.aru.utils.emotes.THINKING
 
@@ -19,7 +19,6 @@ class RateWaifu : ICommand, ICommand.HelpDialogProvider {
         }
 
         val toRate = if (args.isEmpty()) author.asMention
-
         else args
             .replace("<@!", "<@")
             .splitToSequence(' ', '\r', '\n')
@@ -37,13 +36,13 @@ class RateWaifu : ICommand, ICommand.HelpDialogProvider {
         send("$THINKING Hmmm... I think **$toRate** is worth a $rating/100, don't you?").queue()
     }
 
-    override val helpHandler = HelpFactory("RateWaifu Command") {
-        aliases("rw")
-        description("Rates your waifu from zero to 100")
-
-        usage("ratewaifu", "Rates you.")
-        usage("ratewaifu <name/mention>", "Rates the name/user.")
-
-        seeAlso("choose")
-    }
+    override val helpHandler = Help(
+        CommandDescription(listOf("ratewaifu", "rw"), "RateWaifu Command"),
+        Description("Rates your waifu from zero to 100"),
+        Usage(
+            CommandUsage("ratewaifu", "Rates you."),
+            CommandUsage("ratewaifu <name/mention>", "Rates the name/user.")
+        ),
+        SeeAlso["choose"]
+    )
 }

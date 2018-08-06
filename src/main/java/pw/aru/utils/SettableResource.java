@@ -4,7 +4,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class SettableResource<T> implements Resource<T> {
-    private final Object resLock = new Object();
     private Exception ex;
     private T res;
     private LoadState state = LoadState.NOT_LOADED;
@@ -55,5 +54,10 @@ public class SettableResource<T> implements Resource<T> {
         res = null;
         ex = null;
         state = LoadState.UNAVAILABLE;
+    }
+
+    @Override
+    public void close() {
+        setResourceUnavailable();
     }
 }

@@ -6,13 +6,15 @@ import java.util.concurrent.Callable;
 
 class CallableResource<T> implements Resource<T> {
     private final Callable<T> callable;
+    private final boolean reloadable;
     private final Object resLock = new Object();
     private Exception ex;
     private T res;
     private LoadState state = LoadState.NOT_LOADED;
 
-    CallableResource(Callable<T> callable) {
+    CallableResource(Callable<T> callable, boolean reloadable) {
         this.callable = callable;
+        this.reloadable = reloadable;
     }
 
     @Nonnull
@@ -41,7 +43,7 @@ class CallableResource<T> implements Resource<T> {
         synchronized (resLock) {
             if (state == LoadState.LOADING) throw new AssertionError("Impossible to happen?");
             if (state == LoadState.AVAILABLE) return true;
-            if (state == LoadState.UNAVAILABLE) return false;
+            if (state == LoadState.UNAVAILABLE && !reloadable) return false;
 
             state = LoadState.LOADING;
 
@@ -55,5 +57,12 @@ class CallableResource<T> implements Resource<T> {
                 return false;
             }
         }
+    }
+
+    @Override
+    public void close() {
+        state = LoadState.UNAVAILABLE;
+        res = null;
+        ex = null;
     }
 }

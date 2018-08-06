@@ -31,4 +31,8 @@ class UnavailableResource implements Resource {
     public boolean loadResource() {
         return false;
     }
+
+    @Override
+    public void close() {
+    }
 }

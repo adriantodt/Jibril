@@ -5,9 +5,12 @@ import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.CommandDescription
+import pw.aru.core.commands.help.Description
+import pw.aru.core.commands.help.Example
+import pw.aru.core.commands.help.Help
 import pw.aru.dice.exceptions.EvaluationException
 import pw.aru.dice.exceptions.SyntaxException
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.GAME_DIE
 import pw.aru.utils.extensions.stripFormatting
 import kotlin.math.roundToLong
@@ -60,17 +63,19 @@ class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
         }
     }
 
-    override val helpHandler = HelpFactory("Dice Command") {
-        aliases("roll")
-
-        description("Have some fun, roll a dice.")
-        examples(
+    override val helpHandler = Help(
+        CommandDescription(listOf("dice", "roll"), "Dice Command"),
+        Description(
+            "Rolls a dice, which needs to be written in dice notation.",
+            "[Click here to learn more about dice notation.](https://aru.pw/features/dicenotation)"
+        ),
+        Example(
             "dice d20",
             "dice 2d10",
             "dice 1d5 - 2",
             "dice 3d4 + 1d20",
             "dice d360 * pi"
         )
-    }
+    )
 }
 
