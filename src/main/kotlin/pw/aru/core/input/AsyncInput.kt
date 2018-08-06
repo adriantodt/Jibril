@@ -19,11 +19,22 @@ abstract class AsyncInput protected constructor(private val eventWaiter: EventWa
     }
 }
 
-abstract class AsyncCommandInput protected constructor(eventWaiter: EventWaiter, timeout: Long, unit: TimeUnit) : AsyncInput(eventWaiter, timeout, unit) {
+abstract class AsyncCommandsInput protected constructor(eventWaiter: EventWaiter, timeout: Long, unit: TimeUnit) : AsyncInput(eventWaiter, timeout, unit) {
     override fun call(event: GuildMessageReceivedEvent) {
         val parts = event.message.contentRaw.split(' ')
         CommandContext(event, parts.getOrNull(1) ?: "").onCommand(parts[0])
     }
 
     protected abstract fun CommandContext.onCommand(command: String)
+}
+
+abstract class AsyncCommandInput protected constructor(eventWaiter: EventWaiter, timeout: Long, unit: TimeUnit, private val command: String) : AsyncInput(eventWaiter, timeout, unit) {
+    override fun filter(event: GuildMessageReceivedEvent): Boolean = event.message.contentRaw.startsWith(command)
+
+    override fun call(event: GuildMessageReceivedEvent) {
+        val parts = event.message.contentRaw.split(' ')
+        CommandContext(event, parts.getOrNull(1) ?: "").onCommand()
+    }
+
+    protected abstract fun CommandContext.onCommand()
 }

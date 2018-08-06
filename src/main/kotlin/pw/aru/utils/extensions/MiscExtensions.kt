@@ -40,6 +40,37 @@ internal fun <T> T.transformElement(transform: ((T) -> CharSequence)?): CharSequ
     }
 }
 
+fun List<String>.limitedToString(limit: Int): String {
+    if (isEmpty()) return "None"
+    else {
+        val builder = StringBuilder()
+        val iterator = listIterator()
+
+        while (iterator.hasNext()) {
+            val next = iterator.next()
+
+            if ((builder.length + next.length + 2) < 1000) {
+                builder.append(next)
+                if (iterator.hasNext()) builder.append(", ")
+            } else {
+                builder.append("more ").append(size - iterator.nextIndex()).append("...")
+                break
+            }
+        }
+
+        return builder.toString()
+    }
+}
+
+fun <E> List<E>.split(minSize: Int, maxSize: Int): List<List<E>> {
+    if (size < maxSize) return listOf(this)
+    val c = (minSize..maxSize).minBy { it - size % it } ?: 5
+    return withIndex()
+        .groupBy { it.index / c }
+        .values
+        .map { it.map { it.value } }
+}
+
 fun Exception.simpleName(): String {
     var c: Class<*>? = javaClass
 

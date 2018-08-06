@@ -37,15 +37,12 @@ class Args(val raw: String) {
         return p
     }
 
-    fun <T> matchAny(vararg pairs: Pair<T, (String) -> Boolean>): Set<T> {
-        val map = pairs.toMap(LinkedHashMap())
-        val validKeys = LinkedHashSet<T>()
+    fun <T> matchFirst(vararg pairs: Pair<T, (String) -> Boolean>): T? {
+        return pairs.firstOrNull { (_, v) -> matchNextString(v) }?.first
+    }
 
-        while (true) {
-            val (key) = map.entries.firstOrNull { matchNextString(it.value) } ?: return validKeys
-            map.remove(key)
-            validKeys.add(key)
-        }
+    fun <T> matchFirst(pairs: List<Pair<T, (String) -> Boolean>>): T? {
+        return pairs.firstOrNull { (_, v) -> matchNextString(v) }?.first
     }
 
     fun <T> mapNextString(map: (String) -> Pair<T, Boolean>): T {
