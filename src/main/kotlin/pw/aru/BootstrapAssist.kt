@@ -23,6 +23,7 @@ import org.kodein.di.generic.eagerSingleton
 import org.kodein.di.generic.instance
 import org.kodein.di.generic.singleton
 import pw.aru.Aru.bootQuotes
+import pw.aru.api.nekos4j.Nekos4J
 import pw.aru.core.CommandProcessor
 import pw.aru.core.CommandRegistry
 import pw.aru.core.commands.*
@@ -140,6 +141,12 @@ internal fun createInitialInjector(config: AruConfig): Kodein {
                 .setToken(TokenType.WOLKE, config.wshToken)
                 .setHttpClient(instance())
                 .setBotInfo(if (config.dev) "AruDev!" else "Aru!", aru_version, if (config.dev) "development" else "production")
+                .build()
+        }
+
+        bind<Nekos4J>() with singleton {
+            Nekos4J.Builder()
+                .setHttpClient(instance())
                 .build()
         }
 
@@ -275,7 +282,7 @@ internal fun replacePlaceholderCommands(injector: DKodein, registry: CommandRegi
         }
     }
 
-    return map.values.map { { it.forEach { it() } } }
+    return map.values.map { fun() { it.forEach { it() } } }
 }
 
 internal fun launchRedisCheckThread(db: AruDB) {

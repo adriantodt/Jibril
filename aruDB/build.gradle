@@ -17,8 +17,8 @@ repositories {
 
 dependencies {
     //Source of memes
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.2.51"
-    compile "org.jetbrains.kotlin:kotlin-reflect:1.2.51"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.2.60"
+    compile "org.jetbrains.kotlin:kotlin-reflect:1.2.60"
 
     //Client and ID generator
     compile 'redis.clients:jedis:2.9.0'

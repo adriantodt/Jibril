@@ -55,6 +55,8 @@ dependencies {
     compile 'pw.aru.snowflake:snowflake-local:1.0'
     compile 'pw.aru.hungergames:hg-engine:1.0'
     compile 'pw.aru.hungergames:hg-loader:1.0'
+    compile 'pw.aru.api:DD4J:1.0.1'
+    compile 'pw.aru.api:nekos4j:1.0'
 
     //Helping stuff
     compile 'org.apache.commons:commons-lang3:3.7'
