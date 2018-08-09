@@ -8,6 +8,7 @@ import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.commandUsage
 import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.commands.HelpFactory.Companion.prefix
 import pw.aru.utils.emotes.CONFUSED
@@ -16,7 +17,6 @@ import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.extensions.baseEmbed
 import pw.aru.utils.extensions.field
 import pw.aru.utils.extensions.toSmartString
-import pw.aru.utils.extensions.usage
 import java.util.*
 
 @Command("hg", "hungergames")
@@ -40,7 +40,7 @@ class HungerGamesCmd : ICommand, ICommand.HelpHandler {
                 "addall" -> addAllGuests()
                 "rmguests", "rmguest" -> rmGuests(args.takeRemaining())
                 "clearguests" -> clearGuests()
-            //  "configs" -> { }
+                //  "configs" -> { }
                 "start" -> startGame()
                 "", "lobby" -> lobby()
                 else -> showHelp()
@@ -310,7 +310,7 @@ class HungerGamesCmd : ICommand, ICommand.HelpHandler {
         //"hg next".usage("Shows next event."),
         //"hg <end/finish>".usage("Ends the game."),
         //"hg cancel".usage("Abruptly ends the game.")
-        "hg <end/finish/cancel>".usage("Ends the game.")
+        commandUsage("hg <end/finish/cancel>", "Ends the game.")
     ).joinToString("\n\n")
 
     private val lobbyHelp = HelpFactory("HungerGames") {

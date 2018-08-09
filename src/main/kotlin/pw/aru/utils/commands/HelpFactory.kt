@@ -6,7 +6,10 @@ import pw.aru.Aru
 import pw.aru.core.commands.CommandPermission
 import pw.aru.core.commands.ICommand
 import pw.aru.utils.AruColors
-import pw.aru.utils.extensions.*
+import pw.aru.utils.extensions.embed
+import pw.aru.utils.extensions.field
+import pw.aru.utils.extensions.helpEmbed
+import pw.aru.utils.extensions.withPrefix
 import java.awt.Color
 import java.util.*
 
@@ -134,3 +137,6 @@ class HelpFactory(
         val prefix = Aru.prefixes.first()
     }
 }
+
+private fun String.usage(description: String): String = "`${this.withPrefix()}` - $description"
+private fun String.usage(extra: String, description: String): String = "`${this.withPrefix()}` $extra - $description"

@@ -6,24 +6,22 @@ import net.dv8tion.jda.core.Permission.MESSAGE_ADD_REACTION
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.commands.music.MusicPermissionCommand.Companion.checkPermissions
 import pw.aru.core.categories.Categories
-import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.CommandPermission
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.*
+import pw.aru.core.commands.help.CommandUsage.Companion.prefix
 import pw.aru.core.music.GuildMusicPlayer.RepeatMode.*
 import pw.aru.core.music.MusicManager
 import pw.aru.core.music.MusicRequester
 import pw.aru.core.parser.parseOptions
 import pw.aru.core.parser.tryTakeInt
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.ERROR2
 import pw.aru.utils.emotes.STOP
 import pw.aru.utils.emotes.THINKING
 import pw.aru.utils.emotes.X
-import pw.aru.utils.extensions.usage
-import pw.aru.utils.extensions.withPrefix
 import java.net.URL
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -32,9 +30,10 @@ sealed class PlayCommand(
     private val musicManager: MusicManager,
     private val force: Boolean,
     private val next: Boolean,
-    private val playNow: Boolean
+    private val playNow: Boolean,
+    override val helpHandler: Help
 ) : ICommand, ICommand.HelpDialogProvider {
-    override val category: Category = Categories.MUSIC
+    override val category = Categories.MUSIC
 
     private val replacers = listOf(
         listOf("soundcloud:", "soundcloud ", "sc:", "sc ") to "scsearch:",
@@ -57,7 +56,7 @@ sealed class PlayCommand(
         val musicPlayer = musicManager[event.guild]
         if (playNow && !checkPermissions(event, musicPlayer, true)) {
             send(
-                "$STOP B-baka, I'm not allowed to let you do that!\n\n$THINKING Maybe you meant ``${(if (force) "forceplaynext" else "playnext").withPrefix()}`` instead?"
+                "$STOP B-baka, I'm not allowed to let you do that!\n\n$THINKING Maybe you meant ``$prefix${if (force) "forceplaynext" else "playnext"}`` instead?"
             ).queue()
             return
         }
@@ -149,168 +148,171 @@ sealed class PlayCommand(
 
 @Command("play", "p")
 @UseFullInjector
-class Play(musicManager: MusicManager) : PlayCommand(musicManager, false, false, false) {
-    override val helpHandler = HelpFactory("Play Command") {
-        aliases("p")
+class Play(musicManager: MusicManager) : PlayCommand(
+    musicManager, false, false, false,
+    Help(
+        CommandDescription(listOf("play", "p"), "Play Command"),
 
-        description(
+        Description(
             "**Play songs!**",
             "If the user is in a voice channel and there's no song playing, I'll join your channel before starting.",
             "If I'm already playing another song, the song will be added to the end of the queue."
-        )
-
-        usage("play", "+ attachment", "Loads and plays the song from the attachment.")
-        usage("play <song url>", "Loads and plays the song from the URL.")
-        usage("play [youtube/yt] <search term>", "Searches for the video in Youtube.")
-        usage("play <soundcloud/sc> <search term>", "Searches for the song in SoundCloud.")
-
-        note(
+        ),
+        Usage(
+            CommandUsage("play", "+ attachment", "Loads and plays the song from the attachment."),
+            CommandUsage("play <song url>", "Loads and plays the song from the URL."),
+            CommandUsage("play [youtube/yt] <search term>", "Searches for the video in Youtube."),
+            CommandUsage("play <soundcloud/sc> <search term>", "Searches for the song in SoundCloud.")
+        ),
+        Note(
             "**Magic Prefixes**:",
-            "play --vol <volume> ...".usage("Sets the volume of the player."),
-            "play --repeat <mode> ...".usage("Sets the repeat mode of the player."),
+            commandUsage("play --vol <volume> <...>", "Sets the volume of the player."),
+            commandUsage("play --repeat <mode> <...>", "Sets the repeat mode of the player."),
             "(You need the permissions to set the volume or the repeat mode)"
-        )
-
-        seeAlso("playnow", "playnext", "forceplay", "forceplaynow", "forceplaynext")
-    }
-}
+        ),
+        SeeAlso["playnow", "playnext", "forceplay", "forceplaynow", "forceplaynext"]
+    )
+)
 
 @Command("forceplay", "fp")
 @UseFullInjector
-class ForcePlay(musicManager: MusicManager) : PlayCommand(musicManager, true, false, false) {
-    override val helpHandler = HelpFactory("ForcePlay Command") {
-        aliases("fp")
+class ForcePlay(musicManager: MusicManager) : PlayCommand(
+    musicManager, true, false, false,
+    Help(
+        CommandDescription(listOf("forceplay", "fp"), "ForcePlay Command"),
 
-        description(
+        Description(
             "**Play songs!**",
             "If the user is in a voice channel and there's no song playing, I'll join your channel before starting.",
             "If I'm already playing another song, the song will be added to the end of the queue.",
             "Instead of opening a dialog in a search result, this command adds the first result instead."
-        )
-
-        usage("forceplay", "+ attachment", "Loads and plays the song from the attachment.")
-        usage("forceplay <song url>", "Loads and plays the song from the URL.")
-        usage("forceplay [youtube/yt] <search term>", "Searches for the video in Youtube and adds the first result.")
-        usage("forceplay <soundcloud/sc> <search term>", "Searches for the song in SoundCloud and adds the first result.")
-
-        note(
+        ),
+        Usage(
+            CommandUsage("forceplay", "+ attachment", "Loads and plays the song from the attachment."),
+            CommandUsage("forceplay <song url>", "Loads and plays the song from the URL."),
+            CommandUsage("forceplay [youtube/yt] <search term>", "Searches for the video in Youtube and adds the first result."),
+            CommandUsage("forceplay <soundcloud/sc> <search term>", "Searches for the song in SoundCloud and adds the first result.")
+        ),
+        Note(
             "**Magic Prefixes**:",
-            "forceplay --vol <volume> ...".usage("Sets the volume of the player."),
-            "forceplay --repeat <mode> ...".usage("Sets the repeat mode of the player."),
+            commandUsage("forceplay --vol <volume> <...>", "Sets the volume of the player."),
+            commandUsage("forceplay --repeat <mode> <...>", "Sets the repeat mode of the player."),
             "(You need the permissions to set the volume or the repeat mode)"
-        )
-
-        seeAlso("play", "playnow", "playnext", "forceplaynow", "forceplaynext")
-    }
-}
+        ),
+        SeeAlso["play", "playnow", "playnext", "forceplaynow", "forceplaynext"]
+    )
+)
 
 @Command("playnow", "pn")
 @UseFullInjector
-class PlayNow(musicManager: MusicManager) : PlayCommand(musicManager, false, true, true) {
-    override val helpHandler = HelpFactory("PlayNow Command") {
-        aliases("pn")
+class PlayNow(musicManager: MusicManager) : PlayCommand(
+    musicManager, false, true, true,
+    Help(
+        CommandDescription(listOf("playnow", "pn"), "PlayNow Command"),
 
-        description(
+        Description(
             "**Play songs!**",
             "If the user is in a voice channel and there's no song playing, I'll join your channel before starting.",
             "If I'm already playing a song, this command will add the song to the begin of the queue."
-        )
-
-        usage("playnow", "+ attachment", "Loads and plays the song from the attachment.")
-        usage("playnow <song url>", "Loads and plays the song from the URL.")
-        usage("playnow [youtube/yt] <search term>", "Searches for the video in Youtube.")
-        usage("playnow <soundcloud/sc> <search term>", "Searches for the song in SoundCloud.")
-
-        note(
+        ),
+        Usage(
+            CommandUsage("playnow", "+ attachment", "Loads and plays the song from the attachment."),
+            CommandUsage("playnow <song url>", "Loads and plays the song from the URL."),
+            CommandUsage("playnow [youtube/yt] <search term>", "Searches for the video in Youtube."),
+            CommandUsage("playnow <soundcloud/sc> <search term>", "Searches for the song in SoundCloud.")
+        ),
+        Note(
             "**Magic Prefixes**:",
-            "playnow --vol <volume> ...".usage("Sets the volume of the player."),
-            "playnow --repeat <mode> ...".usage("Sets the repeat mode of the player."),
+            commandUsage("playnow --vol <volume> <...>", "Sets the volume of the player."),
+            commandUsage("playnow --repeat <mode> <...>", "Sets the repeat mode of the player."),
             "(You need the permissions to set the volume or the repeat mode)"
-        )
-
-        seeAlso("play", "playnext", "forceplay", "forceplaynow", "forceplaynext")
-    }
-}
+        ),
+        SeeAlso["play", "playnext", "forceplay", "forceplaynow", "forceplaynext"]
+    )
+)
 
 @Command("forceplaynow", "fpn")
 @UseFullInjector
-class ForcePlayNow(musicManager: MusicManager) : PlayCommand(musicManager, true, true, true) {
+class ForcePlayNow(musicManager: MusicManager) : PlayCommand(
+    musicManager, true, true, true,
+    Help(
+        CommandDescription(listOf("forceplaynow", "fpn"), "ForcePlayNow Command"),
 
-    override val helpHandler = HelpFactory("ForcePlayNow Command") {
-        aliases("fpn")
-
-        description(
+        Description(
             "**Play songs!**",
             "If the user is in a voice channel and there's no song playing, I'll join your channel before starting.",
             "If I'm already playing a song, this command will add the song to the begin of the queue.",
             "Instead of opening a dialog in a search result, this command adds the first result instead."
-        )
-
-        usage("forceplaynow", "+ attachment", "Loads and plays the song from the attachment.")
-        usage("forceplaynow <song url>", "Loads and plays the song from the URL.")
-        usage("forceplaynow [youtube/yt] <search term>", "Searches for the video in Youtube and adds the first result.")
-        usage("forceplaynow <soundcloud/sc> <search term>", "Searches for the song in SoundCloud and adds the first result.")
-
-        note(
+        ),
+        Usage(
+            CommandUsage("forceplaynow", "+ attachment", "Loads and plays the song from the attachment."),
+            CommandUsage("forceplaynow <song url>", "Loads and plays the song from the URL."),
+            CommandUsage("forceplaynow [youtube/yt] <search term>", "Searches for the video in Youtube and adds the first result."),
+            CommandUsage("forceplaynow <soundcloud/sc> <search term>", "Searches for the song in SoundCloud and adds the first result.")
+        ),
+        Note(
             "**Magic Prefixes**:",
-            "forceplaynow --vol <volume> ...".usage("Sets the volume of the player."),
-            "forceplaynow --repeat <mode> ...".usage("Sets the repeat mode of the player."),
+            commandUsage("forceplaynow --vol <volume> <...>", "Sets the volume of the player."),
+            commandUsage("forceplaynow --repeat <mode> <...>", "Sets the repeat mode of the player."),
             "(You need the permissions to set the volume or the repeat mode)"
-        )
-
-        seeAlso("play", "playnow", "playnext", "forceplay", "forceplaynext")
-    }
-}
+        ),
+        SeeAlso["play", "playnow", "playnext", "forceplay", "forceplaynext"]
+    )
+)
 
 @Command("playnext")
 @UseFullInjector
-class PlayNext(musicManager: MusicManager) : PlayCommand(musicManager, false, true, false) {
-    override val helpHandler = HelpFactory("PlayNext Command") {
-        description(
+class PlayNext(musicManager: MusicManager) : PlayCommand(
+    musicManager, false, true, false,
+    Help(
+        CommandDescription(listOf("playnext"), "PlayNext Command"),
+
+        Description(
             "**Play songs!**",
             "If the user is in a voice channel and there's no song playing, I'll join your channel before starting.",
             "If I'm already playing a song, this command will add the song to the begin of the queue."
-        )
-
-        usage("playnext", "+ attachment", "Loads and plays the song from the attachment.")
-        usage("playnext <song url>", "Loads and plays the song from the URL.")
-        usage("playnext [youtube/yt] <search term>", "Searches for the video in Youtube.")
-        usage("playnext <soundcloud/sc> <search term>", "Searches for the song in SoundCloud.")
-
-        note(
+        ),
+        Usage(
+            CommandUsage("playnext", "+ attachment", "Loads and plays the song from the attachment."),
+            CommandUsage("playnext <song url>", "Loads and plays the song from the URL."),
+            CommandUsage("playnext [youtube/yt] <search term>", "Searches for the video in Youtube."),
+            CommandUsage("playnext <soundcloud/sc> <search term>", "Searches for the song in SoundCloud.")
+        ),
+        Note(
             "**Magic Prefixes**:",
-            "playnext --vol <volume> ...".usage("Sets the volume of the player."),
-            "playnext --repeat <mode> ...".usage("Sets the repeat mode of the player."),
+            commandUsage("playnext --vol <volume> <...>", "Sets the volume of the player."),
+            commandUsage("playnext --repeat <mode> <...>", "Sets the repeat mode of the player."),
             "(You need the permissions to set the volume or the repeat mode)"
-        )
-
-        seeAlso("play", "playnow", "forceplay", "forceplaynow", "forceplaynext")
-    }
-}
+        ),
+        SeeAlso["play", "playnow", "forceplay", "forceplaynow", "forceplaynext"]
+    )
+)
 
 @Command("forceplaynext")
 @UseFullInjector
-class ForcePlayNext(musicManager: MusicManager) : PlayCommand(musicManager, true, true, false) {
-    override val helpHandler = HelpFactory("ForcePlayNext Command") {
-        description(
+class ForcePlayNext(musicManager: MusicManager) : PlayCommand(
+    musicManager, true, true, false,
+    Help(
+        CommandDescription(listOf("forceplaynext"), "ForcePlayNext Command"),
+
+        Description(
             "**Play songs!**",
             "If the user is in a voice channel and there's no song playing, I'll join your channel before starting.",
             "If I'm already playing a song, this command will add the song to the begin of the queue.",
             "Instead of opening a dialog in a search result, this command adds the first result instead."
-        )
-
-        usage("forceplaynext", "+ attachment", "Loads and plays the song from the attachment.")
-        usage("forceplaynext <song url>", "Loads and plays the song from the URL.")
-        usage("forceplaynext [youtube/yt] <search term>", "Searches for the video in Youtube and adds the first result.")
-        usage("forceplaynext <soundcloud/sc> <search term>", "Searches for the song in SoundCloud and adds the first result.")
-
-        note(
+        ),
+        Usage(
+            CommandUsage("forceplaynext", "+ attachment", "Loads and plays the song from the attachment."),
+            CommandUsage("forceplaynext <song url>", "Loads and plays the song from the URL."),
+            CommandUsage("forceplaynext [youtube/yt] <search term>", "Searches for the video in Youtube and adds the first result."),
+            CommandUsage("forceplaynext <soundcloud/sc> <search term>", "Searches for the song in SoundCloud and adds the first result.")
+        ),
+        Note(
             "**Magic Prefixes**:",
-            "forceplaynext --vol <volume> ...".usage("Sets the volume of the player."),
-            "forceplaynext --repeat <mode> ...".usage("Sets the repeat mode of the player."),
+            commandUsage("forceplaynext --vol <volume> <...>", "Sets the volume of the player."),
+            commandUsage("forceplaynext --repeat <mode> <...>", "Sets the repeat mode of the player."),
             "(You need the permissions to set the volume or the repeat mode)"
-        )
-
-        seeAlso("play", "playnow", "playnext", "forceplay", "forceplaynow")
-    }
-}
+        ),
+        SeeAlso["play", "playnow", "playnext", "forceplay", "forceplaynow"]
+    )
+)

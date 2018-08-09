@@ -65,7 +65,3 @@ const val ERROR_CHANNEL_NOT_NSFW = "For this command to work, set this text chan
 
 @Deprecated("Use CommandUsage.prefix instead.")
 inline fun String.withPrefix() = "${HelpFactory.prefix}$this"
-
-inline fun String.usage(description: String): String = "`${this.withPrefix()}` - $description"
-
-inline fun String.usage(extra: String, description: String): String = "`${this.withPrefix()}` $extra - $description"
