@@ -1,4 +1,4 @@
-package pw.aru.commands.games.hungergames
+package pw.aru.commands.games.hg
 
 import net.dv8tion.jda.core.entities.Member
 import pw.aru.hungergames.game.Tribute

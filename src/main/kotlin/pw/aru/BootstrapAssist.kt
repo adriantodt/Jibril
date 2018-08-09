@@ -24,6 +24,7 @@ import org.kodein.di.generic.instance
 import org.kodein.di.generic.singleton
 import pw.aru.Aru.bootQuotes
 import pw.aru.api.nekos4j.Nekos4J
+import pw.aru.commands.games.manager.GameManager
 import pw.aru.core.CommandProcessor
 import pw.aru.core.CommandRegistry
 import pw.aru.core.commands.*
@@ -123,7 +124,7 @@ internal fun createInitialInjector(config: AruConfig): Kodein {
 
         // Self-references
         bind<Kodein>() with singleton { kodein }
-        bind<DKodein>() with singleton { instance<Kodein>().direct }
+        bind<DKodein>() with singleton { dkodein }
 
         // Instances
         bind<Future<ShardManager>>() with instance(CompletableFuture())
@@ -168,13 +169,14 @@ internal fun createFullInjector(injector: Kodein, shardManager: ShardManager): K
 
         // Override Self-references
         bind<Kodein>(overrides = true) with singleton { kodein }
-        bind<DKodein>(overrides = true) with singleton { instance<Kodein>().direct }
+        bind<DKodein>(overrides = true) with singleton { dkodein }
 
         // Instances
         bind<ShardManager>() with instance(shardManager)
 
         // Managers
         bind<MusicManager>() with singleton { MusicManager(shardManager, instance(), instance()) }
+        bind<GameManager>() with singleton { GameManager(dkodein) }
 
         //Posters
         bind<DBLPoster>() with eagerSingleton {

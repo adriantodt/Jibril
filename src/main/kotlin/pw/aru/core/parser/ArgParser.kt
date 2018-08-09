@@ -48,6 +48,14 @@ class Args(val raw: String) {
         }
     }
 
+    fun <T> matchFirst(vararg pairs: Pair<T, (String) -> Boolean>): T? {
+        return pairs.firstOrNull { (_, v) -> matchNextString(v) }?.first
+    }
+
+    fun <T> matchFirst(pairs: List<Pair<T, (String) -> Boolean>>): T? {
+        return pairs.firstOrNull { (_, v) -> matchNextString(v) }?.first
+    }
+
     fun <T> mapNextString(map: (String) -> Pair<T, Boolean>): T {
         val args = remaining
         val i = args.indexOfAny(charArrayOf(' ', '\r', '\n', '\t'))
