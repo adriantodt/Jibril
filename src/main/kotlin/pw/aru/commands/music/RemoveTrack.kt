@@ -7,9 +7,9 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.*
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.ERROR
 import pw.aru.utils.emotes.SUCCESS
 import java.util.concurrent.LinkedBlockingDeque
@@ -84,14 +84,15 @@ class RemoveTrack(musicManager: MusicManager) : MusicPermissionCommand(musicMana
         send("$SUCCESS Removed **${selected.size()}** track(s) from the queue.").queue()
     }
 
-    override val helpHandler = HelpFactory("RemoveTrack Command") {
-        aliases("removesong")
-
-        description("Remove the specified track from the queue.")
-
-        usage("removetrack first", "Remove the first track.")
-        usage("removetrack last", "Remove the first track.")
-        usage("removetrack <track number>", "Remove the specified track.")
-        usage("removetrack <from~to>", "Remove the tracks in a specific range.")
-    }
+    override val helpHandler = Help(
+        CommandDescription(listOf("removetrack", "removesong"), "RemoveTrack Command"),
+        Description("Remove the specified track from the queue."),
+        Usage(
+            CommandUsage("removetrack first", "Remove the first track."),
+            CommandUsage("removetrack last", "Remove the last track."),
+            CommandUsage("removetrack <track number>", "Remove the specified track."),
+            CommandUsage("removetrack <from~to>", "Remove the tracks in a specific range."),
+            CommandUsage("removetrack all", "Remove all the tracks of the queue.")
+        )
+    )
 }

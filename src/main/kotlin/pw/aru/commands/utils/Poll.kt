@@ -6,8 +6,11 @@ import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
-import pw.aru.utils.commands.HelpFactory
-import pw.aru.utils.extensions.withPrefix
+import pw.aru.core.commands.help.CommandDescription
+import pw.aru.core.commands.help.CommandUsage.Companion.prefix
+import pw.aru.core.commands.help.Description
+import pw.aru.core.commands.help.Example
+import pw.aru.core.commands.help.Help
 import pw.aru.utils.twemoji_pattern
 
 @Command("poll")
@@ -26,17 +29,15 @@ class Poll : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
             .forEach { event.message.addReaction(it).queue() }
     }
 
-    override val helpHandler = HelpFactory("Poll Command") {
-        description("Creates a new poll. It supports most emoji and local emotes.")
-
-        examples(
-            "[${"poll".withPrefix()}] Should we play Fortnite or PUGB?",
-            ":one: Fornite",
-            ":two: PUGB",
-
+    override val helpHandler = Help(
+        CommandDescription(listOf("poll"), "Poll Command"),
+        Description("Creates a new poll. It supports most emoji and local emotes."),
+        Example(
+            "[$prefix${"poll"}] Should we play Fortnite or PUGB?",
+            ":one: Fornite", ":two: PUGB",
             withPrefix = false
         )
-    }
+    )
 }
 
 private fun <T> T?.log(s: String? = null): T? {

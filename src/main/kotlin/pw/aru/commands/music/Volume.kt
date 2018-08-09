@@ -5,9 +5,9 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.*
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.emotes.VOLUME
 
@@ -26,22 +26,21 @@ class Volume(musicManager: MusicManager) : MusicCommand(musicManager), ICommand.
         }
     }
 
-    override val helpHandler = HelpFactory("Volume Command") {
-        aliases("vol")
-
-        description(
+    override val helpHandler = Help(
+        CommandDescription(listOf("volume", "vol"), "Volume Command"),
+        Description(
             "Gets or sets the current volume.",
             "",
             "To be able to set the volume, you have to:",
             "- The only user one listening to me",
             "- Have either DJ or Server Admin permissions"
-        )
-
-        usage("volume", "Gets the current volume.")
-        usage("volume <1-150>", "Sets the current volume.")
-
-        seeAlso("play", "queue", "pause")
-    }
+        ),
+        Usage(
+            CommandUsage("volume", "Gets the current volume."),
+            CommandUsage("volume <1-150>", "Sets the current volume.")
+        ),
+        SeeAlso["play", "queue", "pause"]
+    )
 
     private class SetVolume(musicManager: MusicManager) : MusicPermissionCommand(musicManager, userQueued = true) {
         override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {

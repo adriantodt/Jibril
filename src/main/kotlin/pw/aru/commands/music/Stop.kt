@@ -5,9 +5,9 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.*
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.SUCCESS
 
 @Command("stop")
@@ -23,17 +23,19 @@ class Stop(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "v
         ).queue()
     }
 
-    override val helpHandler = HelpFactory("Stop Command") {
-        description(
+    override val helpHandler = Help(
+        CommandDescription(listOf("stop"), "Stop Command"),
+        Description(
             "Stops the current song and clear the queue.",
             "",
             "To be able to stop the music, you have to:",
             "- The only user one listening to me",
             "- Have either DJ or Server Admin permissions"
+        ),
+        SeeAlso(
+            CommandUsage("votestop", "Create a poll to vote to stop the music.")
         )
-
-        alsoSee("votestop", "Create a poll to vote to stop the music.")
-    }
+    )
 }
 
 @Command("votestop")
@@ -63,13 +65,15 @@ class VoteStop(musicManager: MusicManager) : MusicVotingCommand(musicManager), I
         ).queue()
     }
 
-    override val helpHandler = HelpFactory("VoteStop Command") {
-        description(
+    override val helpHandler = Help(
+        CommandDescription(listOf("votestop"), "VoteStop Command"),
+        Description(
             "Create a poll to stop the current song and clear the queue.",
             "",
             "If 60% or more of the users listening vote, the player will be paused."
+        ),
+        SeeAlso(
+            CommandUsage("stop", "Stops the player without requiring voting.")
         )
-
-        alsoSee("stop", "Stops the player without requiring voting.")
-    }
+    )
 }

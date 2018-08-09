@@ -5,9 +5,9 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.*
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.SUCCESS
 import java.util.concurrent.LinkedBlockingDeque
 
@@ -19,17 +19,19 @@ class Shuffle(musicManager: MusicManager) : MusicPermissionCommand(musicManager,
         send("$SUCCESS Queue shuffled!").queue()
     }
 
-    override val helpHandler = HelpFactory("Shuffle Command") {
-        description(
+    override val helpHandler = Help(
+        CommandDescription(listOf("shuffle"), "Shuffle Command"),
+        Description(
             "Shuffles the current queue!",
             "",
             "To be able to shuffle the queue, you have to:",
             "- The only user one listening to me",
             "- Have either DJ or Server Admin permissions"
+        ),
+        SeeAlso(
+            CommandUsage("voteshuffle", "Create a poll to vote to shuffle the queue.")
         )
-
-        alsoSee("voteshuffle", "Create a poll to vote to shuffle the queue.")
-    }
+    )
 }
 
 @Command("voteshuffle")
@@ -50,13 +52,15 @@ class VoteShuffle(musicManager: MusicManager) : MusicVotingCommand(musicManager)
         send("$SUCCESS Enough votes reached! Queue shuffled.").queue()
     }
 
-    override val helpHandler = HelpFactory("VoteShuffle Command") {
-        description(
-            "Create a poll to shuflle the queue.",
+    override val helpHandler = Help(
+        CommandDescription(listOf("voteshuffle"), "VoteShuffle Command"),
+        Description(
+            "Create a poll to shuffle the queue.",
             "",
             "If 60% or more of the users listening vote, the queue will be shuffled."
+        ),
+        SeeAlso(
+            CommandUsage("shuffle", "Shuffles the queue without requiring voting.")
         )
-
-        alsoSee("shuffle", "Pause the player without requiring voting.")
-    }
+    )
 }

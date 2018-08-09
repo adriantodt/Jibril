@@ -5,11 +5,14 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.CommandDescription
+import pw.aru.core.commands.help.Description
+import pw.aru.core.commands.help.Help
+import pw.aru.core.commands.help.SeeAlso
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
 import pw.aru.core.music.musicLength
 import pw.aru.core.music.progressBar
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.LOADING
 import pw.aru.utils.emotes.PLAY
 import pw.aru.utils.extensions.*
@@ -61,12 +64,13 @@ class Queue(musicManager: MusicManager) : MusicCommand(musicManager), ICommand.H
                 }
             )
 
-            footer("Page ${page.plus(1)} of ${lastPage.plus(1)} | Requested by ${event.member.effectiveName}", event.author.effectiveAvatarUrl)
+            footer("Page ${page + 1} of ${lastPage + 1} | Requested by ${event.member.effectiveName}", event.author.effectiveAvatarUrl)
         }.queue()
     }
 
-    override val helpHandler = HelpFactory("Queue Command") {
-        aliases("q")
-        description("Displays the current queue.")
-    }
+    override val helpHandler = Help(
+        CommandDescription(listOf("queue", "q"), "Queue Command"),
+        Description("Displays the current queue."),
+        SeeAlso["play", "nowplaying", "repeat"]
+    )
 }

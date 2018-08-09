@@ -5,8 +5,8 @@ import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.*
 import pw.aru.utils.Colors
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.THINKING
 import pw.aru.utils.extensions.*
 import java.awt.Color
@@ -144,15 +144,18 @@ class ColorCommand : ICommand, ICommand.HelpDialogProvider {
         }.addFile(generate(color), file).queue()
     }
 
-    override val helpHandler = HelpFactory("Color Command") {
-        description("Returns the visual representation of the specified color.")
-        usage("color #<hex code>", "Parses the hex-code of the color.")
-        usage("color rgb <red> <green> <blue>", "Parses a color in RGB format.")
-        usage("color hsv <hue> <saturation> <value>", "Parses a color in HSV format.")
-        usage("color random", "Returns a random color.")
-        usage("color member", "Returns your color.")
-        usage("color <mention/nickname/name[#discriminator]>", "Returns the member's color.")
-    }
+    override val helpHandler = Help(
+        CommandDescription(listOf("color"), "Color Command"),
+        Description("Returns the visual representation of the specified color."),
+        Usage(
+            CommandUsage("color #<hex code>", "Parses the hex-code of the color."),
+            CommandUsage("color rgb <red> <green> <blue>", "Parses a color in RGB format."),
+            CommandUsage("color hsv <hue> <saturation> <value>", "Parses a color in HSV format."),
+            CommandUsage("color random", "Returns a random color."),
+            CommandUsage("color member", "Returns your color."),
+            CommandUsage("color <mention/nickname/name[#discriminator]>", "Returns the member's color.")
+        )
+    )
 
     private fun generate(color: Color): ByteArray {
         val image = BufferedImage(300, 300, BufferedImage.TYPE_INT_RGB)

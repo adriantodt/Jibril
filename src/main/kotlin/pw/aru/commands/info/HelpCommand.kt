@@ -6,8 +6,8 @@ import pw.aru.core.categories.Categories
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.*
 import pw.aru.utils.TaskManager.task
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.ERROR
 import pw.aru.utils.extensions.*
 import pw.aru.utils.helpers.CommandStatsManager
@@ -110,12 +110,13 @@ class HelpCommand(private val registry: CommandRegistry) : ICommand, ICommand.He
         send("$ERROR There's no command or category with that name!").queue()
     }
 
-    override val helpHandler: ICommand.HelpDialog
-        get() = HelpFactory("Help Command") {
-            aliases("h")
-
-            description("**${jokes.random()}**")
-            usage("help", "Lists all commands.")
-            usage("help <command>", "Displays a command's help.")
-        }
+    override val helpHandler
+        get() = Help(
+            CommandDescription(listOf("help", "h"), "Help Command"),
+            Description("**${jokes.random()}**"),
+            Usage(
+                CommandUsage("help", "Lists all commands."),
+                CommandUsage("help <command>", "Displays a command's help.")
+            )
+        )
 }

@@ -5,9 +5,9 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.*
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.PLAY
 import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.emotes.THINKING
@@ -29,19 +29,21 @@ class Resume(musicManager: MusicManager) : MusicPermissionCommand(musicManager, 
         send("$PLAY Music resumed.").queue()
     }
 
-    override val helpHandler = HelpFactory("Resume Command") {
-        description(
+    override val helpHandler = Help(
+        CommandDescription(listOf("resume"), "Resume Command"),
+        Description(
             "Resumes the player",
             "",
             "To be able to resume the player, you have to:",
             "- The only user one listening to me",
             "- Have either DJ or Server Admin permissions"
+        ),
+        SeeAlso(
+            CommandUsage("voteresume", "Create a poll to resume the player."),
+            CommandUsage("pause", "Pause the player."),
+            CommandUsage("votepause", "Create a poll to pause the player.")
         )
-
-        alsoSee("voteresume", "Create a poll to resume the player.")
-        alsoSee("pause", "Pause the player.")
-        alsoSee("votepause", "Create a poll to pause the player.")
-    }
+    )
 }
 
 @Command("voteresume")
@@ -73,15 +75,17 @@ class VoteResume(musicManager: MusicManager) : MusicVotingCommand(musicManager),
         send("$SUCCESS Enough votes reached! Music resumed.").queue()
     }
 
-    override val helpHandler = HelpFactory("VoteResume Command") {
-        description(
+    override val helpHandler = Help(
+        CommandDescription(listOf("voteresume"), "VoteResume Command"),
+        Description(
             "Create a poll to resume the player.",
             "",
             "If 60% or more of the users listening vote, the player will be resumed."
+        ),
+        SeeAlso(
+            CommandUsage("resume", "Resume the player without requiring voting."),
+            CommandUsage("pause", "Pause the player."),
+            CommandUsage("votepause", "Create a poll to pause the player.")
         )
-
-        alsoSee("resume", "Resume the player without requiring voting.")
-        alsoSee("pause", "Pause the player.")
-        alsoSee("votepause", "Create a poll to pause the player.")
-    }
+    )
 }

@@ -63,6 +63,7 @@ const val ERROR_GUILD_PERMS = "You can **easily** fix that by re-inviting me wit
 const val ERROR_CHANNEL_PERMS = "Fix the **current channel**'s permissions and enable me the missing permissions shown above."
 const val ERROR_CHANNEL_NOT_NSFW = "For this command to work, set this text channel to **NSFW**."
 
+@Deprecated("Use CommandUsage.prefix instead.")
 inline fun String.withPrefix() = "${HelpFactory.prefix}$this"
 
 inline fun String.usage(description: String): String = "`${this.withPrefix()}` - $description"

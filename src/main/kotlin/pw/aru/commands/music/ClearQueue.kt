@@ -5,9 +5,9 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.*
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
-import pw.aru.utils.commands.HelpFactory
 import pw.aru.utils.emotes.PLAY
 import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.emotes.THINKING
@@ -29,19 +29,21 @@ class ClearQueue(musicManager: MusicManager) : MusicPermissionCommand(musicManag
         send("$PLAY Queue cleared.").queue()
     }
 
-    override val helpHandler = HelpFactory("ClearQueue Command") {
-        description(
+    override val helpHandler = Help(
+        CommandDescription(listOf("clearqueue"), "ClearQueue Command"),
+        Description(
             "Clears the player's queue.",
             "",
             "To be able to clear the player's queue, you have to:",
             "- The only user one listening to me",
             "- Have either DJ or Server Admin permissions"
+        ),
+        SeeAlso(
+            CommandUsage("voteclearqueue", "Create a poll to clear the player's queue."),
+            CommandUsage("skip", "Skips the current song."),
+            CommandUsage("voteskip", "Create a poll to skip the current song.")
         )
-
-        alsoSee("voteclearqueue", "Create a poll to clear the player's queue.")
-        alsoSee("skip", "Skips the current song.")
-        alsoSee("voteskip", "Create a poll to skip the current song.")
-    }
+    )
 }
 
 @Command("voteclearqueue")
@@ -73,15 +75,17 @@ class VoteClearQueue(musicManager: MusicManager) : MusicVotingCommand(musicManag
         send("$SUCCESS Enough votes reached! Queue cleared.").queue()
     }
 
-    override val helpHandler = HelpFactory("VoteClearQueue Command") {
-        description(
+    override val helpHandler = Help(
+        CommandDescription(listOf("voteclearqueue"), "VoteClearQueue Command"),
+        Description(
             "Create a poll to clear the player's queue.",
             "",
             "If 60% or more of the users listening vote, the player's queue will be queued."
+        ),
+        SeeAlso(
+            CommandUsage("clearqueue", "Clears the queue of the player without requiring voting."),
+            CommandUsage("skip", "Skips the current song."),
+            CommandUsage("voteskip", "Create a poll to skip the current song.")
         )
-
-        alsoSee("clearqueue", "Clears the queue of the player without requiring voting.")
-        alsoSee("skip", "Skips the current song.")
-        alsoSee("voteskip", "Create a poll to skip the current song.")
-    }
+    )
 }
