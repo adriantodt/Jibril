@@ -13,7 +13,6 @@ import pw.aru.dice.exceptions.EvaluationException
 import pw.aru.dice.exceptions.SyntaxException
 import pw.aru.utils.emotes.GAME_DIE
 import pw.aru.utils.extensions.stripFormatting
-import kotlin.math.roundToLong
 
 @Command("dice", "roll")
 class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
@@ -27,7 +26,7 @@ class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
         }
 
         return try {
-            if (simple) AruDice.resolve(args).toPrettyString() else AruDice.execute(args)
+            AruDice(args).getText(simple)
         } catch (e: Exception) {
             when (e) {
                 is SyntaxException,
@@ -49,18 +48,6 @@ class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
         if (toSend.isEmpty()) return call()
 
         send("**$toSend**\n$GAME_DIE ${resolveRoll(args)}").queue()
-    }
-
-    private fun Number.toPrettyString(): String = when (this) {
-        is Double -> {
-            if (this % 1 == 0.0) roundToLong().toString() else this.toString()
-        }
-        is Float -> {
-            if (this % 1 == 0f) roundToLong().toString() else this.toString()
-        }
-        else -> {
-            toString()
-        }
     }
 
     override val helpHandler = Help(

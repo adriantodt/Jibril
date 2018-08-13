@@ -284,7 +284,7 @@ internal fun replacePlaceholderCommands(injector: DKodein, registry: CommandRegi
         }
     }
 
-    return map.values.map { fun() { it.forEach { it() } } }
+    return map.values.map { { for (f in it) f() } }
 }
 
 internal fun launchRedisCheckThread(db: AruDB) {

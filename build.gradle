@@ -13,7 +13,7 @@ plugins {
 }
 
 group = 'pw.aru'
-version = '2.1.4'
+version = '2.2-dev'
 mainClassName = 'pw.aru.Bootstrap'
 
 // Minified Splash
@@ -39,14 +39,14 @@ dependencies {
     compile 'org.jetbrains.kotlin:kotlin-reflect:1.2.60'
 
     // Main APIs
-    compile 'net.dv8tion:JDA:3.7.1_390'
+    compile 'net.dv8tion:JDA:3.7.1_392'
     compile 'com.sedmelluq:lavaplayer:1.3.7'
     compile 'com.github.natanbc:discordbots-api:3.3.3'
     compile 'com.github.natanbc:weeb4j:3.3'
 
     // Useful
     compile 'com.sedmelluq:jda-nas:1.0.6'
-    compile 'com.jagrosh:jda-utilities-menu:2.1.1'
+    compile 'com.jagrosh:jda-utilities-menu:2.1.3'
 
     // Open-Source Libraries
     compile 'pw.aru.discord:dice-notation:1.0'
@@ -69,7 +69,7 @@ dependencies {
 
     //Logging
     compile 'ch.qos.logback:logback-classic:1.2.3'
-    compile 'io.github.microutils:kotlin-logging:1.5.4'
+    compile 'io.github.microutils:kotlin-logging:1.5.9'
 }
 
 //FILE src/main/kotlin/aru/exported/exported.kt

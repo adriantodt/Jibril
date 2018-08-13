@@ -390,7 +390,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J, nekoApi: Nekos4J
 
         CustomActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("beg"), "Beg Command", "beg.gif", "Begs the mentioned users."),
+            CustomCommandInfo(listOf("beg"), "Beg Command", "Begs the mentioned users.", "beg.gif"),
             File("assets/aru/actions/beg.txt").readLines(),
             ActionLines(
                 "$FUCK {author} is begging {mentions}",
@@ -402,7 +402,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J, nekoApi: Nekos4J
 
         CustomActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("bloodsuck", "vampire"), "Bloodsuck Command", "bloodsuck.gif", "Sucks the blood of the mentioned users."),
+            CustomCommandInfo(listOf("bloodsuck", "vampire"), "Bloodsuck Command", "Sucks the blood of the mentioned users.", "bloodsuck.gif"),
             File("assets/aru/actions/bloodsuck.txt").readLines(),
             ActionLines(
                 "$BITE {mentions}, {author} is sucking your blood",
@@ -414,7 +414,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J, nekoApi: Nekos4J
 
         CustomActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("fuck"), "Fuck Command", "fuck.gif", "Fucks the mentioned users... Hey, that's lewd!", nsfw = true),
+            CustomCommandInfo(listOf("fuck"), "Fuck Command", "Fucks the mentioned users... Hey, that's lewd!", "fuck.gif", nsfw = true),
             File("assets/aru/actions/fuck.txt").readLines(),
             ActionLines(
                 "$FUCK {author} is fucking {mentions}",

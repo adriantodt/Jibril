@@ -17,11 +17,11 @@ object Aru {
     val prefixes = ArrayList<String>()
 
     //Assets
-    val bootQuotes: List<String> get() = File("assets/aru/boot_quotes.txt").readLines()
-    val sleepQuotes: List<String> get() = File("assets/aru/sleep_quotes.txt").readLines()
-    val splashes: List<String> get() = File("assets/aru/splashes.txt").readLines()
+    val bootQuotes get() = File("assets/aru/boot_quotes.txt").readLines()
+    val sleepQuotes get() = File("assets/aru/sleep_quotes.txt").readLines()
+    val splashes get() = File("assets/aru/splashes.txt").readLines()
 
     //Uptime
-    val uptime: String get() = humanizedTime(rawUptime)
+    val uptime get() = humanizedTime(rawUptime)
     val rawUptime get() = ManagementFactory.getRuntimeMXBean().uptime
 }

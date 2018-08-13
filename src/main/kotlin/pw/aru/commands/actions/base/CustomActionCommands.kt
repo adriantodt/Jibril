@@ -15,8 +15,8 @@ import pw.aru.utils.extensions.toSmartString
 data class CustomCommandInfo(
     val names: List<String>,
     val commandName: String,
-    val fileName: String,
     val description: String,
+    val fileName: String,
     val nsfw: Boolean = false
 ) {
     val cmdName = names.first()

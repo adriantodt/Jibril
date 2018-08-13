@@ -12,7 +12,7 @@ import pw.aru.core.config.ConfigManager
 import pw.aru.core.listeners.EventListeners.queueTask
 import pw.aru.core.listeners.EventListeners.submitTask
 import pw.aru.utils.TaskManager.queue
-import pw.aru.utils.TaskType
+import pw.aru.utils.TaskType.BUNK
 import pw.aru.utils.api.DBLPoster
 import pw.aru.utils.api.DBotsPoster
 import pw.aru.utils.extensions.classOf
@@ -49,38 +49,40 @@ internal fun start() {
     // Requires initInjector; Returns otherCommands
     val otherCommands = submitTask("InitCommands (Phase 1)") {
         val (commands, commandProviders) = scanTask()
-        val (noInit, toInit) = commands.partition { it.isAnnotationPresent(classOf<UseFullInjector>()) }.let { (a, b) -> a.toSet() to b.toSet() }
-        val (noInitProviders, toInitProviders) = commandProviders.partition { it.isAnnotationPresent(classOf<UseFullInjector>()) }.let { (a, b) -> a.toSet() to b.toSet() }
+        val (noInit, toInit) = commands
+            .partition { it.isAnnotationPresent(classOf<UseFullInjector>()) }
+            .let { (a, b) -> a.toSet() to b.toSet() }
 
+        val (noInitProviders, toInitProviders) = commandProviders
+            .partition { it.isAnnotationPresent(classOf<UseFullInjector>()) }
+            .let { (a, b) -> a.toSet() to b.toSet() }
 
         initCommands(initInjector.direct, registry, toInit)
         initProviders(initInjector.direct, registry, toInitProviders)
         createPlaceholderCommands(registry, noInit)
-        noInit to noInitProviders
+        (noInit to noInitProviders)
     }
 
     //Create Shard Manager
-    createShardManager(initInjector, config.botToken) {
-        val injector = createFullInjector(initInjector, it)
+    createShardManager(initInjector, config.botToken) { shardManager ->
+        val injector = createFullInjector(initInjector, shardManager)
 
         // Compute Command Initialization (Step 2)
         // Requires injector, otherCommands
         queueTask("InitCommands (Phase 2)") {
             val (toInit, toInitProviders) = otherCommands()
-            replacePlaceholderCommands(injector.direct, registry, toInit).forEach { queue(TaskType.BUNK, it) }
+            replacePlaceholderCommands(injector.direct, registry, toInit).forEach { queue(BUNK, it) }
             initProviders(initInjector.direct, registry, toInitProviders)
             executePostLoad(registry)
-
             log.info { "${registry.lookup.size} commands loaded!" }
         }
 
         queueTask("BotInit") {
-            completeShardManager(it, injector)
-
+            completeShardManager(shardManager, injector)
             log.info("ShardManager initialized!")
         }
 
-        queue(type = TaskType.BUNK) {
+        queue(type = BUNK) {
             injector.direct.instance<DBLPoster>().postStats()
             injector.direct.instance<DBotsPoster>().postStats()
         }

@@ -116,7 +116,7 @@ class ImageCommands(httpClient: OkHttpClient, weebApi: Weeb4J, nekoApi: Nekos4J)
 
         CustomImageCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("jibril"), "Jibril Command", "jibril.gif", "Sends a random Jibril image."),
+            CustomCommandInfo(listOf("jibril"), "Jibril Command", "Sends a random Jibril image.", "jibril.gif"),
             File("assets/aru/images/jibril.txt").readLines()
         )
 
