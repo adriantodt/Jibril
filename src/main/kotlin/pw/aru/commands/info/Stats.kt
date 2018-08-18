@@ -4,7 +4,7 @@ import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.entities.ISnowflake
 import pw.aru.Aru
 import pw.aru.core.CommandProcessor
-import pw.aru.core.categories.Categories
+import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
@@ -42,7 +42,7 @@ class Stats
     private val musicManager: MusicManager,
     private val processor: CommandProcessor
 ) : ICommand, ICommand.HelpDialogProvider {
-    override val category = Categories.INFO
+    override val category = Category.INFO
 
     override fun CommandContext.call() {
         val args = parseable()

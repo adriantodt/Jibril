@@ -1,7 +1,7 @@
 package pw.aru.commands.funny
 
 import pw.aru.commands.funny.dice.AruDice
-import pw.aru.core.categories.Categories
+import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
@@ -16,7 +16,7 @@ import pw.aru.utils.extensions.stripFormatting
 
 @Command("dice", "roll")
 class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
-    override val category = Categories.FUN
+    override val category = Category.FUN
 
     private fun resolveRoll(args: String, simple: Boolean = false): String {
         when {

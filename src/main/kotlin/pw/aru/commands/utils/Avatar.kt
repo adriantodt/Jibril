@@ -1,7 +1,6 @@
 package pw.aru.commands.utils
 
 import com.jagrosh.jdautilities.commons.utils.FinderUtil
-import pw.aru.core.categories.Categories
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
@@ -15,7 +14,7 @@ import pw.aru.utils.extensions.discordTag
 
 @Command("avatar")
 class Avatar : ICommand, ICommand.HelpDialogProvider {
-    override val category: Category = Categories.UTILS
+    override val category: Category = Category.UTILS
 
     override fun CommandContext.call() {
         val user = if (args.isEmpty()) {

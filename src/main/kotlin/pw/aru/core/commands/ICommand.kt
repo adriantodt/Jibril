@@ -42,3 +42,9 @@ interface ICommand {
         fun postLoad()
     }
 }
+
+fun ICommand.HelpDialog.toHelpHandler() = object : ICommand.HelpHandler {
+    override fun onHelp(event: GuildMessageReceivedEvent) {
+        event.channel.sendMessage(this@toHelpHandler.onHelp(event)).queue()
+    }
+}

@@ -1,6 +1,6 @@
 package pw.aru.commands.info
 
-import pw.aru.core.categories.Categories
+import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
@@ -16,7 +16,7 @@ import pw.aru.utils.extensions.thumbnail
 
 @Command("invite", "links", "hangout")
 class Invite : ICommand, ICommand.HelpDialogProvider {
-    override val category = Categories.INFO
+    override val category = Category.INFO
 
     override fun CommandContext.call() {
         sendEmbed {

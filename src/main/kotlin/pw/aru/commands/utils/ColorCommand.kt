@@ -1,7 +1,7 @@
 package pw.aru.commands.utils
 
 import com.jagrosh.jdautilities.commons.utils.FinderUtil
-import pw.aru.core.categories.Categories
+import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
@@ -18,7 +18,7 @@ import kotlin.math.absoluteValue
 
 @Command("color")
 class ColorCommand : ICommand, ICommand.HelpDialogProvider {
-    override val category = Categories.UTILS
+    override val category = Category.UTILS
 
     override fun CommandContext.call() {
         val args = parseable()

@@ -2,14 +2,14 @@ package pw.aru.commands.moderation
 
 import net.dv8tion.jda.core.Permission.MESSAGE_HISTORY
 import net.dv8tion.jda.core.Permission.MESSAGE_MANAGE
-import pw.aru.core.categories.Categories
+import pw.aru.core.categories.Category
 import pw.aru.core.commands.CommandPermission
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.parser.Args
 
 class Prune : ICommand, ICommand.Permission {
-    override val category = Categories.MODERATION
+    override val category = Category.MODERATION
     override val permission = CommandPermission.SERVER_ADMIN
 
     override fun CommandContext.call() {

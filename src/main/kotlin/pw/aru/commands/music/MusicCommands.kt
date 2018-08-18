@@ -4,7 +4,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import gnu.trove.list.TLongList
 import net.dv8tion.jda.core.entities.VoiceChannel
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import pw.aru.core.categories.Categories
+import pw.aru.core.categories.Category
 import pw.aru.core.commands.CommandPermission
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
@@ -19,7 +19,7 @@ import pw.aru.utils.extensions.humanUsers
 import pw.aru.utils.extensions.withPrefix
 
 abstract class MusicCommand(val musicManager: MusicManager) : ICommand {
-    override val category = Categories.MUSIC
+    override val category = Category.MUSIC
 
     override fun CommandContext.call() {
         val musicPlayer = musicManager.get(event.guild)
@@ -39,7 +39,7 @@ abstract class MusicCommand(val musicManager: MusicManager) : ICommand {
 }
 
 abstract class MusicActionCommand(manager: MusicManager) : MusicCommand(manager) {
-    override val category = Categories.MUSIC
+    override val category = Category.MUSIC
 
     override fun CommandContext.call(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
         val voiceState = event.member.voiceState

@@ -1,6 +1,5 @@
 package pw.aru.commands.actions.base
 
-import pw.aru.api.nekos4j.image.Image
 import pw.aru.api.nekos4j.image.ImageProvider
 import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Category
@@ -24,9 +23,11 @@ data class NekosLifeCommandInfo(
     val cmdName = names.first()
 }
 
+private typealias NekosLifeImage = pw.aru.api.nekos4j.image.Image
+
 sealed class NekosLifeCommand(
     override val category: Category,
-    private val provider: ImageProvider,
+    protected val provider: ImageProvider,
     registry: CommandRegistry,
     protected val cache: URLCache,
     protected val info: NekosLifeCommandInfo
@@ -37,7 +38,7 @@ sealed class NekosLifeCommand(
         registry.register(info.names.toTypedArray(), this)
     }
 
-    abstract fun CommandContext.onImage(image: Image)
+    abstract fun CommandContext.onImage(image: NekosLifeImage)
 
     override fun CommandContext.call() {
         if (info.nsfw && !requireNSFW()) return
@@ -51,63 +52,101 @@ sealed class NekosLifeCommand(
         }
     }
 
-    protected val Image.name: String
+    protected val NekosLifeImage.name: String
         get() = url.substring(url.lastIndexOf("/") + 1)
-}
 
-class NekosLifeImageCommand(
-    category: Category,
-    provider: ImageProvider,
-    registry: CommandRegistry,
-    cache: URLCache,
-    info: NekosLifeCommandInfo,
-    private val messages: List<String> = emptyList()
-) : NekosLifeCommand(category, provider, registry, cache, info) {
-    override fun CommandContext.onImage(image: Image) {
-        channel
-            .sendFile(cache.cacheToFile(image.url), image.name)
-            .append(messages.randomOrNull()?.replaceEach("{author}" to "**${author.effectiveName}**") ?: "")
-            .queue()
-    }
-
-    override val helpHandler = Help(
-        CommandDescription(info.names, info.commandName),
-        Usage(
-            CommandUsage(info.cmdName, info.description)
-        ),
-        Note("Powered by [Nekos.Life](https://nekos.life)")
-    )
-}
-
-class NekosLifeActionCommand(
-    category: Category,
-    provider: ImageProvider,
-    registry: CommandRegistry,
-    cache: URLCache,
-    info: NekosLifeCommandInfo,
-    private val lines: ActionLines
-) : NekosLifeCommand(category, provider, registry, cache, info) {
-    override fun CommandContext.onImage(image: Image) {
-        val mentions = event.message.mentionedMembers
-
-        val f = when {
-            mentions.isEmpty() -> lines.noTargets
-            mentions.all { it == event.message.member } -> lines.targetsYou
-            mentions.all { it == event.guild.selfMember } -> lines.targetsMe
-            else -> lines.anyTarget
+    class Image(
+        category: Category,
+        provider: ImageProvider,
+        registry: CommandRegistry,
+        cache: URLCache,
+        info: NekosLifeCommandInfo,
+        private val messages: List<String> = emptyList()
+    ) : NekosLifeCommand(category, provider, registry, cache, info) {
+        override fun CommandContext.onImage(image: NekosLifeImage) {
+            channel
+                .sendFile(cache.cacheToFile(image.url), image.name)
+                .append(messages.randomOrNull()?.replaceEach("{author}" to "**${author.effectiveName}**") ?: "")
+                .queue()
         }
 
-        channel
-            .sendFile(cache.cacheToFile(image.url), image.url)
-            .append(f.replaceEach("{author}" to "**${author.effectiveName}**", "{mentions}" to mentions.toSmartString { "**${it.effectiveName}**" }))
-            .queue()
+        override val helpHandler = Help(
+            CommandDescription(info.names, info.commandName),
+            Usage(
+                CommandUsage(info.cmdName, info.description)
+            ),
+            Note("Powered by [Nekos.Life](https://nekos.life)")
+        )
     }
 
-    override val helpHandler = Help(
-        CommandDescription(info.names, info.commandName),
-        Usage(
-            CommandUsage("${info.cmdName} [mentions]", info.description)
-        ),
-        Note("Powered by [Nekos.Life](https://nekos.life)")
-    )
+    class ImageAlt(
+        category: Category,
+        provider: ImageProvider,
+        registry: CommandRegistry,
+        cache: URLCache,
+        info: NekosLifeCommandInfo,
+        private val nsfwAlt: String,
+        private val messages: List<String> = emptyList()
+    ) : NekosLifeCommand(category, provider, registry, cache, info) {
+        override fun CommandContext.call() {
+            val args = parseable()
+            val type = if (channel.isNSFW && args.takeString() == "nsfw") nsfwAlt else info.type
+            provider.getRandomImage(type).async {
+                if (it == null) {
+                    send("$CONFUSED No images found... ").queue()
+                } else {
+                    onImage(it)
+                }
+            }
+        }
+
+        override fun CommandContext.onImage(image: NekosLifeImage) {
+            channel
+                .sendFile(cache.cacheToFile(image.url), image.name)
+                .append(messages.randomOrNull()?.replaceEach("{author}" to "**${author.effectiveName}**") ?: "")
+                .queue()
+        }
+
+        override val helpHandler = Help(
+            CommandDescription(info.names, info.commandName),
+            Usage(
+                CommandUsage(info.cmdName, info.description),
+                CommandUsage("${info.cmdName} nsfw", "NSFW version of the images.")
+            ),
+            Note("Powered by [Nekos.Life](https://nekos.life)")
+        )
+    }
+
+    class Action(
+        category: Category,
+        provider: ImageProvider,
+        registry: CommandRegistry,
+        cache: URLCache,
+        info: NekosLifeCommandInfo,
+        private val lines: ActionLines
+    ) : NekosLifeCommand(category, provider, registry, cache, info) {
+        override fun CommandContext.onImage(image: NekosLifeImage) {
+            val mentions = event.message.mentionedMembers
+
+            val f = when {
+                mentions.isEmpty() -> lines.noTargets
+                mentions.all { it == event.message.member } -> lines.targetsYou
+                mentions.all { it == event.guild.selfMember } -> lines.targetsMe
+                else -> lines.anyTarget
+            }
+
+            channel
+                .sendFile(cache.cacheToFile(image.url), image.url)
+                .append(f.replaceEach("{author}" to "**${author.effectiveName}**", "{mentions}" to mentions.toSmartString { "**${it.effectiveName}**" }))
+                .queue()
+        }
+
+        override val helpHandler = Help(
+            CommandDescription(info.names, info.commandName),
+            Usage(
+                CommandUsage("${info.cmdName} [mentions]", info.description)
+            ),
+            Note("Powered by [Nekos.Life](https://nekos.life)")
+        )
+    }
 }

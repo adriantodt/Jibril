@@ -5,6 +5,8 @@ package pw.aru.utils.extensions
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.ResponseBody
+import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.reflect.Array.get
 import java.lang.reflect.Array.getLength
@@ -17,6 +19,12 @@ fun jsonStringOf(vararg pairs: Pair<*, *>) = jsonOf(*pairs).toString()
 
 // OkHttp
 inline fun OkHttpClient.newCall(builder: Request.Builder.() -> Unit): Call = newCall(Request.Builder().also(builder).build())
+
+//OkHttp JSON
+inline fun ResponseBody.jsonObject() = JSONObject(string())
+
+inline fun ResponseBody.jsonArray() = JSONArray(string())
+
 
 // Misc
 fun <E> Iterable<E>.toSmartString(transform: ((E) -> CharSequence)? = null): String {

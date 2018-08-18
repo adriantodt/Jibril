@@ -1,6 +1,6 @@
 package pw.aru.commands.funny
 
-import pw.aru.core.categories.Categories
+import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
@@ -15,7 +15,7 @@ import pw.aru.utils.extensions.threadLocalRandom
 
 @Command("coinflip", "flip", "coin")
 class CoinFlip : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
-    override val category = Categories.FUN
+    override val category = Category.FUN
 
     private val sThrow = listOf(
         "Here it goes...",

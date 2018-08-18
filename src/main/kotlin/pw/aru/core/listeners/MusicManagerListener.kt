@@ -1,5 +1,6 @@
 package pw.aru.core.listeners
 
+import gnu.trove.list.TLongList
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.channel.voice.VoiceChannelDeleteEvent
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent
@@ -12,7 +13,7 @@ import pw.aru.core.music.MusicManager
 import pw.aru.core.music.trackData
 import pw.aru.utils.extensions.humanUsers
 
-class VoiceLeaveListener(private val musicManager: MusicManager) : EventListener {
+class MusicManagerListener(private val musicManager: MusicManager) : EventListener {
 
     override fun onEvent(event: Event) {
         when (event) {
@@ -25,7 +26,7 @@ class VoiceLeaveListener(private val musicManager: MusicManager) : EventListener
     }
 
     private fun onVoiceMove(event: GuildVoiceMoveEvent) {
-        if (!event.channelLeft.members.contains(event.guild.selfMember)) return
+        if (!event.channelJoined.members.contains(event.guild.selfMember)) return
 
         if (event.member != event.guild.selfMember) {
             if (event.channelLeft.members.contains(event.guild.selfMember)) {
@@ -34,17 +35,9 @@ class VoiceLeaveListener(private val musicManager: MusicManager) : EventListener
                 onVoiceJoin(GuildVoiceJoinEvent(event.jda, event.responseNumber, event.member))
             }
         } else {
-            val musicPlayer = musicManager.get(event.guild)
+            val musicPlayer = musicManager[event.guild]
 
-            arrayOf(
-                musicPlayer.votePauses,
-                musicPlayer.voteShuffles,
-                musicPlayer.voteSkips,
-                musicPlayer.voteStops
-            ).forEach {
-                it.clear()
-            }
-
+            musicPlayer.run { arrayOf(votePauses, voteShuffles, voteSkips, voteStops).forEach(TLongList::clear) }
             if (event.channelJoined.humanUsers == 0) {
                 onLeftAlone(musicPlayer)
             } else {
@@ -63,7 +56,7 @@ class VoiceLeaveListener(private val musicManager: MusicManager) : EventListener
         if (event.member.user.isBot) return
         if (!event.channelLeft.members.contains(event.guild.selfMember)) return
 
-        val musicPlayer = musicManager.get(event.guild)
+        val musicPlayer = musicManager[event.guild]
 
         arrayOf(
             musicPlayer.votePauses,
@@ -84,7 +77,7 @@ class VoiceLeaveListener(private val musicManager: MusicManager) : EventListener
 
         if (!event.channelJoined.members.contains(event.guild.selfMember)) return
 
-        val musicPlayer = musicManager.get(event.guild)
+        val musicPlayer = musicManager[event.guild]
         val voiceChannel = musicPlayer.currentChannel
 
         if (voiceChannel == event.channelJoined && event.channelJoined.humanUsers > 0) {

@@ -1,7 +1,7 @@
 package pw.aru.commands.games
 
 import pw.aru.commands.games.manager.GameManager
-import pw.aru.core.categories.Categories
+import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
@@ -17,7 +17,7 @@ import pw.aru.utils.extensions.withPrefix
 @Command("gamehub", "gh")
 @UseFullInjector()
 class GameHub(private val gameManager: GameManager) : ICommand {
-    override val category = Categories.GAMES
+    override val category = Category.GAMES
 
     private val games: MutableMap<String, GameCreator> = HashMap()
     private val lobbyManager = gameManager.lobbyManager

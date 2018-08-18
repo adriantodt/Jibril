@@ -1,21 +1,16 @@
 package pw.aru.commands.utils
 
 import net.dv8tion.jda.core.entities.IFakeable
-import pw.aru.core.categories.Categories
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.commands.help.CommandDescription
-import pw.aru.core.commands.help.CommandUsage.Companion.prefix
-import pw.aru.core.commands.help.Description
-import pw.aru.core.commands.help.Example
-import pw.aru.core.commands.help.Help
+import pw.aru.core.commands.help.*
 import pw.aru.utils.twemoji_pattern
 
 @Command("poll")
 class Poll : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
-    override val category: Category = Categories.UTILS
+    override val category: Category = Category.UTILS
 
     override fun CommandContext.call() = showHelp()
 

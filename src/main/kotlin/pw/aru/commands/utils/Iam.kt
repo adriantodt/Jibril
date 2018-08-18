@@ -5,7 +5,7 @@ import net.dv8tion.jda.core.exceptions.PermissionException
 import pw.aru.Aru
 import pw.aru.commands.utils.Iam.iam
 import pw.aru.commands.utils.Iam.iamnot
-import pw.aru.core.categories.Categories
+import pw.aru.core.categories.Category
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.db.AruDB
@@ -15,13 +15,13 @@ import pw.aru.utils.emotes.SUCCESS
 
 //@Command("iam")
 class IamCmd(private val db: AruDB) : ICommand {
-    override val category = Categories.UTILS
+    override val category = Category.UTILS
     override fun CommandContext.call() = iam(db, event, args)
 }
 
 //@Command("iamnot")
 class IamNotCmd(private val db: AruDB) : ICommand {
-    override val category = Categories.UTILS
+    override val category = Category.UTILS
     override fun CommandContext.call() = iamnot(db, event, args)
 }
 

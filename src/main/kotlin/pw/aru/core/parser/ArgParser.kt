@@ -37,6 +37,19 @@ class Args(val raw: String) {
         return p
     }
 
+    fun matchNextString(predicate: String): Boolean {
+        val args = remaining
+        val i = args.indexOfAny(charArrayOf(' ', '\r', '\n', '\t'))
+
+        val ne = if (i != -1) args.substring(0, i) else args
+        val re = if (i != -1) args.substring(i).trimStart() else ""
+
+        val p = (predicate == ne)
+        if (p) remaining = re
+
+        return p
+    }
+
     fun <T> validateMatches(vararg pairs: Pair<T, (String) -> Boolean>): Set<T> {
         val map = pairs.toMap(LinkedHashMap())
         val validKeys = LinkedHashSet<T>()

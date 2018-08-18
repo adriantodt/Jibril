@@ -1,6 +1,6 @@
 package pw.aru.commands.funny
 
-import pw.aru.core.categories.Categories
+import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
@@ -10,7 +10,7 @@ import pw.aru.utils.emotes.THINKING
 
 @Command("ratewaifu", "rw")
 class RateWaifu : ICommand, ICommand.HelpDialogProvider {
-    override val category = Categories.FUN
+    override val category = Category.FUN
 
     override fun CommandContext.call() {
         if (message.mentionedUsers.size > 1) {

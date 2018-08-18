@@ -2,7 +2,7 @@ package pw.aru.commands.info
 
 import mu.KLogging
 import pw.aru.core.CommandRegistry
-import pw.aru.core.categories.Categories
+import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit
 class HelpCommand(private val registry: CommandRegistry) : ICommand, ICommand.HelpDialogProvider {
     companion object : KLogging()
 
-    override val category = Categories.INFO
+    override val category = Category.INFO
 
     private var trending = emptyList<ICommand>()
 
@@ -80,7 +80,7 @@ class HelpCommand(private val registry: CommandRegistry) : ICommand, ICommand.He
                 )
             }
 
-            Categories.LIST.forEach { cat ->
+            Category.LIST.forEach { cat ->
                 val list = registry.lookup
                     .entries
                     .filter { (c) -> c.category == cat && (c !is ICommand.Permission || c.permission.test(event.member)) }
@@ -88,7 +88,7 @@ class HelpCommand(private val registry: CommandRegistry) : ICommand, ICommand.He
                     .sorted()
 
                 if (list.isNotEmpty()) field(
-                    cat.name,
+                    "${cat.categoryName}:",
                     list.joinToString(prefix = "`", separator = "` `", postfix = "`"),
                     inline = false
                 )
@@ -102,7 +102,7 @@ class HelpCommand(private val registry: CommandRegistry) : ICommand, ICommand.He
             return
         }
 
-        Categories.REGISTRY.ifContains(args) {
+        Category.REGISTRY.ifContains(args) {
             onHelp(it, event)
             return
         }

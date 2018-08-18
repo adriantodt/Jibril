@@ -1,22 +1,43 @@
 package pw.aru.core.commands.help
 
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import pw.aru.core.commands.CommandPermission
 import pw.aru.core.commands.ICommand
 import pw.aru.utils.AruColors
 import pw.aru.utils.extensions.baseEmbed
 import pw.aru.utils.extensions.embed
 import pw.aru.utils.extensions.field
 import pw.aru.utils.extensions.thumbnail
+import java.awt.Color
 
 class Help(
-    description: CommandDescription,
+    d: BaseDescription,
     vararg val nodes: HelpNode
 ) : ICommand.HelpDialog {
-    val names = description.names
-    val description = description.description
-    val color = description.color ?: AruColors.primary
-    val permission = description.permission
-    val thumbnail = description.thumbnail
+    val names: List<String>?
+    val description: String
+    val color: Color
+    val permission: CommandPermission?
+    val thumbnail: String
+
+    init {
+        when (d) {
+            is CommandDescription -> {
+                names = d.names
+                description = d.description
+                color = d.color ?: AruColors.primary
+                permission = d.permission
+                thumbnail = d.thumbnail
+            }
+            is CategoryDescription -> {
+                names = null
+                description = d.description
+                color = d.color ?: AruColors.primary
+                permission = d.permission
+                thumbnail = d.thumbnail
+            }
+        }
+    }
 
     override fun onHelp(event: GuildMessageReceivedEvent) = embed {
         baseEmbed(event, name = description, color = color)
@@ -26,7 +47,7 @@ class Help(
             field("Permission Required:", permission.toString(), false)
         }
 
-        if (names.size > 1) {
+        if (names != null && names.size > 1) {
             field("Aliases:", names.drop(1).joinToString("` `", "`", "`"))
         }
 

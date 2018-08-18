@@ -10,19 +10,18 @@ import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.requests.RestAction
 import net.dv8tion.jda.core.utils.JDALogger
 import okhttp3.OkHttpClient
+import org.json.JSONArray
 import pw.aru.Aru.sleepQuotes
+import pw.aru.api.nekos4j.Nekos4J
 import pw.aru.commands.actions.base.GetImage
 import pw.aru.core.CommandRegistry
-import pw.aru.core.categories.Categories
+import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.CommandPermission
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.commands.help.CommandDescription
-import pw.aru.core.commands.help.CommandUsage
-import pw.aru.core.commands.help.Help
-import pw.aru.core.commands.help.Usage
+import pw.aru.core.commands.help.*
 import pw.aru.core.parser.Args
 import pw.aru.core.parser.parseAndCreate
 import pw.aru.db.AruDB
@@ -35,6 +34,7 @@ import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.extensions.*
 import pw.aru.utils.limit
 import pw.aru.utils.paste
+import java.util.*
 import java.util.function.Consumer
 
 @Command("dev", "devtools", "hack")
@@ -46,12 +46,13 @@ class DevCmd
     db: AruDB,
     private val registry: CommandRegistry,
     private val weebSh: Weeb4J,
+    private val nekosLife: Nekos4J,
     private val dblPoster: DBLPoster,
     private val dpwPoster: DBotsPoster
 ) : ICommand, ICommand.Permission, ICommand.HelpDialogProvider {
     companion object : KLogging()
 
-    override val category = Categories.DEVELOPER
+    override val category = Category.DEVELOPER
     override val permission = CommandPermission.BOT_DEVELOPER
 
     override fun CommandContext.call() {
@@ -64,6 +65,7 @@ class DevCmd
             "enablecallsite" -> callsite(true)
             "disablecallsite" -> callsite(false)
             "weebsh" -> weebsh(args)
+            "nekoslife" -> nekoslife(args)
             "genwebyml" -> generateWebYaml()
             "", "check" -> adminCheck()
             else -> showHelp()
@@ -108,12 +110,12 @@ class DevCmd
 
     private fun CommandContext.weebsh(args: Args) {
         val (image, nsfw) = args.parseAndCreate<Pair<GetImage, NsfwFilter?>> {
-            val type by option("-type") { takeString() }
-            val tags by option("-tags") { takeString().split(',') }
-            val ext by option("-ext") { FileType.valueOf(takeString().toUpperCase()) }
-            val nsfw by option("-nsfw") { NsfwFilter.valueOf(("${takeString()}_NSFW").toUpperCase()) }
+            val type = option("-type") { takeString() }
+            val tags = option("-tags") { takeString().split(',') }
+            val ext = option("-ext") { FileType.valueOf(takeString().toUpperCase()) }
+            val nsfw = option("-nsfw") { NsfwFilter.valueOf(("${takeString()}_NSFW").toUpperCase()) }
 
-            creator { GetImage(type, tags, ext) to nsfw }
+            creator { GetImage(type.resourceOrNull, tags.resourceOrNull, ext.resourceOrNull) to nsfw.resourceOrNull }
         }
 
         if (image.isNotEmpty()) {
@@ -141,18 +143,78 @@ class DevCmd
     }
 
     private fun CommandContext.weebshGet(img: GetImage, nsfw: NsfwFilter?) {
-        weebSh.imageProvider.getRandomImage(img.type, img.tags, null, nsfw, img.fileType).async {
-            if (it == null) {
+        weebSh.imageProvider.getRandomImage(img.type, img.tags, null, nsfw, img.fileType).async { img ->
+            if (img == null) {
                 send("$CONFUSED No images found... ").queue()
             } else {
                 sendEmbed {
                     baseEmbed(event, "Aru! | Weeb.sh Debug")
-                    image(it.url)
+                    image(img.url)
                     description(
-                        "Type: ${it.type}",
-                        "Tags: ${it.tags.joinToString(", ", "[", "]") { "Tag[name=${it.name}, user=${it.user}]" }}",
-                        "Account: ${it.account}"
+                        "Type: ${img.type}",
+                        "Tags: ${img.tags.joinToString(", ", "[", "]") { "Tag[name=${it.name}, user=${it.user}]" }}",
+                        "Account: ${img.account}"
                     )
+                }.queue()
+            }
+        }
+    }
+
+    private fun CommandContext.nekoslife(args: Args) {
+        if (args.matchNextString("-type")) {
+            return nekoslifeGet(args.takeString())
+        }
+
+        val imageTypes = httpClient.newCall {
+            url("https://nekos.life/api/v2/endpoints")
+        }.execute().body()!!.jsonArray()
+            .mapNotNull { it as? String }
+            .first { it.contains("/api/v2/img/<") }
+            .let { JSONArray('[' + it.substring(it.indexOf('<') + 1, it.lastIndexOf('>')).replace('\'', '\"') + ']') }
+            .mapNotNull { it as? String }
+
+        if (args.matchNextString("-sorted")) {
+            return nekoslifeSorted(imageTypes)
+        }
+
+        sendEmbed {
+            baseEmbed(event, "Aru! | Nekos.life Debug")
+            thumbnail("https://assets.aru.pw/img/yes.png")
+
+            description(
+                "Types:",
+                "```",
+                imageTypes.sorted().joinToString(" "),
+                "```"
+            )
+        }.queue()
+    }
+
+    private fun CommandContext.nekoslifeSorted(imageTypes: List<String>) {
+        val provider = nekosLife.imageProvider
+        val map = imageTypes.groupByTo(TreeMap()) {
+            provider.getRandomImage(it).execute().url.let { url -> url.substring(url.lastIndexOf(".") + 1) }
+        }
+
+        sendEmbed {
+            baseEmbed(event, "Aru! | Nekos.life Sorted Debug")
+            thumbnail("https://assets.aru.pw/img/yes.png")
+
+            map.forEach { ext, types ->
+                field("Extension $ext", types.sorted().joinToString(" ", "```\n", "\n```"))
+            }
+        }.queue()
+    }
+
+    private fun CommandContext.nekoslifeGet(type: String) {
+        nekosLife.imageProvider.getRandomImage(type).async { img ->
+            if (img == null) {
+                send("$CONFUSED No images found... ").queue()
+            } else {
+                sendEmbed {
+                    baseEmbed(event, "Aru! | Nekos.life Debug")
+                    image(img.url)
+                    description("Type: $type")
                 }.queue()
             }
         }
@@ -249,11 +311,11 @@ class DevCmd
     private fun CommandContext.generateWebYaml() {
         val cmdsGroup = registry.lookup.entries.groupBy { it.key.category }
         val builder = StringBuilder()
-        for (category in Categories.LIST) {
+        for (category in Category.LIST) {
             val cmds = cmdsGroup[category] ?: continue
             if (cmds.isEmpty()) continue
 
-            builder += "- name: ${category.name.dropLast(1)}\n  list:\n"
+            builder += "- name: ${category.categoryName}\n  list:\n"
             for ((cmd, cmdNames) in cmds) {
                 builder += "    - cmd: ${cmdNames[0]}\n"
                 if (cmdNames.size > 1) {
@@ -273,16 +335,19 @@ class DevCmd
         Usage(
             CommandUsage("dev [check]", "Checks if the user running this command is one of my developers."),
             CommandUsage("dev shutdown", "Shutdowns the bot."),
-
+            UsageSeparator,
             CommandUsage("dev <eval/run> <engine> <code>", "Evals a piece of code."),
             CommandUsage("dev <peval/prun> <engine> <code>", "Evals a piece of code in a persistent environiment."),
-
+            UsageSeparator,
             CommandUsage("dev enablecallsite", "Evals a piece of code in a persistent environiment."),
             CommandUsage("dev disablecallsite", "Evals a piece of code in a persistent environiment."),
-
+            UsageSeparator,
             CommandUsage("dev weebsh", "Dumps Weeb.sh types and tags."),
-            CommandUsage("dev weebsh <[-type <value>] [-tags <values,...>] [-nsfw <value>] [-ext <value>]>", "Gets a random Weeb.sj image."),
-
+            CommandUsage("dev weebsh <[-type <value>] [-tags <values,...>] [-nsfw <value>] [-ext <value>]>", "Gets a random Weeb.sh image."),
+            UsageSeparator,
+            CommandUsage("dev nekoslife", "Dumps Weeb.sh types and tags."),
+            CommandUsage("dev nekoslife <-type <value>>", "Gets a random Nekos.life image."),
+            UsageSeparator,
             CommandUsage("dev genwebyml", "Generates the base commands.yml file.")
         )
     )

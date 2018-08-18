@@ -23,6 +23,12 @@ public class SettableResource<T> implements Resource<T> {
 
     @Nullable
     @Override
+    public T getResourceOrNull() {
+        return res;
+    }
+
+    @Nullable
+    @Override
     public Exception getResourceError() {
         return ex;
     }

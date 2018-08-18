@@ -1,6 +1,6 @@
 package pw.aru.commands.info
 
-import pw.aru.core.categories.Categories
+import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
@@ -13,7 +13,7 @@ import java.lang.System.currentTimeMillis
 
 @Command("ping")
 class Ping : ICommand, ICommand.HelpDialogProvider {
-    override val category = Categories.INFO
+    override val category = Category.INFO
 
     private val messages = listOf(
         "I won! *Faster than Discord!*",

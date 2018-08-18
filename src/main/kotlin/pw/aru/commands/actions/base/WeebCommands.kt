@@ -1,7 +1,6 @@
 package pw.aru.commands.actions.base
 
 import com.github.natanbc.weeb4j.image.FileType
-import com.github.natanbc.weeb4j.image.Image
 import com.github.natanbc.weeb4j.image.ImageProvider
 import com.github.natanbc.weeb4j.image.NsfwFilter.*
 import pw.aru.core.CommandRegistry
@@ -29,9 +28,10 @@ data class GetImage(
     val tags: List<String>? = null,
     val fileType: FileType? = null
 ) {
-    fun isEmpty() = type.isNullOrEmpty() && (tags == null || tags.isEmpty()) && fileType != null
-    fun isNotEmpty() = !isEmpty()
+    fun isNotEmpty() = (type != null && type.isNotEmpty()) || (tags != null && tags.isNotEmpty())
 }
+
+private typealias WeebImage = com.github.natanbc.weeb4j.image.Image
 
 sealed class WeebCommand(
     override val category: Category,
@@ -47,7 +47,7 @@ sealed class WeebCommand(
         registry.register(info.names.toTypedArray(), this)
     }
 
-    abstract fun CommandContext.onImage(image: Image)
+    abstract fun CommandContext.onImage(image: WeebImage)
 
     override fun CommandContext.call() {
         val args = parseable()
@@ -63,67 +63,67 @@ sealed class WeebCommand(
         }
     }
 
-    protected val Image.name: String
+    protected val WeebImage.name: String
         get() = "${img.tags?.firstOrNull() ?: img.type}_$id.${fileType.name.toLowerCase()}"
-}
 
-class WeebImageCommand(
-    category: Category,
-    provider: ImageProvider,
-    registry: CommandRegistry,
-    cache: URLCache,
-    info: WeebCommandInfo,
-    img: GetImage,
-    private val messages: List<String> = emptyList()
-) : WeebCommand(category, provider, registry, cache, info, img) {
-    override fun CommandContext.onImage(image: Image) {
-        channel
-            .sendFile(cache.cacheToFile(image.url), image.name)
-            .append(messages.randomOrNull()?.replaceEach("{author}" to "**${author.effectiveName}**") ?: "")
-            .queue()
-    }
-
-    override val helpHandler = Help(
-        CommandDescription(info.names, info.commandName),
-        Usage(
-            CommandUsage(info.cmdName, info.description),
-            CommandUsage("${info.cmdName} nsfw", "Only NSFW images. Might not find an image depending on the command.")
-        ),
-        Note("Powered by [weeb.sh](https://weeb.sh)")
-    )
-}
-
-class WeebActionCommand(
-    category: Category,
-    provider: ImageProvider,
-    registry: CommandRegistry,
-    cache: URLCache,
-    info: WeebCommandInfo,
-    img: GetImage,
-    private val lines: ActionLines
-) : WeebCommand(category, provider, registry, cache, info, img) {
-    override fun CommandContext.onImage(image: Image) {
-        val mentions = event.message.mentionedMembers
-
-        val f = when {
-            mentions.isEmpty() -> lines.noTargets
-            mentions.all { it == event.message.member } -> lines.targetsYou
-            mentions.all { it == event.guild.selfMember } -> lines.targetsMe
-            else -> lines.anyTarget
+    class Image(
+        category: Category,
+        provider: ImageProvider,
+        registry: CommandRegistry,
+        cache: URLCache,
+        info: WeebCommandInfo,
+        img: GetImage,
+        private val messages: List<String> = emptyList()
+    ) : WeebCommand(category, provider, registry, cache, info, img) {
+        override fun CommandContext.onImage(image: WeebImage) {
+            channel
+                .sendFile(cache.cacheToFile(image.url), image.name)
+                .append(messages.randomOrNull()?.replaceEach("{author}" to "**${author.effectiveName}**") ?: "")
+                .queue()
         }
 
-        channel
-            .sendFile(cache.cacheToFile(image.url), image.name)
-            .append(f.replaceEach("{author}" to "**${author.effectiveName}**", "{mentions}" to mentions.toSmartString { "**${it.effectiveName}**" }))
-            .queue()
+        override val helpHandler = Help(
+            CommandDescription(info.names, info.commandName),
+            Usage(
+                CommandUsage(info.cmdName, info.description),
+                CommandUsage("${info.cmdName} nsfw", "Only NSFW images. Might not find an image depending on the command.")
+            ),
+            Note("Powered by [weeb.sh](https://weeb.sh)")
+        )
     }
 
-    override val helpHandler = Help(
-        CommandDescription(info.names, info.commandName),
-        Usage(
-            CommandUsage("${info.cmdName} [mentions]", info.description),
-            CommandUsage("${info.cmdName} nsfw [mentions]", "Only NSFW images. Might not find an image depending on the command.")
-        ),
-        Note("Powered by [weeb.sh](https://weeb.sh)")
-    )
+    class Action(
+        category: Category,
+        provider: ImageProvider,
+        registry: CommandRegistry,
+        cache: URLCache,
+        info: WeebCommandInfo,
+        img: GetImage,
+        private val lines: ActionLines
+    ) : WeebCommand(category, provider, registry, cache, info, img) {
+        override fun CommandContext.onImage(image: WeebImage) {
+            val mentions = event.message.mentionedMembers
+
+            val f = when {
+                mentions.isEmpty() -> lines.noTargets
+                mentions.all { it == event.message.member } -> lines.targetsYou
+                mentions.all { it == event.guild.selfMember } -> lines.targetsMe
+                else -> lines.anyTarget
+            }
+
+            channel
+                .sendFile(cache.cacheToFile(image.url), image.name)
+                .append(f.replaceEach("{author}" to "**${author.effectiveName}**", "{mentions}" to mentions.toSmartString { "**${it.effectiveName}**" }))
+                .queue()
+        }
+
+        override val helpHandler = Help(
+            CommandDescription(info.names, info.commandName),
+            Usage(
+                CommandUsage("${info.cmdName} [mentions]", info.description),
+                CommandUsage("${info.cmdName} nsfw [mentions]", "Only NSFW images. Might not find an image depending on the command.")
+            ),
+            Note("Powered by [weeb.sh](https://weeb.sh)")
+        )
+    }
 }

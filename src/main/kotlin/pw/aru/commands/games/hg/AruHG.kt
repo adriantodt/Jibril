@@ -9,6 +9,7 @@ import pw.aru.commands.games.Game
 import pw.aru.commands.games.manager.GameManager
 import pw.aru.commands.games.manager.lobby.Lobby
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.commandUsage
 import pw.aru.core.input.AsyncCommandInput
 import pw.aru.core.parser.tryTakeDouble
 import pw.aru.hungergames.HungerGames
@@ -78,15 +79,15 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                 "${if (newGame) "New game created successfully! " else ""}**${admin.effectiveName}** is the admin of the game.",
                 "",
                 "**Game Commands:** (without prefix; you must be the admin of the game)",
-                "hg cancel".usage("Returns to the GameHub lobby."),
-                "hg exit".usage("Closes the HungerGames and GameHub lobbies."),
-                "hg lobby".usage("Shows this game's players guests."),
-                "hg addguests".usage("Adds guests to the game."),
-                "hg rmguests".usage("Remove guests to the game."),
-                "hg addall".usage("Add ALL members from the server as guests of the game."),
-                "hg clearguests".usage("Remove all guests from the game."),
-                "hg threshold <suicidal/fast/default/slow/peaceful/<any decimal from 0 to 1>>".usage("Sets the \"madness\" of the game."),
-                "hg start".usage("Starts a new game.")
+                commandUsage("hg cancel", "Returns to the GameHub lobby."),
+                commandUsage("hg exit", "Closes the HungerGames and GameHub lobbies."),
+                commandUsage("hg lobby", "Shows this game's players guests."),
+                commandUsage("hg addguests", "Adds guests to the game."),
+                commandUsage("hg rmguests", "Remove guests to the game."),
+                commandUsage("hg addall", "Add ALL members from the server as guests of the game."),
+                commandUsage("hg clearguests", "Remove all guests from the game."),
+                commandUsage("hg threshold <suicidal/fast/default/slow/peaceful/<any decimal from 0 to 1>>", "Sets the \"madness\" of the game."),
+                commandUsage("hg start", "Starts a new game.")
             )
         }.queue()
     }
@@ -98,7 +99,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                 "**${admin.effectiveName}** is the admin of the game.",
                 "",
                 "**Game Commands:** (without prefix; you must be the admin of the game)",
-                "hg cancel".usage("Returns to the HungerGames sub-lobby.")
+                commandUsage("hg cancel", "Returns to the HungerGames sub-lobby.")
             )
         }.queue()
     }

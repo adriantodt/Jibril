@@ -2,7 +2,6 @@ package pw.aru.commands.eastereggs
 
 import net.dv8tion.jda.core.entities.Member
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.CommandPermission.BOT_DEVELOPER
 import pw.aru.core.commands.CommandPermission.SERVER_ADMIN
@@ -19,7 +18,7 @@ class Greeting : ICommand, ICommand.HelpHandler {
         event.channel.sendMessage(EYES).queue()
     }
 
-    override val category: Category? = null
+    override val category = null
 
     override fun CommandContext.call() {
         send(random(event.member).format(arrayOf(event.member.effectiveName))).queue()

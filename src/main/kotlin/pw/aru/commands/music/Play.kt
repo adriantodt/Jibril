@@ -5,14 +5,13 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import net.dv8tion.jda.core.Permission.MESSAGE_ADD_REACTION
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.commands.music.MusicPermissionCommand.Companion.checkPermissions
-import pw.aru.core.categories.Categories
+import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.CommandPermission
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
-import pw.aru.core.commands.help.CommandUsage.Companion.prefix
 import pw.aru.core.music.GuildMusicPlayer.RepeatMode.*
 import pw.aru.core.music.MusicManager
 import pw.aru.core.music.MusicRequester
@@ -33,7 +32,7 @@ sealed class PlayCommand(
     private val playNow: Boolean,
     override val helpHandler: Help
 ) : ICommand, ICommand.HelpDialogProvider {
-    override val category = Categories.MUSIC
+    override val category = Category.MUSIC
 
     private val replacers = listOf(
         listOf("soundcloud:", "soundcloud ", "sc:", "sc ") to "scsearch:",

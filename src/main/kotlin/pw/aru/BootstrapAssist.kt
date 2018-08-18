@@ -100,7 +100,7 @@ internal fun createShardManager(injector: Kodein, token: String, onAllShardsRead
 
 internal fun completeShardManager(shardManager: ShardManager, injector: Kodein) {
     shardManager.addEventListener(
-        injector.direct.instance<VoiceLeaveListener>(),
+        injector.direct.instance<MusicManagerListener>(),
         injector.direct.instance<GuildListener>()
     )
 

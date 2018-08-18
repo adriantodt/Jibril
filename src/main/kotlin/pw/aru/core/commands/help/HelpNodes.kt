@@ -2,8 +2,9 @@ package pw.aru.core.commands.help
 
 import pw.aru.Aru
 import pw.aru.core.commands.CommandPermission
-import pw.aru.core.commands.help.CommandUsage.Companion.prefix
 import java.awt.Color
+
+sealed class BaseDescription
 
 data class CommandDescription(
     val names: List<String>,
@@ -11,7 +12,14 @@ data class CommandDescription(
     val permission: CommandPermission? = null,
     val color: Color? = null,
     val thumbnail: String = "https://assets.aru.pw/img/help_thumbnail.png"
-)
+) : BaseDescription()
+
+data class CategoryDescription(
+    val description: String,
+    val permission: CommandPermission? = null,
+    val color: Color? = null,
+    val thumbnail: String = "https://assets.aru.pw/img/help_thumbnail.png"
+) : BaseDescription()
 
 //=== w ===//
 
@@ -59,12 +67,14 @@ data class CommandUsage(val command: String, val extra: String?, val description
     constructor(command: String, description: String) : this(command, null, description)
 
     override fun toString() = if (extra != null) commandUsage(command, extra, description) else commandUsage(command, description)
-
-    companion object {
-        val prefix get() = Aru.prefixes.first()
-    }
 }
 
 data class TextUsage(val value: String) : UsageNode() {
     override fun toString() = value
 }
+
+object UsageSeparator : UsageNode() {
+    override fun toString() = ""
+}
+
+val prefix get() = Aru.prefixes.first()
