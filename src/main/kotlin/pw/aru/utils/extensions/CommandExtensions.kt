@@ -5,7 +5,7 @@ package pw.aru.utils.extensions
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.ICommand
-import pw.aru.utils.commands.HelpFactory
+import pw.aru.core.commands.help.prefix
 import pw.aru.utils.emotes.ERROR
 
 object CommandExceptions {
@@ -64,4 +64,4 @@ const val ERROR_CHANNEL_PERMS = "Fix the **current channel**'s permissions and e
 const val ERROR_CHANNEL_NOT_NSFW = "For this command to work, set this text channel to **NSFW**."
 
 @Deprecated("Use CommandUsage.prefix instead.")
-inline fun String.withPrefix() = "${HelpFactory.prefix}$this"
+inline fun String.withPrefix() = "$prefix$this"

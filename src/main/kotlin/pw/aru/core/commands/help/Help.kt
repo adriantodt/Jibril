@@ -44,7 +44,7 @@ class Help(
         thumbnail(thumbnail)
 
         if (permission != null) {
-            field("Permission Required:", permission.toString(), false)
+            field("Permission Required:", permission.toString())
         }
 
         if (names != null && names.size > 1) {

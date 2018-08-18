@@ -57,7 +57,7 @@ fun List<String>.limitedToString(limit: Int): String {
         while (iterator.hasNext()) {
             val next = iterator.next()
 
-            if ((builder.length + next.length + 2) < 1000) {
+            if ((builder.length + next.length + 2) < limit) {
                 builder.append(next)
                 if (iterator.hasNext()) builder.append(", ")
             } else {

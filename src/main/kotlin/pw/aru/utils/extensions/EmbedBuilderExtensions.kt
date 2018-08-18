@@ -56,12 +56,12 @@ fun EmbedBuilder.image(url: String?) {
     setImage(url)
 }
 
-fun EmbedBuilder.field(name: String, value: String, inline: Boolean = false) {
-    addField(name, value, inline)
+fun EmbedBuilder.field(name: String, vararg value: String) {
+    addField(name, value.joinToString("\n"), false)
 }
 
-fun EmbedBuilder.field(name: String, value: Array<String>, inline: Boolean = false) {
-    field(name, value.joinToString("\n"), inline)
+fun EmbedBuilder.inlineField(name: String, vararg value: String) {
+    addField(name, value.joinToString("\n"), true)
 }
 
 fun EmbedBuilder.description(value: String) {

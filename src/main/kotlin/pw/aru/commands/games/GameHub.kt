@@ -1,25 +1,30 @@
 package pw.aru.commands.games
 
+import pw.aru.commands.games.hg.HGCreator
 import pw.aru.commands.games.manager.GameManager
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
-import pw.aru.utils.commands.HelpFactory
+import pw.aru.core.commands.help.*
 import pw.aru.utils.emotes.ERROR
 import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.extensions.baseEmbed
 import pw.aru.utils.extensions.embed
 import pw.aru.utils.extensions.field
-import pw.aru.utils.extensions.withPrefix
+import pw.aru.utils.extensions.limitedToString
+import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 @Command("gamehub", "gh")
 @UseFullInjector()
 class GameHub(private val gameManager: GameManager) : ICommand {
     override val category = Category.GAMES
 
-    private val games: MutableMap<String, GameCreator> = HashMap()
+    private val games: MutableMap<String, GameCreator> = linkedMapOf("hg" to HGCreator())
+    private val playCount: MutableMap<GameCreator, AtomicInteger> = WeakHashMap()
+
     private val lobbyManager = gameManager.lobbyManager
 
     override fun CommandContext.call() {
@@ -28,16 +33,75 @@ class GameHub(private val gameManager: GameManager) : ICommand {
         val option = args.takeString()
 
         when (option) {
-            "list" -> {
-            }
-
+            "" -> if (lobbyManager.hasLobby(channel)) lobby() else introduction()
+            "list" -> listGames()
             "new" -> newLobby()
             "join" -> joinLobby()
             "leave" -> leaveLobby()
             "start", "play" -> playGame(args.takeRemaining())
-            "lobby", "" -> lobby()
+            "lobby" -> lobby()
             else -> showHelp()
         }
+    }
+
+    private fun CommandContext.introduction() = send(intro.onHelp(event)).queue()
+
+    private val intro = Help(
+        CategoryDescription("Aru!GameHub"),
+        Description(
+            "The **GameHub** is Aru's lobby and game system. Simply create a new lobby, let your friends join, and you're ready to play!"
+        ),
+        Usage(
+            TextUsage("To create a new lobby:"),
+            CommandUsage("gamehub new", "Creates a new lobby on the text channel. It'll fail if the channel already has a lobby."),
+            TextUsage("Once you create the lobby, you'll be considered the lobby's admin."),
+            UsageSeparator,
+            TextUsage("To join a lobby:"),
+            CommandUsage("gamehub join", "Joins a lobby of this text channel. It'll fail if the channel doesn't has a lobby."),
+            UsageSeparator,
+            TextUsage("Finding and playing games:"),
+            CommandUsage("gamehub list", "List all available games."),
+            CommandUsage("gamehub play <game>", "Starts the game you've chosen."),
+            TextUsage("You have to be the lobby's admin to be able to start a game.")
+        )
+    )
+
+    private fun CommandContext.listGames() {
+        sendEmbed {
+            baseEmbed(event, "Aru!GameHub | Available Games")
+            games.forEach { id, game ->
+                val description = game.description
+                field(
+                    description.name,
+                    "(Run ``${prefix}gamehub play $id`` to start this game!)",
+                    "",
+                    "**Description**:",
+                    description.description,
+                    "",
+                    "**Played ${playCount[game]?.get() ?: 0} times since last startup**"
+                )
+            }
+        }.queue()
+    }
+
+    private fun CommandContext.lobby() {
+        val lobby = lobbyManager.getLobby(event.channel)
+
+        if (lobby == null) {
+            event.channel.sendMessage(
+                "$ERROR S-sorry, but there's no lobby here!\n" +
+                    "Use ``${prefix}gamehub new`` and create your lobby!"
+            ).queue()
+            return
+        }
+
+        event.channel.sendMessage(
+            embed {
+                baseEmbed(event, "Aru!GameHub | ${event.guild.getMemberById(lobby.adminId).effectiveName}'s Lobby")
+
+                field("Players:", lobby.players.map { "**${it.effectiveName}**" }.sorted().limitedToString(1000))
+            }
+        ).queue()
     }
 
     private fun CommandContext.newLobby() {
@@ -46,11 +110,11 @@ class GameHub(private val gameManager: GameManager) : ICommand {
 
         event.channel.sendMessage(
             if (created) "$SUCCESS **${event.member.effectiveName}** created a new lobby!\n" +
-                "Other players can run ``${"hg".withPrefix()} join`` to join it!\n" +
-                "Use  ``${"hg".withPrefix()} start`` to start the game!"
+                "Other players can run ``${prefix}gamehub join`` to join it!\n" +
+                "Use  ``${prefix}gamehub play <game>`` to start a game!"
             else
                 "$ERROR S-sorry, but a lobby (created by **${event.guild.getMemberById(lobby.adminId).effectiveName}**) already exists!\n" +
-                    "Use ``${"hg".withPrefix()} join`` to join it!"
+                    "Use ``${prefix}gamehub join`` to join it!"
         ).queue()
     }
 
@@ -59,7 +123,7 @@ class GameHub(private val gameManager: GameManager) : ICommand {
         when {
             lobby == null -> event.channel.sendMessage(
                 "$ERROR S-sorry, but there's no lobby here!\n" +
-                    "Use ``${HelpFactory.prefix}hg new`` and create your lobby!"
+                    "Use ``${prefix}gamehub new`` and create your lobby!"
             ).queue()
 
             lobby.adminId == event.author.id || lobby.players.contains(event.member) -> event.channel.sendMessage(
@@ -101,6 +165,8 @@ class GameHub(private val gameManager: GameManager) : ICommand {
     }
 
     private fun CommandContext.playGame(args: String) {
+        if (args.isEmpty()) return listGames()
+
         val lobby = lobbyManager.getLobby(event.channel)
 
         if (lobby == null) {
@@ -121,50 +187,9 @@ class GameHub(private val gameManager: GameManager) : ICommand {
         }
 
         lobbyManager.removeLobby(event.channel)
+        playCount.getOrPut(creator, ::AtomicInteger).getAndIncrement()
         gameManager.newGame(event.channel, lobby, creator)
     }
-
-    private fun CommandContext.lobby() {
-        val lobby = lobbyManager.getLobby(event.channel)
-
-        if (lobby == null) {
-            event.channel.sendMessage(
-                "$ERROR S-sorry, but there's no lobby here!\n" +
-                    "Use ``${HelpFactory.prefix}hg new`` and create your lobby!"
-            ).queue()
-            return
-        }
-
-        event.channel.sendMessage(
-            embed {
-                baseEmbed(event, "HungerGames | ${event.guild.getMemberById(lobby.adminId).effectiveName}'s Lobby")
-
-                field("Players:", lobby.players.map { "**${it.effectiveName}**" }.sorted().limitedToString())
-            }
-        ).queue()
-    }
-
-    private fun List<String>.limitedToString(): String {
-        if (isEmpty()) return "None"
-        else {
-            val builder = StringBuilder()
-            val iterator = listIterator()
-
-            while (iterator.hasNext()) {
-                val next = iterator.next()
-
-                if ((builder.length + next.length + 2) < 1000) {
-                    builder.append(next)
-                    if (iterator.hasNext()) builder.append(", ")
-                } else {
-                    builder.append("more ").append(size - iterator.nextIndex()).append("...")
-                    break
-                }
-            }
-
-            return builder.toString()
-        }
-    }
-
 }
+
 

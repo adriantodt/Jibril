@@ -234,10 +234,10 @@ class GuildMusicPlayer(private val shardManager: ShardManager, val musicManager:
             val member = guild.getMember(user)
             val requester = "**${member?.effectiveName ?: user.discordTag}**"
 
-            field("Requested by:", requester, inline = true)
+            inlineField("Requested by:", requester)
         }
 
-        field("Duration:", musicLength(trackInfo.length, "Unknown"), inline = true)
+        inlineField("Duration:", musicLength(trackInfo.length, "Unknown"))
 
         if (memberRequested == null) {
             footer(

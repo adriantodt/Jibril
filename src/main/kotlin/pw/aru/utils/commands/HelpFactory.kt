@@ -49,15 +49,15 @@ class HelpFactory(
             }
 
             if (description != null) {
-                field("Description:", description!!, false)
+                field("Description:", description!!)
             }
 
             if (tutorial != null) {
-                field("Tutorial:", tutorial!!, false)
+                field("Tutorial:", tutorial!!)
             }
 
             if (usages.isNotEmpty()) {
-                field(if (category) "Commands:" else "Usages:", usages.joinToString("\n"), false)
+                field(if (category) "Commands:" else "Usages:", usages.joinToString("\n"))
             }
 
             if (examples.isNotEmpty()) {
@@ -68,11 +68,11 @@ class HelpFactory(
             }
 
             if (note != null) {
-                field("Note:", note!!, false)
+                field("Note:", note!!)
             }
 
             if (seeAlso.isNotEmpty()) {
-                field(if (category) "Other Commands:" else "See Also:", seeAlso.joinToString("\n"), false)
+                field(if (category) "Other Commands:" else "See Also:", seeAlso.joinToString("\n"))
             }
         }
     }

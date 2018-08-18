@@ -17,6 +17,7 @@ import pw.aru.utils.emotes.LOADING
 import pw.aru.utils.extensions.baseEmbed
 import pw.aru.utils.extensions.field
 import pw.aru.utils.extensions.format
+import pw.aru.utils.extensions.inlineField
 import pw.aru.utils.helpers.AsyncInfoMonitor.availableProcessors
 import pw.aru.utils.helpers.AsyncInfoMonitor.cpuUsage
 import pw.aru.utils.helpers.AsyncInfoMonitor.freeMemory
@@ -60,16 +61,14 @@ class Stats
         EmbedFirst(event) {
             baseEmbed(event, "Aru! | Discord Stats")
             field("Uptime:", Aru.uptime)
-            field("Bot Stats:",
-                arrayOf(
-                    "\u25AB **Aru Version**: $aru_version",
-                    "\u25AB **Threads**: ${Thread.activeCount().format("%,d")}",
-                    "\u25AB **Shards**: ${shardManager.shardsTotal.format("%,d")} (Current: ${event.jda.shardInfo.shardId})",
-                    "\u25AB **Commands**: ${processor.commandCount.format("%,d")} executed"
-                ),
-                inline = true
+            inlineField(
+                "Bot Stats:",
+                "\u25AB **Aru Version**: $aru_version",
+                "\u25AB **Threads**: ${Thread.activeCount().format("%,d")}",
+                "\u25AB **Shards**: ${shardManager.shardsTotal.format("%,d")} (Current: ${event.jda.shardInfo.shardId})",
+                "\u25AB **Commands**: ${processor.commandCount.format("%,d")} executed"
             )
-            field("Discord Stats:", "$LOADING Gathering $LOADING", inline = true)
+            inlineField("Discord Stats:", "$LOADING Gathering $LOADING")
         } then {
             sleep(100)
 
@@ -83,16 +82,14 @@ class Stats
                 .sum().format("%,d")
 
             fields.remove(fields.last())
-            field("Discord Stats:",
-                arrayOf(
-                    "\u25AB **Servers**: $guildCount",
-                    "\u25AB **Unique Users**: $uniqueUserCount",
-                    "\u25AB **Text Channels**: $textChannelCount",
-                    "\u25AB **Voice Channels**: $voiceChannelCount",
-                    "\u25AB **Playing music on $musicCount servers**",
-                    "\u25AB **$queueSize tracks queued**"
-                ),
-                inline = true
+            inlineField(
+                "Discord Stats:",
+                "\u25AB **Servers**: $guildCount",
+                "\u25AB **Unique Users**: $uniqueUserCount",
+                "\u25AB **Text Channels**: $textChannelCount",
+                "\u25AB **Voice Channels**: $voiceChannelCount",
+                "\u25AB **Playing music on $musicCount servers**",
+                "\u25AB **$queueSize tracks queued**"
             )
         }
     }
@@ -129,20 +126,16 @@ class Stats
             baseEmbed(event, "Aru! | Server Stats")
             field(
                 "Resource Usage:",
-                arrayOf(
-                    "\u25AB **Threads**: $threadCount",
-                    "\u25AB **RAM**: ${(totalMemory - freeMemory).format("%.2f")}MB/${maxMemory.format("%.2f")}MB",
-                    "\u25AB **Allocated Memory**: ${totalMemory.format("%.2f")}MB (${freeMemory.format("%.2f")}MB remaining)",
-                    "\u25AB **CPU Usage**: ${cpuUsage.format("%.2f")}%"
-                )
+                "\u25AB **Threads**: $threadCount",
+                "\u25AB **RAM**: ${(totalMemory - freeMemory).format("%.2f")}MB/${maxMemory.format("%.2f")}MB",
+                "\u25AB **Allocated Memory**: ${totalMemory.format("%.2f")}MB (${freeMemory.format("%.2f")}MB remaining)",
+                "\u25AB **CPU Usage**: ${cpuUsage.format("%.2f")}%"
             )
             field(
                 "Server:",
-                arrayOf(
-                    "\u25AB **RAM** (Total/Free/Used): ${vpsMaxMemory.format("%.2f")}GB/${vpsFreeMemory.format("%.2f")}GB/${vpsUsedMemory.format("%.2f")}GB",
-                    "\u25AB **CPU Cores**: ${availableProcessors.format("%.2f")} cores",
-                    "\u25AB **CPU Usage**: ${vpsCpuUsage.format("%.2f")}%"
-                )
+                "\u25AB **RAM** (Total/Free/Used): ${vpsMaxMemory.format("%.2f")}GB/${vpsFreeMemory.format("%.2f")}GB/${vpsUsedMemory.format("%.2f")}GB",
+                "\u25AB **CPU Cores**: ${availableProcessors.format("%.2f")} cores",
+                "\u25AB **CPU Usage**: ${vpsCpuUsage.format("%.2f")}%"
             )
         }.queue()
     }

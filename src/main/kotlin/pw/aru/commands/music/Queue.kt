@@ -32,19 +32,12 @@ class Queue(musicManager: MusicManager) : MusicCommand(musicManager), ICommand.H
 
             field(
                 "Now Playing:",
-                if (currentTrack.duration == Long.MAX_VALUE) {
-                    arrayOf(
-                        "**[${currentTrack.info.title}](${currentTrack.info.uri})** by **${currentTrack.info.author}**",
-                        "",
-                        "$PLAY $LOADING Streaming $LOADING"
-                    )
-                } else {
-                    arrayOf(
-                        "**[${currentTrack.info.title}](${currentTrack.info.uri})** by **${currentTrack.info.author}**",
-                        "",
-                        "$PLAY ${progressBar(currentTrack.position, currentTrack.duration)} (`${musicLength(currentTrack.duration - currentTrack.position)}`)"
-                    )
-                }
+                "**[${currentTrack.info.title}](${currentTrack.info.uri})** by **${currentTrack.info.author}**",
+                "",
+                if (currentTrack.duration == Long.MAX_VALUE)
+                    "$PLAY $LOADING Streaming $LOADING"
+                else
+                    "$PLAY ${progressBar(currentTrack.position, currentTrack.duration)} (`${musicLength(currentTrack.duration - currentTrack.position)}`)"
             )
 
             thumbnail(musicManager.resolveThumbnail(currentTrack))

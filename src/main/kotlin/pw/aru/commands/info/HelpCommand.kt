@@ -75,8 +75,7 @@ class HelpCommand(private val registry: CommandRegistry) : ICommand, ICommand.He
                     "Trending:",
                     t.asSequence().filter { it !is ICommand.Permission || it.permission.test(event.member) }
                         .take(10)
-                        .joinToString(prefix = "`", separator = "` `", postfix = "`") { registry.lookup[it]!![0] },
-                    inline = false
+                        .joinToString(prefix = "`", separator = "` `", postfix = "`") { registry.lookup[it]!![0] }
                 )
             }
 
@@ -89,8 +88,7 @@ class HelpCommand(private val registry: CommandRegistry) : ICommand, ICommand.He
 
                 if (list.isNotEmpty()) field(
                     "${cat.categoryName}:",
-                    list.joinToString(prefix = "`", separator = "` `", postfix = "`"),
-                    inline = false
+                    list.joinToString(prefix = "`", separator = "` `", postfix = "`")
                 )
             }
         }.queue()

@@ -8,6 +8,10 @@ import java.util.concurrent.TimeUnit
 
 abstract class AsyncInput protected constructor(private val eventWaiter: EventWaiter, private val timeout: Long, private val unit: TimeUnit) {
 
+    init {
+        waitForNextEvent()
+    }
+
     protected abstract fun call(event: GuildMessageReceivedEvent)
 
     protected abstract fun filter(event: GuildMessageReceivedEvent): Boolean
@@ -21,7 +25,7 @@ abstract class AsyncInput protected constructor(private val eventWaiter: EventWa
 
 abstract class AsyncCommandsInput protected constructor(eventWaiter: EventWaiter, timeout: Long, unit: TimeUnit) : AsyncInput(eventWaiter, timeout, unit) {
     override fun call(event: GuildMessageReceivedEvent) {
-        val parts = event.message.contentRaw.split(' ')
+        val parts = event.message.contentRaw.split(' ', limit = 2)
         CommandContext(event, parts.getOrNull(1) ?: "").onCommand(parts[0])
     }
 
@@ -32,7 +36,7 @@ abstract class AsyncCommandInput protected constructor(eventWaiter: EventWaiter,
     override fun filter(event: GuildMessageReceivedEvent): Boolean = event.message.contentRaw.startsWith(command)
 
     override fun call(event: GuildMessageReceivedEvent) {
-        val parts = event.message.contentRaw.split(' ')
+        val parts = event.message.contentRaw.split(' ', limit = 2)
         CommandContext(event, parts.getOrNull(1) ?: "").onCommand()
     }
 
