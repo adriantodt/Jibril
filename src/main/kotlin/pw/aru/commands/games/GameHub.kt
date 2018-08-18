@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 @Command("gamehub", "gh")
 @UseFullInjector()
-class GameHub(private val gameManager: GameManager) : ICommand {
+class GameHub(private val gameManager: GameManager) : ICommand, ICommand.HelpDialogProvider {
     override val category = Category.GAMES
 
     private val games: MutableMap<String, GameCreator> = linkedMapOf("hg" to HGCreator())
@@ -190,6 +190,27 @@ class GameHub(private val gameManager: GameManager) : ICommand {
         playCount.getOrPut(creator, ::AtomicInteger).getAndIncrement()
         gameManager.newGame(event.channel, lobby, creator)
     }
+
+    override val helpHandler = Help(
+        CommandDescription(listOf("gamehub", "gh"), "Aru!GameHub"),
+        Description(
+            "The **GameHub** is Aru's lobby and game system. Simply create a new lobby, let your friends join, and you're ready to play!"
+        ),
+        Usage(
+            CommandUsage("gamehub list", "Lists all available games."),
+            UsageSeparator,
+            CommandUsage("gamehub new", "Creates a new lobby on this text channel."),
+            TextUsage("     (It'll fail if there's already a lobby.)"),
+            CommandUsage("gamehub lobby", "Displays this channel's lobby."),
+            UsageSeparator,
+            CommandUsage("gamehub join", "Joins this channel's lobby."),
+            CommandUsage("gamehub leave", "Leaves this channel's lobby."),
+            UsageSeparator,
+            CommandUsage("gamehub play <game>", "Starts the game you've chosen."),
+            TextUsage("     (Only the creator of the lobby can start a game.)")
+        )
+    )
+
 }
 
 
