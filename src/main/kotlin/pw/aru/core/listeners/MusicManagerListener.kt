@@ -26,22 +26,24 @@ class MusicManagerListener(private val musicManager: MusicManager) : EventListen
     }
 
     private fun onVoiceMove(event: GuildVoiceMoveEvent) {
-        if (!event.channelJoined.members.contains(event.guild.selfMember)) return
+        val selfMember = event.guild.selfMember
+        when {
+            (event.member == selfMember) -> {
+                val musicPlayer = musicManager[event.guild]
 
-        if (event.member != event.guild.selfMember) {
-            if (event.channelLeft.members.contains(event.guild.selfMember)) {
-                onVoiceLeave(GuildVoiceLeaveEvent(event.jda, event.responseNumber, event.member, event.channelLeft))
-            } else if (event.channelJoined.members.contains(event.guild.selfMember)) {
-                onVoiceJoin(GuildVoiceJoinEvent(event.jda, event.responseNumber, event.member))
+                musicPlayer.run { arrayOf(votePauses, voteShuffles, voteSkips, voteStops).forEach(TLongList::clear) }
+
+                if (event.channelJoined.humanUsers == 0) {
+                    onLeftAlone(musicPlayer)
+                } else {
+                    musicPlayer.cancelLeave(true)
+                }
             }
-        } else {
-            val musicPlayer = musicManager[event.guild]
-
-            musicPlayer.run { arrayOf(votePauses, voteShuffles, voteSkips, voteStops).forEach(TLongList::clear) }
-            if (event.channelJoined.humanUsers == 0) {
-                onLeftAlone(musicPlayer)
-            } else {
-                musicPlayer.cancelLeave()
+            event.channelLeft.members.contains(selfMember) -> {
+                onVoiceLeave(GuildVoiceLeaveEvent(event.jda, event.responseNumber, event.member, event.channelLeft))
+            }
+            event.channelJoined.members.contains(selfMember) -> {
+                onVoiceJoin(GuildVoiceJoinEvent(event.jda, event.responseNumber, event.member))
             }
         }
     }

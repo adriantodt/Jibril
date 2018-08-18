@@ -10,6 +10,7 @@ import gnu.trove.list.array.TLongArrayList
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.Member
+import net.dv8tion.jda.core.entities.TextChannel
 import net.dv8tion.jda.core.entities.VoiceChannel
 import pw.aru.utils.TaskManager.schedule
 import pw.aru.utils.TaskType
@@ -54,6 +55,9 @@ class GuildMusicPlayer(private val shardManager: ShardManager, val musicManager:
 
     val guild: Guild
         get() = shardManager.getGuildById(guildId)
+
+    val textChannel: TextChannel?
+        get() = audioPlayer.playingTrack?.trackData?.textChannel
 
     init {
         this.audioPlayer.addListener(this)
@@ -112,17 +116,35 @@ class GuildMusicPlayer(private val shardManager: ShardManager, val musicManager:
         }
     }
 
-    fun cancelLeave() {
+    fun cancelLeave(discordWorkaround: Boolean = false) {
         if (disconnectTask == null) return
-        disconnectTask!!.cancel(true)
+        disconnectTask?.cancel(true)
         disconnectTask = null
-        this.audioPlayer.isPaused = false
-        val info = audioPlayer.playingTrack?.trackData ?: return
-        val channel = info.textChannel
-        if (channel?.canTalk() == true) {
-            channel.sendMessage(
-                "$SMILE2 *Yay someone joined me to listen to some nice songs!*\nI've resumed from where I stopped for you!"
-            ).queue()
+        this.audioPlayer.isPaused = discordWorkaround
+        val channel = textChannel
+
+        if (discordWorkaround) {
+            val message = if (channel?.canTalk() == true) {
+                channel.sendMessage(
+                    "$SMILE2 *Yay someone joined me to listen to some nice songs!*\n$LOADING Getting ready to resume the music for you!"
+                ).submit()
+            } else null
+
+            schedule(500, TimeUnit.MILLISECONDS) {
+                audioPlayer.isPaused = false
+
+                if (message != null) {
+                    message().editMessage(
+                        "$SMILE2 *Yay someone joined me to listen to some nice songs!*\n$ZAP Engines ready, music resumed!"
+                    ).queue()
+                }
+            }
+        } else {
+            if (channel?.canTalk() == true) {
+                channel.sendMessage(
+                    "$SMILE2 *Yay someone joined me to listen to some nice songs!*\n$SUCCESS I've resumed from where I stopped for you!"
+                ).queue()
+            }
         }
     }
 

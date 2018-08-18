@@ -39,14 +39,14 @@ dependencies {
     compile 'org.jetbrains.kotlin:kotlin-reflect:1.2.60'
 
     // Main APIs
-    compile 'net.dv8tion:JDA:3.7.1_392'
+    compile 'net.dv8tion:JDA:3.7.1_395'
     compile 'com.sedmelluq:lavaplayer:1.3.7'
     compile 'com.github.natanbc:discordbots-api:3.3.3'
     compile 'com.github.natanbc:weeb4j:3.3'
 
     // Useful
     compile 'com.sedmelluq:jda-nas:1.0.6'
-    compile 'com.jagrosh:jda-utilities-menu:2.1.3'
+    compile 'com.jagrosh:jda-utilities-menu:2.1.4'
 
     // Open-Source Libraries
     compile 'pw.aru.discord:dice-notation:1.0'
@@ -101,7 +101,7 @@ const val user_agent = "JDA/DiscordBot (Aru! ${version})"
 //BELOW: TASKS AND CONFIGS YOU PROBABLY DON'T NEED TO TWEAK MORE THAN ONCE IN A LIFETIME
 
 task packAssets(type: Zip) { baseName = 'assets'; from file('./assets'); destinationDir = file('build/assets'); version = '' }
-task wrapper(type: Wrapper) { gradleVersion = '4.9' }
+task wrapper(type: Wrapper) { gradleVersion = '4.6' }
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 [compileKotlin, compileTestKotlin].each { it.kotlinOptions.jvmTarget = "1.8" }
