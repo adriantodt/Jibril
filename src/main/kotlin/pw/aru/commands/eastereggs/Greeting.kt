@@ -14,11 +14,11 @@ import java.util.*
 
 @Command("hi", "hai", "hello")
 class Greeting : ICommand, ICommand.HelpHandler {
+    override val category = null
+
     override fun onHelp(event: GuildMessageReceivedEvent) {
         event.channel.sendMessage(EYES).queue()
     }
-
-    override val category = null
 
     override fun CommandContext.call() {
         send(random(event.member).format(arrayOf(event.member.effectiveName))).queue()

@@ -16,17 +16,16 @@ import pw.aru.hungergames.data.SimpleTribute
 import pw.aru.hungergames.events.EventFormatter
 import pw.aru.hungergames.game.Actions
 import pw.aru.hungergames.game.Phase
+import pw.aru.hungergames.game.Tribute
 import pw.aru.hungergames.loader.loadFile
 import pw.aru.hungergames.loader.parseHarmfulActions
 import pw.aru.hungergames.loader.parseHarmlessActions
 import pw.aru.hungergames.phases.*
 import pw.aru.utils.Colors
-import pw.aru.utils.emotes.BANG
-import pw.aru.utils.emotes.SAD
-import pw.aru.utils.emotes.SUCCESS
-import pw.aru.utils.emotes.ZAP
+import pw.aru.utils.emotes.*
 import pw.aru.utils.extensions.*
 import java.io.File
+import java.util.*
 import java.util.concurrent.TimeUnit.MINUTES
 import kotlin.concurrent.thread
 
@@ -65,6 +64,11 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
     val admin = channel.guild.getMemberById(lobby.adminId)
     var threshold = Threshold.DEFAULT.value
     var speed = Speed.DEFAULT
+    var lastGame: List<Tribute>? = null
+    var lastGameDayCount: Int? = null
+    var lastGameNightCount: Int? = null
+    var lastGameFeastCount: Int? = null
+    var lastGameAvgDeaths: Double? = null
 
     init {
         showHelp(true)
@@ -83,13 +87,18 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                 "**HG Lobby Commands:** (without prefix; you must be the admin of the game)",
                 commandUsage("hg cancel", "Returns to the GameHub lobby."),
                 commandUsage("hg exit", "Closes the HungerGames and GameHub lobbies."),
+                "",
                 commandUsage("hg lobby", "Shows this game's players guests."),
+                commandUsage("hg scoreboard", "Shows last game's scoreboards and stats."),
+                "",
                 commandUsage("hg addguests", "Adds guests to the game."),
                 commandUsage("hg rmguests", "Remove guests to the game."),
                 commandUsage("hg addall", "Add ALL members from the server as guests of the game."),
                 commandUsage("hg clearguests", "Remove all guests from the game."),
+                "",
                 commandUsage("hg threshold <suicidal/fast/default/slow/peaceful/<any decimal from 0 to 1>>", "Sets the \"madness\" of the game."),
                 commandUsage("hg speed <insane/fast/default/slow/slowest>", "Sets the speed of the game's events."),
+                "",
                 commandUsage("hg start", "Starts a new game.")
             )
         }.queue()
@@ -147,7 +156,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
 
                     "guests", "lobby" -> {
                         sendEmbed {
-                            baseEmbed(event, "Aru! HungerGames | ${admin.effectiveName}'s Lobby")
+                            baseEmbed(event, "Aru! HungerGames | ${admin.effectiveName}'s Lobby", color = Colors.discordCanary)
                             thumbnail("https://assets.aru.pw/img/hungergames.png")
 
                             field("Players:", players.map { "**${it.effectiveName}**" }.sorted().limitedToString(1000))
@@ -158,6 +167,48 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                         }.queue()
                         waitForNextEvent()
                     }
+                    "scoreboard" -> {
+                        val tributes = lastGame
+
+                        if (tributes == null) {
+                            send("$X Sorry, but no games on this lobby were played (and finished). There's nothing to show!").queue()
+                            waitForNextEvent()
+                            return
+                        }
+
+                        sendEmbed {
+                            baseEmbed(event, "Aru! HungerGames | Scoreboard of Last Game", color = Colors.discordCanary)
+                            thumbnail("https://assets.aru.pw/img/hungergames.png")
+
+                            inlineField(
+                                "Last Alive:",
+                                tributes.take(10).withIndex().joinToString("\n") { (i, it) -> "#${i + 1} - ${it.format(formatter)}" }
+                            )
+
+                            inlineField(
+                                "Top Killers:",
+                                tributes.asSequence()
+                                    .filter { it.kills > 0 }
+                                    .sortedByDescending { it.kills }
+                                    .take(10)
+                                    .withIndex()
+                                    .joinToString("\n") { (i, it) -> "#${i + 1} - ${it.format(formatter)}" }
+                            )
+
+                            field(
+                                "Stats:",
+                                "**Tributes**: ${tributes.size}",
+                                "",
+                                "**Days**: $lastGameDayCount",
+                                "**Nights**: $lastGameNightCount",
+                                "**Feasts**: $lastGameFeastCount",
+                                "",
+                                "**Cannons shots per day**: ${lastGameAvgDeaths!!.format("%.2f")}"
+                            )
+                        }.queue()
+                        waitForNextEvent()
+                    }
+
                     "addguests" -> {
                         if (args.isEmpty()) {
                             showHelp()
@@ -324,6 +375,11 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
         fun quickYield() = Thread.sleep(speed.quickYield)
         fun yield() = Thread.sleep(speed.yield)
 
+        var dayCount = 0
+        var nightCount = 0
+        var feastCount = 0
+        var deathCount = LinkedList<Int>()
+
         for (e: Phase in newGame()) {
             when (e) {
                 is Bloodbath -> {
@@ -336,6 +392,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                     }
                 }
                 is Day -> {
+                    dayCount++
                     send("·—·— **Day ${e.number}** —·—·")
                     quickYield()
 
@@ -346,6 +403,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                 }
                 is FallenTributes -> {
                     val fallenTributes = e.fallenTributes
+                    deathCount.add(fallenTributes.size)
 
                     send(
                         "·—·— **Fallen Tributes** —·—·",
@@ -355,6 +413,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                     yield()
                 }
                 is Night -> {
+                    nightCount++
                     send("·—·— **Night ${e.number}** —·—·")
                     quickYield()
 
@@ -364,6 +423,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                     }
                 }
                 is Feast -> {
+                    feastCount++
                     send("·—·— **Feast (Day ${e.number})** —·—·")
                     quickYield()
 
@@ -381,6 +441,11 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
 
                     send("·—·— ·—·—·—· —·—·")
 
+                    lastGame = e.ranking
+                    lastGameDayCount = dayCount
+                    lastGameNightCount = nightCount
+                    lastGameFeastCount = feastCount
+                    lastGameAvgDeaths = deathCount.average()
                     return
                 }
                 is Draw -> {
@@ -391,6 +456,11 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
 
                     send("·—·— ·—·—·—· —·—·")
 
+                    lastGame = e.ranking
+                    lastGameDayCount = dayCount
+                    lastGameNightCount = nightCount
+                    lastGameFeastCount = feastCount
+                    lastGameAvgDeaths = deathCount.average()
                     return
                 }
             }
