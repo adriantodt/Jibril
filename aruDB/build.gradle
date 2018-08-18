@@ -28,7 +28,7 @@ dependencies {
     compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.6'
 
     //Snowflakes
-    compile 'pw.aru.snowflake:snowflake-local:1.2'
+    compile 'pw.aru.snowflake:snowflake-local:1.0'
 }
 
 compileKotlin {

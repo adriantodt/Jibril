@@ -2,7 +2,6 @@ package pw.aru.db
 
 import pw.aru.db.base.RedisObject
 import pw.aru.db.base.metadata.RedisObjectMetadata
-import pw.aru.snowflake.entities.SnowflakeGenerator
 import pw.aru.snowflake.local.LocalGeneratorBuilder
 import pw.aru.utils.extensions.get
 import pw.aru.utils.extensions.useResource
@@ -23,10 +22,16 @@ class AruDB(uri: String = "redis://localhost:6379", database: Long = 0, worker: 
 
     inline fun <reified T : RedisObject> exists(id: Long): Boolean = exists(T::class.java, id)
 
+    fun <T : RedisObject> keys(table: Class<T>): List<Long> = pool
+        .useResource { it.keys(RedisObjectMetadata(table).identifier + ":*") }
+        .mapNotNull { it.substring(it.lastIndexOf(":") + 1).toLongOrNull() }
+
+    inline fun <reified T : RedisObject> keys(): List<Long> = keys(T::class.java)
+
     val idWorker = generator[database, worker]
 
     companion object {
-        val generator: SnowflakeGenerator = LocalGeneratorBuilder()
+        val generator = LocalGeneratorBuilder()
             .setEpoch(1517400000000L)
             .setDatacenterIdBits(2L)
             .setWorkerIdBits(2L)
