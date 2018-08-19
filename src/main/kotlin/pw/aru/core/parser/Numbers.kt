@@ -31,3 +31,11 @@ fun Args.takeDouble(): Double = tryTakeDouble() ?: throw IllegalStateException("
 fun Args.takeDoubles() = descontructed(Args::takeDouble)
 
 fun Args.takeAllDoubles(): List<Double> = generateSequence(this::tryTakeDouble).toList()
+
+fun Args.tryTakeBoolean(): Boolean? = matchFirst(true to "true"::equals, false to "false"::equals)
+
+fun Args.takeBoolean(): Boolean = tryTakeBoolean() ?: throw IllegalStateException("argument is not a Boolean")
+
+fun Args.takeBooleans() = descontructed(Args::takeBoolean)
+
+fun Args.takeAllBooleans(): List<Boolean> = generateSequence(this::tryTakeBoolean).toList()

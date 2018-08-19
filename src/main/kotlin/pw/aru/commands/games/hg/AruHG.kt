@@ -10,11 +10,13 @@ import pw.aru.commands.games.manager.GameManager
 import pw.aru.commands.games.manager.lobby.Lobby
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.input.AsyncCommandInput
+import pw.aru.core.parser.tryTakeBoolean
 import pw.aru.core.parser.tryTakeDouble
 import pw.aru.hungergames.HungerGames
 import pw.aru.hungergames.data.SimpleTribute
 import pw.aru.hungergames.events.EventFormatter
 import pw.aru.hungergames.game.Actions
+import pw.aru.hungergames.game.HarmfulAction
 import pw.aru.hungergames.game.Phase
 import pw.aru.hungergames.game.Tribute
 import pw.aru.hungergames.loader.loadFile
@@ -64,6 +66,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
     val admin = channel.guild.getMemberById(lobby.adminId)
     var threshold = Threshold.DEFAULT.value
     var speed = Speed.DEFAULT
+    var onlyKills = false
     var lastGame: List<Tribute>? = null
     var lastGameDayCount: Int? = null
     var lastGameNightCount: Int? = null
@@ -98,6 +101,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                 "",
                 commandUsage("hg threshold <suicidal/fast/default/slow/peaceful/<any decimal from 0 to 1>>", "Sets the \"madness\" of the game."),
                 commandUsage("hg speed <insane/fast/default/slow/slowest>", "Sets the speed of the game's events."),
+                commandUsage("hg onlykills <true/false>", "Disables harmless actions from appearing on the log."),
                 "",
                 commandUsage("hg start", "Starts a new game.")
             )
@@ -124,7 +128,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
     }
 
     enum class Speed(val yield: Long, val quickYield: Long) {
-        INSANE(1000, 1000), FAST(10000, 2000), DEFAULT(15000, 2500), SLOW(30000, 3000), SLOWEST(45000, 5000);
+        INSANE(1000, 1000), FAST(7500, 1250), DEFAULT(15000, 2500), SLOW(30000, 3000), SLOWEST(45000, 5000);
 
         override fun toString() = name.toLowerCase().capitalize()
     }
@@ -282,23 +286,24 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                             return
                         }
 
-                        val enumValue = args.matchFirst(
-                            Threshold.values().map { it to fun(s: String) = it.name.equals(s, true) }
-                        )
-                        if (enumValue != null) {
-                            threshold = enumValue.value
+                        val numberValue = args.tryTakeDouble()
+                        if (numberValue != null) {
+                            threshold = numberValue
                             send(
-                                "$SUCCESS **Threshold** set to ${Threshold.values().firstOrNull { it.value == threshold } ?: threshold}"
+                                "$SUCCESS **Threshold** set to ${Threshold.values().firstOrNull { it.value == numberValue } ?: numberValue}"
                             ).queue()
                             waitForNextEvent()
                             return
                         }
 
-                        val numberValue = args.tryTakeDouble()
-                        if (numberValue != null) {
-                            threshold == numberValue
+                        val enumValue = args.matchFirst(
+                            Threshold.values().map { it to fun(s: String) = it.name.equals(s, true) }
+                        )
+
+                        if (enumValue != null) {
+                            threshold = enumValue.value
                             send(
-                                "$SUCCESS **Threshold** set to ${Threshold.values().firstOrNull { it.value == threshold } ?: threshold}"
+                                "$SUCCESS **Threshold** set to ${Threshold.values().firstOrNull { it == enumValue } ?: enumValue}"
                             ).queue()
                             waitForNextEvent()
                             return
@@ -328,6 +333,25 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                         waitForNextEvent()
 
                     }
+                    "onlykills" -> {
+                        if (args.isEmpty()) {
+                            send("$SUCCESS **Only Kills**: $onlyKills").queue()
+                            waitForNextEvent()
+                            return
+                        }
+
+                        val value = args.tryTakeBoolean()
+                        if (value == null) {
+                            showHelp()
+                            waitForNextEvent()
+                            return
+                        }
+
+                        onlyKills = value
+                        send("$SUCCESS **Only Kills** set to $onlyKills").queue()
+                        waitForNextEvent()
+
+                    }
                     else -> {
                         showHelp()
                         waitForNextEvent()
@@ -343,6 +367,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
         val guests = guests.toSet()
         val threshold = threshold
         val speed = speed
+        val onlyKills = onlyKills
 
         val hungerGames = HungerGames(
             listOf(
@@ -356,7 +381,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
 
         val gameThread = thread(name = "HungerGames-$channel") {
             try {
-                hungerGames.handle(channel, speed)
+                hungerGames.handle(channel, speed, onlyKills)
                 send("$ZAP Returning to HungerGames sub-lobby. Use `hg cancel` to return to the game lobby.").queue()
             } catch (e: InterruptedException) {
                 send("$BANG Game finished by admin. Returning to HungerGames sub-lobby. Use `hg cancel` to return to the game lobby.").queue()
@@ -367,7 +392,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
         startGameLobby(gameThread)
     }
 
-    private fun HungerGames.handle(channel: TextChannel, speed: Speed) {
+    private fun HungerGames.handle(channel: TextChannel, speed: Speed, onlyKills: Boolean) {
         fun send(vararg messages: Any?) {
             channel.sendMessage(messages.joinToString("\n", transform = Any?::toString)).queue()
         }
@@ -378,15 +403,21 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
         var dayCount = 0
         var nightCount = 0
         var feastCount = 0
-        var deathCount = LinkedList<Int>()
+        val deathCount = LinkedList<Int>()
 
-        for (e: Phase in newGame()) {
+        loop@ for (e: Phase in newGame()) {
             when (e) {
                 is Bloodbath -> {
                     send("·—·— **The Bloodbath** —·—·")
+                    if (onlyKills && e.events.none { it.action is HarmfulAction }) {
+                        send("No deaths.")
+                        quickYield()
+                        continue@loop
+                    }
                     quickYield()
 
-                    for (blocks in e.events.split(4, 7)) {
+                    val events = if (onlyKills) e.events.filter { it.action is HarmfulAction } else e.events
+                    for (blocks in events.split(4, 7)) {
                         send(blocks.joinToString("\n") { it.format(formatter) })
                         yield()
                     }
@@ -394,9 +425,15 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                 is Day -> {
                     dayCount++
                     send("·—·— **Day ${e.number}** —·—·")
+                    if (onlyKills && e.events.none { it.action is HarmfulAction }) {
+                        send("No deaths.")
+                        quickYield()
+                        continue@loop
+                    }
                     quickYield()
 
-                    for (blocks in e.events.split(4, 7)) {
+                    val events = if (onlyKills) e.events.filter { it.action is HarmfulAction } else e.events
+                    for (blocks in events.split(4, 7)) {
                         send(blocks.joinToString("\n") { it.format(formatter) })
                         yield()
                     }
@@ -415,9 +452,15 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                 is Night -> {
                     nightCount++
                     send("·—·— **Night ${e.number}** —·—·")
+                    if (onlyKills && e.events.none { it.action is HarmfulAction }) {
+                        send("No deaths.")
+                        quickYield()
+                        continue@loop
+                    }
                     quickYield()
 
-                    for (blocks in e.events.split(4, 7)) {
+                    val events = if (onlyKills) e.events.filter { it.action is HarmfulAction } else e.events
+                    for (blocks in events.split(4, 7)) {
                         send(blocks.joinToString("\n") { it.format(formatter) })
                         yield()
                     }
@@ -425,9 +468,15 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                 is Feast -> {
                     feastCount++
                     send("·—·— **Feast (Day ${e.number})** —·—·")
+                    if (onlyKills && e.events.none { it.action is HarmfulAction }) {
+                        send("No deaths.")
+                        quickYield()
+                        continue@loop
+                    }
                     quickYield()
 
-                    for (blocks in e.events.split(4, 7)) {
+                    val events = if (onlyKills) e.events.filter { it.action is HarmfulAction } else e.events
+                    for (blocks in events.split(4, 7)) {
                         send(blocks.joinToString("\n") { it.format(formatter) })
                         yield()
                     }

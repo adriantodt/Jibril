@@ -20,7 +20,7 @@ amount: 2, action: "{0} severely injures {1}, but puts them out of their misery.
 amount: 2, action: "{0} severely injures {1} and leaves them to die.", killed: (T1), killers: (T0)
 amount: 2, action: "{0} bashes {1}'s head in with a mace.", killed: (T1), killers: (T0)
 amount: 1, action: "{0} attempts to climb a tree, but falls to their death.", killed: (T0), killers: ()
-amount: 2, action: "{0} pushes {1} off a cliff during a knife fight.", killed: (T0), killers: (T1)
+amount: 2, action: "{0} pushes {1} off a cliff during a knife fight.", killed: (T1), killers: (T0)
 amount: 2, action: "{0} throws a knife into {1}'s chest.", killed: (T1), killers: (T0)
 amount: 2, action: "{0}'s trap kills {1}.", killed: (T1), killers: (T0)
 amount: 2, action: "{0} kills {1} while they are sleeping.", killed: (T1), killers: (T0)

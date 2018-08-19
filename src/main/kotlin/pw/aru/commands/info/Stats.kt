@@ -134,7 +134,7 @@ class Stats
             field(
                 "Server:",
                 "\u25AB **RAM** (Total/Free/Used): ${vpsMaxMemory.format("%.2f")}GB/${vpsFreeMemory.format("%.2f")}GB/${vpsUsedMemory.format("%.2f")}GB",
-                "\u25AB **CPU Cores**: ${availableProcessors.format("%.2f")} cores",
+                "\u25AB **CPU Cores**: ${availableProcessors} cores",
                 "\u25AB **CPU Usage**: ${vpsCpuUsage.format("%.2f")}%"
             )
         }.queue()
