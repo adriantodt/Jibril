@@ -28,6 +28,10 @@ class GameHub(private val gameManager: GameManager) : ICommand, ICommand.HelpDia
     private val lobbyManager = gameManager.lobbyManager
 
     override fun CommandContext.call() {
+        if (gameManager.isGameRegistered(channel)) {
+            send("$ERROR There's already a game running! Please, wait for the current game to end or use other TextChannel.").queue()
+            return
+        }
         val args = parseable()
 
         val option = args.takeString()
