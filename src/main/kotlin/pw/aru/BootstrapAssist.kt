@@ -36,6 +36,7 @@ import pw.aru.db.AruDB
 import pw.aru.exported.aru_version
 import pw.aru.kodein.jit.installJit
 import pw.aru.kodein.jit.jit
+import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.TaskManager
 import pw.aru.utils.TaskManager.task
 import pw.aru.utils.TaskType
@@ -133,6 +134,7 @@ internal fun createInitialInjector(config: AruConfig): Kodein {
         bind<CommandRegistry>() with singleton { CommandRegistry() }
         bind<CommandProcessor>() with singleton { CommandProcessor(instance(), instance()) }
         bind<EventWaiter>() with singleton { EventWaiter(TaskManager.scheduler(TaskType.BUNK), false) }
+        bind<ReloadableListProvider>() with singleton { ReloadableListProvider() }
 
         // APIs
         bind<OkHttpClient>() with singleton { OkHttpClient() }

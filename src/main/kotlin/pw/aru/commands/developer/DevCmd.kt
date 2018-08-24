@@ -26,6 +26,7 @@ import pw.aru.core.parser.Args
 import pw.aru.core.parser.parseAndCreate
 import pw.aru.db.AruDB
 import pw.aru.utils.Colors
+import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.api.DBLPoster
 import pw.aru.utils.api.DBotsPoster
 import pw.aru.utils.commands.EmbedFirst
@@ -48,7 +49,8 @@ class DevCmd
     private val weebSh: Weeb4J,
     private val nekosLife: Nekos4J,
     private val dblPoster: DBLPoster,
-    private val dpwPoster: DBotsPoster
+    private val dpwPoster: DBotsPoster,
+    private val assetProvider: ReloadableListProvider
 ) : ICommand, ICommand.Permission, ICommand.HelpDialogProvider {
     companion object : KLogging()
 
@@ -66,6 +68,7 @@ class DevCmd
             "disablecallsite" -> callsite(false)
             "weebsh" -> weebsh(args)
             "nekoslife" -> nekoslife(args)
+            "reloadassets" -> reloadassets()
             "genwebyml" -> generateWebYaml()
             "", "check" -> adminCheck()
             else -> showHelp()
@@ -330,6 +333,10 @@ class DevCmd
         send("**Commands.yml generated**: ${paste(httpClient, builder.toString())}").queue()
     }
 
+    private fun CommandContext.reloadassets() {
+        assetProvider.reload()
+        message.addReaction(SUCCESS).queue()
+    }
     override val helpHandler = Help(
         CommandDescription(listOf("dev", "devtools", "hack"), "Developer Command", permission),
         Usage(
@@ -348,6 +355,7 @@ class DevCmd
             CommandUsage("dev nekoslife", "Dumps Weeb.sh types and tags."),
             CommandUsage("dev nekoslife <-type <value>>", "Gets a random Nekos.life image."),
             UsageSeparator,
+            CommandUsage("dev reloadassets", "Reloads assets."),
             CommandUsage("dev genwebyml", "Generates the base commands.yml file.")
         )
     )

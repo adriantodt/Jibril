@@ -9,12 +9,19 @@ import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.CommandProvider
 import pw.aru.core.commands.ICommandProvider
+import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.caches.URLCache
 import pw.aru.utils.emotes.*
 import java.io.File
 
 @CommandProvider
-class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J, nekoApi: Nekos4J) : ICommandProvider {
+class ActionCommands(
+    httpClient: OkHttpClient,
+    weebApi: Weeb4J,
+    nekoApi: Nekos4J,
+    private val assetProvider: ReloadableListProvider
+) : ICommandProvider {
+
     private val weebProvider = weebApi.imageProvider
     private val nekoProvider = nekoApi.imageProvider
     private val cache = URLCache(httpClient, File("url_cache"))
@@ -183,7 +190,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J, nekoApi: Nekos4J
         CustomActionCommand(
             category, r, cache,
             CustomCommandInfo(listOf("nuzzle"), "Nuzzle Command", "Nuzzles the mentioned users.", "nuzzle.gif"),
-            File("assets/aru/actions/nuzzle.txt").readLines(),
+            assetProvider["assets/aru/actions/nuzzle.txt"],
             ActionLines(
                 "$CUDDLE {mentions}, you have been nuzzled by {author}",
                 "$CUDDLE *Nuzzles~*",
@@ -379,7 +386,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J, nekoApi: Nekos4J
         CustomActionCommand(
             category, r, cache,
             CustomCommandInfo(listOf("meow"), "Meow Command", "Meows at the mentioned users.", "meow.gif"),
-            File("assets/aru/actions/meow.txt").readLines(),
+            assetProvider["assets/aru/actions/meow.txt"],
             ActionLines(
                 "$CAT {mentions}, Meow",
                 "$CAT *Meow~*",
@@ -391,7 +398,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J, nekoApi: Nekos4J
         CustomActionCommand(
             category, r, cache,
             CustomCommandInfo(listOf("beg"), "Beg Command", "Begs the mentioned users.", "beg.gif"),
-            File("assets/aru/actions/beg.txt").readLines(),
+            assetProvider["assets/aru/actions/beg.txt"],
             ActionLines(
                 "$FUCK {author} is begging {mentions}",
                 "$FUCK *Begs~*",
@@ -403,7 +410,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J, nekoApi: Nekos4J
         CustomActionCommand(
             category, r, cache,
             CustomCommandInfo(listOf("bloodsuck", "vampire"), "Bloodsuck Command", "Sucks the blood of the mentioned users.", "bloodsuck.gif"),
-            File("assets/aru/actions/bloodsuck.txt").readLines(),
+            assetProvider["assets/aru/actions/bloodsuck.txt"],
             ActionLines(
                 "$BITE {mentions}, {author} is sucking your blood",
                 "$BITE *Sucks blood~*",
@@ -415,7 +422,7 @@ class ActionCommands(httpClient: OkHttpClient, weebApi: Weeb4J, nekoApi: Nekos4J
         CustomActionCommand(
             category, r, cache,
             CustomCommandInfo(listOf("fuck"), "Fuck Command", "Fucks the mentioned users... Hey, that's lewd!", "fuck.gif", nsfw = true),
-            File("assets/aru/actions/fuck.txt").readLines(),
+            assetProvider["assets/aru/actions/fuck.txt"],
             ActionLines(
                 "$FUCK {author} is fucking {mentions}",
                 "$FUCK *Fucks~*",
