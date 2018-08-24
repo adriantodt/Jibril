@@ -34,7 +34,7 @@ class GameManager(val injector: DKodein) {
 
     fun newGame(channel: TextChannel, lobby: Lobby, creator: GameCreator): Boolean {
         if (isGameRegistered(channel)) return false
-        games[channel.id] = creator.create(this, channel, lobby)
+        games[channel.id] = creator.create(this, channel, lobby) ?: return false
         return true
     }
 

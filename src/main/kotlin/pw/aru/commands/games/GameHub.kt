@@ -185,10 +185,10 @@ class GameHub(private val gameManager: GameManager) : ICommand, ICommand.HelpDia
             event.channel.sendMessage("$ERROR There's no game named ``$args``!").queue()
             return
         }
+        gameManager.newGame(event.channel, lobby, creator)
 
         lobbyManager.removeLobby(event.channel)
         playCount.getOrPut(creator, ::AtomicInteger).getAndIncrement()
-        gameManager.newGame(event.channel, lobby, creator)
     }
 
     override val helpHandler = Help(

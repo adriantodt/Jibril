@@ -12,7 +12,7 @@ interface Game {
 interface GameCreator {
     val description: GameDescription
 
-    fun create(manager: GameManager, channel: TextChannel, lobby: Lobby): Game
+    fun create(manager: GameManager, channel: TextChannel, lobby: Lobby): Game?
 }
 
 data class GameDescription(
