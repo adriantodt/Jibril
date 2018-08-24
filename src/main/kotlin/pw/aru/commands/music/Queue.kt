@@ -24,8 +24,8 @@ class Queue(musicManager: MusicManager) : MusicCommand(musicManager), ICommand.H
         val queue = musicPlayer.queue
         val lastPage = queue.size / 5
         val page = (if (args.isEmpty()) 1 else args.toIntOrNull() ?: return showHelp())
+            .coerceIn(1, lastPage)
             .minus(1)
-            .coerceIn(0, lastPage)
 
         sendEmbed {
             baseEmbed(event, "Queue for guild ${event.guild.name}", image = event.guild.iconUrl)
@@ -57,7 +57,7 @@ class Queue(musicManager: MusicManager) : MusicCommand(musicManager), ICommand.H
                 }
             )
 
-            footer("Page ${page + 1} of ${lastPage + 1} | Requested by ${event.member.effectiveName}", event.author.effectiveAvatarUrl)
+            footer("Page ${page + 1} of $lastPage | Requested by ${event.member.effectiveName}", event.author.effectiveAvatarUrl)
         }.queue()
     }
 

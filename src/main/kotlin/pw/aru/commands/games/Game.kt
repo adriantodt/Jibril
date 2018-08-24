@@ -2,7 +2,7 @@ package pw.aru.commands.games
 
 import net.dv8tion.jda.core.entities.TextChannel
 import pw.aru.commands.games.manager.GameManager
-import pw.aru.commands.games.manager.lobby.Lobby
+import pw.aru.commands.games.manager.Lobby
 
 interface Game {
     val channel: TextChannel

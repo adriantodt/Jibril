@@ -7,7 +7,7 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import org.kodein.di.generic.instance
 import pw.aru.commands.games.Game
 import pw.aru.commands.games.manager.GameManager
-import pw.aru.commands.games.manager.lobby.Lobby
+import pw.aru.commands.games.manager.Lobby
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.input.AsyncCommandInput
 import pw.aru.core.parser.tryTakeBoolean
@@ -29,6 +29,7 @@ import pw.aru.utils.extensions.*
 import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit.MINUTES
+import java.util.concurrent.TimeUnit.SECONDS
 import kotlin.concurrent.thread
 
 class AruHG(private val manager: GameManager, override val channel: TextChannel, private val lobby: Lobby) : Game {
@@ -134,7 +135,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
     }
 
     private fun startHgLobby() {
-        object : AsyncCommandInput(manager.injector.instance(), 2, MINUTES, "hg") {
+        object : AsyncCommandInput(manager.injector.instance(), 5, MINUTES, "hg") {
             override fun filter(event: GuildMessageReceivedEvent) = (event.author.id == admin.id && super.filter(event))
 
             override fun timeout() {
@@ -517,10 +518,13 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
     }
 
     private fun startGameLobby(gameThread: Thread) {
-        object : AsyncCommandInput(manager.injector.instance(), 0, MINUTES, "hg") {
+        object : AsyncCommandInput(manager.injector.instance(), 30, SECONDS, "hg") {
             override fun filter(event: GuildMessageReceivedEvent) = (event.author.id == admin.id && super.filter(event))
 
-            override fun timeout() = Unit
+            override fun timeout() {
+                if (!gameThread.isAlive) return
+                waitForNextEvent()
+            }
 
             override fun CommandContext.onCommand() {
                 if (!gameThread.isAlive) return
