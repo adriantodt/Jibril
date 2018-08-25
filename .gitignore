@@ -16,5 +16,6 @@
 /db/
 /tests/
 /url_cache/
+/img_assets/
 *.log
 aru.properties

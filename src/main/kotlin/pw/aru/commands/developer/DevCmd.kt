@@ -1,6 +1,7 @@
 package pw.aru.commands.developer
 
 import ch.qos.logback.core.helpers.ThrowableToStringArray
+import com.github.natanbc.weeb4j.Account
 import com.github.natanbc.weeb4j.Weeb4J
 import com.github.natanbc.weeb4j.image.FileType
 import com.github.natanbc.weeb4j.image.NsfwFilter
@@ -112,6 +113,10 @@ class DevCmd
     }
 
     private fun CommandContext.weebsh(args: Args) {
+        if (args.matchNextString("-account")) {
+            return weebshAccount()
+        }
+
         val (image, nsfw) = args.parseAndCreate<Pair<GetImage, NsfwFilter?>> {
             val type = option("-type") { takeString() }
             val tags = option("-tags") { takeString().split(',') }
@@ -161,6 +166,27 @@ class DevCmd
                 }.queue()
             }
         }
+    }
+
+    private fun CommandContext.weebshAccount() {
+        sendEmbed {
+            baseEmbed(event, "Aru! | Weeb.sh Debug")
+            thumbnail("https://assets.aru.pw/img/yes.png")
+
+            val (id, name, discordId, active, scopes) = weebSh.tokenInfo.execute().account
+
+            description(
+                "ID: ``$id``",
+                "Name: ``$name``",
+                "DiscordID: ``$discordId``",
+                "Active: ${active.toString().toLowerCase().capitalize()}",
+                "",
+                "Scopes:",
+                "```",
+                scopes.sorted().joinToString(" "),
+                "```"
+            )
+        }.queue()
     }
 
     private fun CommandContext.nekoslife(args: Args) {
@@ -360,3 +386,9 @@ class DevCmd
         )
     )
 }
+
+private operator fun Account.component1() = id
+private operator fun Account.component2() = name
+private operator fun Account.component3() = discordId
+private operator fun Account.component4() = isActive
+private operator fun Account.component5() = scopes

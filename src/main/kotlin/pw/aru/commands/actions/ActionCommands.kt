@@ -3,7 +3,6 @@ package pw.aru.commands.actions
 import com.github.natanbc.weeb4j.Weeb4J
 import com.github.natanbc.weeb4j.image.FileType.GIF
 import okhttp3.OkHttpClient
-import pw.aru.api.nekos4j.Nekos4J
 import pw.aru.commands.actions.base.*
 import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Category
@@ -18,12 +17,10 @@ import java.io.File
 class ActionCommands(
     httpClient: OkHttpClient,
     weebApi: Weeb4J,
-    nekoApi: Nekos4J,
     private val assetProvider: ReloadableListProvider
 ) : ICommandProvider {
 
     private val weebProvider = weebApi.imageProvider
-    private val nekoProvider = nekoApi.imageProvider
     private val cache = URLCache(httpClient, File("url_cache"))
 
     /*
@@ -187,9 +184,9 @@ class ActionCommands(
             )
         )
 
-        CustomActionCommand(
+        URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("nuzzle"), "Nuzzle Command", "Nuzzles the mentioned users.", "nuzzle.gif"),
+            CustomCommandInfo(listOf("nuzzle"), "Nuzzle Command", "Nuzzles the mentioned users."),
             assetProvider["assets/aru/actions/nuzzle.txt"],
             ActionLines(
                 "$CUDDLE {mentions}, you have been nuzzled by {author}",
@@ -383,9 +380,9 @@ class ActionCommands(
             )
         )
 
-        CustomActionCommand(
+        URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("meow"), "Meow Command", "Meows at the mentioned users.", "meow.gif"),
+            CustomCommandInfo(listOf("meow"), "Meow Command", "Meows at the mentioned users."),
             assetProvider["assets/aru/actions/meow.txt"],
             ActionLines(
                 "$CAT {mentions}, Meow",
@@ -395,9 +392,9 @@ class ActionCommands(
             )
         )
 
-        CustomActionCommand(
+        URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("beg"), "Beg Command", "Begs the mentioned users.", "beg.gif"),
+            CustomCommandInfo(listOf("beg"), "Beg Command", "Begs the mentioned users."),
             assetProvider["assets/aru/actions/beg.txt"],
             ActionLines(
                 "$FUCK {author} is begging {mentions}",
@@ -407,9 +404,9 @@ class ActionCommands(
             )
         )
 
-        CustomActionCommand(
+        URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("bloodsuck", "vampire"), "Bloodsuck Command", "Sucks the blood of the mentioned users.", "bloodsuck.gif"),
+            CustomCommandInfo(listOf("bloodsuck", "vampire"), "Bloodsuck Command", "Sucks the blood of the mentioned users."),
             assetProvider["assets/aru/actions/bloodsuck.txt"],
             ActionLines(
                 "$BITE {mentions}, {author} is sucking your blood",
@@ -419,9 +416,9 @@ class ActionCommands(
             )
         )
 
-        CustomActionCommand(
+        URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("fuck"), "Fuck Command", "Fucks the mentioned users... Hey, that's lewd!", "fuck.gif", nsfw = true),
+            CustomCommandInfo(listOf("fuck"), "Fuck Command", "Fucks the mentioned users... Hey, that's lewd!", nsfw = true),
             assetProvider["assets/aru/actions/fuck.txt"],
             ActionLines(
                 "$FUCK {author} is fucking {mentions}",

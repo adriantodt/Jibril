@@ -19,41 +19,6 @@ class ImageCommands(httpClient: OkHttpClient, weebApi: Weeb4J, nekoApi: Nekos4J)
     private val nekoProvider = nekoApi.imageProvider
     private val cache = URLCache(httpClient, File("url_cache"))
 
-    /*
-    nekos4j: {
-        types.sfw: [
-            fox_girl, feed, holo, lizard, wallpaper,
-        ],
-        types.nsfw: [
-            Random_hentai_gif, anal, bj, blowjob, spank,
-            boobs, classic, cum, cum_jpg, ero, erofeet,
-            erok, erokemo, eron, eroyuri, femdom, les,
-            nsfw_neko_gif, pussy, pussy_jpg, pwankg,
-            futanari, gasm, hentai, holoero, keta,
-            kuni, smallboobs, hololewd, lewd, solo,
-            solog, tits, trap, yuri
-
-            lewdk,  // LEWD KITSUNES
-        ],
-        types.rejected: [
-            8ball,  // Use actual 8ball API
-
-            avatar,         // (SFW) Random square avatars
-            waifu,          // (SFW) Avatars of random girls
-            feet,           // (SFW-ish) Why
-            feetg,          // (NSFW) NO!
-            nsfw_avatar,    // (NSFW) Random square avatars
-            gecg,           // (SFW) Just... no. (Genetically engineered Catgirls)
-
-            //Below: Already available by Weeb.sh
-            pat, poke, slap, hug, cuddle, tickle, kiss, neko, meow, kemonomimi, lewdkemo,
-        ],
-        types.review: [
-            ngif,   // Neko GIFs
-        ]
-    }
-     */
-
     override fun provide(r: CommandRegistry) {
         val category = Category.IMAGE
 
@@ -114,9 +79,9 @@ class ImageCommands(httpClient: OkHttpClient, weebApi: Weeb4J, nekoApi: Nekos4J)
             GetImage(type = "rem")
         )
 
-        CustomImageCommand(
-            category, r, cache,
-            CustomCommandInfo(listOf("jibril"), "Jibril Command", "Sends a random Jibril image.", "jibril.gif"),
+        LocalImageCommand(
+            category, r,
+            CustomCommandInfo(listOf("jibril"), "Jibril Command", "Sends a random Jibril image."),
             File("assets/aru/images/jibril.txt").readLines()
         )
 
@@ -158,4 +123,16 @@ class ImageCommands(httpClient: OkHttpClient, weebApi: Weeb4J, nekoApi: Nekos4J)
         )
     }
 
+}
+
+fun main(args: Array<String>) {
+    fun File.recursiveFileList(): List<File> {
+        val (directories: List<File>, files: List<File>) = listFiles().partition(File::isDirectory)
+        return files + directories.flatMap(File::recursiveFileList)
+    }
+
+    File("assets/aru/images/jibril.new.txt").writeText(
+        File("img_assets/jibril").recursiveFileList()
+            .joinToString("\n") { it.path.replace('\\', '/') }
+    )
 }
