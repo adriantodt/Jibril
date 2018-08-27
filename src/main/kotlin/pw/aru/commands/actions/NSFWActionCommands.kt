@@ -159,7 +159,7 @@ class NSFWActionCommands(
         //boobtease
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("boobtease"), "Boobtease Command", "Teases the mentioned users with your boobs.", nsfw = true),
+            CustomCommandInfo(listOf("boobtease"), "Boobtease Command", "Teases the mentioned users using your boobs.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/boobtease.txt"],
             ActionLines(
                 "$BOOBS {author} is using her melons to tease {mentions}",
@@ -185,7 +185,7 @@ class NSFWActionCommands(
         //butttease
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("butttease"), "Butttease Command", "Teases the mentioned users with your butts.", nsfw = true),
+            CustomCommandInfo(listOf("butttease"), "Butttease Command", "Teases the mentioned users using your butts.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/butttease.txt"],
             ActionLines(
                 "$BUTTS {author} is using her butts to tease {mentions}",
@@ -281,7 +281,7 @@ class NSFWActionCommands(
             ActionLines(
                 "$FUCK {everyone} are having a gangbang",
                 "",
-                "$FUCK I brought some friends. And apparently have a dick now, too. Oh, well.. *starts gangbanging you~*",
+                "$FUCK I brought some friends. And apparently I have a dick now, too. Oh, well.. *starts gangbanging you~*",
                 "$FUCK Eeh..? Who's all these... guys? *gets gangbanged~* $CRY That's not funny..."
             )
         )
@@ -292,101 +292,101 @@ class NSFWActionCommands(
             CustomCommandInfo(listOf("gasm", "orgasm"), "Orgasm Command", "When you're a girl and someone breaks your decency. That's messy... And lewd.\nCheck `${prefix}cum` too!", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/gasm.txt"],
             ActionLines(
-                "$FUCK {author} {mentions} TODO",
+                "$GASM {mentions}, {author} is having an orgasm",
                 "",
-                "$FUCK *TODO you~* Lewdie~",
-                "$FUCK Eeh..? That's lewd! Bakaaa!"
+                "$GASM {author} is having an orgasm",
+                "$GASM Having fun? *pats~* $PAT"
             )
         )
 
-        //TODO handjob
+        //handjob
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("handjob"), "Handjob Command", "TODO DOCS", nsfw = true),
+            CustomCommandInfo(listOf("handjob"), "Handjob Command", "Gives a handjob to the mentioned users.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/handjob.txt"],
             ActionLines(
-                "$FUCK {author} {mentions} TODO",
+                "$FUCK {author} is giving {mentions} a handjob",
                 "",
-                "$FUCK *TODO you~* Lewdie~",
-                "$FUCK Eeh..? That's lewd! Bakaaa!"
+                "$FUCK W-What? Am I supposed to...? *gives you a handjob~* Lewdie~",
+                "$FUCK Eeh..? What? Since when I have a dick?? That's lewd! B-but don't stop!"
             )
         )
 
-        //TODO handjobcum
+        //handjobcum
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("handjobcum"), "Handjobcum Command", "TODO DOCS", nsfw = true),
+            CustomCommandInfo(listOf("handjobcum", "cumhandjob"), "Handjob Cum Command", "Cums while someone is doing you a handjob.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/handjobcum.txt"],
             ActionLines(
-                "$FUCK {author} {mentions} TODO",
+                "$FUCK {author} is giving {mentions} a handjob... $CUM",
                 "",
-                "$FUCK *TODO you~* Lewdie~",
-                "$FUCK Eeh..? That's lewd! Bakaaa!"
+                "$GASM S-something is c-coming out... $CUM",
+                "$FUCK Could you like... not cum on my hand? Now lick it, you baka!"
             )
         )
 
-        //TODO lesbian
+        //lesbian
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("lesbian"), "Lesbian Command", "TODO DOCS", nsfw = true),
+            CustomCommandInfo(listOf("lesbian"), "Lesbian Command", "Lesbian fun, together.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/lesbian.txt"],
             ActionLines(
-                "$FUCK {author} {mentions} TODO",
+                "$FUCK {everyone} are having some decent fun together",
                 "",
-                "$FUCK *TODO you~* Lewdie~",
-                "$FUCK Eeh..? That's lewd! Bakaaa!"
+                "$FUCK *plays with you~* Lewdie~",
+                "$FUCK *plays with you~* Lewdie~"
             )
         )
 
-        //TODO masturbating
+        //masturbating
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("masturbating"), "Masturbating Command", "TODO DOCS", nsfw = true),
+            CustomCommandInfo(listOf("masturbating"), "Masturbating Command", "When you're a girl and you're just way too bored.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/masturbating.txt"],
             ActionLines(
-                "$FUCK {author} {mentions} TODO",
+                "$GASM {mentions}, {author} is masturbating in front of you",
                 "",
-                "$FUCK *TODO you~* Lewdie~",
-                "$FUCK Eeh..? That's lewd! Bakaaa!"
+                "$GASM {author} is masturbating",
+                "$GASM Having fun? *pats~* $PAT"
             )
         )
 
-        //TODO pussylick
+        //pussylick
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("pussylick"), "Pussylick Command", "TODO DOCS", nsfw = true),
+            CustomCommandInfo(listOf("pussylick"), "Pussylick Command", "Licks the pussy of the mentioned users", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/pussylick.txt"],
             ActionLines(
-                "$FUCK {author} {mentions} TODO",
+                "$FUCK {author} is licking {mentions}'s pussy",
                 "",
-                "$FUCK *TODO you~* Lewdie~",
-                "$FUCK Eeh..? That's lewd! Bakaaa!"
+                "$FUCK *Licks your pussy~* Lewdiee~",
+                "$GASM You're good with the tongue, heh?"
             )
         )
 
-        //TODO pussyplay
+        //pussyplay
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("pussyplay"), "Pussyplay Command", "TODO DOCS", nsfw = true),
+            CustomCommandInfo(listOf("pussyplay"), "Pussyplay Command", "Plays with the boobs of the mentioned users.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/pussyplay.txt"],
             ActionLines(
-                "$FUCK {author} {mentions} TODO",
+                "$FUCK {author} is playing with {mentions}'s pussy",
                 "",
-                "$FUCK *TODO you~* Lewdie~",
-                "$FUCK Eeh..? That's lewd! Bakaaa!"
+                "$FUCK *Plays with your pussy~* Lewdiee~",
+                "$FUCK Eeh..? W-Why are you playing with my pussy? That's lewd, baka!"
             )
         )
 
-        //TODO pussytease
+        //pussytease
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("pussytease"), "Pussytease Command", "TODO DOCS", nsfw = true),
+            CustomCommandInfo(listOf("pussytease"), "Pussytease Command", "Teases the mentioned users using your pussy.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/pussytease.txt"],
             ActionLines(
-                "$FUCK {author} {mentions} TODO",
+                "$BOOBS {author} is using her pussy to tease {mentions}",
                 "",
-                "$FUCK *TODO you~* Lewdie~",
-                "$FUCK Eeh..? That's lewd! Bakaaa!"
+                "$TEEHEE *Teases you~*",
+                "$BOOBS Eeh..? W-Why are you teasing me?"
             )
         )
 
