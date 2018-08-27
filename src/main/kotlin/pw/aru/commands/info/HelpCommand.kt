@@ -69,6 +69,8 @@ class HelpCommand(private val registry: CommandRegistry) : ICommand, ICommand.He
                 "To check the command usage, type `${"help <command>".withPrefix()}`."
             )
 
+            footer("${registry.lookup.size} commands | Requested by ${event.member.effectiveName}", event.author.effectiveAvatarUrl)
+
             val t = trending
             if (t.isNotEmpty()) {
                 field(
@@ -80,16 +82,28 @@ class HelpCommand(private val registry: CommandRegistry) : ICommand, ICommand.He
             }
 
             Category.LIST.forEach { cat ->
-                val list = registry.lookup
-                    .entries
-                    .filter { (c) -> c.category == cat && (c !is ICommand.Permission || c.permission.test(event.member)) }
-                    .map { it.value[0] }
-                    .sorted()
+                if (cat.nsfw && !channel.isNSFW) {
+                    val count = registry.lookup
+                        .keys
+                        .count { it.category == cat && (it !is ICommand.Permission || it.permission.test(event.member)) }
 
-                if (list.isNotEmpty()) field(
-                    "${cat.categoryName}:",
-                    list.joinToString(prefix = "`", separator = "` `", postfix = "`")
-                )
+
+                    if (count > 0) field(
+                        "${cat.categoryName}:",
+                        "$count hidden commands. Set the channel to **NSFW** to view them."
+                    )
+                } else {
+                    val list = registry.lookup
+                        .entries
+                        .filter { (c) -> c.category == cat && (c !is ICommand.Permission || c.permission.test(event.member)) }
+                        .map { it.value[0] }
+                        .sorted()
+
+                    if (list.isNotEmpty()) field(
+                        "${cat.categoryName}:",
+                        list.joinToString(prefix = "`", separator = "` `", postfix = "`")
+                    )
+                }
             }
         }.queue()
     }

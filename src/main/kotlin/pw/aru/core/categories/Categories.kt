@@ -5,7 +5,7 @@ import pw.aru.core.commands.CommandPermission.*
 import pw.aru.core.commands.help.*
 import pw.aru.utils.extensions.toSmartString
 
-enum class Category(val categoryName: String, val help: Help? = null, val permission: CommandPermission = USER) {
+enum class Category(val categoryName: String, val help: Help? = null, val nsfw: Boolean = false, val permission: CommandPermission = USER) {
     MUSIC("Music Commands",
         Help(
             CategoryDescription("Music Commands"),
@@ -34,8 +34,8 @@ enum class Category(val categoryName: String, val help: Help? = null, val permis
     FUN("Fun Commands"),
     MODERATION("Moderation Commands", permission = SERVER_ADMIN),
     DEVELOPER("Developer Commands", permission = BOT_DEVELOPER),
-    NSFW_ACTION("NSFW Action Commands"),
-    NSFW_IMAGE("NSFW Image Commands"),
+    NSFW_ACTION("NSFW Action Commands", nsfw = true),
+    NSFW_IMAGE("NSFW Image Commands", nsfw = true),
     INFO("Info Commands"),
     UTILS("Utility Commands"),
     MISC("Misc Commands");
