@@ -20,7 +20,6 @@ import org.kodein.di.generic.eagerSingleton
 import org.kodein.di.generic.instance
 import org.kodein.di.generic.singleton
 import pw.aru.Aru.bootQuotes
-import pw.aru.api.nekos4j.Nekos4J
 import pw.aru.commands.games.manager.GameManager
 import pw.aru.core.CommandProcessor
 import pw.aru.core.CommandRegistry
@@ -39,10 +38,12 @@ import pw.aru.utils.TaskManager.task
 import pw.aru.utils.TaskType
 import pw.aru.utils.api.DBLPoster
 import pw.aru.utils.api.DBotsPoster
+import pw.aru.utils.caches.URLCache
 import pw.aru.utils.extensions.classOf
 import pw.aru.utils.extensions.listener
 import pw.aru.utils.extensions.random
 import pw.aru.utils.extensions.shardManager
+import java.io.File
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
@@ -144,11 +145,7 @@ internal fun createInitialInjector(config: AruConfig): Kodein {
                 .build()
         }
 
-        bind<Nekos4J>() with singleton {
-            Nekos4J.Builder()
-                .setHttpClient(instance())
-                .build()
-        }
+        bind<URLCache>() with singleton { URLCache(instance(), File("url_cache")) }
 
         bind<DiscordBotsAPI>() with singleton {
             DiscordBotsAPI.Builder()

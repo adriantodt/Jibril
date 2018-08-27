@@ -11,9 +11,7 @@ import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.requests.RestAction
 import net.dv8tion.jda.core.utils.JDALogger
 import okhttp3.OkHttpClient
-import org.json.JSONArray
 import pw.aru.Aru.sleepQuotes
-import pw.aru.api.nekos4j.Nekos4J
 import pw.aru.commands.actions.base.GetImage
 import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Category
@@ -36,7 +34,6 @@ import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.extensions.*
 import pw.aru.utils.limit
 import pw.aru.utils.paste
-import java.util.*
 import java.util.function.Consumer
 
 @Command("dev", "devtools", "hack")
@@ -48,7 +45,6 @@ class DevCmd
     db: AruDB,
     private val registry: CommandRegistry,
     private val weebSh: Weeb4J,
-    private val nekosLife: Nekos4J,
     private val dblPoster: DBLPoster,
     private val dpwPoster: DBotsPoster,
     private val assetProvider: ReloadableListProvider
@@ -68,7 +64,6 @@ class DevCmd
             "enablecallsite" -> callsite(true)
             "disablecallsite" -> callsite(false)
             "weebsh" -> weebsh(args)
-            "nekoslife" -> nekoslife(args)
             "reloadassets" -> reloadassets()
             "genwebyml" -> generateWebYaml()
             "", "check" -> adminCheck()
@@ -187,66 +182,6 @@ class DevCmd
                 "```"
             )
         }.queue()
-    }
-
-    private fun CommandContext.nekoslife(args: Args) {
-        if (args.matchNextString("-type")) {
-            return nekoslifeGet(args.takeString())
-        }
-
-        val imageTypes = httpClient.newCall {
-            url("https://nekos.life/api/v2/endpoints")
-        }.execute().body()!!.jsonArray()
-            .mapNotNull { it as? String }
-            .first { it.contains("/api/v2/img/<") }
-            .let { JSONArray('[' + it.substring(it.indexOf('<') + 1, it.lastIndexOf('>')).replace('\'', '\"') + ']') }
-            .mapNotNull { it as? String }
-
-        if (args.matchNextString("-sorted")) {
-            return nekoslifeSorted(imageTypes)
-        }
-
-        sendEmbed {
-            baseEmbed(event, "Aru! | Nekos.life Debug")
-            thumbnail("https://assets.aru.pw/img/yes.png")
-
-            description(
-                "Types:",
-                "```",
-                imageTypes.sorted().joinToString(" "),
-                "```"
-            )
-        }.queue()
-    }
-
-    private fun CommandContext.nekoslifeSorted(imageTypes: List<String>) {
-        val provider = nekosLife.imageProvider
-        val map = imageTypes.groupByTo(TreeMap()) {
-            provider.getRandomImage(it).execute().url.let { url -> url.substring(url.lastIndexOf(".") + 1) }
-        }
-
-        sendEmbed {
-            baseEmbed(event, "Aru! | Nekos.life Sorted Debug")
-            thumbnail("https://assets.aru.pw/img/yes.png")
-
-            map.forEach { ext, types ->
-                field("Extension $ext", types.sorted().joinToString(" ", "```\n", "\n```"))
-            }
-        }.queue()
-    }
-
-    private fun CommandContext.nekoslifeGet(type: String) {
-        nekosLife.imageProvider.getRandomImage(type).async { img ->
-            if (img == null) {
-                send("$CONFUSED No images found... ").queue()
-            } else {
-                sendEmbed {
-                    baseEmbed(event, "Aru! | Nekos.life Debug")
-                    image(img.url)
-                    description("Type: $type")
-                }.queue()
-            }
-        }
     }
 
     private fun CommandContext.shutdown() {
@@ -377,9 +312,6 @@ class DevCmd
             UsageSeparator,
             CommandUsage("dev weebsh", "Dumps Weeb.sh types and tags."),
             CommandUsage("dev weebsh <[-type <value>] [-tags <values,...>] [-nsfw <value>] [-ext <value>]>", "Gets a random Weeb.sh image."),
-            UsageSeparator,
-            CommandUsage("dev nekoslife", "Dumps Weeb.sh types and tags."),
-            CommandUsage("dev nekoslife <-type <value>>", "Gets a random Nekos.life image."),
             UsageSeparator,
             CommandUsage("dev reloadassets", "Reloads assets."),
             CommandUsage("dev genwebyml", "Generates the base commands.yml file.")
