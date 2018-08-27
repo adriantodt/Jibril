@@ -1,5 +1,4 @@
 @file:JvmName("Bootstrap")
-@file:JvmMultifileClass
 
 package pw.aru
 

@@ -1,6 +1,3 @@
-@file:JvmName("Bootstrap")
-@file:JvmMultifileClass
-
 package pw.aru
 
 import com.github.natanbc.discordbotsapi.DiscordBotsAPI

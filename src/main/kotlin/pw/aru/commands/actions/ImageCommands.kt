@@ -8,13 +8,19 @@ import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.CommandProvider
 import pw.aru.core.commands.ICommandProvider
+import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.caches.URLCache
 import pw.aru.utils.emotes.CAT
 import pw.aru.utils.emotes.DOG
 import java.io.File
 
 @CommandProvider
-class ImageCommands(httpClient: OkHttpClient, weebApi: Weeb4J, nekoApi: Nekos4J) : ICommandProvider {
+class ImageCommands(
+    httpClient: OkHttpClient,
+    weebApi: Weeb4J,
+    nekoApi: Nekos4J,
+    private val assetProvider: ReloadableListProvider
+) : ICommandProvider {
     private val weebProvider = weebApi.imageProvider
     private val nekoProvider = nekoApi.imageProvider
     private val cache = URLCache(httpClient, File("url_cache"))
@@ -79,10 +85,10 @@ class ImageCommands(httpClient: OkHttpClient, weebApi: Weeb4J, nekoApi: Nekos4J)
             GetImage(type = "rem")
         )
 
-        LocalImageCommand(
-            category, r,
+        URLsImageCommand(
+            category, r, cache,
             CustomCommandInfo(listOf("jibril"), "Jibril Command", "Sends a random Jibril image."),
-            File("assets/aru/images/jibril.txt").readLines()
+            assetProvider["assets/aru/images/jibril.txt"]
         )
 
         WeebCommand.Image(
@@ -122,17 +128,4 @@ class ImageCommands(httpClient: OkHttpClient, weebApi: Weeb4J, nekoApi: Nekos4J)
             GetImage(type = "jojo")
         )
     }
-
-}
-
-fun main(args: Array<String>) {
-    fun File.recursiveFileList(): List<File> {
-        val (directories: List<File>, files: List<File>) = listFiles().partition(File::isDirectory)
-        return files + directories.flatMap(File::recursiveFileList)
-    }
-
-    File("assets/aru/images/jibril.new.txt").writeText(
-        File("img_assets/jibril").recursiveFileList()
-            .joinToString("\n") { it.path.replace('\\', '/') }
-    )
 }

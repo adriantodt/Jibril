@@ -397,10 +397,10 @@ class ActionCommands(
             CustomCommandInfo(listOf("beg"), "Beg Command", "Begs the mentioned users."),
             assetProvider["assets/aru/actions/beg.txt"],
             ActionLines(
-                "$FUCK {author} is begging {mentions}",
-                "$FUCK *Begs~*",
-                "$FUCK *Begs you~*",
-                "$FUCK Eeh..? Why are you begging me? uwu"
+                "$BEG {author} is begging {mentions}",
+                "$BEG *Begs~*",
+                "$BEG *Begs you~*",
+                "$BEG Eeh..? Why are you begging me? uwu"
             )
         )
 
@@ -416,17 +416,30 @@ class ActionCommands(
             )
         )
 
+        //eartease
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("fuck"), "Fuck Command", "Fucks the mentioned users... Hey, that's lewd!", nsfw = true),
-            assetProvider["assets/aru/actions/fuck.txt"],
+            CustomCommandInfo(listOf("eartease", "teaseear", "teaseears"), "Ear Tease Command", "Ear-teases the mentioned users."),
+            assetProvider["assets/aru/sfw_actions/eartease.txt"],
             ActionLines(
-                "$FUCK {author} is fucking {mentions}",
-                "$FUCK *Fucks~*",
-                "$FUCK *Fucks you~* Lewdie~",
-                "$FUCK Eeh..? That's lewd! Bakaaa!"
+                "$TEEHEE {author} is teasing {mentions}'s ear",
+                "$TEEHEE *Teases ear~*",
+                "$TEEHEE *Teases your ear~*",
+                "$TEEHEE Eeh..? *starts melting~* It's not I'm liking it, b-baka!"
+            )
+        )
+
+        //necktease
+        URLsActionCommand(
+            category, r, cache,
+            CustomCommandInfo(listOf("necktease", "teaseneck"), "Neck Tease Command", "Neck-teases the mentioned-users"),
+            assetProvider["assets/aru/sfw_actions/necktease.txt"],
+            ActionLines(
+                "$TEEHEE {author} is teasing {mentions}'s ear",
+                "$TEEHEE *Teases neck~*",
+                "$TEEHEE *Teases your neck~*",
+                "$TEEHEE Eeh..? Eeh..? *starts melting~* It's not I'm liking it, b-baka!"
             )
         )
     }
-
 }

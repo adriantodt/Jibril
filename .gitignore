@@ -11,6 +11,8 @@
 /src/main/kotlin/aru/exported/exported.kt
 /src/main/resources/aru/assets/assets.zip
 
+# Gradle
+
 # Runtime
 /logs/
 /db/
