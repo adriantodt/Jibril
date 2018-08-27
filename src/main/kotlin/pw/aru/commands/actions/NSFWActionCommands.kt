@@ -12,7 +12,6 @@ import pw.aru.core.commands.help.prefix
 import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.caches.URLCache
 import pw.aru.utils.emotes.*
-import pw.aru.utils.extensions.capitalize
 import java.io.File
 
 @CommandProvider
@@ -338,10 +337,10 @@ class NSFWActionCommands(
             )
         )
 
-        //masturbating
+        //masturbate
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("masturbating"), "Masturbating Command", "When you're a girl and you're just way too bored.", nsfw = true),
+            CustomCommandInfo(listOf("masturbate"), "Masturbate Command", "When you're a girl and you're just way too bored.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/masturbating.txt"],
             ActionLines(
                 "$GASM {mentions}, {author} is masturbating in front of you",
@@ -468,27 +467,4 @@ class NSFWActionCommands(
             )
         )
     }
-}
-
-fun main(args: Array<String>) {
-    println(File("assets/aru/nsfw_actions").listFiles().joinToString("\n\n") {
-        val name = it.nameWithoutExtension
-        val path = it.path.replace('\\', '/')
-        val cName = name.capitalize()
-        """
-        //TODO $name
-        URLsActionCommand(
-            category, r, cache,
-            CustomCommandInfo(listOf("$name"), "$cName Command", "TODO DOCS", nsfw = true),
-            assetProvider["$path"],
-            ActionLines(
-                "$ FUCK {author} {mentions} TODO",
-                "$ FUCK *TODO~*",
-                "$ FUCK *TODO you~* Lewdie~",
-                "$ FUCK Eeh..? That's lewd! Bakaaa!"
-            )
-        )
-        """.trimIndent()
-    }
-    )
 }
