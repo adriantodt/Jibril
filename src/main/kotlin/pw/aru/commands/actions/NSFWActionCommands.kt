@@ -10,10 +10,7 @@ import pw.aru.core.commands.CommandProvider
 import pw.aru.core.commands.ICommandProvider
 import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.caches.URLCache
-import pw.aru.utils.emotes.CUM
-import pw.aru.utils.emotes.FUCK
-import pw.aru.utils.emotes.GASM
-import pw.aru.utils.emotes.TEEHEE
+import pw.aru.utils.emotes.*
 import pw.aru.utils.extensions.capitalize
 import java.io.File
 
@@ -112,10 +109,10 @@ class NSFWActionCommands(
             CustomCommandInfo(listOf("boobjob"), "Boobjob Command", "Gives a boobjob to the mentioned users.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/boobjob.txt"],
             ActionLines(
-                "$FUCK {author} is giving {mentions} a boobjob",
+                "$BOOBS {author} is giving {mentions} a boobjob",
                 "",
-                "$FUCK W-What? Am I supposed to...? *gives you a boobjob~* Lewdie~",
-                "$FUCK Eeh..? What? Since when I have a dick?? That's lewd!"
+                "$BOOBS W-What? Am I supposed to...? *gives you a boobjob~* Lewdie~",
+                "$BOOBS Eeh..? What? Since when I have a dick?? That's lewd!"
             )
         )
 
@@ -125,9 +122,9 @@ class NSFWActionCommands(
             CustomCommandInfo(listOf("boobjobcum"), "Boobjob Cum Command", "That's messy... And lewd.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/boobjobcum.txt"],
             ActionLines(
-                "$FUCK {author} is giving {mentions} a boobjob... $CUM",
+                "$BOOBS {author} is giving {mentions} a boobjob... $CUM",
                 "",
-                "$FUCK Could you like... not cum on my face while I'm playing with you, baka?",
+                "$BOOBS Could you like... not cum on my face while I'm playing with you, baka?",
                 "$GASM S-something is c-coming out... $CUM"
             )
         )
@@ -138,9 +135,9 @@ class NSFWActionCommands(
             CustomCommandInfo(listOf("booblick"), "Booblick Command", "Licks the boobs of the mentioned users", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/booblick.txt"],
             ActionLines(
-                "$FUCK {author} is licking {mentions}'s boobs",
+                "$BOOBS {author} is licking {mentions}'s boobs",
                 "",
-                "$FUCK *Licks your boobies~* Lewdiee~",
+                "$BOOBS *Licks your boobies~* Lewdiee~",
                 "$GASM M-my nipples are sensitive, c-can you not, baka?"
             )
         )
@@ -151,10 +148,10 @@ class NSFWActionCommands(
             CustomCommandInfo(listOf("boobplay"), "Boobplay Command", "Plays with the boobs of the mentioned users", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/boobplay.txt"],
             ActionLines(
-                "$FUCK {author} is playing with {mentions}'s boobs",
+                "$BOOBS {author} is playing with {mentions}'s boobs",
                 "",
-                "$FUCK *Plays with your boobies~* Lewdiee~",
-                "$FUCK Eeh..? W-Why are you playing with my boobs? That's lewd, baka!"
+                "$BOOBS *Plays with your boobies~* Lewdiee~",
+                "$BOOBS Eeh..? W-Why are you playing with my boobs? That's lewd, baka!"
             )
         )
 
@@ -164,23 +161,23 @@ class NSFWActionCommands(
             CustomCommandInfo(listOf("boobtease"), "Boobtease Command", "Teases the mentioned users with your boobs", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/boobtease.txt"],
             ActionLines(
-                "$FUCK {author} is using her melons to tease {mentions}",
+                "$BOOBS {author} is using her melons to tease {mentions}",
                 "",
                 "$TEEHEE *Teases you~*",
-                "$FUCK Eeh..? W-Why are you teasing me?"
+                "$BOOBS Eeh..? W-Why are you teasing me?"
             )
         )
 
-        //TODO buttplay
+        //buttplay
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("buttplay"), "Buttplay Command", "TODO DOCS", nsfw = true),
+            CustomCommandInfo(listOf("buttplay"), "Buttplay Command", "Plays with the butts of the mentioned users", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/buttplay.txt"],
             ActionLines(
-                "$FUCK {author} {mentions} TODO",
-                "$FUCK *TODO~*",
-                "$FUCK *TODO you~* Lewdie~",
-                "$FUCK Eeh..? That's lewd! Bakaaa!"
+                "$BUTTS {author} is playing with {mentions}'s butts",
+                "",
+                "$BUTTS *Plays with your butts~* Lewdiee~",
+                "$BUTTS Eeh..? H-HEY! M-my butt! That's lewd! Bakaaa!"
             )
         )
 
@@ -190,10 +187,10 @@ class NSFWActionCommands(
             CustomCommandInfo(listOf("butttease"), "Butttease Command", "TODO DOCS", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/butttease.txt"],
             ActionLines(
-                "$FUCK {author} {mentions} TODO",
-                "$FUCK *TODO~*",
-                "$FUCK *TODO you~* Lewdie~",
-                "$FUCK Eeh..? That's lewd! Bakaaa!"
+                "$BUTTS {author} is using her butts to tease {mentions}",
+                "",
+                "$TEEHEE *Teases you~*",
+                "$BUTTS Eeh..? W-Why are you teasing me?"
             )
         )
 

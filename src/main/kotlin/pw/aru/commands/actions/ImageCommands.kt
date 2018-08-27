@@ -2,7 +2,6 @@ package pw.aru.commands.actions
 
 import com.github.natanbc.weeb4j.Weeb4J
 import okhttp3.OkHttpClient
-import pw.aru.api.nekos4j.Nekos4J
 import pw.aru.commands.actions.base.*
 import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Category
@@ -18,11 +17,9 @@ import java.io.File
 class ImageCommands(
     httpClient: OkHttpClient,
     weebApi: Weeb4J,
-    nekoApi: Nekos4J,
     private val assetProvider: ReloadableListProvider
 ) : ICommandProvider {
     private val weebProvider = weebApi.imageProvider
-    private val nekoProvider = nekoApi.imageProvider
     private val cache = URLCache(httpClient, File("url_cache"))
 
     override fun provide(r: CommandRegistry) {
