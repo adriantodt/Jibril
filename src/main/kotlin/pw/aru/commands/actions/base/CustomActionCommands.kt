@@ -84,7 +84,11 @@ class URLsActionCommand(
         val url = images.random()
         channel
             .sendFile(cache.cacheToFile(url), url.substring(url.lastIndexOf('/') + 1))
-            .append(f.replaceEach("{author}" to "**${author.effectiveName}**", "{mentions}" to mentions.toSmartString { "**${it.effectiveName}**" }))
+            .append(f.replaceEach(
+                "{author}" to "**${author.effectiveName}**",
+                "{mentions}" to mentions.toSmartString { "**${it.effectiveName}**" },
+                "{everyone}" to (mentions + author).toSmartString { "**${it.effectiveName}**" }
+            ))
             .queue()
     }
 

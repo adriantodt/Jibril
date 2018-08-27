@@ -66,7 +66,7 @@ class HelpCommand(private val registry: CommandRegistry) : ICommand, ICommand.He
 
             description(
                 "Here's all my commands. I'm sure you'll find the one you need!",
-                "To check the command usage, type `${"help <command>".withPrefix()}`."
+                "To check the command usage, type `${prefix}help <command>`."
             )
 
             footer("${registry.lookup.size} commands | Requested by ${event.member.effectiveName}", event.author.effectiveAvatarUrl)
@@ -114,8 +114,50 @@ class HelpCommand(private val registry: CommandRegistry) : ICommand, ICommand.He
             return
         }
 
-        Category.REGISTRY.ifContains(args) {
-            onHelp(it, event)
+        Category.REGISTRY.ifContains(args) { category ->
+            if (category is ICommand.HelpProvider) {
+                category.helpHandler.onHelp(event)
+                return
+            }
+
+            if (category is ICommand.HelpDialogProvider) {
+                event.channel.sendMessage(category.helpHandler.onHelp(event)).queue()
+                return
+            }
+            if (category is ICommand.HelpHandler) {
+                category.onHelp(event)
+                return
+            }
+
+            if (category is ICommand.HelpDialog) {
+                event.channel.sendMessage(category.onHelp(event)).queue()
+                return
+            }
+
+            sendEmbed {
+                baseEmbed(event, "Aru! | Help: ${category.categoryName}")
+
+                description(
+                    "Here's all the category's commands. I'm sure you'll find the one you need!",
+                    "To check the command usage, type `${prefix}help <command>`."
+                )
+
+                val list = registry.lookup
+                    .entries
+                    .filter { (c) -> c.category == category && (c !is ICommand.Permission || c.permission.test(event.member)) }
+                    .map { it.value[0] }
+                    .sorted()
+
+                field(
+                    "Commands:",
+                    if (list.isEmpty()) "There's only dust here." else list.joinToString(prefix = "`", separator = "` `", postfix = "`")
+                )
+
+
+                footer("${list.size} commands | Requested by ${event.member.effectiveName}", event.author.effectiveAvatarUrl)
+
+            }
+
             return
         }
 

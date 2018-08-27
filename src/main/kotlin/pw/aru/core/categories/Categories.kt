@@ -44,9 +44,9 @@ enum class Category(val categoryName: String, val help: Help? = null, val nsfw: 
 
     companion object {
         @JvmField
-        val LIST = listOf(*values())
+        val LIST = values().toList()
 
         @JvmField
-        val REGISTRY = LIST.map { it.name to it }.toMap()
+        val REGISTRY = LIST.map { it.name.toLowerCase() to it }.toMap()
     }
 }

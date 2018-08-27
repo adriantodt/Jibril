@@ -3,7 +3,6 @@
 package pw.aru.utils.extensions
 
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import pw.aru.core.categories.Category
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.help.prefix
 import pw.aru.utils.emotes.ERROR
@@ -34,29 +33,6 @@ fun onHelp(command: ICommand, event: GuildMessageReceivedEvent) {
     }
 
     event.channel.sendMessage("$ERROR Heh. Sorry, but the command doesn't provide any help. I can still pat you, right?").queue()
-}
-
-fun onHelp(category: Category, event: GuildMessageReceivedEvent) {
-    if (category is ICommand.HelpProvider) {
-        category.helpHandler.onHelp(event)
-        return
-    }
-
-    if (category is ICommand.HelpDialogProvider) {
-        event.channel.sendMessage(category.helpHandler.onHelp(event)).queue()
-        return
-    }
-    if (category is ICommand.HelpHandler) {
-        category.onHelp(event)
-        return
-    }
-
-    if (category is ICommand.HelpDialog) {
-        event.channel.sendMessage(category.onHelp(event)).queue()
-        return
-    }
-
-    event.channel.sendMessage("$ERROR Heh. Sorry, but the category doesn't provide any help. I can still pat you, right?").queue()
 }
 
 const val ERROR_GUILD_PERMS = "You can **easily** fix that by re-inviting me with the following link: `https://add.aru.pw/`"
