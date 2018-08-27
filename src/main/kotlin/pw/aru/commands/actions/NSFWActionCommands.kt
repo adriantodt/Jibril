@@ -250,7 +250,7 @@ class NSFWActionCommands(
         //fuck
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("fuck"), "Fuck Command", "Fucks the mentioned users... Hey, that's lewd!", nsfw = true),
+            CustomCommandInfo(listOf("fuck"), "Fuck (Classical) Command", "Fucks the mentioned users... Hey, that's lewd!", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/fuck.txt"],
             ActionLines(
                 "$FUCK {author} is fucking {mentions}",
@@ -383,88 +383,88 @@ class NSFWActionCommands(
             CustomCommandInfo(listOf("pussytease"), "Pussytease Command", "Teases the mentioned users using your pussy.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/pussytease.txt"],
             ActionLines(
-                "$BOOBS {author} is using her pussy to tease {mentions}",
+                "$FUCK {author} is using her pussy to tease {mentions}",
                 "",
                 "$TEEHEE *Teases you~*",
-                "$BOOBS Eeh..? W-Why are you teasing me?"
+                "$FUCK Eeh..? W-Why are you teasing me?"
             )
         )
 
-        //TODO spank
+        //spank
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("spank"), "Spank Command", "TODO DOCS", nsfw = true),
+            CustomCommandInfo(listOf("spank"), "Spank Command", "Spanks the mentioned users.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/spank.txt"],
             ActionLines(
-                "$FUCK {author} {mentions} TODO",
+                "$FUCK {author} is spanking {mentions}",
                 "",
-                "$FUCK *TODO you~* Lewdie~",
-                "$FUCK Eeh..? That's lewd! Bakaaa!"
+                "$FUCK *Spanks you~* BAKAA!",
+                "$CRY Don't spank mee~ I did nothing wroong. $CRY"
             )
         )
 
-        //TODO stripclothes
+        //stripclothes
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("stripclothes"), "Stripclothes Command", "TODO DOCS", nsfw = true),
+            CustomCommandInfo(listOf("stripclothes"), "Strip Clothes Command", "Strips the clothes of the mentioned users.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/stripclothes.txt"],
             ActionLines(
-                "$FUCK {author} {mentions} TODO",
+                "$FUCK {author} is stripping {mentions}'s clothes",
                 "",
-                "$FUCK *TODO you~* Lewdie~",
-                "$FUCK Eeh..? That's lewd! Bakaaa!"
+                "$FUCK *strips your clothes~* Lewdiee~",
+                "$FUCK D-DON'T... *gets clothes stripped~* Y-you bakaa!"
             )
         )
 
-        //TODO striptease
+        //striptease
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("striptease"), "Striptease Command", "TODO DOCS", nsfw = true),
+            CustomCommandInfo(listOf("striptease"), "Striptease Command", "Stripteases in front of the mentioned users.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/striptease.txt"],
             ActionLines(
-                "$FUCK {author} {mentions} TODO",
+                "$FUCK {mentions}, {author} is strip-teasing in front of you",
                 "",
-                "$FUCK *TODO you~* Lewdie~",
-                "$FUCK Eeh..? That's lewd! Bakaaa!"
+                "$FUCK {author} is stripteasing you",
+                "$FUCK *stripteases in front of you~* I-I'm not doing this because you asked, b-baka."
             )
         )
 
-        //TODO tentacles
+        //tentacles
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("tentacles"), "Tentacles Command", "TODO DOCS", nsfw = true),
+            CustomCommandInfo(listOf("tentacles"), "Tentacles Command", "Tentacle fun.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/tentacles.txt"],
             ActionLines(
-                "$FUCK {author} {mentions} TODO",
+                "$FUCK {mentions}, you're getting fucked by {author}'s tentacles",
                 "",
-                "$FUCK *TODO you~* Lewdie~",
-                "$FUCK Eeh..? That's lewd! Bakaaa!"
+                "$FUCK {author} is getting fucked by tentacles",
+                "$FUCK W-Wha..? *gets fucked by tentacles~* $CRY That's not funny..."
             )
         )
 
-        //TODO toying
+        //toying
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("toying"), "Toying Command", "TODO DOCS", nsfw = true),
+            CustomCommandInfo(listOf("toying"), "Toying Command", "When you're a girl and you're REALLY bored.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/toying.txt"],
             ActionLines(
-                "$FUCK {author} {mentions} TODO",
+                "$GASM {mentions}, {author} is toying herself in front of you",
                 "",
-                "$FUCK *TODO you~* Lewdie~",
-                "$FUCK Eeh..? That's lewd! Bakaaa!"
+                "$GASM {author} is toying herself",
+                "$GASM Having fun? *pats~* $PAT"
             )
         )
 
-        //TODO weirdfuck
+        //weirdfuck
         URLsActionCommand(
             category, r, cache,
-            CustomCommandInfo(listOf("weirdfuck"), "Weirdfuck Command", "TODO DOCS", nsfw = true),
+            CustomCommandInfo(listOf("weirdfuck", "sillyfuck"), "Weird Fuck Command", "Fucks the mentioned users... in a very weird way.", nsfw = true),
             assetProvider["assets/aru/nsfw_actions/weirdfuck.txt"],
             ActionLines(
-                "$FUCK {author} {mentions} TODO",
+                "$FUCK {mentions}, {author} is fucking you in a... rather weird way",
                 "",
-                "$FUCK *TODO you~* Lewdie~",
-                "$FUCK Eeh..? That's lewd! Bakaaa!"
+                "$FUCK Eeh..? Since when I have a dick?? Am I supposed to...? *fucks you in a weird way~* I don't even know what am I doing.",
+                "$FUCK Wha?? *gets confused while getting fucked~* What the fuck are you doing with me...?"
             )
         )
     }
