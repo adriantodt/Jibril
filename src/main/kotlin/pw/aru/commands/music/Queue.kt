@@ -22,7 +22,7 @@ import pw.aru.utils.extensions.thumbnail
 class Queue(musicManager: MusicManager) : MusicCommand(musicManager), ICommand.HelpDialogProvider {
     override fun CommandContext.call(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
         val queue = musicPlayer.queue
-        val lastPage = queue.size / 5
+        val lastPage = maxOf(1, queue.size / 5)
         val page = (if (args.isEmpty()) 1 else args.toIntOrNull() ?: return showHelp())
             .coerceIn(1, lastPage)
             .minus(1)

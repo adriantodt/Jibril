@@ -38,7 +38,9 @@ class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDia
             )
             field(
                 "Other",
-                "\u25AB Image and Action Commands powered by https://weeb.sh/"
+                "\u25AB Image and Action Commands powered by https://weeb.sh/",
+                "\u25AB Thanks to ${discordTag("291710319619866624")} for providing a lot of GIFs for action commands",
+                "(Also for being our first patron owo)"
             )
         }.queue()
     }

@@ -425,7 +425,7 @@ class ActionCommands(
                 "$TEEHEE {author} is teasing {mentions}'s ear",
                 "$TEEHEE *Teases ear~*",
                 "$TEEHEE *Teases your ear~*",
-                "$TEEHEE Eeh..? *starts melting~* It's not I'm liking it, b-baka!"
+                "$TEEHEE Eeh..? *starts melting~* I-it's not I'm liking it, b-baka!"
             )
         )
 
@@ -435,10 +435,10 @@ class ActionCommands(
             CustomCommandInfo(listOf("necktease", "teaseneck"), "Neck Tease Command", "Neck-teases the mentioned-users"),
             assetProvider["assets/aru/sfw_actions/necktease.txt"],
             ActionLines(
-                "$TEEHEE {author} is teasing {mentions}'s ear",
+                "$TEEHEE {author} is teasing {mentions}'s neck",
                 "$TEEHEE *Teases neck~*",
                 "$TEEHEE *Teases your neck~*",
-                "$TEEHEE Eeh..? Eeh..? *starts melting~* It's not I'm liking it, b-baka!"
+                "$TEEHEE Eeh..? Eeh..? *starts melting~* I-it's not I'm liking it, b-baka!"
             )
         )
     }
