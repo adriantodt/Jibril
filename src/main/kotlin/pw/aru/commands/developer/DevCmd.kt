@@ -182,17 +182,17 @@ class DevCmd
     }
 
     private fun CommandContext.weebshGet(img: GetImage, nsfw: NsfwFilter?) {
-        weebSh.imageProvider.getRandomImage(img.type, img.tags, null, nsfw, img.fileType).async { img ->
-            if (img == null) {
+        weebSh.imageProvider.getRandomImage(img.type, img.tags, null, nsfw, img.fileType).async { image ->
+            if (image == null) {
                 send("$CONFUSED No images found... ").queue()
             } else {
                 sendEmbed {
                     baseEmbed(event, "Aru! | Weeb.sh Debug")
-                    image(img.url)
+                    image(image.url)
                     description(
-                        "Type: ${img.type}",
-                        "Tags: ${img.tags.joinToString(", ", "[", "]") { "Tag[name=${it.name}, user=${it.user}]" }}",
-                        "Account: ${img.account}"
+                        "Type: ${image.type}",
+                        "Tags: ${image.tags.joinToString(", ", "[", "]") { "Tag[name=${it.name}, user=${it.user}]" }}",
+                        "Account: ${image.account}"
                     )
                 }.queue()
             }

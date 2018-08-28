@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.collections.LinkedHashMap
 import kotlin.collections.LinkedHashSet
 
-fun startBootstrap(args: Array<String>) {
+fun startBootstrap() {
     Locale.setDefault(Locale("en", "US"))
 
     //TerminalConsoleAdaptor.initializeTerminal()

@@ -28,6 +28,7 @@ mainClassName = 'pw.aru.Bootstrap'
 repositories {
     jcenter()
     maven { url = 'https://dl.bintray.com/adriantodt/maven' }
+    maven { url = "https://dl.bintray.com/kodehawa/maven" }
     mavenLocal()
 }
 
@@ -48,6 +49,7 @@ dependencies {
     // Useful
     compile 'com.sedmelluq:jda-nas:1.0.6'
     compile 'com.jagrosh:jda-utilities-menu:2.1.4'
+    compile 'net.kodehawa:imageboard-api:2.0.3_2'
 
     // Open-Source Libraries
     compile 'pw.aru.discord:dice-notation:1.0'

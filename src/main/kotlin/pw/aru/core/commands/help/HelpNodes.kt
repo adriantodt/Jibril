@@ -43,7 +43,9 @@ data class SeeAlso(val value: String) : HelpNode() {
     companion object {
         @JvmStatic
         @JvmName("simpleList")
-        inline operator fun get(vararg values: String) = SeeAlso(values.joinToString("` `", "`", "`"))
+        operator fun get(vararg values: String) = SeeAlso(values.joinToString("` `", "`", "`"))
+
+        fun ofList(names: List<String>) = SeeAlso(names.joinToString("` `", "`", "`"))
     }
 }
 
@@ -59,9 +61,9 @@ data class Field(val name: String, val value: String) : HelpNode() {
 
 sealed class UsageNode
 
-inline fun commandUsage(command: String, description: String) = "`$prefix$command` - $description"
+fun commandUsage(command: String, description: String) = "`$prefix$command` - $description"
 
-inline fun commandUsage(command: String, extra: String, description: String) = "`$prefix$command` $extra - $description"
+fun commandUsage(command: String, extra: String, description: String) = "`$prefix$command` $extra - $description"
 
 data class CommandUsage(val command: String, val extra: String?, val description: String) : UsageNode() {
     constructor(command: String, description: String) : this(command, null, description)

@@ -32,6 +32,7 @@ enum class Category(val categoryName: String, val help: Help? = null, val nsfw: 
     GAMES("Games"),
     IMAGE("Image Commands"),
     FUN("Fun Commands"),
+    IMAGEBOARD("Imageboard Commands"),
     MODERATION("Moderation Commands", permission = SERVER_ADMIN),
     DEVELOPER("Developer Commands", permission = BOT_DEVELOPER),
     NSFW_ACTION("NSFW Action Commands", nsfw = true),
