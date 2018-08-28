@@ -4,7 +4,6 @@ package pw.aru.utils.extensions
 
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import pw.aru.core.commands.CommandPermission
 import pw.aru.utils.AruColors
 import java.awt.Color
 
@@ -28,16 +27,6 @@ fun EmbedBuilder.baseEmbed(
 ) {
     author(name, url, image)
     color(color)
-}
-
-fun EmbedBuilder.helpEmbed(
-    event: GuildMessageReceivedEvent,
-    name: String,
-    commandPermission: CommandPermission? = null,
-    url: String? = null,
-    image: String = event.jda.selfUser.effectiveAvatarUrl,
-    color: Color? = event.member.color ?: AruColors.primary
-) {
 }
 
 fun EmbedBuilder.author(name: String?, url: String? = null, iconUrl: String? = null) {
