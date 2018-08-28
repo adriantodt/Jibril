@@ -133,11 +133,10 @@ class DevCmd
                     val guild = shardManager.getGuildById(guildId)
                     val nowPlaying = player.currentTrack!!.info
                     field(
-                        "Guild: ${guild.name}",
-                        "**Now Playing**: " + "**[${nowPlaying.title}](${nowPlaying.uri})** by **${nowPlaying.author}**",
-                        "",
+                        "Guild: ${guild.name} (${guild.id})",
+                        "**Now Playing**: " + "**[${nowPlaying.title.limit(40)}](${nowPlaying.uri})** by **${nowPlaying.author}**",
                         if (player.queue.isEmpty()) "Empty queue."
-                        else "**Queued**:\n" + player.queue.take(5).joinToString("\n") { "**[${it.info.title}](${it.info.uri})** by **${it.info.author}**" }
+                        else "**Queued**:\n" + player.queue.take(3).joinToString("\n") { "**[${it.info.title.limit(40)}](${it.info.uri})** by **${it.info.author}**" }
                     )
                 }
         }.queue()
