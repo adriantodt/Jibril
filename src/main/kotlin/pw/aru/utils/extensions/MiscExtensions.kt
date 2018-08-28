@@ -8,9 +8,12 @@ import okhttp3.Request
 import okhttp3.ResponseBody
 import org.json.JSONArray
 import org.json.JSONObject
+import pw.aru.utils.Resource
+import pw.aru.utils.SettableResource
 import java.lang.reflect.Array.get
 import java.lang.reflect.Array.getLength
 import java.util.*
+import kotlin.reflect.KProperty
 
 // Json
 fun jsonOf(vararg pairs: Pair<*, *>): JSONObject = if (pairs.isNotEmpty()) JSONObject(mapOf(*pairs)) else JSONObject()
@@ -25,6 +28,12 @@ inline fun ResponseBody.jsonObject() = JSONObject(string())
 
 inline fun ResponseBody.jsonArray() = JSONArray(string())
 
+// Resource
+operator fun <T> Resource<T>.getValue(thisRef: Any?, property: KProperty<*>): T? = resourceOrNull
+
+operator fun <T> SettableResource<T>.setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+    setResourceAvailable(value)
+}
 
 // Misc
 fun <E> Iterable<E>.toSmartString(transform: ((E) -> CharSequence)? = null): String {
@@ -71,12 +80,10 @@ fun List<String>.limitedToString(limit: Int): String {
 }
 
 fun <E> List<E>.split(minSize: Int, maxSize: Int): List<List<E>> {
-    if (size < maxSize) return listOf(this)
-    val c = (minSize..maxSize).minBy { it - size % it } ?: 5
-    return withIndex()
-        .groupBy { it.index / c }
-        .values
-        .map { it.map(IndexedValue<E>::value) }
+    return when {
+        size < maxSize -> listOf(this)
+        else -> chunked((minSize..maxSize).minBy { it - size % it } ?: (minSize + maxSize) / 2)
+    }
 }
 
 fun Exception.simpleName(): String {

@@ -12,7 +12,6 @@ import pw.aru.utils.emotes.PAUSE
 import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.emotes.THINKING
 import pw.aru.utils.emotes.X
-import pw.aru.utils.extensions.withPrefix
 
 @Command("pause")
 @UseFullInjector
@@ -20,13 +19,13 @@ class Pause(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "
     override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
         if (musicPlayer.audioPlayer.isPaused) {
             send(
-                "$X The music is already paused, silly!\n\n$THINKING Maybe you want to resume the music with ``${"resume".withPrefix()}``, instead?"
+                "$X The music is already paused, silly!\n\n$THINKING Maybe you want to resume the music with ``$prefix${"resume"}``, instead?"
             ).queue()
             return
         }
 
         musicPlayer.audioPlayer.isPaused = true
-        send("$PAUSE Music Paused.\nType `${"resume".withPrefix()}` to resume the player.").queue()
+        send("$PAUSE Music Paused.\nType `$prefix${"resume"}` to resume the player.").queue()
     }
 
     override val helpHandler = Help(
@@ -52,7 +51,7 @@ class VotePause(musicManager: MusicManager) : MusicVotingCommand(musicManager), 
     override fun CommandContext.checkRequirements(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack): Boolean {
         if (musicPlayer.audioPlayer.isPaused) {
             send(
-                "$X The music is already paused, silly!\n\n$THINKING Maybe you want to resume the music with ``${"voteresume".withPrefix()}``, instead?"
+                "$X The music is already paused, silly!\n\n$THINKING Maybe you want to resume the music with ``$prefix${"voteresume"}``, instead?"
             ).queue()
             return false
         }
@@ -72,7 +71,7 @@ class VotePause(musicManager: MusicManager) : MusicVotingCommand(musicManager), 
 
     override fun CommandContext.onVotesReached(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
         musicPlayer.audioPlayer.isPaused = true
-        send("$SUCCESS Enough votes reached! Music Paused.\nType `${"voteresume".withPrefix()}` to resume the player.").queue()
+        send("$SUCCESS Enough votes reached! Music Paused.\nType `$prefix${"voteresume"}` to resume the player.").queue()
     }
 
     override val helpHandler = Help(

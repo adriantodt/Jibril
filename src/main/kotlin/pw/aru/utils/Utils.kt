@@ -39,7 +39,7 @@ fun paste(httpClient: OkHttpClient, contents: String): String {
             header("Content-Type", "text/plain")
 
             post(RequestBody.create(MediaType.parse("text/plain"), contents))
-        }.execute().use { return "https://hastebin.com/${it.body()!!.jsonObject().getString("key")}" }
+        }.execute().body()!!.use { return "https://hastebin.com/${it.jsonObject().getString("key")}" }
     } catch (e: Exception) {
         e.printStackTrace()
         return "$DISAPPOINTED Hastebin is unavailable right now."

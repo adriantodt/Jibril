@@ -50,15 +50,15 @@ class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDia
             description(
                 "Hi, I'm **Aru**, the personal angel guardian that your server needs!",
                 "I'm here to provide you with:",
-                "\u25AB **Music!** Check out `${"help music".withPrefix()}` to get started!",
+                "\u25AB **Music!** Check out `$prefix${"help music"}` to get started!",
                 "\u25AB Add **fun** to your server with action commands, games and more!",
                 "",
-                "Let's get started? Send `${"help".withPrefix()}` to check my command list!",
+                "Let's get started? Send `$prefix${"help"}` to check my command list!",
                 "",
                 "Questions? Check out my **[Support server!](https://support.aru.pw)**",
                 "If you feel like helping a poor angel, **[be a Patreon](https://patreon.aru.pw)** and support my development! It's as cheap as $1 a month.",
                 "",
-                "Send `${"about credits".withPrefix()}` to see the credits."
+                "Send `$prefix${"about credits"}` to see the credits."
             )
             footer(
                 "Invite link: https://add.aru.pw/ | Requested by ${event.member.effectiveName}",

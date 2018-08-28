@@ -23,7 +23,6 @@ import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.utils.URIBuilder
 import org.json.JSONObject
 import pw.aru.core.listeners.EventListeners.submitTask
-import pw.aru.utils.extensions.computeIfAbsent
 import pw.aru.utils.extensions.newCall
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -140,4 +139,13 @@ class MusicManager(private val shardManager: ShardManager, private val httpClien
 
 private operator fun AudioPlayerManager.plusAssign(sourceManager: AudioSourceManager) {
     registerSourceManager(sourceManager)
+}
+
+private inline fun <T> TLongObjectMap<T>.computeIfAbsent(key: Long, value: (Long) -> T): T {
+    if (!containsKey(key)) {
+        val t = value(key)
+        put(key, t)
+        return t
+    }
+    return get(key)
 }

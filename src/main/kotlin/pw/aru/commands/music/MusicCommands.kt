@@ -8,6 +8,7 @@ import pw.aru.core.categories.Category
 import pw.aru.core.commands.CommandPermission
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.prefix
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
 import pw.aru.core.music.trackData
@@ -16,7 +17,6 @@ import pw.aru.utils.emotes.STOP
 import pw.aru.utils.emotes.THINKING
 import pw.aru.utils.emotes.X
 import pw.aru.utils.extensions.humanUsers
-import pw.aru.utils.extensions.withPrefix
 
 abstract class MusicCommand(val musicManager: MusicManager) : ICommand {
     override val category = Category.MUSIC
@@ -87,7 +87,7 @@ abstract class MusicPermissionCommand(
         } else {
             send(
                 "$STOP B-baka, I'm not allowed to let you do that!" +
-                    if (alternate == null) "" else "\n\n$THINKING Maybe you meant ``${alternate.withPrefix()}`` instead?"
+                    if (alternate == null) "" else "\n\n$THINKING Maybe you meant ``$prefix$alternate`` instead?"
             ).queue()
         }
     }

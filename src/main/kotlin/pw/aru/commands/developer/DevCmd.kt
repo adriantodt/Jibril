@@ -5,6 +5,7 @@ import com.github.natanbc.weeb4j.Account
 import com.github.natanbc.weeb4j.Weeb4J
 import com.github.natanbc.weeb4j.image.FileType
 import com.github.natanbc.weeb4j.image.NsfwFilter
+import gnu.trove.TDecorators.wrap
 import mu.KLogging
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.entities.MessageEmbed
@@ -21,8 +22,10 @@ import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
+import pw.aru.core.music.MusicManager
 import pw.aru.core.parser.Args
 import pw.aru.core.parser.parseAndCreate
+import pw.aru.core.parser.tryTakeInt
 import pw.aru.db.AruDB
 import pw.aru.utils.Colors
 import pw.aru.utils.ReloadableListProvider
@@ -41,8 +44,9 @@ import java.util.function.Consumer
 class DevCmd
 (
     private val httpClient: OkHttpClient,
-    shardManager: ShardManager,
+    private val shardManager: ShardManager,
     db: AruDB,
+    private val musicManager: MusicManager,
     private val registry: CommandRegistry,
     private val weebSh: Weeb4J,
     private val dblPoster: DBLPoster,
@@ -58,6 +62,7 @@ class DevCmd
         val args = parseable()
 
         when (args.takeString()) {
+            "peek" -> peek(args)
             "shutdown" -> shutdown()
             "eval", "run" -> eval(false, args.takeRemaining())
             "peval", "prun" -> eval(true, args.takeRemaining())
@@ -104,6 +109,37 @@ class DevCmd
                 "*${adminJokes.random()}* **${event.member.effectiveName}** is one of my developers${randomOf(".", "!")}"
             )
 
+        }.queue()
+    }
+
+    private fun CommandContext.peek(args: Args) {
+        when (args.takeString()) {
+            "nowplaying" -> peekNowPlaying(args)
+            else -> showHelp()
+        }
+    }
+
+    private fun CommandContext.peekNowPlaying(args: Args) {
+        sendEmbed {
+            baseEmbed(event, "Aru! | Peek: NowPlaying")
+            wrap(musicManager.musicPlayers)
+                .entries
+                .asSequence()
+                .filter { (_, p) -> p.currentChannel != null && p.currentTrack != null }
+                .sortedByDescending { it.value.queue.size }
+                .drop(args.tryTakeInt()?.minus(1)?.times(10) ?: 0)
+                .take(10)
+                .forEach { (guildId, player) ->
+                    val guild = shardManager.getGuildById(guildId)
+                    val nowPlaying = player.currentTrack!!.info
+                    field(
+                        "Guild: ${guild.name}",
+                        "**Now Playing**: " + "**[${nowPlaying.title}](${nowPlaying.uri})** by **${nowPlaying.author}**",
+                        "",
+                        if (player.queue.isEmpty()) "Empty queue."
+                        else "**Queued**:\n" + player.queue.take(5).joinToString("\n") { "**[${it.info.title}](${it.info.uri})** by **${it.info.author}**" }
+                    )
+                }
         }.queue()
     }
 
@@ -298,6 +334,7 @@ class DevCmd
         assetProvider.reload()
         message.addReaction(SUCCESS).queue()
     }
+
     override val helpHandler = Help(
         CommandDescription(listOf("dev", "devtools", "hack"), "Developer Command", permission),
         Usage(

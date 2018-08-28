@@ -4,12 +4,7 @@ package pw.aru.utils.extensions
 
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.help.prefix
 import pw.aru.utils.emotes.ERROR
-
-object CommandExceptions {
-    object ShowHelp : RuntimeException()
-}
 
 fun onHelp(command: ICommand, event: GuildMessageReceivedEvent) {
     if (command is ICommand.HelpProvider) {
@@ -38,6 +33,3 @@ fun onHelp(command: ICommand, event: GuildMessageReceivedEvent) {
 const val ERROR_GUILD_PERMS = "You can **easily** fix that by re-inviting me with the following link: `https://add.aru.pw/`"
 const val ERROR_CHANNEL_PERMS = "Fix the **current channel**'s permissions and enable me the missing permissions shown above."
 const val ERROR_CHANNEL_NOT_NSFW = "For this command to work, set this text channel to **NSFW**."
-
-@Deprecated("Use CommandUsage.prefix instead.")
-inline fun String.withPrefix() = "$prefix$this"

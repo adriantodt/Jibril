@@ -12,7 +12,6 @@ import pw.aru.utils.emotes.PLAY
 import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.emotes.THINKING
 import pw.aru.utils.emotes.X
-import pw.aru.utils.extensions.withPrefix
 
 @Command("resume")
 @UseFullInjector
@@ -20,7 +19,7 @@ class Resume(musicManager: MusicManager) : MusicPermissionCommand(musicManager, 
     override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
         if (!musicPlayer.audioPlayer.isPaused) {
             send(
-                "$X The music is already playing, silly!\n\n$THINKING Maybe you want to pause the music with ``${"pause".withPrefix()}``, instead?"
+                "$X The music is already playing, silly!\n\n$THINKING Maybe you want to pause the music with ``$prefix${"pause"}``, instead?"
             ).queue()
             return
         }
@@ -52,7 +51,7 @@ class VoteResume(musicManager: MusicManager) : MusicVotingCommand(musicManager),
     override fun CommandContext.checkRequirements(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack): Boolean {
         if (!musicPlayer.audioPlayer.isPaused) {
             send(
-                "$X The music is already playing, silly!\n\n$THINKING Maybe you want to pause the music with ``${"votepause".withPrefix()}``, instead?"
+                "$X The music is already playing, silly!\n\n$THINKING Maybe you want to pause the music with ``$prefix${"votepause"}``, instead?"
             ).queue()
             return false
         }

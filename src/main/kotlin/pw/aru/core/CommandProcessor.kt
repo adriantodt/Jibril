@@ -6,6 +6,7 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.Aru.prefixes
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.commands.help.prefix
 import pw.aru.db.AruDB
 import pw.aru.db.entities.guild.GuildSettings
 import pw.aru.snow64.Snow64
@@ -164,7 +165,7 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
     }
 
     private fun handleException(c: ICommand, event: GuildMessageReceivedEvent, e: Exception) {
-        if (e == CommandExceptions.ShowHelp) {
+        if (e == CommandContext.ShowHelp) {
             return onHelp(c, event)
         }
 
@@ -206,7 +207,7 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
             }
         } else {
             event.channel.sendMessage(
-                "$WORRIED ${errorQuotes.random()}\n\n$TALKING Eh, do you mind reporting this to my developers? (Check out `${"hangout".withPrefix()}`)\n$PENCIL **Error ID**: `$errorId`"
+                "$WORRIED ${errorQuotes.random()}\n\n$TALKING Eh, do you mind reporting this to my developers? (Check out `$prefix${"hangout"}`)\n$PENCIL **Error ID**: `$errorId`"
             ).queue()
         }
     }

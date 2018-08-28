@@ -12,7 +12,6 @@ import pw.aru.utils.emotes.PLAY
 import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.emotes.THINKING
 import pw.aru.utils.emotes.X
-import pw.aru.utils.extensions.withPrefix
 
 @Command("clearqueue")
 @UseFullInjector
@@ -20,7 +19,7 @@ class ClearQueue(musicManager: MusicManager) : MusicPermissionCommand(musicManag
     override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
         if (musicPlayer.queue.isEmpty()) {
             send(
-                "$X The queue is already empty, silly!\n\n$THINKING Maybe you want to skip the current song with ``${"skip".withPrefix()}``, instead?"
+                "$X The queue is already empty, silly!\n\n$THINKING Maybe you want to skip the current song with ``$prefix${"skip"}``, instead?"
             ).queue()
             return
         }
@@ -52,7 +51,7 @@ class VoteClearQueue(musicManager: MusicManager) : MusicVotingCommand(musicManag
     override fun CommandContext.checkRequirements(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack): Boolean {
         if (musicPlayer.queue.isEmpty()) {
             send(
-                "$X The queue is already empty, silly!\n\n$THINKING Maybe you want to skip the current song with ``${"voteskip".withPrefix()}``, instead?"
+                "$X The queue is already empty, silly!\n\n$THINKING Maybe you want to skip the current song with ``$prefix${"voteskip"}``, instead?"
             ).queue()
             return false
         }

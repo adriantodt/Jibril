@@ -5,17 +5,17 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.commands.help.CommandDescription
-import pw.aru.core.commands.help.Description
-import pw.aru.core.commands.help.Help
-import pw.aru.core.commands.help.SeeAlso
+import pw.aru.core.commands.help.*
 import pw.aru.core.music.GuildMusicPlayer
 import pw.aru.core.music.MusicManager
 import pw.aru.core.music.musicLength
 import pw.aru.core.music.progressBar
 import pw.aru.utils.emotes.LOADING
 import pw.aru.utils.emotes.PLAY
-import pw.aru.utils.extensions.*
+import pw.aru.utils.extensions.baseEmbed
+import pw.aru.utils.extensions.field
+import pw.aru.utils.extensions.footer
+import pw.aru.utils.extensions.thumbnail
 
 @Command("queue", "q")
 @UseFullInjector
@@ -46,7 +46,7 @@ class Queue(musicManager: MusicManager) : MusicCommand(musicManager), ICommand.H
 
             field("Queue: (${queue.size} songs - ${musicLength(queue)})",
                 if (queue.isEmpty()) {
-                    "Music queue is empty! You can add more songs using `${"play".withPrefix()}`!"
+                    "Music queue is empty! You can add more songs using `$prefix${"play"}`!"
                 } else {
                     queue.withIndex()
                         .drop(page * 5)

@@ -28,7 +28,7 @@ data class CommandContext(
 
     fun parseable() = Args(args)
 
-    fun showHelp(): Unit = throw CommandExceptions.ShowHelp
+    fun showHelp(): Unit = throw ShowHelp
 
     fun sendEmbed(builder: EmbedBuilder = EmbedBuilder(), init: EmbedBuilder.() -> Unit): MessageAction = event.channel.sendMessage(embed(builder, init))
 
@@ -74,5 +74,7 @@ data class CommandContext(
 
         return true
     }
+
+    object ShowHelp : RuntimeException()
 }
 
