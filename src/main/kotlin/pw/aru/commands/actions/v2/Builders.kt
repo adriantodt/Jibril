@@ -23,6 +23,13 @@ class ActionCommandBuilder(
     var noTargets: String = ""
     var targetsYou: String = ""
     var targetsMe: String = ""
+
+    fun actions(anyTarget: String, noTargets: String, targetsYou: String, targetsMe: String) {
+        this.anyTarget = anyTarget
+        this.noTargets = noTargets
+        this.targetsYou = targetsYou
+        this.targetsMe = targetsMe
+    }
 }
 
 class ImageCommandBuilder(
@@ -32,4 +39,8 @@ class ImageCommandBuilder(
     override val description: String
 ) : ImageBasedCommandBuilder() {
     var messages: List<String> = emptyList()
+
+    fun messages(vararg values: String) {
+        messages = values.toList()
+    }
 }

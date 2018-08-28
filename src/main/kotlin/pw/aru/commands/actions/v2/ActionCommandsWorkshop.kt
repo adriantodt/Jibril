@@ -13,6 +13,7 @@ import pw.aru.commands.actions.v2.providers.WeebProvider
 import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Category
 import pw.aru.core.categories.Category.ACTION
+import pw.aru.core.commands.CommandProvider
 import pw.aru.core.commands.ICommandProvider
 import pw.aru.utils.caches.URLCache
 import pw.aru.utils.emotes.PAT
@@ -61,9 +62,10 @@ abstract class ActionCommandsWorkshop(weebApi: Weeb4J, private val cache: URLCac
     private fun ImageCommandBuilder.build() = ImageCommandImpl(names, category, commandName, description, provider, nsfwProvider, note, messages)
 }
 
+@CommandProvider
 class Test(weebApi: Weeb4J, cache: URLCache) : ActionCommandsWorkshop(weebApi, cache, ACTION) {
     override fun create() {
-        actionCommand(listOf("pat"), "Pat Command", "Pats the mentioned users.") {
+        actionCommand(listOf("pat2"), "Pat Command", "Pats the mentioned users.") {
             provider = fromWeebSh(type = "pat", fileType = GIF)
             anyTarget = "$PAT {mentions}, you have been patted by {author}"
             noTargets = "$PAT *Pats~*"
