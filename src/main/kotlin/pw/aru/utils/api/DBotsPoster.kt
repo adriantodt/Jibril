@@ -26,7 +26,7 @@ interface DBotsPoster {
                 url(apiRequest)
                 header("Authorization", apiKey)
                 post(RequestBody.create(MediaType.parse("application/json"), jsonStringOf("serverCount" to shardManager.guildCache.size())))
-            }.execute()
+            }.execute().close()
         }
     }
 }

@@ -3,9 +3,9 @@ package pw.aru.utils
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
-import org.json.JSONObject
 import pw.aru.exported.user_agent
 import pw.aru.utils.emotes.DISAPPOINTED
+import pw.aru.utils.extensions.jsonObject
 import pw.aru.utils.extensions.newCall
 import pw.aru.utils.extensions.toSmartString
 import java.util.*
@@ -39,7 +39,7 @@ fun paste(httpClient: OkHttpClient, contents: String): String {
             header("Content-Type", "text/plain")
 
             post(RequestBody.create(MediaType.parse("text/plain"), contents))
-        }.execute().use { return "https://hastebin.com/${JSONObject(it.body()!!.string()).getString("key")}" }
+        }.execute().use { return "https://hastebin.com/${it.body()!!.jsonObject().getString("key")}" }
     } catch (e: Exception) {
         e.printStackTrace()
         return "$DISAPPOINTED Hastebin is unavailable right now."

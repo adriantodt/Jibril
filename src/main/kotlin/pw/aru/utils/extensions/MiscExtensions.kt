@@ -12,7 +12,7 @@ import java.lang.reflect.Array.get
 import java.lang.reflect.Array.getLength
 import java.util.*
 
-//Json
+// Json
 fun jsonOf(vararg pairs: Pair<*, *>): JSONObject = if (pairs.isNotEmpty()) JSONObject(mapOf(*pairs)) else JSONObject()
 
 fun jsonStringOf(vararg pairs: Pair<*, *>) = jsonOf(*pairs).toString()
@@ -20,7 +20,7 @@ fun jsonStringOf(vararg pairs: Pair<*, *>) = jsonOf(*pairs).toString()
 // OkHttp
 inline fun OkHttpClient.newCall(builder: Request.Builder.() -> Unit): Call = newCall(Request.Builder().also(builder).build())
 
-//OkHttp JSON
+// OkHttp JSON
 inline fun ResponseBody.jsonObject() = JSONObject(string())
 
 inline fun ResponseBody.jsonArray() = JSONArray(string())
@@ -76,7 +76,7 @@ fun <E> List<E>.split(minSize: Int, maxSize: Int): List<List<E>> {
     return withIndex()
         .groupBy { it.index / c }
         .values
-        .map { it.map { it.value } }
+        .map { it.map(IndexedValue<E>::value) }
 }
 
 fun Exception.simpleName(): String {

@@ -1,8 +1,8 @@
 package pw.aru.utils.caches
 
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import pw.aru.exported.user_agent
+import pw.aru.utils.extensions.newCall
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
@@ -20,16 +20,10 @@ class URLCache(private val httpClient: OkHttpClient, private var cacheDir: File)
         if (file.exists()) return file
 
         //Download and Cache
-        val bytes = httpClient.newCall(
-            Request.Builder()
-                .url(url)
-                .header("User-Agent", user_agent)
-                .build()
-        ).execute()
-            .body()!!
-            .bytes()
-
-        file.writeBytes(bytes)
+        httpClient.newCall {
+            url(url)
+            header("User-Agent", user_agent)
+        }.execute().body()!!.use { it.source().inputStream().copyTo(file.outputStream()) }
 
         return file
     }

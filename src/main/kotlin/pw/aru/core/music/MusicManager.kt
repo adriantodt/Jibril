@@ -101,30 +101,30 @@ class MusicManager(private val shardManager: ShardManager, private val httpClien
             is SoundCloudAudioSourceManager -> {
 
                 fun request(retry: Boolean = true): String? {
-                    val response = httpClient.newCall {
+                    httpClient.newCall {
                         url(
                             URIBuilder("https://api.soundcloud.com/tracks/${currentTrack.identifier}")
                                 .addParameter("client_id", sourceManager.clientId)
                                 .build()
                                 .toURL()
                         )
-                    }.execute()
+                    }.execute().use { response ->
+                        if (response.code() == 401) {
+                            return if (retry) {
+                                sourceManager.updateClientId()
+                                request(false)
+                            } else {
+                                null
+                            }
+                        }
 
-                    if (response.code() == 401) {
-                        return if (retry) {
-                            sourceManager.updateClientId()
-                            request(false)
-                        } else {
+                        return try {
+                            JSONObject(response.body()!!.string())
+                                .getString("artwork_url")
+                                .replace("large", "t500x500")
+                        } catch (_: Exception) {
                             null
                         }
-                    }
-
-                    return try {
-                        JSONObject(response.body()!!.string())
-                            .getString("artwork_url")
-                            .replace("large", "t500x500")
-                    } catch (_: Exception) {
-                        null
                     }
                 }
 
