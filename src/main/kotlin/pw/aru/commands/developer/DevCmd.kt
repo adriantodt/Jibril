@@ -27,6 +27,7 @@ import pw.aru.core.parser.Args
 import pw.aru.core.parser.parseAndCreate
 import pw.aru.core.parser.tryTakeInt
 import pw.aru.db.AruDB
+import pw.aru.exported.aru_version
 import pw.aru.utils.Colors
 import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.api.DBLPoster
@@ -62,15 +63,24 @@ class DevCmd
         val args = parseable()
 
         when (args.takeString()) {
-            "peek" -> peek(args)
             "shutdown" -> shutdown()
+
             "eval", "run" -> eval(false, args.takeRemaining())
             "peval", "prun" -> eval(true, args.takeRemaining())
+
             "enablecallsite" -> callsite(true)
             "disablecallsite" -> callsite(false)
+
             "weebsh" -> weebsh(args)
+
+            "peek" -> when (args.takeString()) {
+                "nowplaying" -> peekNowPlaying(args)
+                else -> showHelp()
+            }
+
             "reloadassets" -> reloadassets()
             "genwebyml" -> generateWebYaml()
+            "gendbotshtml" -> generateBotlistCmdList()
             "", "check" -> adminCheck()
             else -> showHelp()
         }
@@ -112,13 +122,6 @@ class DevCmd
         }.queue()
     }
 
-    private fun CommandContext.peek(args: Args) {
-        when (args.takeString()) {
-            "nowplaying" -> peekNowPlaying(args)
-            else -> showHelp()
-        }
-    }
-
     private fun CommandContext.peekNowPlaying(args: Args) {
         sendEmbed {
             baseEmbed(event, "Aru! | Peek: NowPlaying")
@@ -132,9 +135,13 @@ class DevCmd
                 .forEach { (guildId, player) ->
                     val guild = shardManager.getGuildById(guildId)
                     val nowPlaying = player.currentTrack!!.info
+                    val voiceChannel = guild.selfMember.voiceState.channel
                     field(
                         "Guild: ${guild.name} (${guild.id})",
-                        "**Now Playing**: " + "**[${nowPlaying.title.limit(40)}](${nowPlaying.uri})** by **${nowPlaying.author}**",
+                        "**Voice Channel**: ${voiceChannel.name} (${voiceChannel.humanUsers} listening)",
+                        "",
+                        "**Now Playing**: ",
+                        "**[${nowPlaying.title.limit(40)}](${nowPlaying.uri})** by **${nowPlaying.author}**",
                         if (player.queue.isEmpty()) "Empty queue."
                         else "**Queued**:\n" + player.queue.take(3).joinToString("\n") { "**[${it.info.title.limit(40)}](${it.info.uri})** by **${it.info.author}**" }
                     )
@@ -329,6 +336,24 @@ class DevCmd
         send("**Commands.yml generated**: ${paste(httpClient, builder.toString())}").queue()
     }
 
+    private fun CommandContext.generateBotlistCmdList() {
+        val cmdsGroup = registry.lookup.entries.groupBy({ it.key.category }, { it.value[0] })
+        val builder = StringBuilder()
+        builder += "<p class=\"fmt-h4\">My Commands: (v$aru_version)</p>\n<ul class=\"bot-list\">\n"
+
+        for (category in Category.LIST) {
+            if (category.nsfw) continue
+            if (category.permission == CommandPermission.BOT_DEVELOPER) continue
+            val cmds = cmdsGroup[category] ?: continue
+            if (cmds.isEmpty()) continue
+
+            builder += "<li><b class=\"fmt-b\">${category.categoryName}</b>: ${cmds.sorted().joinToString("</code> <code>", "<code>", "</code>")}</li>\n"
+        }
+
+        builder += "</ul>\n"
+        send("**Commands.html snippet generated**: ${paste(httpClient, builder.toString())}").queue()
+    }
+
     private fun CommandContext.reloadassets() {
         assetProvider.reload()
         message.addReaction(SUCCESS).queue()
@@ -349,8 +374,11 @@ class DevCmd
             CommandUsage("dev weebsh", "Dumps Weeb.sh types and tags."),
             CommandUsage("dev weebsh <[-type <value>] [-tags <values,...>] [-nsfw <value>] [-ext <value>]>", "Gets a random Weeb.sh image."),
             UsageSeparator,
+            CommandUsage("dev peek nowplaying", "Peek musics being played."),
+            UsageSeparator,
             CommandUsage("dev reloadassets", "Reloads assets."),
-            CommandUsage("dev genwebyml", "Generates the base commands.yml file.")
+            CommandUsage("dev genwebyml", "Generates the base commands.yml file."),
+            CommandUsage("dev gendbotshtml", "Generates the html snipppet for the botlists.")
         )
     )
 }

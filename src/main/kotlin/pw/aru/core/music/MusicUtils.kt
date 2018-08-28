@@ -121,7 +121,7 @@ fun musicLength(queue: Iterable<AudioTrack>): String {
 
 private const val BLOCK_INACTIVE = "\u25AC"
 private const val BLOCK_ACTIVE = "\uD83D\uDD18"
-private const val TOTAL_BLOCKS = 10
+private const val TOTAL_BLOCKS = 15
 
 fun progressBar(position: Long, duration: Long): String {
     val active = (position.toDouble() / duration.toDouble()).times(TOTAL_BLOCKS).toInt()
