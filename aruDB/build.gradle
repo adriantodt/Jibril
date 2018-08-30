@@ -17,8 +17,8 @@ repositories {
 
 dependencies {
     //Kotlin
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.2.60"
-    compile "org.jetbrains.kotlin:kotlin-reflect:1.2.60"
+    compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.2.61'
+    compile 'org.jetbrains.kotlin:kotlin-reflect:1.2.61'
 
     //Redis
     compile 'redis.clients:jedis:2.9.0'

@@ -4,7 +4,7 @@
 
 plugins {
     //Compiles Kotlin
-    id 'org.jetbrains.kotlin.jvm' version '1.2.60'
+    id 'org.jetbrains.kotlin.jvm' version '1.2.61'
     //Adds an Executable Manifest
     id 'application'
     //Creates FatJars
@@ -22,13 +22,13 @@ mainClassName = 'pw.aru.Bootstrap'
     def d = "$l ${(v.size() + l.size() + 1) % 2 != 0 ? "-" : "--"} v$v"
     def w = (0..(30 - d.size() / 2)).collect { it % 2 != 0 ? '-' : '=' }.join ''
     println "|$w| $d |${w.reverse()}|"
-})("Aru!", version)
+})('Aru!', version)
 
 //Repositories and Dependencies
 repositories {
     jcenter()
     maven { url = 'https://dl.bintray.com/adriantodt/maven' }
-    maven { url = "https://dl.bintray.com/kodehawa/maven" }
+    maven { url = 'https://dl.bintray.com/kodehawa/maven' }
     mavenLocal()
 }
 
@@ -37,8 +37,8 @@ dependencies {
     compile project('aruDB')
 
     //Source of memes
-    compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.2.60'
-    compile 'org.jetbrains.kotlin:kotlin-reflect:1.2.60'
+    compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.2.61'
+    compile 'org.jetbrains.kotlin:kotlin-reflect:1.2.61'
 
     // Main APIs
     compile 'net.dv8tion:JDA:3.7.1_406'
@@ -49,7 +49,7 @@ dependencies {
     // Useful
     compile 'com.sedmelluq:jda-nas:1.0.6'
     compile 'com.jagrosh:jda-utilities-menu:2.1.4'
-    compile 'net.kodehawa:imageboard-api:2.0.3_2'
+    compile 'net.kodehawa:imageboard-api:2.0.5'
 
     // Open-Source Libraries
     compile 'pw.aru.discord:dice-notation:1.0'
@@ -61,7 +61,7 @@ dependencies {
     compile 'pw.aru.api:DD4J:1.0.1'
 
     //Helping stuff
-    compile 'org.apache.commons:commons-lang3:3.7'
+    compile 'org.apache.commons:commons-lang3:3.8'
     compile 'org.apache-extras.beanshell:bsh:2.0b6'
 
     //Scanning and Injections
@@ -75,7 +75,7 @@ dependencies {
 }
 
 //FILE src/main/kotlin/aru/exported/exported.kt
-rootProject.file("src/main/kotlin/pw/aru/exported/exported.kt").with {
+rootProject.file('src/main/kotlin/pw/aru/exported/exported.kt').with {
     parentFile.mkdirs()
     createNewFile()
     write("""
@@ -97,7 +97,7 @@ const val aru_version = "${version}"
  * User Agent
  */
 const val user_agent = "JDA/DiscordBot (Aru! ${version})"
-""".trim(), "UTF-8")
+""".trim(), 'UTF-8')
 }
 
 //BELOW: TASKS AND CONFIGS YOU PROBABLY DON'T NEED TO TWEAK MORE THAN ONCE IN A LIFETIME
@@ -110,6 +110,6 @@ targetCompatibility = 1.8
 artifacts { archives shadowJar }
 tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
 task cleanDistArchives(type: Delete) { delete files(distTar, distZip, jar) }
-[jar, distZip, distTar].each { it.with { classifier = "trash"; finalizedBy cleanDistArchives } }
-shadowJar.classifier = ""
-dependencyUpdates.revision = "release"
+[jar, distZip, distTar].each { it.with { classifier = 'trash'; finalizedBy cleanDistArchives } }
+shadowJar.classifier = ''
+dependencyUpdates.revision = 'release'
