@@ -63,6 +63,8 @@ class DevCmd
         val args = parseable()
 
         when (args.takeString()) {
+            "crash" -> throw RuntimeException("I'm not feeling good, Todt~")
+
             "shutdown" -> shutdown()
 
             "eval", "run" -> eval(false, args.takeRemaining())

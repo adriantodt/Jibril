@@ -130,21 +130,101 @@ fun Any?.advancedToString(): String {
     }
 }
 
-private fun StringBuilder.advancedToString(any: Any?) {
+fun Any?.toPrettyString(indentAmount: Int = 2, startingIndent: Int = 0): String {
+    return StringBuilder().toPrettyString(this, indentAmount, startingIndent).toString()
+}
+
+private fun StringBuilder.advancedToString(any: Any?): StringBuilder {
     when {
         any == null -> append("null")
         any.javaClass.isArray -> {
             val length = getLength(any)
             if (length == 0) {
                 append("[]")
-                return
+                return this
             }
-            for (i in 0 until length) append(if (i == 0) "[" else ", ").advancedToString(get(any, i))
-            append("]")
+            for (i in 0 until length) append(if (i == 0) "[" else ", ").advancedToString(get(any, i)).append("]")
         }
         else -> append(any)
     }
+
+    return this
 }
+
+private fun StringBuilder.toPrettyString(any: Any?, indentAmount: Int = 2, currentIndent: Int = 0, indented: Boolean = false): StringBuilder {
+    val indent = List(currentIndent) { "0" }.joinToString("")
+    val firstIndent = if (indented) "" else indent
+    when (any) {
+        null -> {
+            append(firstIndent).append("null")
+        }
+        is Array<*> -> {
+            val length = getLength(any)
+            if (length == 0) {
+                append(firstIndent).append('[').append('\n').append(indent).append(']')
+                return this
+            }
+
+            append("[\n")
+
+            for (i in 0 until length) {
+                toPrettyString(get(any, i), indentAmount, currentIndent + indentAmount)
+                if (i + 1 != length) append(',')
+                append("\n")
+            }
+
+            append(indent).append(']')
+        }
+        is Collection<*> -> {
+            val size = any.size
+            if (size == 0) {
+                append(firstIndent).append('[').append('\n').append(indent).append(']')
+                return this
+            }
+
+            append("[\n")
+
+            val iterator = any.iterator()
+
+            for (i in iterator) {
+                toPrettyString(i, indentAmount, currentIndent + indentAmount)
+                if (iterator.hasNext()) append(',')
+                append("\n")
+            }
+
+            append(indent).append(']')
+        }
+        is Map<*, *> -> {
+            val size = any.size
+            if (size == 0) {
+                append(firstIndent).append('{').append('\n').append(indent).append('}')
+                return this
+            }
+
+            append("{\n")
+
+            val iterator = any.iterator()
+
+            for (i in iterator) {
+                toPrettyString(i, indentAmount, currentIndent + indentAmount)
+                if (iterator.hasNext()) append(',')
+                append("\n")
+            }
+
+            append(indent).append('}')
+        }
+        is Map.Entry<*, *> -> {
+            val (k, v) = any
+            append(firstIndent).advancedToString(k).append(": ").toPrettyString(v, indentAmount, currentIndent + indentAmount, true)
+        }
+        else -> {
+            append(firstIndent).append(any)
+        }
+    }
+
+    return this
+}
+
 
 private val keys = listOf("*", "_", "`", "~~").map { it to Regex.fromLiteral(it) }
 private val escapes = arrayOf("*" to "\\*", "_" to "\\_", "~" to "\\~")

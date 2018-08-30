@@ -15,6 +15,7 @@
 
 # Runtime
 /logs/
+/reports/
 /db/
 /tests/
 /url_cache/

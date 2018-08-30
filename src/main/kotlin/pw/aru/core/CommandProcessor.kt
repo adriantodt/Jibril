@@ -7,6 +7,7 @@ import pw.aru.Aru.prefixes
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.prefix
+import pw.aru.core.logging.DiscordLogBack
 import pw.aru.db.AruDB
 import pw.aru.db.entities.guild.GuildSettings
 import pw.aru.snow64.Snow64
@@ -14,6 +15,9 @@ import pw.aru.utils.emotes.*
 import pw.aru.utils.extensions.*
 import pw.aru.utils.helpers.CommandStatsManager
 import redis.clients.jedis.exceptions.JedisConnectionException
+import java.io.File
+import java.io.PrintWriter
+import java.io.StringWriter
 import java.util.*
 
 class CommandProcessor(private val db: AruDB, private val registry: CommandRegistry) : KLogging() {
@@ -173,12 +177,12 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
             try {
                 c.handle(event, e)
             } catch (e2: Exception) {
-                reportException(event, e, if (e != e2) e2 else null)
+                reportException(c, event, e, if (e != e2) e2 else null)
             }
             return
         }
 
-        reportException(event, e)
+        reportException(c, event, e)
     }
 
     private val errorQuotes = listOf(
@@ -187,17 +191,44 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
         "What am I supposed to do with an error? Because I got one."
     )
 
-    private fun reportException(event: GuildMessageReceivedEvent, e: Exception, h: Exception? = null) {
+    private fun reportException(c: ICommand, event: GuildMessageReceivedEvent, e: Exception, h: Exception? = null) {
 
-        val errorId = e.simpleName().initials() + "#" + Snow64.fromSnowflake(event.message.idLong)
+        val errorId = e.simpleName().initials() + "-" + Snow64.fromSnowflake(event.message.idLong)
+        val fileId = DiscordLogBack.logWorker.generate()
+        File("reports").mkdirs()
 
-        logger.error(e) {
+        val log = if (h != null) {
+            StringWriter().also { e.printStackTrace(PrintWriter(it, true)) }.buffer.toString().trim() +
+                "\nUnderlying Exception:\n" +
+                StringWriter().also { h.printStackTrace(PrintWriter(it, true)) }.buffer.toString().trim()
+        } else {
+            StringWriter().also { e.printStackTrace(PrintWriter(it, true)) }.buffer.toString().trim()
+        }
+
+        File("reports/$fileId.html").writeText(
+            File("assets/aru/log.html").readText().replaceEach(
+                "{date}" to Date().toString(),
+                "{log}" to log,
+                "{extra}" to
+                    "ErrorID: $errorId\n" +
+                    "TextChannel: ${event.channel}\n" +
+                    "Guild: ${event.guild}\n" +
+                    "Member: ${event.member}\n\n" +
+                    "Message: ${event.message.contentRaw}\n" +
+                    "Command: $c (${c.javaClass})\n" +
+                    "Exception: ${e.javaClass}"
+            )
+        )
+
+        logger.error(e)
+        {
             "**ERROR REPORTED**\n" +
                 "**ErrorID**: `$errorId`\n" +
                 "**TextChannel**: `${event.channel}`\n" +
                 "**Guild**: `${event.guild}`\n" +
                 "**Type**: `${e.javaClass.simpleName}`\n" +
-                "**Command**: ``${event.message.contentRaw}``"
+                "**Command**: ``${event.message.contentRaw}``\n\n" +
+                "**Report**: https://reports.aru.pw/$fileId.html"
         }
 
         if (h != null) {

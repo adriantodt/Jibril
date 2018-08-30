@@ -10,9 +10,13 @@ import net.dv8tion.jda.webhook.WebhookClient
 import net.dv8tion.jda.webhook.WebhookClientBuilder
 import okhttp3.OkHttpClient
 import org.slf4j.LoggerFactory
+import pw.aru.db.AruDB
+import pw.aru.snow64.Snow64
 import pw.aru.utils.emotes.BOOK
 import pw.aru.utils.extensions.classOf
-import pw.aru.utils.paste
+import pw.aru.utils.extensions.replaceEach
+import pw.aru.utils.extensions.toPrettyString
+import java.io.File
 import java.lang.Thread.interrupted
 import java.text.SimpleDateFormat
 import java.util.*
@@ -21,7 +25,8 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 class DiscordLogBack : AppenderBase<ILoggingEvent>() {
-    private lateinit var layout: PatternLayout
+    private lateinit var discordLayout: PatternLayout
+    private lateinit var logLayout: PatternLayout
     private val httpClient = OkHttpClient()
 
     @Synchronized
@@ -38,23 +43,23 @@ class DiscordLogBack : AppenderBase<ILoggingEvent>() {
 
                     // Get First (Blocking)
                     val first: ILoggingEvent = queue.take()
+                    val list = arrayListOf(first)
 
                     val joiner = StringJoiner("\n")
-                    joiner.add(layout.doLayout(first).trim())
+                    joiner.add(discordLayout.doLayout(first).trim())
 
                     val start = System.currentTimeMillis()
                     while (true) {
-                        val events = queue.poll(500, TimeUnit.MILLISECONDS) ?: break
-                        joiner.add(layout.doLayout(events).trim())
+                        val event = queue.poll(700, TimeUnit.MILLISECONDS) ?: break
+                        list += event
+                        joiner.add(discordLayout.doLayout(event).trim())
                         if (System.currentTimeMillis() > start + 1000) break
                     }
 
-                    val log = joiner.toString()
-
-                    if (log.length > 8000) {
-                        client.send("[`${format.format(Date())}`] [$BOOK] Log got too long: ${paste(httpClient, log)}")
+                    if (joiner.length() > 8000) {
+                        client.send("[`${format.format(Date())}`] [$BOOK] Log got too long: ${saveLogHtml(list)}")
                     } else {
-                        MessageBuilder().append(log).buildAll(SplitPolicy.SPACE).forEach { client.send(it) }
+                        MessageBuilder().append(joiner.toString()).buildAll(SplitPolicy.SPACE).forEach { client.send(it) }
                     }
                 }
             } catch (e: InterruptedException) {
@@ -62,6 +67,26 @@ class DiscordLogBack : AppenderBase<ILoggingEvent>() {
 
             client.close()
         }
+    }
+
+    private fun saveLogHtml(logs: List<ILoggingEvent>): String {
+        val fileId = logWorker.generate()
+        File("reports").mkdirs()
+
+        val mdc = logs.flatMap { it.mdcPropertyMap.entries }
+            .groupBy({ it.key }, { it.value })
+            .mapValues { (_, v) -> v.singleOrNull() ?: v.toSortedSet() }
+            .toPrettyString(4)
+
+        File("reports/$fileId.html").writeText(
+            File("assets/aru/log.html").readText().replaceEach(
+                "{date}" to Date().toString(),
+                "{log}" to logs.joinToString("\n") { logLayout.doLayout(it).trim() },
+                "{extra}" to "Log Count: ${logs.size}\n\nMDC:\n$mdc"
+            )
+        )
+
+        return "https://reports.aru.pw/$fileId.html"
     }
 
     override fun append(event: ILoggingEvent) {
@@ -77,17 +102,24 @@ class DiscordLogBack : AppenderBase<ILoggingEvent>() {
 
         instance = this
 
-        layout = PatternLayout()
+        discordLayout = PatternLayout()
+        logLayout = PatternLayout()
 
         //Configuration
-        layout.context = this.context
-        layout.pattern = "[`%d{HH:mm:ss}`] [`%t/%level`] [`%logger{0}`]: %msg%n%ex{5}"
-        layout.start()
+        discordLayout.context = this.context
+        discordLayout.pattern = "[`%d{HH:mm:ss}`] [`%t/%level`] [`%logger{0}`]: %msg%n%ex{5}"
+        discordLayout.start()
+
+        logLayout.context = this.context
+        logLayout.pattern = "[%d] [%t/%level] [%logger{1}]: %msg%n"
+        logLayout.start()
 
         super.start()
     }
 
     companion object {
+        val logWorker = Snow64.convert(AruDB.generator).getWorker(0, 1)
+
         private val queue = LinkedBlockingQueue<ILoggingEvent>()
         private var instance: DiscordLogBack? = null
         private var thread: Thread? = null
