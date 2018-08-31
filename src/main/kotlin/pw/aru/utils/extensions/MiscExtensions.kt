@@ -130,7 +130,7 @@ fun Any?.advancedToString(): String {
     }
 }
 
-fun Any?.toPrettyString(indentAmount: Int = 2, startingIndent: Int = 0): String {
+fun Any?.toPrettyString(indentAmount: Int = 4, startingIndent: Int = 0): String {
     return StringBuilder().toPrettyString(this, indentAmount, startingIndent).toString()
 }
 

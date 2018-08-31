@@ -194,7 +194,7 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
     private fun reportException(c: ICommand, event: GuildMessageReceivedEvent, e: Exception, h: Exception? = null) {
 
         val errorId = e.simpleName().initials() + "-" + Snow64.fromSnowflake(event.message.idLong)
-        val fileId = DiscordLogBack.logWorker.generate()
+        val fileId = DiscordLogBack.fileWorker.generate()
         File("reports").mkdirs()
 
         val log = if (h != null) {
@@ -206,7 +206,7 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
         }
 
         File("reports/$fileId.html").writeText(
-            File("assets/aru/log.html").readText().replaceEach(
+            File("assets/aru/templates/logs.html").readText().replaceEach(
                 "{date}" to Date().toString(),
                 "{log}" to log,
                 "{extra}" to

@@ -3,12 +3,12 @@ package pw.aru.core.logging
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.PatternLayout
 import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.classic.spi.LoggingEventVO
 import ch.qos.logback.core.AppenderBase
 import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.MessageBuilder.SplitPolicy
 import net.dv8tion.jda.webhook.WebhookClient
 import net.dv8tion.jda.webhook.WebhookClientBuilder
-import okhttp3.OkHttpClient
 import org.slf4j.LoggerFactory
 import pw.aru.db.AruDB
 import pw.aru.snow64.Snow64
@@ -27,10 +27,9 @@ import kotlin.concurrent.thread
 class DiscordLogBack : AppenderBase<ILoggingEvent>() {
     private lateinit var discordLayout: PatternLayout
     private lateinit var logLayout: PatternLayout
-    private val httpClient = OkHttpClient()
 
     @Synchronized
-    private fun boot(client: WebhookClient) {
+    private fun startThread(client: WebhookClient) {
         if (thread != null) {
             throw IllegalStateException("Sender Thread already running")
         }
@@ -44,22 +43,22 @@ class DiscordLogBack : AppenderBase<ILoggingEvent>() {
                     // Get First (Blocking)
                     val first: ILoggingEvent = queue.take()
                     val list = arrayListOf(first)
-
-                    val joiner = StringJoiner("\n")
-                    joiner.add(discordLayout.doLayout(first).trim())
+                    val log = StringJoiner("\n").add(discordLayout.doLayout(first).trim())
 
                     val start = System.currentTimeMillis()
                     while (true) {
                         val event = queue.poll(700, TimeUnit.MILLISECONDS) ?: break
-                        list += event
-                        joiner.add(discordLayout.doLayout(event).trim())
+                        list.add(event)
+                        log.add(discordLayout.doLayout(event).trim())
                         if (System.currentTimeMillis() > start + 1000) break
                     }
 
-                    if (joiner.length() > 8000) {
+                    if (log.length() > 8000) {
                         client.send("[`${format.format(Date())}`] [$BOOK] Log got too long: ${saveLogHtml(list)}")
                     } else {
-                        MessageBuilder().append(joiner.toString()).buildAll(SplitPolicy.SPACE).forEach { client.send(it) }
+                        MessageBuilder(log.toString())
+                            .buildAll(SplitPolicy.SPACE)
+                            .forEach { client.send(it) }
                     }
                 }
             } catch (e: InterruptedException) {
@@ -70,7 +69,7 @@ class DiscordLogBack : AppenderBase<ILoggingEvent>() {
     }
 
     private fun saveLogHtml(logs: List<ILoggingEvent>): String {
-        val fileId = logWorker.generate()
+        val fileId = fileWorker.generate()
         File("reports").mkdirs()
 
         val mdc = logs.flatMap { it.mdcPropertyMap.entries }
@@ -79,7 +78,7 @@ class DiscordLogBack : AppenderBase<ILoggingEvent>() {
             .toPrettyString(4)
 
         File("reports/$fileId.html").writeText(
-            File("assets/aru/log.html").readText().replaceEach(
+            File("assets/aru/templates/logs.html").readText().replaceEach(
                 "{date}" to Date().toString(),
                 "{log}" to logs.joinToString("\n") { logLayout.doLayout(it).trim() },
                 "{extra}" to "Log Count: ${logs.size}\n\nMDC:\n$mdc"
@@ -91,7 +90,9 @@ class DiscordLogBack : AppenderBase<ILoggingEvent>() {
 
     override fun append(event: ILoggingEvent) {
         if (event.level.isGreaterOrEqual(Level.INFO)) {
-            synchronized(queue) { queue.offer(event) }
+            synchronized(queue) {
+                queue.offer(LoggingEventVO.build(event))
+            }
         }
     }
 
@@ -118,7 +119,7 @@ class DiscordLogBack : AppenderBase<ILoggingEvent>() {
     }
 
     companion object {
-        val logWorker = Snow64.convert(AruDB.generator).getWorker(0, 1)
+        val fileWorker = Snow64.convert(AruDB.generator).getWorker(0, 1)
 
         private val queue = LinkedBlockingQueue<ILoggingEvent>()
         private var instance: DiscordLogBack? = null
@@ -141,7 +142,7 @@ class DiscordLogBack : AppenderBase<ILoggingEvent>() {
                 throw IllegalStateException("DiscordLogBack instance not initialized.")
             }
 
-            instance!!.boot(WebhookClientBuilder(logWebhook).build())
+            instance!!.startThread(WebhookClientBuilder(logWebhook).build())
         }
     }
 }

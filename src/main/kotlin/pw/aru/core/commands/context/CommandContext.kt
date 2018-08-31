@@ -26,6 +26,12 @@ data class CommandContext(
     val guild: Guild
         get() = event.guild
 
+    val selfMember: Member
+        get() = event.guild.selfMember
+
+    val selfUser: SelfUser
+        get() = event.jda.selfUser
+
     fun parseable() = Args(args)
 
     fun showHelp(): Unit = throw ShowHelp
@@ -42,13 +48,8 @@ data class CommandContext(
     fun send(embed: MessageEmbed): MessageAction = event.channel.sendMessage(embed)
 
     fun requireNSFW(): Boolean {
-        if (!event.channel.isNSFW) {
-            event.channel.sendMessage(
-                arrayOf(
-                    "$X S-Sorry, but this channel is not a **NSFW** channel!",
-                    ERROR_CHANNEL_NOT_NSFW
-                ).joinToString("\n")
-            ).queue()
+        if (!channel.isNSFW) {
+            send("$X S-Sorry, but this channel is not a **NSFW** channel!\n$ERROR_CHANNEL_NOT_NSFW").queue()
             return false
         }
 
@@ -56,13 +57,11 @@ data class CommandContext(
     }
 
     fun requirePerms(vararg permissions: Permission): Boolean {
-        val self = event.guild.selfMember
-        val channel = event.channel
-        if (!self.hasPermission(channel, *permissions)) {
-            val guildCheck = self.hasPermission(*permissions)
-            val perms = permissions.map { it to self.hasPermission(channel, it) }
+        if (!selfMember.hasPermission(channel, *permissions)) {
+            val guildCheck = selfMember.hasPermission(*permissions)
+            val perms = permissions.map { it to selfMember.hasPermission(channel, it) }
 
-            event.channel.sendMessage(
+            send(
                 arrayOf(
                     "$X For this command to work, I need the following permissions:",
                     perms.joinToString("\n") { (perm, enabled) -> "${if (enabled) "✅" else "❎"} **${perm.getName()}**" },

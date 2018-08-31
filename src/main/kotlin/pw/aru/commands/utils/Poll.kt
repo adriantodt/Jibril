@@ -1,5 +1,6 @@
 package pw.aru.commands.utils
 
+import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.IFakeable
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
@@ -17,6 +18,8 @@ class Poll : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
     private val pattern = Regex(twemoji_pattern)
 
     override fun CommandContext.discreteCall(outer: String) {
+        if (!requirePerms(Permission.MESSAGE_HISTORY)) return
+
         val emotes = event.message.emotes.filterNot(IFakeable::isFake).map { it.asMention to "${it.name}:${it.id}" }
         outer.split('\n')
             .mapNotNull { pattern.find(it.trimStart())?.value ?: emotes.firstOrNull { (e) -> it.trimStart().startsWith(e) }?.second }
@@ -31,11 +34,7 @@ class Poll : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
             "[$prefix${"poll"}] Should we play Fortnite or PUGB?",
             ":one: Fornite", ":two: PUGB",
             withPrefix = false
-        )
+        ),
+        Note("Besides the standard permissions, this command requires the **${Permission.MESSAGE_HISTORY.getName()}** permission.")
     )
-}
-
-private fun <T> T?.log(s: String? = null): T? {
-    println("$s${this}")
-    return this
 }

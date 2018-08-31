@@ -3,11 +3,14 @@ package pw.aru.utils
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
+import pw.aru.core.logging.DiscordLogBack
 import pw.aru.exported.user_agent
 import pw.aru.utils.emotes.DISAPPOINTED
 import pw.aru.utils.extensions.jsonObject
 import pw.aru.utils.extensions.newCall
+import pw.aru.utils.extensions.replaceEach
 import pw.aru.utils.extensions.toSmartString
+import java.io.File
 import java.util.*
 
 fun humanizedTime(millis: Long): String {
@@ -30,7 +33,24 @@ fun String.limit(size: Int): String {
     return if (length <= size) this else substring(0, size - 3) + "..."
 }
 
-fun paste(httpClient: OkHttpClient, contents: String): String {
+fun paste(title: String, content: String, lang: String = "none"): String {
+    val fileId = DiscordLogBack.fileWorker.generate()
+    File("pastes").mkdirs()
+
+    File("pastes/$fileId.html").writeText(
+        File("assets/aru/templates/logs.html").readText().replaceEach(
+            "{date}" to Date().toString(),
+            "{title}" to title,
+            "{lang}" to lang,
+            "{content}" to content
+        )
+    )
+
+    return "https://pastes.aru.pw/$fileId.html"
+}
+
+@Deprecated("Use paste instead.", ReplaceWith("paste(title, contents)", "pw.aru.utils.paste"))
+fun haste(httpClient: OkHttpClient, contents: String): String {
     try {
         httpClient.newCall {
             url("https://hastebin.com/documents")

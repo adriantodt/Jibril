@@ -77,8 +77,8 @@ internal fun createShardManager(injector: Kodein, token: String, onAllShardsRead
         setStatus(OnlineStatus.DO_NOT_DISTURB)
 
         addEventListeners(
-            listener<ReadyEvent> {
-                val shardManager = it.jda.asBot().shardManager
+            listener<ReadyEvent> { event ->
+                val shardManager = event.jda.asBot().shardManager
 
                 if (shardManager.shardCache.all { it.status == LOADING_SUBSYSTEMS || it.status == CONNECTED }) {
                     shardManager.removeEventListener(this)

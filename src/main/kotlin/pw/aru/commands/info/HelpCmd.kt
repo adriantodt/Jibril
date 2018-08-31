@@ -14,7 +14,7 @@ import pw.aru.utils.helpers.CommandStatsManager
 import java.util.concurrent.TimeUnit
 
 @Command("help", "h")
-class HelpCommand(private val registry: CommandRegistry) : ICommand, ICommand.HelpDialogProvider {
+class HelpCmd(private val registry: CommandRegistry) : ICommand, ICommand.HelpDialogProvider {
     companion object : KLogging()
 
     override val category = Category.INFO
@@ -75,32 +75,31 @@ class HelpCommand(private val registry: CommandRegistry) : ICommand, ICommand.He
             if (t.isNotEmpty()) {
                 field(
                     "Trending:",
-                    t.asSequence().filter { it !is ICommand.Permission || it.permission.test(event.member) }
+                    t.asSequence()
+                        .filter { c -> (c !is ICommand.Permission || c.permission.test(event.member)) && (c.category?.nsfw != true || channel.isNSFW) }
                         .take(10)
                         .joinToString(prefix = "`", separator = "` `", postfix = "`") { registry.lookup[it]!![0] }
                 )
             }
 
-            Category.LIST.forEach { cat ->
-                if (cat.nsfw && !channel.isNSFW) {
+            Category.LIST.forEach { category ->
+                if (category.nsfw && !channel.isNSFW) {
                     val count = registry.lookup
-                        .keys
-                        .count { it.category == cat && (it !is ICommand.Permission || it.permission.test(event.member)) }
-
+                        .count { (c) -> c.category == category && (c !is ICommand.Permission || c.permission.test(event.member)) }
 
                     if (count > 0) field(
-                        "${cat.categoryName}:",
+                        "${category.categoryName}:",
                         "$count hidden commands. Set the channel to **NSFW** to view them."
                     )
                 } else {
                     val list = registry.lookup
                         .entries
-                        .filter { (c) -> c.category == cat && (c !is ICommand.Permission || c.permission.test(event.member)) }
+                        .filter { (c) -> c.category == category && (c !is ICommand.Permission || c.permission.test(event.member)) }
                         .map { it.value[0] }
                         .sorted()
 
                     if (list.isNotEmpty()) field(
-                        "${cat.categoryName}:",
+                        "${category.categoryName}:",
                         list.joinToString(prefix = "`", separator = "` `", postfix = "`")
                     )
                 }
@@ -115,47 +114,44 @@ class HelpCommand(private val registry: CommandRegistry) : ICommand, ICommand.He
         }
 
         Category.REGISTRY.ifContains(args) { category ->
-            if (category is ICommand.HelpProvider) {
-                category.helpHandler.onHelp(event)
-                return
-            }
+            if (category.help != null) {
+                send(category.help.onHelp(event)).queue()
+            } else {
+                sendEmbed {
+                    baseEmbed(event, "Aru! | Help: ${category.categoryName}")
 
-            if (category is ICommand.HelpDialogProvider) {
-                event.channel.sendMessage(category.helpHandler.onHelp(event)).queue()
-                return
-            }
-            if (category is ICommand.HelpHandler) {
-                category.onHelp(event)
-                return
-            }
+                    description(
+                        "Here's all the category's commands. I'm sure you'll find the one you need!",
+                        "To check the command usage, type `${prefix}help <command>`."
+                    )
 
-            if (category is ICommand.HelpDialog) {
-                event.channel.sendMessage(category.onHelp(event)).queue()
-                return
-            }
-
-            sendEmbed {
-                baseEmbed(event, "Aru! | Help: ${category.categoryName}")
-
-                description(
-                    "Here's all the category's commands. I'm sure you'll find the one you need!",
-                    "To check the command usage, type `${prefix}help <command>`."
-                )
-
-                val list = registry.lookup
-                    .entries
-                    .filter { (c) -> c.category == category && (c !is ICommand.Permission || c.permission.test(event.member)) }
-                    .map { it.value[0] }
-                    .sorted()
-
-                field(
-                    "Commands:",
-                    if (list.isEmpty()) "There's only dust here." else list.joinToString(prefix = "`", separator = "` `", postfix = "`")
-                )
+                    val list = registry.lookup
+                        .entries
+                        .filter { (c) -> c.category == category && (c !is ICommand.Permission || c.permission.test(event.member)) }
+                        .map { it.value[0] }
+                        .sorted()
 
 
-                footer("${list.size} commands | Requested by ${event.member.effectiveName}", event.author.effectiveAvatarUrl)
+                    if (category.nsfw && !channel.isNSFW) {
+                        val count = registry.lookup
+                            .count { (c) -> c.category == category && (c !is ICommand.Permission || c.permission.test(event.member)) }
 
+                        if (count > 0) description(
+                            "$count hidden commands. Set the channel to **NSFW** to view them."
+                        )
+                    } else {
+                        if (list.isNotEmpty()) field(
+                            "Commands:",
+                            list.joinToString(prefix = "`", separator = "` `", postfix = "`")
+                        )
+                    }
+
+                    field(
+                        if (list.isEmpty()) "There's only dust here." else list.joinToString(prefix = "`", separator = "` `", postfix = "`")
+                    )
+
+                    footer("${list.size} commands | Requested by ${event.member.effectiveName}", event.author.effectiveAvatarUrl)
+                }.queue()
             }
 
             return

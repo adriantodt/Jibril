@@ -64,6 +64,9 @@ class DevCmd
 
         when (args.takeString()) {
             "crash" -> throw RuntimeException("I'm not feeling good, Todt~")
+            "shitlog" -> {
+                logger.info("Here's a shitton of numbers: ${(0..10000).joinToString()}")
+            }
 
             "shutdown" -> shutdown()
 
@@ -82,7 +85,8 @@ class DevCmd
 
             "reloadassets" -> reloadassets()
             "genwebyml" -> generateWebYaml()
-            "gendbotshtml" -> generateBotlistCmdList()
+            "gencmdhtml" -> generateCmdHtml()
+            "gencmdmd" -> generateCmdMd()
             "", "check" -> adminCheck()
             else -> showHelp()
         }
@@ -292,7 +296,7 @@ class DevCmd
                     e.javaClass.name,
                     e.message!!.limit(MessageEmbed.VALUE_MAX_LENGTH)
                 )
-                field("Full Stacktrace:", paste(httpClient, ThrowableToStringArray.convert(e).joinToString("\n")))
+                field("Full Stacktrace:", paste("Full Stacktrace:", ThrowableToStringArray.convert(e).joinToString("\n")), "java")
             } else {
                 baseEmbed("DevConsole | Evaluated with success", color = Colors.discordGreen)
                 thumbnail("https://assets.aru.pw/img/yes.png")
@@ -300,14 +304,14 @@ class DevCmd
                     "Evaluated with success ${if (result == null) "with no objects returned." else "and returned an object."}"
                 )
                 if (result != null) {
-                    val toString = result.advancedToString()
+                    val toString = result.toPrettyString()
                     field(
                         result.javaClass.simpleName,
                         toString.limit(MessageEmbed.VALUE_MAX_LENGTH)
                     )
 
                     if (toString.length > MessageEmbed.VALUE_MAX_LENGTH) {
-                        field("Full ToString:", paste(httpClient, toString))
+                        field("Full ToString:", paste("Full toString():", toString))
                     }
                 }
             }
@@ -335,17 +339,16 @@ class DevCmd
             builder += "\n"
         }
 
-        send("**Commands.yml generated**: ${paste(httpClient, builder.toString())}").queue()
+        send("**Commands.yml generated**: ${paste("Commands.yml generated:", builder.toString())}").queue()
     }
 
-    private fun CommandContext.generateBotlistCmdList() {
+    private fun CommandContext.generateCmdHtml() {
         val cmdsGroup = registry.lookup.entries.groupBy({ it.key.category }, { it.value[0] })
         val builder = StringBuilder()
         builder += "<p class=\"fmt-h4\">My Commands: (v$aru_version)</p>\n<ul class=\"bot-list\">\n"
 
         for (category in Category.LIST) {
-            if (category.nsfw) continue
-            if (category.permission == CommandPermission.BOT_DEVELOPER) continue
+            if (category.nsfw || category.permission == CommandPermission.BOT_DEVELOPER) continue
             val cmds = cmdsGroup[category] ?: continue
             if (cmds.isEmpty()) continue
 
@@ -353,7 +356,24 @@ class DevCmd
         }
 
         builder += "</ul>\n"
-        send("**Commands.html snippet generated**: ${paste(httpClient, builder.toString())}").queue()
+        send("**Commands.html snippet generated**: ${paste("Commands.html generated:", builder.toString())}").queue()
+    }
+
+    private fun CommandContext.generateCmdMd() {
+        val cmdsGroup = registry.lookup.entries.groupBy({ it.key.category }, { it.value[0] })
+        val builder = StringBuilder()
+        builder += "### My Commands: (v$aru_version)\n\n"
+
+        for (category in Category.LIST) {
+            if (category.nsfw || category.permission == CommandPermission.BOT_DEVELOPER) continue
+            val cmds = cmdsGroup[category] ?: continue
+            if (cmds.isEmpty()) continue
+
+            builder += "- **${category.categoryName}**: ${cmds.sorted().joinToString("` `", "`", "`")}\n"
+        }
+
+        builder += "\n"
+        send("**Commands.md snippet generated**: ${paste("Commands.md generated:", builder.toString())}").queue()
     }
 
     private fun CommandContext.reloadassets() {
@@ -380,7 +400,8 @@ class DevCmd
             UsageSeparator,
             CommandUsage("dev reloadassets", "Reloads assets."),
             CommandUsage("dev genwebyml", "Generates the base commands.yml file."),
-            CommandUsage("dev gendbotshtml", "Generates the html snipppet for the botlists.")
+            CommandUsage("dev gendcmdhtml", "Generates the html snipppet for the botlists."),
+            CommandUsage("dev gendcmdmd", "Generates the markdown snipppet for the botlists.")
         )
     )
 }
