@@ -1,3 +1,4 @@
+@file:JvmName("Emotes")
 package pw.aru.utils.emotes
 
 const val EGGPLANT = "\uD83C\uDF46"

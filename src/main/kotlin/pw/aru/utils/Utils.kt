@@ -3,7 +3,7 @@ package pw.aru.utils
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
-import pw.aru.core.logging.DiscordLogBack
+import pw.aru.core.reporting.ErrorReportHandler.Companion.fileWorker
 import pw.aru.exported.user_agent
 import pw.aru.utils.emotes.DISAPPOINTED
 import pw.aru.utils.extensions.jsonObject
@@ -34,7 +34,7 @@ fun String.limit(size: Int): String {
 }
 
 fun paste(title: String, content: String, lang: String = "none"): String {
-    val fileId = DiscordLogBack.fileWorker.generate()
+    val fileId = fileWorker.generate()
     File("pastes").mkdirs()
 
     File("pastes/$fileId.html").writeText(

@@ -49,6 +49,8 @@ data class CommandContext(
 
     fun send(embed: MessageEmbed): MessageAction = event.channel.sendMessage(embed)
 
+    fun send(message: Message): MessageAction = event.channel.sendMessage(message)
+
     fun ICommand.ExceptionHandler.handleException(): (Throwable) -> Unit = {
         try {
             handle(event, it)

@@ -7,8 +7,11 @@ import com.github.natanbc.weeb4j.image.NsfwFilter
 import gnu.trove.TDecorators.wrap
 import mu.KLogging
 import net.dv8tion.jda.bot.sharding.ShardManager
+import net.dv8tion.jda.core.MessageBuilder
+import net.dv8tion.jda.core.MessageBuilder.SplitPolicy.NEWLINE
 import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.requests.RestAction
+import net.dv8tion.jda.core.requests.restaction.MessageAction
 import net.dv8tion.jda.core.utils.JDALogger
 import okhttp3.OkHttpClient
 import pw.aru.Aru.sleepQuotes
@@ -37,6 +40,7 @@ import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.extensions.*
 import pw.aru.utils.limit
 import pw.aru.utils.paste
+import java.lang.reflect.Modifier
 import java.util.function.Consumer
 
 @Command("dev", "devtools", "hack")
@@ -86,6 +90,7 @@ class DevCmd
             "genwebyml" -> generateWebYaml()
             "gencmdhtml" -> generateCmdHtml()
             "gencmdmd" -> generateCmdMd()
+            "genemotelist" -> generateEmoteList()
             "", "check" -> adminCheck()
             else -> showHelp()
         }
@@ -152,6 +157,23 @@ class DevCmd
                     )
                 }
         }.queue()
+    }
+
+    private fun CommandContext.generateEmoteList() {
+        MessageBuilder()
+            .append("**EMOTES**\n")
+            .append(
+                Class.forName("pw.aru.utils.emotes.Emotes")
+                    .declaredFields
+                    .filter { Modifier.isPublic(it.modifiers) }
+                    .map { it.name to it[null].toString() }
+                    .sortedBy(Pair<String, String>::first)
+                    .joinToString("\n") { "${it.second} | ${it.first}" }
+            )
+            .buildAll(NEWLINE)
+            .asSequence()
+            .map(::send)
+            .forEach(MessageAction::queue)
     }
 
     private fun CommandContext.weebsh(args: Args) {
