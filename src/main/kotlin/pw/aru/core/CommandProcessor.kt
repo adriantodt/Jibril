@@ -5,19 +5,19 @@ import net.dv8tion.jda.core.Permission.*
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.Aru.prefixes
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.ICommand.ExceptionHandler
 import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.commands.help.prefix
-import pw.aru.core.logging.DiscordLogBack
+import pw.aru.core.commands.context.CommandContext.ShowHelp
+import pw.aru.core.reporting.ErrorReporter
 import pw.aru.db.AruDB
 import pw.aru.db.entities.guild.GuildSettings
-import pw.aru.snow64.Snow64
-import pw.aru.utils.emotes.*
-import pw.aru.utils.extensions.*
+import pw.aru.utils.emotes.DISAPPOINTED
+import pw.aru.utils.emotes.STOP
+import pw.aru.utils.extensions.ERROR_CHANNEL_PERMS
+import pw.aru.utils.extensions.ERROR_GUILD_PERMS
+import pw.aru.utils.extensions.onHelp
 import pw.aru.utils.helpers.CommandStatsManager
 import redis.clients.jedis.exceptions.JedisConnectionException
-import java.io.File
-import java.io.PrintWriter
-import java.io.StringWriter
 import java.util.*
 
 class CommandProcessor(private val db: AruDB, private val registry: CommandRegistry) : KLogging() {
@@ -165,81 +165,42 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
             } catch (_: Exception) {
             }
         }
-
     }
 
     private fun handleException(c: ICommand, event: GuildMessageReceivedEvent, e: Exception) {
-        if (e == CommandContext.ShowHelp) {
-            return onHelp(c, event)
-        }
-
-        if (c is ICommand.ExceptionHandler) {
-            try {
-                c.handle(event, e)
-            } catch (e2: Exception) {
-                reportException(c, event, e, if (e != e2) e2 else null)
+        when {
+            e == ShowHelp -> {
+                onHelp(c, event)
             }
-            return
-        }
 
-        reportException(c, event, e)
-    }
-
-    private val errorQuotes = listOf(
-        "What is happening? I'm sorry, I'm sorry, I'm sorry!",
-        "Wha? Everything caught fire! qwq",
-        "What am I supposed to do with an error? Because I got one."
-    )
-
-    private fun reportException(c: ICommand, event: GuildMessageReceivedEvent, e: Exception, h: Exception? = null) {
-
-        val errorId = e.simpleName().initials() + "-" + Snow64.fromSnowflake(event.message.idLong)
-        val fileId = DiscordLogBack.fileWorker.generate()
-        File("reports").mkdirs()
-
-        val log = if (h != null) {
-            StringWriter().also { e.printStackTrace(PrintWriter(it, true)) }.buffer.toString().trim() +
-                "\nUnderlying Exception:\n" +
-                StringWriter().also { h.printStackTrace(PrintWriter(it, true)) }.buffer.toString().trim()
-        } else {
-            StringWriter().also { e.printStackTrace(PrintWriter(it, true)) }.buffer.toString().trim()
-        }
-
-        File("reports/$fileId.html").writeText(
-            File("assets/aru/templates/logs.html").readText().replaceEach(
-                "{date}" to Date().toString(),
-                "{log}" to log,
-                "{extra}" to
-                    "ErrorID: $errorId\n" +
-                    "TextChannel: ${event.channel}\n" +
-                    "Guild: ${event.guild}\n" +
-                    "Member: ${event.member}\n\n" +
-                    "Message: ${event.message.contentRaw}\n" +
-                    "Command: $c (${c.javaClass})\n" +
-                    "Exception: ${e.javaClass}"
-            )
-        )
-
-        logger.error(e)
-        {
-            "**ERROR REPORTED**\n" +
-                "**ErrorID**: `$errorId`\n" +
-                "**TextChannel**: `${event.channel}`\n" +
-                "**Guild**: `${event.guild}`\n" +
-                "**Type**: `${e.javaClass.simpleName}`\n" +
-                "**Command**: ``${event.message.contentRaw}``\n\n" +
-                "**Report**: https://reports.aru.pw/$fileId.html"
-        }
-
-        if (h != null) {
-            logger.error(h) {
-                "(ErrorID `$errorId`'s underlying exception)\n" +
-                    "Type: `${h.javaClass.simpleName}`"
+            c is ExceptionHandler -> {
+                try {
+                    c.handle(event, e)
+                } catch (u: Exception) {
+                    ErrorReporter()
+                        .command(c)
+                        .exception(e)
+                        .underlyingException(u)
+                        .message(event)
+                        .errorIdFromContext()
+                        .report()
+                        .logToFile()
+                        .logAsError()
+                        .sendErrorMessage()
+                }
             }
-        } else {
-            event.channel.sendMessage(
-                "$WORRIED ${errorQuotes.random()}\n\n$TALKING Eh, do you mind reporting this to my developers? (Check out `$prefix${"hangout"}`)\n$PENCIL **Error ID**: `$errorId`"
-            ).queue()
+
+            else -> {
+                ErrorReporter()
+                    .command(c)
+                    .exception(e)
+                    .message(event)
+                    .errorIdFromContext()
+                    .report()
+                    .logToFile()
+                    .logAsError()
+                    .sendErrorMessage()
+            }
         }
     }
 }

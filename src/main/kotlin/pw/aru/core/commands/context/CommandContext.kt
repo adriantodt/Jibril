@@ -6,7 +6,9 @@ import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.requests.restaction.MessageAction
+import pw.aru.core.commands.ICommand
 import pw.aru.core.parser.Args
+import pw.aru.core.reporting.ErrorReporter
 import pw.aru.utils.emotes.X
 import pw.aru.utils.extensions.*
 
@@ -46,6 +48,23 @@ data class CommandContext(
     fun send(text: CharSequence): MessageAction = event.channel.sendMessage(text)
 
     fun send(embed: MessageEmbed): MessageAction = event.channel.sendMessage(embed)
+
+    fun ICommand.ExceptionHandler.handleException(): (Throwable) -> Unit = {
+        try {
+            handle(event, it)
+        } catch (underlying: Exception) {
+            ErrorReporter()
+                .command(this as ICommand)
+                .throwable(it)
+                .underlyingException(underlying)
+                .message(event)
+                .errorIdFromContext()
+                .report()
+                .logToFile()
+                .logAsError()
+                .sendErrorMessage()
+        }
+    }
 
     fun requireNSFW(): Boolean {
         if (!channel.isNSFW) {

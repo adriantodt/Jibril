@@ -10,13 +10,9 @@ import net.dv8tion.jda.core.MessageBuilder.SplitPolicy
 import net.dv8tion.jda.webhook.WebhookClient
 import net.dv8tion.jda.webhook.WebhookClientBuilder
 import org.slf4j.LoggerFactory
-import pw.aru.db.AruDB
-import pw.aru.snow64.Snow64
+import pw.aru.core.reporting.ErrorReporter
 import pw.aru.utils.emotes.BOOK
 import pw.aru.utils.extensions.classOf
-import pw.aru.utils.extensions.replaceEach
-import pw.aru.utils.extensions.toPrettyString
-import java.io.File
 import java.lang.Thread.interrupted
 import java.text.SimpleDateFormat
 import java.util.*
@@ -69,23 +65,18 @@ class DiscordLogBack : AppenderBase<ILoggingEvent>() {
     }
 
     private fun saveLogHtml(logs: List<ILoggingEvent>): String {
-        val fileId = fileWorker.generate()
-        File("reports").mkdirs()
-
         val mdc = logs.flatMap { it.mdcPropertyMap.entries }
             .groupBy({ it.key }, { it.value })
             .mapValues { (_, v) -> v.singleOrNull() ?: v.toSortedSet() }
-            .toPrettyString(4)
 
-        File("reports/$fileId.html").writeText(
-            File("assets/aru/templates/logs.html").readText().replaceEach(
-                "{date}" to Date().toString(),
-                "{log}" to logs.joinToString("\n") { logLayout.doLayout(it).trim() },
-                "{extra}" to "Log Count: ${logs.size}\n\nMDC:\n$mdc"
-            )
-        )
+        val log = logs.joinToString("\n") { logLayout.doLayout(it).trim() }
 
-        return "https://reports.aru.pw/$fileId.html"
+        return ErrorReporter()
+            .log(log)
+            .extra("mdc", mdc)
+            .extra("logCount", logs.size)
+            .report()
+            .logToFileAndGetUrl()
     }
 
     override fun append(event: ILoggingEvent) {
@@ -119,7 +110,6 @@ class DiscordLogBack : AppenderBase<ILoggingEvent>() {
     }
 
     companion object {
-        val fileWorker = Snow64.convert(AruDB.generator).getWorker(0, 1)
 
         private val queue = LinkedBlockingQueue<ILoggingEvent>()
         private var instance: DiscordLogBack? = null

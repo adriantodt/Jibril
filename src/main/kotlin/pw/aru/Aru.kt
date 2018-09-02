@@ -20,6 +20,12 @@ object Aru {
     val bootQuotes get() = File("assets/aru/boot_quotes.txt").readLines()
     val sleepQuotes get() = File("assets/aru/sleep_quotes.txt").readLines()
     val splashes get() = File("assets/aru/splashes.txt").readLines()
+    val errorQuotes = listOf(
+        "What is happening? I'm sorry, I'm sorry, I'm sorry!",
+        "Wha? Everything caught fire! qwq",
+        "What am I supposed to do with an error? Because I got one."
+    )
+
 
     //Uptime
     val uptime get() = humanizedTime(rawUptime)

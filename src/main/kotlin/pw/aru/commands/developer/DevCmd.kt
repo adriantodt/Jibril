@@ -1,6 +1,5 @@
 package pw.aru.commands.developer
 
-import ch.qos.logback.core.helpers.ThrowableToStringArray
 import com.github.natanbc.weeb4j.Account
 import com.github.natanbc.weeb4j.Weeb4J
 import com.github.natanbc.weeb4j.image.FileType
@@ -296,7 +295,7 @@ class DevCmd
                     e.javaClass.name,
                     e.message!!.limit(MessageEmbed.VALUE_MAX_LENGTH)
                 )
-                field("Full Stacktrace:", paste("Full Stacktrace:", ThrowableToStringArray.convert(e).joinToString("\n")), "java")
+                field("Full Stacktrace:", paste("Full Stacktrace:", e.stackTraceToString()), "java")
             } else {
                 baseEmbed("DevConsole | Evaluated with success", color = Colors.discordGreen)
                 thumbnail("https://assets.aru.pw/img/yes.png")

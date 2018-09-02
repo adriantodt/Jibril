@@ -19,7 +19,7 @@ interface ICommand {
     }
 
     interface ExceptionHandler {
-        fun handle(event: GuildMessageReceivedEvent, exception: Exception)
+        fun handle(event: GuildMessageReceivedEvent, t: Throwable)
     }
 
     interface HelpDialog {

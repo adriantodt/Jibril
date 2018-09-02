@@ -86,7 +86,7 @@ fun <E> List<E>.split(minSize: Int, maxSize: Int): List<List<E>> {
     }
 }
 
-fun Exception.simpleName(): String {
+fun Throwable.simpleName(): String {
     var c: Class<*>? = javaClass
 
     while (c != null) {
@@ -95,13 +95,13 @@ fun Exception.simpleName(): String {
         c = c.superclass
     }
 
-    return "Exception"
+    return "Throwable"
 }
 
 fun Exception.exceptionType(): String {
     var c: Class<*>? = javaClass
 
-    while (c != null && c != Exception::class.java) {
+    while (c != null) {
         val name = c.simpleName
         if (!name.isEmpty()) {
             return when {
@@ -113,7 +113,7 @@ fun Exception.exceptionType(): String {
         c = c.superclass
     }
 
-    return "Exception"
+    return "Throwable"
 }
 
 /**

@@ -1,9 +1,12 @@
 package pw.aru.commands.imageboard
 
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import net.dv8tion.jda.core.exceptions.ErrorResponseException
 import net.kodehawa.lib.imageboards.DefaultImageBoards.*
 import net.kodehawa.lib.imageboards.ImageBoard
 import net.kodehawa.lib.imageboards.entities.Rating
 import net.kodehawa.lib.imageboards.entities.Rating.*
+import net.kodehawa.lib.imageboards.entities.exceptions.QueryFailedException
 import pw.aru.commands.imageboard.ImageboardCommand.Type.RANDOM_IMAGE
 import pw.aru.commands.imageboard.ImageboardCommand.Type.SEARCH_RESULT
 import pw.aru.core.CommandRegistry
@@ -15,12 +18,15 @@ import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
 import pw.aru.core.parser.parseAndCreate
 import pw.aru.core.parser.tryTakeInt
+import pw.aru.utils.emotes.DISAPPOINTED
 import pw.aru.utils.emotes.ERROR
 import pw.aru.utils.emotes.TALKING
 import pw.aru.utils.emotes.WARNING
 import pw.aru.utils.extensions.baseEmbed
 import pw.aru.utils.extensions.description
 import pw.aru.utils.extensions.image
+import java.net.SocketTimeoutException
+import java.util.concurrent.atomic.AtomicInteger
 
 @CommandProvider
 class ImageboardCommands : ICommandProvider {
@@ -64,7 +70,7 @@ class ImageboardCommand(
     private val name: String,
     private val board: ImageBoard<*>,
     private val nsfwOnly: Boolean = false
-) : ICommand, ICommand.HelpDialogProvider {
+) : ICommand, ICommand.HelpDialogProvider, ICommand.ExceptionHandler {
     override val category = IMAGEBOARD
 
     init {
@@ -118,19 +124,54 @@ class ImageboardCommand(
         if (image != null) {
             sendEmbed {
                 baseEmbed(event, "$name | ${type.title}", image.url)
+
+                val imgTags = image.tags.sorted().let {
+                    if (it.isEmpty()) "None." else {
+                        val count = AtomicInteger(1)
+                        val tagsTaken = it.takeWhile { tag -> count.addAndGet(tag.length + 3) < 1900 }
+                        if (tagsTaken.size != it.size) {
+                            tagsTaken.joinToString("`, `", "`", "`, ${it.size - tagsTaken.size} more ...")
+                        } else {
+                            it.joinToString("`, `", "`", "`")
+                        }
+                    }
+                }
+
                 description(
                     "**${image.width}**x**${image.height}** | **${image.rating.longName.capitalize()}**",
                     "",
-                    "**Tags**: ${image.tags.let { if (it.isEmpty()) "None." else it.sorted().joinToString("`, `", "`", "`") }}",
+                    "**Tags**: $imgTags",
                     "",
                     "**Image**:"
                 )
                 image(image.url)
-            }.queue()
+                println("URL: ${image.url}")
+            }.queue(null, handleException())
         } else {
             send(
                 "$ERROR No images found.\n\n$TALKING Did you use the right tag? Tags are imageboard-dependant and might be different."
             ).queue()
+        }
+    }
+
+    override fun handle(event: GuildMessageReceivedEvent, t: Throwable) {
+        when {
+            t is RuntimeException && t.cause is SocketTimeoutException -> {
+                // Reported ErrorID: RE#Br4FAL3EAAI
+                // Imageboard request times out
+                event.channel.sendMessage("$DISAPPOINTED We're having issues with $name. Seems that we can't connect to it. Please, try again later.").queue()
+            }
+            t is ErrorResponseException -> {
+                // Error Message: 485593425605951500
+                // Bad image url
+                event.channel.sendMessage("$DISAPPOINTED We're having issues with $name. The image that I got was invalid. Please, try again later.").queue()
+            }
+            t is QueryFailedException -> {
+                // Reported ErrorID: QFE#Br4EkZsAAAA
+                // Query fails
+                event.channel.sendMessage("$DISAPPOINTED We're having issues with $name. Did you put more tags on it than the allowed by the imageboard?").queue()
+            }
+            else -> throw t
         }
     }
 

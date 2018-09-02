@@ -2,6 +2,7 @@
 
 package pw.aru.utils.extensions
 
+import ch.qos.logback.core.helpers.ThrowableToStringArray
 import redis.clients.util.Pool
 import java.io.Closeable
 import java.util.*
@@ -11,8 +12,6 @@ import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.atomic.AtomicLong
 import java.util.function.Consumer
 import kotlin.concurrent.thread
-
-
 
 inline fun <reified T> classOf() = T::class.java
 
@@ -49,6 +48,13 @@ inline fun <E> randomOf(vararg objects: E): E = objects.random()
 inline fun <E> Random.anyOf(vararg objects: E): E = objects.random(this)
 
 inline fun <T : Closeable?, R> Pool<T>.useResource(block: (T) -> R) = resource.use(block)
+
+inline fun Throwable.stackTraceToString() = ThrowableToStringArray.convert(this).joinToString("\n")
+
+inline fun <T, U> T.applyOn(thisObj: U, block: U.() -> Unit): T {
+    thisObj.block()
+    return this
+}
 
 fun threadFactory(
     isDaemon: Boolean = false,
