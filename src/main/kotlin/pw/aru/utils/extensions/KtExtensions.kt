@@ -56,6 +56,8 @@ inline fun <T, U> T.applyOn(thisObj: U, block: U.() -> Unit): T {
     return this
 }
 
+inline fun anyOf(vararg cases: Boolean) = cases.find { it } ?: false
+
 fun threadFactory(
     isDaemon: Boolean = false,
     contextClassLoader: ClassLoader? = null,

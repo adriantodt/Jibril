@@ -16,6 +16,7 @@ import pw.aru.utils.emotes.CONFUSED
 import pw.aru.utils.emotes.STOP
 import pw.aru.utils.emotes.THINKING
 import pw.aru.utils.emotes.X
+import pw.aru.utils.extensions.anyOf
 import pw.aru.utils.extensions.humanUsers
 
 abstract class MusicCommand(val musicManager: MusicManager) : ICommand {
@@ -75,9 +76,12 @@ abstract class MusicPermissionCommand(
             // User is DJ/Server Admin/Bot Developer
             val currentChannel = musicPlayer.currentChannel
             val currentTrack = musicPlayer.currentTrack
-            return (currentChannel == null || currentChannel.humanUsers == 1)
-                || (userQueued && currentTrack != null && currentTrack.trackData.user == event.author)
-                || (CommandPermission.DJ.test(event.member))
+
+            return anyOf(
+                currentChannel?.humanUsers?.equals(1) ?: true,
+                userQueued && currentTrack?.trackData?.user?.equals(event.author) ?: true,
+                CommandPermission.DJ.test(event.member)
+            )
         }
     }
 
