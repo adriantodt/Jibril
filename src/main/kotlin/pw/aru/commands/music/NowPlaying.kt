@@ -20,7 +20,7 @@ class NowPlaying(musicManager: MusicManager) : MusicCommand(musicManager), IComm
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("nowplaying", "np"), "NowPlaying Command"),
+        CommandDescription(listOf("nowplaying", "np"), "NowPlaying Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
         Description("Displays the current track playing"),
         SeeAlso["play", "queue", "repeat"]
     )

@@ -15,6 +15,7 @@ import pw.aru.core.commands.help.*
 import pw.aru.core.music.GuildMusicPlayer.RepeatMode.*
 import pw.aru.core.music.MusicManager
 import pw.aru.core.music.MusicRequester
+import pw.aru.core.music.MusicRequester.Companion.loadAndPlay
 import pw.aru.core.parser.parseOptions
 import pw.aru.core.parser.tryTakeInt
 import pw.aru.utils.emotes.ERROR2
@@ -60,8 +61,10 @@ sealed class PlayCommand(
             return
         }
 
+        var shufflePlaylist = false
+
         args.parseOptions {
-            option("--vol") {
+            option("--volume", "--vol", "-v") {
                 val vol = tryTakeInt()
                 if (vol != null) {
                     if (!checkPermissions(event, musicPlayer, true)) {
@@ -74,7 +77,7 @@ sealed class PlayCommand(
                 }
             }
 
-            option("--repeat") {
+            option("--repeat", "-r") {
                 val repeat = takeString()
                 if (!checkPermissions(event, musicPlayer, false)) {
                     send(
@@ -91,6 +94,10 @@ sealed class PlayCommand(
                     if (mode != null) musicPlayer.repeatMode = mode
                 }
             }
+
+            option("--shuffled", "-s") {
+                shufflePlaylist = true
+            }
         }
 
         val isDev = CommandPermission.BOT_DEVELOPER.test(event.member)
@@ -100,7 +107,7 @@ sealed class PlayCommand(
             if (attachments.isEmpty()) return showHelp()
 
             attachments.forEach {
-                request(event, it.url, if (isDev) musicManager.devPlayerManager else musicManager.httpSafePlayerManager)
+                request(event, it.url, if (isDev) musicManager.devPlayerManager else musicManager.httpSafePlayerManager, shufflePlaylist)
             }
         } else {
             val playerManager = if (isDev) musicManager.devPlayerManager else musicManager.userPlayerManager
@@ -109,7 +116,7 @@ sealed class PlayCommand(
             for ((list, replacement) in replacers) {
                 for (prefix in list) {
                     if (music.startsWith(prefix)) {
-                        request(event, replacement + music.substring(prefix.length).trim(), playerManager)
+                        request(event, replacement + music.substring(prefix.length).trim(), playerManager, shufflePlaylist)
                         return
                     }
                 }
@@ -117,22 +124,22 @@ sealed class PlayCommand(
 
             try {
                 when (URL(music).host) {
-                    "cdn.discordapp.com", "media.discordapp.com" -> request(event, music, musicManager.httpSafePlayerManager)
-                    else -> request(event, music, playerManager)
+                    "cdn.discordapp.com", "media.discordapp.com" -> request(event, music, musicManager.httpSafePlayerManager, shufflePlaylist)
+                    else -> request(event, music, playerManager, shufflePlaylist)
                 }
             } catch (e: Exception) {
-                request(event, "ytsearch: ${music.trim()}", playerManager)
+                request(event, "ytsearch: ${music.trim()}", playerManager, shufflePlaylist)
             }
         }
     }
 
-    private fun request(event: GuildMessageReceivedEvent, args: String, playerManager: AudioPlayerManager) {
-        val future = MusicRequester.loadAndPlay(
+    private fun request(event: GuildMessageReceivedEvent, args: String, playerManager: AudioPlayerManager, shufflePlaylist: Boolean) {
+        val future = loadAndPlay(
             event.channel, event.member,
             musicManager[event.guild],
             args,
             playerManager,
-            !force, next, playNow
+            !force, next, playNow, shufflePlaylist
         )
 
         try {
@@ -150,7 +157,7 @@ sealed class PlayCommand(
 class Play(musicManager: MusicManager) : PlayCommand(
     musicManager, false, false, false,
     Help(
-        CommandDescription(listOf("play", "p"), "Play Command"),
+        CommandDescription(listOf("play", "p"), "Play Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
 
         Description(
             "**Play songs!**",
@@ -165,9 +172,15 @@ class Play(musicManager: MusicManager) : PlayCommand(
         ),
         Note(
             "**Magic Prefixes**:",
-            commandUsage("play --vol <volume> <...>", "Sets the volume of the player."),
+            commandUsage("play --volume <volume> <...>", "Sets the volume of the player."),
             commandUsage("play --repeat <mode> <...>", "Sets the repeat mode of the player."),
-            "(You need the permissions to set the volume or the repeat mode)"
+            commandUsage("play --shuffled <...>", "Shuffles the order of the playlist added. Has no effects on single tracks."),
+            "(You need the permissions to set the volume or the repeat mode)",
+            "",
+            "**Aliases**:",
+            " - Volume: `--vol`, `-v`",
+            " - Repeat: `-r`",
+            " - Shuffle Playlists: `-s`"
         ),
         SeeAlso["playnow", "playnext", "forceplay", "forceplaynow", "forceplaynext"]
     )
@@ -178,7 +191,7 @@ class Play(musicManager: MusicManager) : PlayCommand(
 class ForcePlay(musicManager: MusicManager) : PlayCommand(
     musicManager, true, false, false,
     Help(
-        CommandDescription(listOf("forceplay", "fp"), "ForcePlay Command"),
+        CommandDescription(listOf("forceplay", "fp"), "ForcePlay Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
 
         Description(
             "**Play songs!**",
@@ -194,9 +207,15 @@ class ForcePlay(musicManager: MusicManager) : PlayCommand(
         ),
         Note(
             "**Magic Prefixes**:",
-            commandUsage("forceplay --vol <volume> <...>", "Sets the volume of the player."),
-            commandUsage("forceplay --repeat <mode> <...>", "Sets the repeat mode of the player."),
-            "(You need the permissions to set the volume or the repeat mode)"
+            commandUsage("play --volume <volume> <...>", "Sets the volume of the player."),
+            commandUsage("play --repeat <mode> <...>", "Sets the repeat mode of the player."),
+            commandUsage("play --shuffled <...>", "Shuffles the order of the playlist added. Has no effects on single tracks."),
+            "(You need the permissions to set the volume or the repeat mode)",
+            "",
+            "**Aliases**:",
+            " - Volume: `--vol`, `-v`",
+            " - Repeat: `-r`",
+            " - Shuffle Playlists: `-s`"
         ),
         SeeAlso["play", "playnow", "playnext", "forceplaynow", "forceplaynext"]
     )
@@ -207,7 +226,7 @@ class ForcePlay(musicManager: MusicManager) : PlayCommand(
 class PlayNow(musicManager: MusicManager) : PlayCommand(
     musicManager, false, true, true,
     Help(
-        CommandDescription(listOf("playnow", "pn"), "PlayNow Command"),
+        CommandDescription(listOf("playnow", "pn"), "PlayNow Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
 
         Description(
             "**Play songs!**",
@@ -222,9 +241,15 @@ class PlayNow(musicManager: MusicManager) : PlayCommand(
         ),
         Note(
             "**Magic Prefixes**:",
-            commandUsage("playnow --vol <volume> <...>", "Sets the volume of the player."),
-            commandUsage("playnow --repeat <mode> <...>", "Sets the repeat mode of the player."),
-            "(You need the permissions to set the volume or the repeat mode)"
+            commandUsage("play --volume <volume> <...>", "Sets the volume of the player."),
+            commandUsage("play --repeat <mode> <...>", "Sets the repeat mode of the player."),
+            commandUsage("play --shuffled <...>", "Shuffles the order of the playlist added. Has no effects on single tracks."),
+            "(You need the permissions to set the volume or the repeat mode)",
+            "",
+            "**Aliases**:",
+            " - Volume: `--vol`, `-v`",
+            " - Repeat: `-r`",
+            " - Shuffle Playlists: `-s`"
         ),
         SeeAlso["play", "playnext", "forceplay", "forceplaynow", "forceplaynext"]
     )
@@ -235,7 +260,7 @@ class PlayNow(musicManager: MusicManager) : PlayCommand(
 class ForcePlayNow(musicManager: MusicManager) : PlayCommand(
     musicManager, true, true, true,
     Help(
-        CommandDescription(listOf("forceplaynow", "fpn"), "ForcePlayNow Command"),
+        CommandDescription(listOf("forceplaynow", "fpn"), "ForcePlayNow Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
 
         Description(
             "**Play songs!**",
@@ -251,9 +276,15 @@ class ForcePlayNow(musicManager: MusicManager) : PlayCommand(
         ),
         Note(
             "**Magic Prefixes**:",
-            commandUsage("forceplaynow --vol <volume> <...>", "Sets the volume of the player."),
-            commandUsage("forceplaynow --repeat <mode> <...>", "Sets the repeat mode of the player."),
-            "(You need the permissions to set the volume or the repeat mode)"
+            commandUsage("play --volume <volume> <...>", "Sets the volume of the player."),
+            commandUsage("play --repeat <mode> <...>", "Sets the repeat mode of the player."),
+            commandUsage("play --shuffled <...>", "Shuffles the order of the playlist added. Has no effects on single tracks."),
+            "(You need the permissions to set the volume or the repeat mode)",
+            "",
+            "**Aliases**:",
+            " - Volume: `--vol`, `-v`",
+            " - Repeat: `-r`",
+            " - Shuffle Playlists: `-s`"
         ),
         SeeAlso["play", "playnow", "playnext", "forceplay", "forceplaynext"]
     )
@@ -264,7 +295,7 @@ class ForcePlayNow(musicManager: MusicManager) : PlayCommand(
 class PlayNext(musicManager: MusicManager) : PlayCommand(
     musicManager, false, true, false,
     Help(
-        CommandDescription(listOf("playnext"), "PlayNext Command"),
+        CommandDescription(listOf("playnext"), "PlayNext Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
 
         Description(
             "**Play songs!**",
@@ -279,9 +310,15 @@ class PlayNext(musicManager: MusicManager) : PlayCommand(
         ),
         Note(
             "**Magic Prefixes**:",
-            commandUsage("playnext --vol <volume> <...>", "Sets the volume of the player."),
-            commandUsage("playnext --repeat <mode> <...>", "Sets the repeat mode of the player."),
-            "(You need the permissions to set the volume or the repeat mode)"
+            commandUsage("play --volume <volume> <...>", "Sets the volume of the player."),
+            commandUsage("play --repeat <mode> <...>", "Sets the repeat mode of the player."),
+            commandUsage("play --shuffled <...>", "Shuffles the order of the playlist added. Has no effects on single tracks."),
+            "(You need the permissions to set the volume or the repeat mode)",
+            "",
+            "**Aliases**:",
+            " - Volume: `--vol`, `-v`",
+            " - Repeat: `-r`",
+            " - Shuffle Playlists: `-s`"
         ),
         SeeAlso["play", "playnow", "forceplay", "forceplaynow", "forceplaynext"]
     )
@@ -292,7 +329,7 @@ class PlayNext(musicManager: MusicManager) : PlayCommand(
 class ForcePlayNext(musicManager: MusicManager) : PlayCommand(
     musicManager, true, true, false,
     Help(
-        CommandDescription(listOf("forceplaynext"), "ForcePlayNext Command"),
+        CommandDescription(listOf("forceplaynext"), "ForcePlayNext Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
 
         Description(
             "**Play songs!**",
@@ -308,9 +345,15 @@ class ForcePlayNext(musicManager: MusicManager) : PlayCommand(
         ),
         Note(
             "**Magic Prefixes**:",
-            commandUsage("forceplaynext --vol <volume> <...>", "Sets the volume of the player."),
-            commandUsage("forceplaynext --repeat <mode> <...>", "Sets the repeat mode of the player."),
-            "(You need the permissions to set the volume or the repeat mode)"
+            commandUsage("play --volume <volume> <...>", "Sets the volume of the player."),
+            commandUsage("play --repeat <mode> <...>", "Sets the repeat mode of the player."),
+            commandUsage("play --shuffled <...>", "Shuffles the order of the playlist added. Has no effects on single tracks."),
+            "(You need the permissions to set the volume or the repeat mode)",
+            "",
+            "**Aliases**:",
+            " - Volume: `--vol`, `-v`",
+            " - Repeat: `-r`",
+            " - Shuffle Playlists: `-s`"
         ),
         SeeAlso["play", "playnow", "playnext", "forceplay", "forceplaynow"]
     )

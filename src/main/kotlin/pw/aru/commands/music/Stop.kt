@@ -24,7 +24,7 @@ class Stop(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "v
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("stop"), "Stop Command"),
+        CommandDescription(listOf("stop"), "Stop Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
         Description(
             "Stops the current song and clear the queue.",
             "",
@@ -66,7 +66,7 @@ class VoteStop(musicManager: MusicManager) : MusicVotingCommand(musicManager), I
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("votestop"), "VoteStop Command"),
+        CommandDescription(listOf("votestop"), "VoteStop Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
         Description(
             "Create a poll to stop the current song and clear the queue.",
             "",

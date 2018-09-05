@@ -113,7 +113,7 @@ class HelpCmd(private val registry: CommandRegistry) : ICommand, ICommand.HelpDi
             return
         }
 
-        Category.REGISTRY.ifContains(args) { category ->
+        Category.SEARCH.ifContains(args) { category ->
             if (category.help != null) {
                 send(category.help.onHelp(event)).queue()
             } else {
@@ -143,12 +143,8 @@ class HelpCmd(private val registry: CommandRegistry) : ICommand, ICommand.HelpDi
                         if (list.isNotEmpty()) field(
                             "Commands:",
                             list.joinToString(prefix = "`", separator = "` `", postfix = "`")
-                        )
+                        ) else description("There's only dust here.")
                     }
-
-                    field(
-                        if (list.isEmpty()) "There's only dust here." else list.joinToString(prefix = "`", separator = "` `", postfix = "`")
-                    )
 
                     footer("${list.size} commands | Requested by ${event.member.effectiveName}", event.author.effectiveAvatarUrl)
                 }.queue()

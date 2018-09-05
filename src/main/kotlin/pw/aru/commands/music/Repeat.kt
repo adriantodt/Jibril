@@ -31,7 +31,7 @@ class Repeat(musicManager: MusicManager) : MusicPermissionCommand(musicManager),
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("repeat"), "Repeat Command"),
+        CommandDescription(listOf("repeat"), "Repeat Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
         Description(
             "Sets the repeat mode of the player.",
             "",

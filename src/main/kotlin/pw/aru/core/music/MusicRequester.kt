@@ -20,7 +20,8 @@ class MusicRequester private constructor(
     private val textChannel: TextChannel, private val member: Member, private val musicPlayer: GuildMusicPlayer,
     private val searchTerm: String, private val showDialog: Boolean,
     private val addFirst: Boolean,
-    private val playNow: Boolean
+    private val playNow: Boolean,
+    private val shufflePlaylist: Boolean
 ) : AudioLoadResultHandler {
 
     override fun trackLoaded(track: AudioTrack) {
@@ -107,12 +108,12 @@ class MusicRequester private constructor(
         val position = if (addFirst) "0-${playlist.tracks.size}" else "$queueSize-${queueSize + playlist.tracks.size}"
 
         if (addFirst) {
-            playlist.tracks.reversed().forEach {
+            (if (shufflePlaylist) playlist.tracks.shuffled() else playlist.tracks.reversed()).forEach {
                 it.userData = TrackData(textChannel, member.user)
                 musicPlayer.queue.offerFirst(it)
             }
         } else {
-            playlist.tracks.forEach {
+            (if (shufflePlaylist) playlist.tracks.shuffled() else playlist.tracks).forEach {
                 it.userData = TrackData(textChannel, member.user)
                 musicPlayer.queue.offer(it)
             }
@@ -150,11 +151,11 @@ class MusicRequester private constructor(
         fun loadAndPlay(
             textChannel: TextChannel, member: Member, musicPlayer: GuildMusicPlayer,
             searchTerm: String, playerManager: AudioPlayerManager,
-            showDialog: Boolean, addFirst: Boolean, playNow: Boolean
+            showDialog: Boolean, addFirst: Boolean, playNow: Boolean, shufflePlaylist: Boolean
         ): Future<*> {
             return playerManager.loadItem(
                 searchTerm,
-                MusicRequester(textChannel, member, musicPlayer, searchTerm, showDialog, addFirst, playNow)
+                MusicRequester(textChannel, member, musicPlayer, searchTerm, showDialog, addFirst, playNow, shufflePlaylist)
             )
         }
     }

@@ -29,7 +29,7 @@ class Pause(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("pause"), "Pause Command"),
+        CommandDescription(listOf("pause"), "Pause Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
         Description(
             "Pauses the player",
             "",
@@ -75,7 +75,7 @@ class VotePause(musicManager: MusicManager) : MusicVotingCommand(musicManager), 
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("votepause"), "VotePause Command"),
+        CommandDescription(listOf("votepause"), "VotePause Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
         Description(
             "Create a poll to pause the player.",
             "",

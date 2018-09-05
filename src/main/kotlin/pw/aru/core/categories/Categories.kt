@@ -8,7 +8,7 @@ import pw.aru.utils.extensions.toSmartString
 enum class Category(val categoryName: String, val help: Help? = null, val nsfw: Boolean = false, val permission: CommandPermission = USER) {
     MUSIC("Music Commands",
         Help(
-            CategoryDescription("Music Commands"),
+            CategoryDescription("Music Commands", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
             Description("**Aru** provides first-class music for your server!\nLet's get started!"),
             Usage(
                 CommandUsage("play [youtube/yt] <search term>", "Searches for the video in Youtube and plays it."),
@@ -47,7 +47,16 @@ enum class Category(val categoryName: String, val help: Help? = null, val nsfw: 
         @JvmField
         val LIST = values().toList()
 
+        private val EXTRAS = listOf(
+            listOf("musics", "audio") to MUSIC,
+            listOf("actions") to ACTION,
+            listOf("nsfwimage", "nsfw image", "image nsfw", "nsfwimages", "nsfw images", "images nsfw", "nsfwpics", "nsfw pics", "pics nsfw") to NSFW_IMAGE,
+            listOf("nsfwactions", "nsfw actions", "actions nsfw", "nsfwaction", "nsfw action", "action nsfw") to NSFW_ACTION,
+            listOf("mod") to MODERATION,
+            listOf("util") to UTILS
+        ).flatMap { (k, v) -> k.map { it to v } }
+
         @JvmField
-        val REGISTRY = LIST.map { it.name.toLowerCase() to it }.toMap()
+        val SEARCH = LIST.map { it.name.toLowerCase() to it }.plus(EXTRAS).toMap()
     }
 }

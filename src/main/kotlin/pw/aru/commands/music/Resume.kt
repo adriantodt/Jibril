@@ -29,7 +29,7 @@ class Resume(musicManager: MusicManager) : MusicPermissionCommand(musicManager, 
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("resume"), "Resume Command"),
+        CommandDescription(listOf("resume"), "Resume Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
         Description(
             "Resumes the player",
             "",
@@ -75,7 +75,7 @@ class VoteResume(musicManager: MusicManager) : MusicVotingCommand(musicManager),
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("voteresume"), "VoteResume Command"),
+        CommandDescription(listOf("voteresume"), "VoteResume Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
         Description(
             "Create a poll to resume the player.",
             "",

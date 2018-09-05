@@ -85,8 +85,8 @@ class ErrorReportHandler internal constructor(private val report: ErrorReport) {
         File("reports/$fileId.html").writeText(
             File("assets/aru/templates/logs.html").readText().replaceEach(
                 "{date}" to Date(timestamp ?: currentTimeMillis()).toString(),
-                "{log}" to log,
-                "{extra}" to extra
+                "{log}" to log.replaceEach("&" to "&amp;", "\"" to "&quot;", "'" to "&apos;", "<" to "&lt;", ">" to "&gt;"),
+                "{extra}" to extra.replaceEach("&" to "&amp;", "\"" to "&quot;", "'" to "&apos;", "<" to "&lt;", ">" to "&gt;")
             )
         )
 

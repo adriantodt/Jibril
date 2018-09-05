@@ -20,7 +20,7 @@ class Shuffle(musicManager: MusicManager) : MusicPermissionCommand(musicManager,
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("shuffle"), "Shuffle Command"),
+        CommandDescription(listOf("shuffle"), "Shuffle Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
         Description(
             "Shuffles the current queue!",
             "",
@@ -53,7 +53,7 @@ class VoteShuffle(musicManager: MusicManager) : MusicVotingCommand(musicManager)
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("voteshuffle"), "VoteShuffle Command"),
+        CommandDescription(listOf("voteshuffle"), "VoteShuffle Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
         Description(
             "Create a poll to shuffle the queue.",
             "",

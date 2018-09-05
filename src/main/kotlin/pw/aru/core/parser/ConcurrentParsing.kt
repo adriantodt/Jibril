@@ -8,6 +8,7 @@ internal fun Args.runOptions(list: List<Pair<(String) -> Boolean, Args.() -> Uni
     while (true) {
         val (key, value) = map.entries.firstOrNull { matchNextString(it.key) } ?: return
         map.remove(key)
+        while (map.values.remove(value));
         value()
     }
 }
@@ -19,8 +20,10 @@ class OptionBuilder {
         list += predicate to function
     }
 
-    fun option(key: String, function: Args.() -> Unit) {
-        list += key::equals to function
+    fun option(vararg keys: String, function: Args.() -> Unit) {
+        for (key in keys) {
+            list += key::equals to function
+        }
     }
 }
 
@@ -35,10 +38,10 @@ class OptionCreatorBuilder<T> {
         return res
     }
 
-    fun <V> option(key: String, mapper: Args.() -> V): Resource<V> {
+    fun <V> option(vararg keys: String, mapper: Args.() -> V): Resource<V> {
         val res = Resource.settable<V>()
         res.setResourceUnavailable()
-        builder.option(key) { res.setResourceAvailable(mapper()) }
+        builder.option(*keys) { res.setResourceAvailable(mapper()) }
         return res
     }
 

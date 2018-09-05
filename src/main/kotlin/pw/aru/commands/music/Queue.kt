@@ -62,7 +62,7 @@ class Queue(musicManager: MusicManager) : MusicCommand(musicManager), ICommand.H
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("queue", "q"), "Queue Command"),
+        CommandDescription(listOf("queue", "q"), "Queue Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
         Description("Displays the current queue."),
         SeeAlso["play", "nowplaying", "repeat"]
     )

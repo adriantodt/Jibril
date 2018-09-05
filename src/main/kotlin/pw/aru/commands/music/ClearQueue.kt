@@ -29,7 +29,7 @@ class ClearQueue(musicManager: MusicManager) : MusicPermissionCommand(musicManag
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("clearqueue"), "ClearQueue Command"),
+        CommandDescription(listOf("clearqueue"), "ClearQueue Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
         Description(
             "Clears the player's queue.",
             "",
