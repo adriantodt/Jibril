@@ -3,11 +3,9 @@ package pw.aru.commands.actions
 import com.github.natanbc.weeb4j.Weeb4J
 import com.github.natanbc.weeb4j.image.FileType.GIF
 import okhttp3.OkHttpClient
-import pw.aru.commands.actions.base.*
-import pw.aru.core.CommandRegistry
+import pw.aru.commands.actions.v2.ActionCommandsWorkshop
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.CommandProvider
-import pw.aru.core.commands.ICommandProvider
 import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.caches.URLCache
 import pw.aru.utils.emotes.*
@@ -18,10 +16,7 @@ class ActionCommands(
     httpClient: OkHttpClient,
     weebApi: Weeb4J,
     private val assetProvider: ReloadableListProvider
-) : ICommandProvider {
-
-    private val weebProvider = weebApi.imageProvider
-    private val cache = URLCache(httpClient, File("url_cache"))
+) : ActionCommandsWorkshop(weebApi, URLCache(httpClient, File("url_cache")), Category.ACTION) {
 
     /*
     weeb4j: {
@@ -37,295 +32,238 @@ class ActionCommands(
     }
      */
 
-    override fun provide(r: CommandRegistry) {
-        val category = Category.ACTION
-
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("pat"), "Pat Command", "Pats the mentioned users."),
-            GetImage(type = "pat", fileType = GIF),
-            ActionLines(
-                "$PAT {mentions}, you have been patted by {author}",
-                "$PAT *Pats~*",
-                "$PAT *Pats you~*",
-                "$PAT Oh, eh.. *~gets patted~* T-thanks~"
+    override fun create() {
+        actionCommand(listOf("pat"), "Pat Command", "Pats the mentioned users.") {
+            provider = fromWeebSh(type = "pat", fileType = GIF)
+            actions(
+                anyTarget = "$PAT {mentions}, you have been patted by {author}",
+                noTargets = "$PAT *Pats~*",
+                targetsYou = "$PAT *Pats you~*",
+                targetsMe = "$PAT Oh, eh.. *~gets patted~* T-thanks~"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("poke"), "Poke Command", "Pokes the mentioned users."),
-            GetImage(type = "poke", fileType = GIF),
-            ActionLines(
-                "$POKE {mentions}, {author} is poking you",
-                "$POKE *Pokes~*",
-                "$POKE *Pokes you~*",
-                "$POKE Eeh..? T-that's awkward, stop!"
+        actionCommand(listOf("poke"), "Poke Command", "Pokes the mentioned users.") {
+            provider = fromWeebSh(type = "poke", fileType = GIF)
+            actions(
+                anyTarget = "$POKE {mentions}, {author} is poking you",
+                noTargets = "$POKE *Pokes~*",
+                targetsYou = "$POKE *Pokes you~*",
+                targetsMe = "$POKE Eeh..? T-that's awkward, stop!"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("highfive"), "Highfive Command", "Highfives the mentioned users."),
-            GetImage(type = "highfive", fileType = GIF),
-            ActionLines(
-                "$HIGHFIVE {author} is high-fiving {mentions}",
-                "$HIGHFIVE *Highfives~*",
-                "$HIGHFIVE *Highfives you~*",
-                "$HIGHFIVE Oh, eh.. *~high-fives back~* Hai!"
+        actionCommand(listOf("highfive"), "Highfive Command", "Highfives the mentioned users.") {
+            provider = fromWeebSh(type = "highfive", fileType = GIF)
+            actions(
+                anyTarget = "$HIGHFIVE {author} is high-fiving {mentions}",
+                noTargets = "$HIGHFIVE *Highfives~*",
+                targetsYou = "$HIGHFIVE *Highfives you~*",
+                targetsMe = "$HIGHFIVE Oh, eh.. *~high-fives back~* Hai!"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("tease", "teehee"), "Tease Command", "Teases the mentioned users."),
-            GetImage(type = "teehee", fileType = GIF),
-            ActionLines(
-                "$TEEHEE {mentions}, {author} is teasing you",
-                "$TEEHEE *Teases~*",
-                "$TEEHEE *Teases you~*",
-                "$TEEHEE Eeh..? T-that's awkward, stop!"
+        actionCommand(listOf("tease", "teehee"), "Tease Command", "Teases the mentioned users.") {
+            provider = fromWeebSh(type = "teehee", fileType = GIF)
+            actions(
+                anyTarget = "$TEEHEE {mentions}, {author} is teasing you",
+                noTargets = "$TEEHEE *Teases~*",
+                targetsYou = "$TEEHEE *Teases you~*",
+                targetsMe = "$TEEHEE Eeh..? T-that's awkward, stop!"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("tickle"), "Tickle Command", "Tickles the mentioned users."),
-            GetImage(type = "teehee", fileType = GIF),
-            ActionLines(
-                "$TEEHEE {mentions}, {author} is tickling you",
-                "$TEEHEE *Tickles~*",
-                "$TEEHEE *Tickles you~*",
-                "$TEEHEE Eeh..? T-that's awkward, stop!"
+        actionCommand(listOf("tickle"), "Tickle Command", "Tickles the mentioned users.") {
+            provider = fromWeebSh(type = "teehee", fileType = GIF)
+            actions(
+                anyTarget = "$TEEHEE {mentions}, {author} is tickling you",
+                noTargets = "$TEEHEE *Tickles~*",
+                targetsYou = "$TEEHEE *Tickles you~*",
+                targetsMe = "$TEEHEE Eeh..? T-that's awkward, stop!"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("slap"), "Slap Command", "Slaps the mentioned users."),
-            GetImage(type = "slap", fileType = GIF),
-            ActionLines(
-                "$EVIL {mentions}, you have been slapped by {author}",
-                "$EVIL *Slaps~*",
-                "$EVIL *Slaps you~*",
-                "$EVIL Eeh..? *~gets slapped~* Y-you BAKA! $CRY"
+        actionCommand(listOf("slap"), "Slap Command", "Slaps the mentioned users.") {
+            provider = fromWeebSh(type = "slap", fileType = GIF)
+            actions(
+                anyTarget = "$EVIL {mentions}, you have been slapped by {author}",
+                noTargets = "$EVIL *Slaps~*",
+                targetsYou = "$EVIL *Slaps you~*",
+                targetsMe = "$EVIL Eeh..? *~gets slapped~* Y-you BAKA! $CRY"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("smile"), "Smile Command", "Smiles at the mentioned users."),
-            GetImage(type = "smile", fileType = GIF),
-            ActionLines(
-                "$SMILE {mentions}, {author} is smiling at you",
-                "$SMILE *Smiles~*",
-                "$SMILE *Smiles at you~*",
-                "$SMILE Eeh..? T-that's awkward, stop!"
+        actionCommand(listOf("smile"), "Smile Command", "Smiles at the mentioned users.") {
+            provider = fromWeebSh(type = "smile", fileType = GIF)
+            actions(
+                anyTarget = "$SMILE {mentions}, {author} is smiling at you",
+                noTargets = "$SMILE *Smiles~*",
+                targetsYou = "$SMILE *Smiles at you~*",
+                targetsMe = "$SMILE Eeh..? T-that's awkward, stop!"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("pout"), "Pout Command", "Pouts at the mentioned users."),
-            GetImage(type = "pout", fileType = GIF),
-            ActionLines(
-                "$POUT {mentions}, {author} is pouting at you",
-                "$POUT *Pouts~*",
-                "$POUT *Pouts at you~*",
-                "$POUT Eeh..? W-what do you want?"
+        actionCommand(listOf("pout"), "Pout Command", "Pouts at the mentioned users.") {
+            provider = fromWeebSh(type = "pout", fileType = GIF)
+            actions(
+                anyTarget = "$POUT {mentions}, {author} is pouting at you",
+                noTargets = "$POUT *Pouts~*",
+                targetsYou = "$POUT *Pouts at you~*",
+                targetsMe = "$POUT Eeh..? W-what do you want?"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("cuddle"), "Cuddle Command", "Cuddles the mentioned users."),
-            GetImage(type = "cuddle", fileType = GIF),
-            ActionLines(
-                "$CUDDLE {mentions}, you have been cuddled by {author}",
-                "$CUDDLE *Cuddles~*",
-                "$CUDDLE *Cuddles you~*",
-                "$CUDDLE Oh, eh.. *~gets cuddled~* T-thanks~"
+        actionCommand(listOf("cuddle"), "Cuddle Command", "Cuddles the mentioned users.") {
+            provider = fromWeebSh(type = "cuddle", fileType = GIF)
+            actions(
+                anyTarget = "$CUDDLE {mentions}, you have been cuddled by {author}",
+                noTargets = "$CUDDLE *Cuddles~*",
+                targetsYou = "$CUDDLE *Cuddles you~*",
+                targetsMe = "$CUDDLE Oh, eh.. *~gets cuddled~* T-thanks~"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("punch"), "Punch Command", "Punches the mentioned users."),
-            GetImage(type = "punch", fileType = GIF),
-            ActionLines(
-                "$PUNCH {mentions}, you have been punched by {author}",
-                "$PUNCH *Punches~*",
-                "$PUNCH *Punches you~*",
-                "$PUNCH Eeh..? *~gets punched~* Y-you BAKA! $CRY"
+        actionCommand(listOf("punch"), "Punch Command", "Punches the mentioned users.") {
+            provider = fromWeebSh(type = "punch", fileType = GIF)
+            actions(
+                anyTarget = "$PUNCH {mentions}, you have been punched by {author}",
+                noTargets = "$PUNCH *Punches~*",
+                targetsYou = "$PUNCH *Punches you~*",
+                targetsMe = "$PUNCH Eeh..? *~gets punched~* Y-you BAKA! $CRY"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("holdhands", "holdhand"), "Hold Hands Command", "Holds the hands of the mentioned users."),
-            GetImage(type = "handholding", fileType = GIF),
-            ActionLines(
-                "$CUDDLE {author} is holding {mentions}'s hand",
-                "$CUDDLE *Holds hands~*",
-                "$CUDDLE *Holds your hand~*",
-                "$CUDDLE Oh, eh.. T-thanks~ $BLUSH"
+        actionCommand(listOf("holdhands", "holdhand"), "Hold Hands Command", "Holds the hands of the mentioned users.") {
+            provider = fromWeebSh(type = "handholding", fileType = GIF)
+            actions(
+                anyTarget = "$CUDDLE {author} is holding {mentions}'s hand",
+                noTargets = "$CUDDLE *Holds hands~*",
+                targetsYou = "$CUDDLE *Holds your hand~*",
+                targetsMe = "$CUDDLE Oh, eh.. T-thanks~ $BLUSH"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("hug"), "Hug Command", "Hugs the mentioned users."),
-            GetImage(type = "hug", fileType = GIF),
-            ActionLines(
-                "$HUG {mentions}, you have been hugged by {author}",
-                "$HUG *Hugs~*",
-                "$HUG *Hugs you~*",
-                "$HUG Oh, eh.. *~gets hugged~* T-thanks~"
+        actionCommand(listOf("hug"), "Hug Command", "Hugs the mentioned users.") {
+            provider = fromWeebSh(type = "hug", fileType = GIF)
+            actions(
+                anyTarget = "$HUG {mentions}, you have been hugged by {author}",
+                noTargets = "$HUG *Hugs~*",
+                targetsYou = "$HUG *Hugs you~*",
+                targetsMe = "$HUG Oh, eh.. *~gets hugged~* T-thanks~"
             )
-        )
+        }
 
-        URLsActionCommand(
-            category, r, cache,
-            CustomCommandInfo(listOf("nuzzle"), "Nuzzle Command", "Nuzzles the mentioned users."),
-            assetProvider["assets/aru/actions/nuzzle.txt"],
-            ActionLines(
-                "$CUDDLE {mentions}, you have been nuzzled by {author}",
-                "$CUDDLE *Nuzzles~*",
-                "$CUDDLE *Nuzzles you~*",
-                "$CUDDLE Oh, eh.. *~gets nuzzled~* T-thanks~"
+        actionCommand(listOf("nuzzle"), "Nuzzle Command", "Nuzzles the mentioned users.") {
+            assetProvider["assets/aru/actions/nuzzle.txt"]
+            actions(
+                anyTarget = "$CUDDLE {mentions}, you have been nuzzled by {author}",
+                noTargets = "$CUDDLE *Nuzzles~*",
+                targetsYou = "$CUDDLE *Nuzzles you~*",
+                targetsMe = "$CUDDLE Oh, eh.. *~gets nuzzled~* T-thanks~"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("kiss"), "Kiss Command", "Kisses the mentioned users."),
-            GetImage(type = "kiss", fileType = GIF),
-            ActionLines(
-                "$KISS {mentions}, you have been kissed by {author}",
-                "$KISS *Kisses~*",
-                "$KISS *Kisses you~*",
-                "$KISS Oh, eh.. *~gets kissed~* T-thanks~"
+        actionCommand(listOf("kiss"), "Kiss Command", "Kisses the mentioned users.") {
+            provider = fromWeebSh(type = "kiss", fileType = GIF)
+            actions(
+                anyTarget = "$KISS {mentions}, you have been kissed by {author}",
+                noTargets = "$KISS *Kisses~*",
+                targetsYou = "$KISS *Kisses you~*",
+                targetsMe = "$KISS Oh, eh.. *~gets kissed~* T-thanks~"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("lick"), "Lick Command", "Licks the mentioned users."),
-            GetImage(type = "lick", fileType = GIF),
-            ActionLines(
-                "$LICK {mentions}, {author} is licking you",
-                "$LICK *Licks~*",
-                "$LICK *Licks you~*",
-                "$LICK Eeh..? T-that's awkward, stop!"
+        actionCommand(listOf("lick"), "Lick Command", "Licks the mentioned users.") {
+            provider = fromWeebSh(type = "lick", fileType = GIF)
+            actions(
+                anyTarget = "$LICK {mentions}, {author} is licking you",
+                noTargets = "$LICK *Licks~*",
+                targetsYou = "$LICK *Licks you~*",
+                targetsMe = "$LICK Eeh..? T-that's awkward, stop!"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("bite"), "Bite Command", "Bite the mentioned users."),
-            GetImage(type = "bite", fileType = GIF),
-            ActionLines(
-                "$BITE {mentions}, you have been bitten by {author}",
-                "$BITE *Bites~*",
-                "$BITE *Bites you~*",
-                "$BITE O-Ouch! That hurts, you baka!"
+        actionCommand(listOf("bite"), "Bite Command", "Bite the mentioned users.") {
+            provider = fromWeebSh(type = "bite", fileType = GIF)
+            actions(
+                anyTarget = "$BITE {mentions}, you have been bitten by {author}",
+                noTargets = "$BITE *Bites~*",
+                targetsYou = "$BITE *Bites you~*",
+                targetsMe = "$BITE O-Ouch! That hurts, you baka!"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("stare"), "Stare Command", "Stares the mentioned users."),
-            GetImage(type = "stare", fileType = GIF),
-            ActionLines(
-                "$STARE {mentions}, {author} is staring you",
-                "$STARE *Stares~*",
-                "$STARE *Stares you~*",
-                "$STARE Eeh..? T-that's awkward, stop!"
+        actionCommand(listOf("stare"), "Stare Command", "Stares the mentioned users.") {
+            provider = fromWeebSh(type = "stare", fileType = GIF)
+            actions(
+                anyTarget = "$STARE {mentions}, {author} is staring you",
+                noTargets = "$STARE *Stares~*",
+                targetsYou = "$STARE *Stares you~*",
+                targetsMe = "$STARE Eeh..? T-that's awkward, stop!"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("cry"), "Cry Command", "It's okay to cry."),
-            GetImage(type = "cry", fileType = GIF),
-            ActionLines(
-                "$CRY {mentions}, {author} is crying",
-                "$CRY *Cries~*",
-                "$CRY *Cries~*",
-                "$CRY Eeh..? D-Did I do something wrong? I-I'm sorry!"
+        actionCommand(listOf("cry"), "Cry Command", "It's okay to cry.") {
+            provider = fromWeebSh(type = "cry", fileType = GIF)
+            actions(
+                anyTarget = "$CRY {mentions}, {author} is crying",
+                noTargets = "$CRY *Cries~*",
+                targetsYou = "$CRY *Cries~*",
+                targetsMe = "$CRY Eeh..? D-Did I do something wrong? I-I'm sorry!"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("smug"), "Smug Command", "It's never late enough to be smug."),
-            GetImage(type = "smug", fileType = GIF),
-            ActionLines(
-                "$SMUG {mentions}, {author} is looking a bit smug",
-                "$SMUG {author} is looking a bit smug",
-                "$SMUG {author} is looking a bit smug",
-                "$SMUG Eeh..? T-that's awkward, stop!"
+        actionCommand(listOf("smug"), "Smug Command", "It's never late enough to be smug.") {
+            provider = fromWeebSh(type = "smug", fileType = GIF)
+            actions(
+                anyTarget = "$SMUG {mentions}, {author} is looking a bit smug",
+                noTargets = "$SMUG {author} is looking a bit smug",
+                targetsYou = "$SMUG {author} is looking a bit smug",
+                targetsMe = "$SMUG Eeh..? T-that's awkward, stop!"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("wag", "tail", "tailwag", "wagtail"), "Wag Tail Command", "Wags tails at the mentioned users."),
-            GetImage(type = "wag", fileType = GIF),
-            ActionLines(
-                "$AWOO {mentions}, {author} is wagging the tail at you!",
-                "$AWOO *Wags tail~*",
-                "$AWOO *Wags tail at you~*",
-                "$AWOO Eeh..? W-what do you want?"
+        actionCommand(listOf("wag", "tail", "tailwag", "wagtail"), "Wag Tail Command", "Wags tails at the mentioned users.") {
+            provider = fromWeebSh(type = "wag", fileType = GIF)
+            actions(
+                anyTarget = "$AWOO {mentions}, {author} is wagging the tail at you!",
+                noTargets = "$AWOO *Wags tail~*",
+                targetsYou = "$AWOO *Wags tail at you~*",
+                targetsMe = "$AWOO Eeh..? W-what do you want?"
             )
-        )
+        }
 
-        WeebCommand.Image(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("blush"), "Blush Command", "When it's just too much for you to handle."),
-            GetImage(type = "banghead", fileType = GIF),
-            listOf("$BLUSH {author} is slowly turning into a tomato")
-        )
+        imageCommand(listOf("blush"), "Blush Command", "When it's just too much for you to handle.") {
+            provider = fromWeebSh(type = "banghead", fileType = GIF)
+            messages("$BLUSH {author} is slowly turning into a tomato")
+        }
 
-        WeebCommand.Image(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("dance"), "Dance Command", "Sends a random dance image."),
-            GetImage(type = "dance", fileType = GIF),
-            listOf("$DANCE {author} is dancing $DANCE2")
-        )
+        imageCommand(listOf("dance"), "Dance Command", "Sends a random dance image.") {
+            provider = fromWeebSh(type = "dance", fileType = GIF)
+            messages("$DANCE {author} is dancing $DANCE2")
+        }
 
-        WeebCommand.Image(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("facedesk", "banghead"), "Facedesk Command", "When it's just too much to handle."),
-            GetImage(type = "banghead", fileType = GIF),
-            listOf("$TALKING *Facedesks~*")
-        )
+        imageCommand(listOf("facedesk", "banghead"), "Facedesk Command", "When it's just too much to handle.") {
+            provider = fromWeebSh(type = "banghead", fileType = GIF)
+            messages("$TALKING *Facedesks~*")
+        }
 
-        WeebCommand.Image(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("drift"), "Drift Command", "*Initial D intensifies.*"),
-            GetImage(type = "initial_d", fileType = GIF),
-            listOf("$CAR *Drifts in japanese~*")
-        )
+        imageCommand(listOf("drift"), "Drift Command", "*Initial D intensifies.*") {
+            provider = fromWeebSh(type = "initial_d", fileType = GIF)
+            messages("$CAR *Drifts in japanese~*")
+        }
 
-        WeebCommand.Image(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("thinking"), "Thinking Command", "Sends a random thinking image."),
-            GetImage(type = "thinking")
-        )
+        imageCommand(listOf("thinking"), "Thinking Command", "Sends a random thinking image.") {
+            provider = fromWeebSh(type = "thinking")
+        }
 
+        imageCommand(listOf("nom"), "Nom Command", "Sends a random nom image.") {
+            provider = fromWeebSh(type = "nom")
+        }
 
-        WeebCommand.Image(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("nom"), "Nom Command", "Sends a random nom image."),
-            GetImage(type = "nom")
-        )
-
-        WeebCommand.Image(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("thumbsup", "thumps"), "Thumbs Up Command", "Sends a random Thumbs Up image."),
-            GetImage(type = "thumbsup"),
-            listOf(
+        imageCommand(listOf("thumbsup", "thumps"), "Thumbs Up Command", "Sends a random Thumbs Up image.") {
+            provider = fromWeebSh(type = "thumbsup")
+            messages(
                 "$THUMBSUP1 *Raises hand~*",
                 "$THUMBSUP2 *Raises hand~*",
                 "$THUMBSUP3 *Raises hand~*",
@@ -333,113 +271,91 @@ class ActionCommands(
                 "$THUMBSUP5 *Raises hand~*",
                 "$THUMBSUP6 *Raises hand~*"
             )
-        )
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("lewd"), "Lewd Command", "T-that's lewd!"),
-            GetImage(type = "lewd"),
-            ActionLines(
-                "$LEWD {mentions}, Y-you lewdie!",
-                "$LEWD Y-you lewdie!",
-                "$LEWD Y-you lewdie!",
-                "$LEWD I-I'm not lewd, you lewdie!"
+        actionCommand(listOf("lewd"), "Lewd Command", "T-that's lewd!") {
+            provider = fromWeebSh(type = "lewd")
+            actions(
+                anyTarget = "$LEWD {mentions}, Y-you lewdie!",
+                noTargets = "$LEWD Y-you lewdie!",
+                targetsYou = "$LEWD Y-you lewdie!",
+                targetsMe = "$LEWD I-I'm not lewd, you lewdie!"
             )
-        )
+        }
 
-        WeebCommand.Image(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("owo"), "OwO Command", "What's this?"),
-            GetImage(type = "owo")
-        )
+        imageCommand(listOf("owo"), "OwO Command", "What's this?") {
+            provider = fromWeebSh(type = "owo")
+        }
 
-        WeebCommand.Image(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("dab"), "Dabs Command", "Sends a random dab image."),
-            GetImage(type = "dab")
-        )
+        imageCommand(listOf("dab"), "Dabs Command", "Sends a random dab image.") {
+            provider = fromWeebSh(type = "dab")
+        }
 
-        WeebCommand.Action(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("shrug"), "Shrug Command", "Sends a random shrug image."),
-            GetImage(type = "shrug", fileType = GIF),
-            ActionLines(
-                "$SHRUG {mentions}, {author} is shrugging at you",
-                "$SHRUG {author} is shrugging",
-                "$SHRUG {author} is shrugging",
-                "$SHRUG W-Why are you Shrugging at me?"
+        actionCommand(listOf("shrug"), "Shrug Command", "Sends a random shrug image.") {
+            provider = fromWeebSh(type = "shrug", fileType = GIF)
+            actions(
+                anyTarget = "$SHRUG {mentions}, {author} is shrugging at you",
+                noTargets = "$SHRUG {author} is shrugging",
+                targetsYou = "$SHRUG {author} is shrugging",
+                targetsMe = "$SHRUG W-Why are you Shrugging at me?"
             )
-        )
+        }
 
-        WeebCommand.Image(
-            category, weebProvider, r, cache,
-            WeebCommandInfo(listOf("awoo", "awo", "awooo", "awoooo"), "Awoo Command", "Sends a random awoo!"),
-            GetImage(type = "awoo", fileType = GIF),
-            listOf(
-                "$AWOO Awooo~!"
-            )
-        )
+        imageCommand(listOf("awoo", "awo", "awooo", "awoooo"), "Awoo Command", "Sends a random awoo!") {
+            provider = fromWeebSh(type = "awoo", fileType = GIF)
+            messages("$AWOO Awooo~!")
+        }
 
-        URLsActionCommand(
-            category, r, cache,
-            CustomCommandInfo(listOf("meow"), "Meow Command", "Meows at the mentioned users."),
-            assetProvider["assets/aru/actions/meow.txt"],
-            ActionLines(
-                "$CAT {mentions}, Meow",
-                "$CAT *Meow~*",
-                "$CAT {author}, *Meow~*",
-                "$CAT Eeh..? T-that's awkward, stop!"
+        actionCommand(listOf("meow"), "Meow Command", "Meows at the mentioned users.") {
+            provider = fromLinks(assetProvider["assets/aru/actions/meow.txt"])
+            actions(
+                anyTarget = "$CAT {mentions}, Meow",
+                noTargets = "$CAT *Meow~*",
+                targetsYou = "$CAT {author}, *Meow~*",
+                targetsMe = "$CAT Eeh..? T-that's awkward, stop!"
             )
-        )
+        }
 
-        URLsActionCommand(
-            category, r, cache,
-            CustomCommandInfo(listOf("beg"), "Beg Command", "Begs the mentioned users."),
-            assetProvider["assets/aru/actions/beg.txt"],
-            ActionLines(
-                "$BEG {author} is begging {mentions}",
-                "$BEG *Begs~*",
-                "$BEG *Begs you~*",
-                "$BEG Eeh..? Why are you begging me? uwu"
+        actionCommand(listOf("beg"), "Beg Command", "Begs the mentioned users.") {
+            provider = fromLinks(assetProvider["assets/aru/actions/beg.txt"])
+            actions(
+                anyTarget = "$BEG {author} is begging {mentions}",
+                noTargets = "$BEG *Begs~*",
+                targetsYou = "$BEG *Begs you~*",
+                targetsMe = "$BEG Eeh..? Why are you begging me? uwu"
             )
-        )
+        }
 
-        URLsActionCommand(
-            category, r, cache,
-            CustomCommandInfo(listOf("bloodsuck", "vampire"), "Bloodsuck Command", "Sucks the blood of the mentioned users."),
-            assetProvider["assets/aru/actions/bloodsuck.txt"],
-            ActionLines(
-                "$BITE {mentions}, {author} is sucking your blood",
-                "$BITE *Sucks blood~*",
-                "$BITE *Sucks your blood~*",
-                "$BITE Eeh..? *gets blood sucked~* T-that hurts, stop!"
+        actionCommand(listOf("bloodsuck", "vampire"), "Bloodsuck Command", "Sucks the blood of the mentioned users.") {
+            provider = fromLinks(assetProvider["assets/aru/actions/bloodsuck.txt"])
+            actions(
+                anyTarget = "$BITE {mentions}, {author} is sucking your blood",
+                noTargets = "$BITE *Sucks blood~*",
+                targetsYou = "$BITE *Sucks your blood~*",
+                targetsMe = "$BITE Eeh..? *gets blood sucked~* T-that hurts, stop!"
             )
-        )
+        }
 
         //eartease
-        URLsActionCommand(
-            category, r, cache,
-            CustomCommandInfo(listOf("eartease", "teaseear", "teaseears"), "Ear Tease Command", "Ear-teases the mentioned users."),
-            assetProvider["assets/aru/sfw_actions/eartease.txt"],
-            ActionLines(
-                "$TEEHEE {author} is teasing {mentions}'s ear",
-                "$TEEHEE *Teases ear~*",
-                "$TEEHEE *Teases your ear~*",
-                "$TEEHEE Eeh..? *starts melting~* I-it's not I'm liking it, b-baka!"
+        actionCommand(listOf("eartease", "teaseear", "teaseears"), "Ear Tease Command", "Ear-teases the mentioned users.") {
+            provider = fromLinks(assetProvider["assets/aru/sfw_actions/eartease.txt"])
+            actions(
+                anyTarget = "$TEEHEE {author} is teasing {mentions}'s ear",
+                noTargets = "$TEEHEE *Teases ear~*",
+                targetsYou = "$TEEHEE *Teases your ear~*",
+                targetsMe = "$TEEHEE Eeh..? *starts melting~* I-it's not I'm liking it, b-baka!"
             )
-        )
+        }
 
         //necktease
-        URLsActionCommand(
-            category, r, cache,
-            CustomCommandInfo(listOf("necktease", "teaseneck"), "Neck Tease Command", "Neck-teases the mentioned-users"),
-            assetProvider["assets/aru/sfw_actions/necktease.txt"],
-            ActionLines(
-                "$TEEHEE {author} is teasing {mentions}'s neck",
-                "$TEEHEE *Teases neck~*",
-                "$TEEHEE *Teases your neck~*",
-                "$TEEHEE Eeh..? Eeh..? *starts melting~* I-it's not I'm liking it, b-baka!"
+        actionCommand(listOf("necktease", "teaseneck"), "Neck Tease Command", "Neck-teases the mentioned-users") {
+            provider = fromLinks(assetProvider["assets/aru/sfw_actions/necktease.txt"])
+            actions(
+                anyTarget = "$TEEHEE {author} is teasing {mentions}'s neck",
+                noTargets = "$TEEHEE *Teases neck~*",
+                targetsYou = "$TEEHEE *Teases your neck~*",
+                targetsMe = "$TEEHEE Eeh..? Eeh..? *starts melting~* I-it's not I'm liking it, b-baka!"
             )
-        )
+        }
     }
 }

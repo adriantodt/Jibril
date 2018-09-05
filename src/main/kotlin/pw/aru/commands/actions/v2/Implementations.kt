@@ -4,7 +4,9 @@ import pw.aru.core.categories.Category
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.CommandDescription
+import pw.aru.core.commands.help.CommandUsage
 import pw.aru.core.commands.help.Help
+import pw.aru.core.commands.help.Usage
 import pw.aru.utils.extensions.randomOf
 import pw.aru.utils.extensions.randomOrNull
 import pw.aru.utils.extensions.replaceEach
@@ -36,7 +38,6 @@ sealed class ImageBasedCommandImpl : ICommand, ICommand.HelpDialogProvider {
                 if (!channel.isNSFW) sfw else if (args.takeString() == "nsfw") nsfw else randomOf(sfw, nsfw)
             }
             else -> throw RuntimeException("Impossible state")
-            //EU COMPLETEI A TABELA VERDADE, VAI TOMAR NO CU
         }
 
         handle(provider.provide())
@@ -78,7 +79,10 @@ class ActionCommandImpl(
     }
 
     override val helpHandler = Help(
-        CommandDescription(names, description)
+        CommandDescription(names, commandName),
+        Usage(
+            CommandUsage(names[0], description)
+        )
     )
 }
 
@@ -100,6 +104,9 @@ class ImageCommandImpl(
     }
 
     override val helpHandler = Help(
-        CommandDescription(names, description)
+        CommandDescription(names, commandName),
+        Usage(
+            CommandUsage(names[0], description)
+        )
     )
 }

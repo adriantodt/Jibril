@@ -2,7 +2,6 @@ package pw.aru.commands.actions.v2
 
 import com.github.natanbc.weeb4j.Weeb4J
 import com.github.natanbc.weeb4j.image.FileType
-import com.github.natanbc.weeb4j.image.FileType.GIF
 import com.github.natanbc.weeb4j.image.HiddenMode
 import com.github.natanbc.weeb4j.image.HiddenMode.DEFAULT
 import com.github.natanbc.weeb4j.image.NsfwFilter
@@ -12,11 +11,8 @@ import pw.aru.commands.actions.v2.providers.RandomURLProvider
 import pw.aru.commands.actions.v2.providers.WeebProvider
 import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Category
-import pw.aru.core.categories.Category.ACTION
-import pw.aru.core.commands.CommandProvider
 import pw.aru.core.commands.ICommandProvider
 import pw.aru.utils.caches.URLCache
-import pw.aru.utils.emotes.PAT
 
 abstract class ActionCommandsWorkshop(weebApi: Weeb4J, private val cache: URLCache, private val category: Category) : ICommandProvider {
     //You only need to implement this
@@ -32,11 +28,21 @@ abstract class ActionCommandsWorkshop(weebApi: Weeb4J, private val cache: URLCac
 
     //Builders
     protected fun actionCommand(names: List<String>, commandName: String, description: String, block: ActionCommandBuilder.() -> Unit) {
-        registry.register(names.toTypedArray(), ActionCommandBuilder(names, category, commandName, description).apply(block).build())
+        registry.register(
+            names.toTypedArray(),
+            ActionCommandBuilder(names, category, commandName, description)
+                .apply(block)
+                .build()
+        )
     }
 
     protected fun imageCommand(names: List<String>, commandName: String, description: String, block: ImageCommandBuilder.() -> Unit) {
-        registry.register(names.toTypedArray(), ImageCommandBuilder(names, category, commandName, description).apply(block).build())
+        registry.register(
+            names.toTypedArray(),
+            ImageCommandBuilder(names, category, commandName, description)
+                .apply(block)
+                .build()
+        )
     }
 
     // Utility Functions
@@ -60,17 +66,4 @@ abstract class ActionCommandsWorkshop(weebApi: Weeb4J, private val cache: URLCac
     private fun ActionCommandBuilder.build() = ActionCommandImpl(names, category, commandName, description, provider, nsfwProvider, note, anyTarget, noTargets, targetsYou, targetsMe)
 
     private fun ImageCommandBuilder.build() = ImageCommandImpl(names, category, commandName, description, provider, nsfwProvider, note, messages)
-}
-
-@CommandProvider
-class Test(weebApi: Weeb4J, cache: URLCache) : ActionCommandsWorkshop(weebApi, cache, ACTION) {
-    override fun create() {
-        actionCommand(listOf("pat2"), "Pat Command", "Pats the mentioned users.") {
-            provider = fromWeebSh(type = "pat", fileType = GIF)
-            anyTarget = "$PAT {mentions}, you have been patted by {author}"
-            noTargets = "$PAT *Pats~*"
-            targetsYou = "$PAT *Pats you~*"
-            targetsMe = "$PAT Oh, eh.. *~gets patted~* T-thanks~"
-        }
-    }
 }
