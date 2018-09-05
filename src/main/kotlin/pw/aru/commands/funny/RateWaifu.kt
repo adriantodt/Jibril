@@ -37,7 +37,7 @@ class RateWaifu : ICommand, ICommand.HelpDialogProvider {
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("ratewaifu", "rw"), "RateWaifu Command"),
+        CommandDescription(listOf("ratewaifu", "rw"), "RateWaifu Command", thumbnail = "https://assets.aru.pw/img/category/fun.png"),
         Description("Rates your waifu from zero to 100"),
         Usage(
             CommandUsage("ratewaifu", "Rates you."),

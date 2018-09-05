@@ -85,7 +85,7 @@ class RemoveTrack(musicManager: MusicManager) : MusicPermissionCommand(musicMana
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("removetrack", "removesong"), "RemoveTrack Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
+        CommandDescription(listOf("removetrack", "removesong"), "RemoveTrack Command", thumbnail = "https://assets.aru.pw/img/category/music.png"),
         Description("Remove the specified track from the queue."),
         Usage(
             CommandUsage("removetrack first", "Remove the first track."),

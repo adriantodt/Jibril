@@ -21,7 +21,7 @@ class Choose : ICommand, ICommand.HelpDialogProvider {
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("choose"), "Choose Command"),
+        CommandDescription(listOf("choose"), "Choose Command", thumbnail = "https://assets.aru.pw/img/category/fun.png"),
         Description("Decisions are though, huh? Let me choose between the options for you."),
         Usage(
             CommandUsage("choose <option 1>, <option 2>, [other options separated by comma...]", "Choose one of the options.")

@@ -21,7 +21,7 @@ class Skip(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "v
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("skip"), "Skip Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
+        CommandDescription(listOf("skip"), "Skip Command", thumbnail = "https://assets.aru.pw/img/category/music.png"),
         Description(
             "Skips the current song!",
             "",
@@ -59,7 +59,7 @@ class VoteSkip(musicManager: MusicManager) : MusicVotingCommand(musicManager), I
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("voteskip"), "VoteSkip Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
+        CommandDescription(listOf("voteskip"), "VoteSkip Command", thumbnail = "https://assets.aru.pw/img/category/music.png"),
         Description(
             "Create a poll to skip the current track.",
             "",

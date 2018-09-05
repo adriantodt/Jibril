@@ -51,6 +51,9 @@ data class SeeAlso(val value: String) : HelpNode() {
 
 data class Example(val values: List<String>, val withPrefix: Boolean = true) : HelpNode() {
     constructor(vararg values: String, withPrefix: Boolean = true) : this(values.toList(), withPrefix)
+
+    val displayValues: List<String>
+        get() = if (withPrefix) values.map { "$prefix$it" } else values
 }
 
 data class Field(val name: String, val value: String) : HelpNode() {

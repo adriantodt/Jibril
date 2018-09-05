@@ -157,7 +157,7 @@ sealed class PlayCommand(
 class Play(musicManager: MusicManager) : PlayCommand(
     musicManager, false, false, false,
     Help(
-        CommandDescription(listOf("play", "p"), "Play Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
+        CommandDescription(listOf("play", "p"), "Play Command", thumbnail = "https://assets.aru.pw/img/category/music.png"),
 
         Description(
             "**Play songs!**",
@@ -191,7 +191,7 @@ class Play(musicManager: MusicManager) : PlayCommand(
 class ForcePlay(musicManager: MusicManager) : PlayCommand(
     musicManager, true, false, false,
     Help(
-        CommandDescription(listOf("forceplay", "fp"), "ForcePlay Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
+        CommandDescription(listOf("forceplay", "fp"), "ForcePlay Command", thumbnail = "https://assets.aru.pw/img/category/music.png"),
 
         Description(
             "**Play songs!**",
@@ -226,7 +226,7 @@ class ForcePlay(musicManager: MusicManager) : PlayCommand(
 class PlayNow(musicManager: MusicManager) : PlayCommand(
     musicManager, false, true, true,
     Help(
-        CommandDescription(listOf("playnow", "pn"), "PlayNow Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
+        CommandDescription(listOf("playnow", "pn"), "PlayNow Command", thumbnail = "https://assets.aru.pw/img/category/music.png"),
 
         Description(
             "**Play songs!**",
@@ -260,7 +260,7 @@ class PlayNow(musicManager: MusicManager) : PlayCommand(
 class ForcePlayNow(musicManager: MusicManager) : PlayCommand(
     musicManager, true, true, true,
     Help(
-        CommandDescription(listOf("forceplaynow", "fpn"), "ForcePlayNow Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
+        CommandDescription(listOf("forceplaynow", "fpn"), "ForcePlayNow Command", thumbnail = "https://assets.aru.pw/img/category/music.png"),
 
         Description(
             "**Play songs!**",
@@ -295,7 +295,7 @@ class ForcePlayNow(musicManager: MusicManager) : PlayCommand(
 class PlayNext(musicManager: MusicManager) : PlayCommand(
     musicManager, false, true, false,
     Help(
-        CommandDescription(listOf("playnext"), "PlayNext Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
+        CommandDescription(listOf("playnext"), "PlayNext Command", thumbnail = "https://assets.aru.pw/img/category/music.png"),
 
         Description(
             "**Play songs!**",
@@ -329,7 +329,7 @@ class PlayNext(musicManager: MusicManager) : PlayCommand(
 class ForcePlayNext(musicManager: MusicManager) : PlayCommand(
     musicManager, true, true, false,
     Help(
-        CommandDescription(listOf("forceplaynext"), "ForcePlayNext Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
+        CommandDescription(listOf("forceplaynext"), "ForcePlayNext Command", thumbnail = "https://assets.aru.pw/img/category/music.png"),
 
         Description(
             "**Play songs!**",

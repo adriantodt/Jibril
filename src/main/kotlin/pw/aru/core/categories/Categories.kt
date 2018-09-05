@@ -8,7 +8,7 @@ import pw.aru.utils.extensions.toSmartString
 enum class Category(val categoryName: String, val help: Help? = null, val nsfw: Boolean = false, val permission: CommandPermission = USER) {
     MUSIC("Music Commands",
         Help(
-            CategoryDescription("Music Commands", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
+            CategoryDescription("Music Commands", thumbnail = "https://assets.aru.pw/img/category/music.png"),
             Description("**Aru** provides first-class music for your server!\nLet's get started!"),
             Usage(
                 CommandUsage("play [youtube/yt] <search term>", "Searches for the video in Youtube and plays it."),

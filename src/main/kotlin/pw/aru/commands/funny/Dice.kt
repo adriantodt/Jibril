@@ -51,7 +51,7 @@ class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("dice", "roll"), "Dice Command"),
+        CommandDescription(listOf("dice", "roll"), "Dice Command", thumbnail = "https://assets.aru.pw/img/category/fun.png"),
         Description(
             "Rolls a dice, which needs to be written in dice notation.",
             "[Click here to learn more about dice notation.](https://aru.pw/features/dicenotation)"

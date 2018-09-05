@@ -54,7 +54,7 @@ class Help(
         for (node in nodes) when (node) {
             is Description -> field("Description:", node.value)
             is Usage -> field("Usage:", node.nodes.joinToString("\n"))
-            is Example -> field("Example:", node.values.joinToString(prefix = "```\n", separator = "\n", postfix = "\n```"))
+            is Example -> field("Example:", node.displayValues.joinToString(prefix = "```\n", separator = "\n", postfix = "\n```"))
             is Note -> field("Note:", node.value)
             is SeeAlso -> field("See Also:", node.value)
 

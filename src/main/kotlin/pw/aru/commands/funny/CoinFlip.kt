@@ -33,7 +33,7 @@ class CoinFlip : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("coinflip", "flip", "coin"), "CoinFlip Command"),
+        CommandDescription(listOf("coinflip", "flip", "coin"), "CoinFlip Command", thumbnail = "https://assets.aru.pw/img/category/fun.png"),
         Description("Have some fun, flip a coin.")
     )
 

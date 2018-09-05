@@ -27,7 +27,7 @@ class Volume(musicManager: MusicManager) : MusicCommand(musicManager), ICommand.
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("volume", "vol"), "Volume Command", thumbnail = "https://assets.aru.pw/img/aru_music.png"),
+        CommandDescription(listOf("volume", "vol"), "Volume Command", thumbnail = "https://assets.aru.pw/img/category/music.png"),
         Description(
             "Gets or sets the current volume.",
             "",
