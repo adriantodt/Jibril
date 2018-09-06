@@ -3,7 +3,10 @@ package pw.aru.commands.developer
 import com.github.natanbc.weeb4j.Account
 import com.github.natanbc.weeb4j.Weeb4J
 import com.github.natanbc.weeb4j.image.FileType
+import com.github.natanbc.weeb4j.image.HiddenMode
+import com.github.natanbc.weeb4j.image.HiddenMode.DEFAULT
 import com.github.natanbc.weeb4j.image.NsfwFilter
+import com.github.natanbc.weeb4j.image.NsfwFilter.NO_NSFW
 import gnu.trove.TDecorators.wrap
 import mu.KLogging
 import net.dv8tion.jda.bot.sharding.ShardManager
@@ -15,7 +18,6 @@ import net.dv8tion.jda.core.requests.restaction.MessageAction
 import net.dv8tion.jda.core.utils.JDALogger
 import okhttp3.OkHttpClient
 import pw.aru.Aru.sleepQuotes
-import pw.aru.commands.actions.base.GetImage
 import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
@@ -66,11 +68,6 @@ class DevCmd
         val args = parseable()
 
         when (args.takeString()) {
-            "crash" -> throw RuntimeException("I'm not feeling good, Todt~")
-            "shitlog" -> {
-                logger.info("Here's a shitton of numbers: ${(0..10000).joinToString()}")
-            }
-
             "shutdown" -> shutdown()
 
             "eval", "run" -> eval(false, args.takeRemaining())
@@ -181,17 +178,26 @@ class DevCmd
             return weebshAccount()
         }
 
-        val (image, nsfw) = args.parseAndCreate<Pair<GetImage, NsfwFilter?>> {
+        val image = args.parseAndCreate<GetImage> {
             val type = option("-type") { takeString() }
             val tags = option("-tags") { takeString().split(',') }
             val ext = option("-ext") { FileType.valueOf(takeString().toUpperCase()) }
+            val hidden = option("-hidden") { HiddenMode.valueOf(takeString().toUpperCase()) }
             val nsfw = option("-nsfw") { NsfwFilter.valueOf(("${takeString()}_NSFW").toUpperCase()) }
 
-            creator { GetImage(type.resourceOrNull, tags.resourceOrNull, ext.resourceOrNull) to nsfw.resourceOrNull }
+            creator {
+                GetImage(
+                    type.resourceOrNull,
+                    tags.resourceOrNull,
+                    ext.resourceOrNull,
+                    hidden.resourceOrNull ?: DEFAULT,
+                    nsfw.resourceOrNull ?: NO_NSFW
+                )
+            }
         }
 
         if (image.isNotEmpty()) {
-            return weebshGet(image, nsfw)
+            return weebshGet(image)
         }
 
         val imageTypes = weebSh.imageProvider.imageTypes.submit()
@@ -214,8 +220,8 @@ class DevCmd
         }.queue()
     }
 
-    private fun CommandContext.weebshGet(img: GetImage, nsfw: NsfwFilter?) {
-        weebSh.imageProvider.getRandomImage(img.type, img.tags, null, nsfw, img.fileType).async { image ->
+    private fun CommandContext.weebshGet(img: GetImage) {
+        weebSh.imageProvider.getRandomImage(img.type, img.tags, img.hidden, img.nsfw, img.ext).async { image ->
             if (image == null) {
                 send("$CONFUSED No images found... ").queue()
             } else {
@@ -415,7 +421,7 @@ class DevCmd
             CommandUsage("dev disablecallsite", "Evals a piece of code in a persistent environiment."),
             UsageSeparator,
             CommandUsage("dev weebsh", "Dumps Weeb.sh types and tags."),
-            CommandUsage("dev weebsh <[-type <value>] [-tags <values,...>] [-nsfw <value>] [-ext <value>]>", "Gets a random Weeb.sh image."),
+            CommandUsage("dev weebsh <[-type <value>] [-tags <values,...>] [-ext <value>] [-hidden <value>] [-nsfw <value>]>", "Gets a random Weeb.sh image."),
             UsageSeparator,
             CommandUsage("dev peek nowplaying", "Peek musics being played."),
             UsageSeparator,
@@ -432,3 +438,7 @@ private operator fun Account.component2() = name
 private operator fun Account.component3() = discordId
 private operator fun Account.component4() = isActive
 private operator fun Account.component5() = scopes
+
+data class GetImage(val type: String?, val tags: List<String>?, val ext: FileType?, val hidden: HiddenMode = DEFAULT, val nsfw: NsfwFilter = NO_NSFW) {
+    fun isNotEmpty() = (type != null && type.isNotEmpty()) || (tags != null && tags.isNotEmpty())
+}

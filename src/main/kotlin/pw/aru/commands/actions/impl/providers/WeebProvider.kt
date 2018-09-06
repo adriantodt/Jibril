@@ -1,10 +1,10 @@
-package pw.aru.commands.actions.v2.providers
+package pw.aru.commands.actions.impl.providers
 
 import com.github.natanbc.weeb4j.image.FileType
 import com.github.natanbc.weeb4j.image.HiddenMode
 import com.github.natanbc.weeb4j.image.NsfwFilter
-import pw.aru.commands.actions.v2.Image
-import pw.aru.commands.actions.v2.ImageProvider
+import pw.aru.commands.actions.impl.Image
+import pw.aru.commands.actions.impl.ImageProvider
 import pw.aru.utils.caches.URLCache
 
 private typealias WeebImage = com.github.natanbc.weeb4j.image.Image

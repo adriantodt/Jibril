@@ -1,4 +1,4 @@
-package pw.aru.commands.actions.v2
+package pw.aru.commands.actions.impl
 
 import com.github.natanbc.weeb4j.Weeb4J
 import com.github.natanbc.weeb4j.image.FileType
@@ -6,9 +6,9 @@ import com.github.natanbc.weeb4j.image.HiddenMode
 import com.github.natanbc.weeb4j.image.HiddenMode.DEFAULT
 import com.github.natanbc.weeb4j.image.NsfwFilter
 import com.github.natanbc.weeb4j.image.NsfwFilter.NO_NSFW
-import pw.aru.commands.actions.v2.providers.LocalFileProvider
-import pw.aru.commands.actions.v2.providers.RandomURLProvider
-import pw.aru.commands.actions.v2.providers.WeebProvider
+import pw.aru.commands.actions.impl.providers.LocalFileProvider
+import pw.aru.commands.actions.impl.providers.RandomURLProvider
+import pw.aru.commands.actions.impl.providers.WeebProvider
 import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.ICommandProvider

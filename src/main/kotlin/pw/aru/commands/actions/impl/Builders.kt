@@ -1,4 +1,4 @@
-package pw.aru.commands.actions.v2
+package pw.aru.commands.actions.impl
 
 import pw.aru.core.categories.Category
 

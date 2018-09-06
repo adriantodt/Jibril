@@ -1,7 +1,7 @@
-package pw.aru.commands.actions.v2.providers
+package pw.aru.commands.actions.impl.providers
 
-import pw.aru.commands.actions.v2.Image
-import pw.aru.commands.actions.v2.ImageProvider
+import pw.aru.commands.actions.impl.Image
+import pw.aru.commands.actions.impl.ImageProvider
 import pw.aru.utils.caches.URLCache
 import pw.aru.utils.extensions.random
 import java.io.File

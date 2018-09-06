@@ -3,7 +3,7 @@ package pw.aru.commands.actions
 import com.github.natanbc.weeb4j.Weeb4J
 import com.github.natanbc.weeb4j.image.FileType.GIF
 import okhttp3.OkHttpClient
-import pw.aru.commands.actions.v2.ActionCommandsWorkshop
+import pw.aru.commands.actions.impl.ActionCommandsWorkshop
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.CommandProvider
 import pw.aru.utils.ReloadableListProvider
