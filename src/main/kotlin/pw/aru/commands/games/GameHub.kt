@@ -196,7 +196,7 @@ class GameHub(private val gameManager: GameManager) : ICommand, ICommand.HelpDia
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("gamehub", "gh"), "Aru!GameHub"),
+        CommandDescription(listOf("gamehub", "gh"), "Aru!GameHub", thumbnail = "https://assets.aru.pw/img/category/games.png"),
         Description(
             "The **GameHub** is Aru's lobby and game system. Simply create a new lobby, let your friends join, and you're ready to play!"
         ),

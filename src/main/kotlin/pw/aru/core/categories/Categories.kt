@@ -28,6 +28,7 @@ enum class Category(val categoryName: String, val help: Help? = null, val nsfw: 
         )
     ),
     ACTION("Action Commands"),
+    SOCIAL("Social Commands"),
     CURRENCY("Currency Commands"),
     GAMES("Games"),
     IMAGE("Image Commands"),
