@@ -11,14 +11,14 @@ data class CommandDescription(
     val description: String,
     val permission: CommandPermission? = null,
     val color: Color? = null,
-    val thumbnail: String = "https://assets.aru.pw/img/help_thumbnail.png"
+    val thumbnail: String = "https://i.imgur.com/uxHqhwt.png"
 ) : BaseDescription()
 
 data class CategoryDescription(
     val description: String,
     val permission: CommandPermission? = null,
     val color: Color? = null,
-    val thumbnail: String = "https://assets.aru.pw/img/help_thumbnail.png"
+    val thumbnail: String = "https://i.imgur.com/uxHqhwt.png"
 ) : BaseDescription()
 
 //=== w ===//

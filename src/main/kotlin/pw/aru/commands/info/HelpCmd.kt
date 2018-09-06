@@ -42,16 +42,6 @@ class HelpCmd(private val registry: CommandRegistry) : ICommand, ICommand.HelpDi
         }
     }
 
-    private val jokes = listOf(
-        "You helped yourself.",
-        "Congrats, you managed to use the help command.",
-        "Yo damn I heard you like help, because you just issued the help command to get the help about the help command.",
-        "Helps you to help yourself.",
-        "Help Inception.",
-        "A help helping helping helping help.",
-        "I wonder if this is what you are looking for..."
-    )
-
     override fun CommandContext.call() {
         if (args.isEmpty()) {
             botHelp()
@@ -156,13 +146,24 @@ class HelpCmd(private val registry: CommandRegistry) : ICommand, ICommand.HelpDi
         send("$ERROR There's no command or category with that name!").queue()
     }
 
+    private val jokes = listOf(
+        "You helped yourself.",
+        "Congrats, you managed to use the help command.",
+        "Yo damn I heard you like help, because you just issued the help command to get the help about the help command.",
+        "Helps you to help yourself.",
+        "Help Inception.",
+        "A help helping helping helping help.",
+        "I wonder if this is what you are looking for..."
+    )
+
     override val helpHandler
         get() = Help(
             CommandDescription(listOf("help", "h"), "Help Command"),
             Description("**${jokes.random()}**"),
             Usage(
                 CommandUsage("help", "Lists all commands."),
-                CommandUsage("help <command>", "Displays a command's help.")
+                CommandUsage("help <command>", "Displays a command's help."),
+                CommandUsage("help <category>", "Displays a category's help.")
             )
         )
 }

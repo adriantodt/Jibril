@@ -301,7 +301,7 @@ class ActionCommands(
             )
         }
 
-        imageCommand(listOf("awoo", "awo", "awooo", "awoooo"), "Awoo Command", "Sends a random awoo!") {
+        imageCommand(listOf("awoo", "awo", "awooo", "awoooo", "awooooo", "awoooooo", "awoooooo"), "Awoo Command", "Sends a random awoo!") {
             provider = fromWeebSh(type = "awoo", fileType = GIF)
             messages("$AWOO Awooo~!")
         }
