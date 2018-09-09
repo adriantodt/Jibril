@@ -14,7 +14,7 @@ class NSFWImageCommands(
     httpClient: OkHttpClient,
     weebApi: Weeb4J,
     private val assetProvider: ReloadableListProvider
-) : ActionCommandsWorkshop(weebApi, URLCache(httpClient, File("url_cache")), Category.ACTION) {
+) : ActionCommandsWorkshop(weebApi, URLCache(httpClient, File("url_cache")), Category.NSFW_IMAGE) {
     override fun create() {
 
     }

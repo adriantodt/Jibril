@@ -1,13 +1,6 @@
 package pw.aru.utils
 
-import okhttp3.MediaType
-import okhttp3.OkHttpClient
-import okhttp3.RequestBody
 import pw.aru.core.reporting.ErrorReportHandler.Companion.fileWorker
-import pw.aru.exported.user_agent
-import pw.aru.utils.emotes.DISAPPOINTED
-import pw.aru.utils.extensions.jsonObject
-import pw.aru.utils.extensions.newCall
 import pw.aru.utils.extensions.replaceEach
 import pw.aru.utils.extensions.toSmartString
 import java.io.File
@@ -40,29 +33,12 @@ fun paste(title: String, content: String, lang: String = "none"): String {
     File("pastes/$fileId.html").writeText(
         File("assets/aru/templates/pastes.html").readText().replaceEach(
             "{date}" to Date().toString(),
-            "{title}" to title,
+            "{title}" to title.replaceEach("&" to "&amp;", "\"" to "&quot;", "'" to "&apos;", "<" to "&lt;", ">" to "&gt;"),
             "{lang}" to lang,
-            "{content}" to content
+            "{content}" to content.replaceEach("&" to "&amp;", "\"" to "&quot;", "'" to "&apos;", "<" to "&lt;", ">" to "&gt;")
         )
     )
 
     return "https://pastes.aru.pw/$fileId.html"
-}
-
-@Deprecated("Use paste instead.", ReplaceWith("paste(title, contents)", "pw.aru.utils.paste"))
-fun haste(httpClient: OkHttpClient, contents: String): String {
-    try {
-        httpClient.newCall {
-            url("https://hastebin.com/documents")
-
-            header("User-Agent", user_agent)
-            header("Content-Type", "text/plain")
-
-            post(RequestBody.create(MediaType.parse("text/plain"), contents))
-        }.execute().body()!!.use { return "https://hastebin.com/${it.jsonObject().getString("key")}" }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        return "$DISAPPOINTED Hastebin is unavailable right now."
-    }
 }
 

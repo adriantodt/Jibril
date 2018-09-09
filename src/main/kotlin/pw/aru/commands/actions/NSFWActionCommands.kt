@@ -16,7 +16,7 @@ class NSFWActionCommands(
     httpClient: OkHttpClient,
     weebApi: Weeb4J,
     private val assetProvider: ReloadableListProvider
-) : ActionCommandsWorkshop(weebApi, URLCache(httpClient, File("url_cache")), Category.ACTION) {
+) : ActionCommandsWorkshop(weebApi, URLCache(httpClient, File("url_cache")), Category.NSFW_ACTION) {
     override fun create() {
         //69
         actionCommand(listOf("69"), "69 Command", "Hey, that's lewd!") {
