@@ -17,7 +17,7 @@ class ImageCommands(
     httpClient: OkHttpClient,
     weebApi: Weeb4J,
     private val assetProvider: ReloadableListProvider
-) : ActionCommandsWorkshop(weebApi, URLCache(httpClient, File("url_cache")), Category.ACTION) {
+) : ActionCommandsWorkshop(weebApi, URLCache(httpClient, File("url_cache")), Category.IMAGE) {
     override fun create() {
         imageCommand(listOf("cat"), "Cat Command", "Sends a random cat image.") {
             provider = fromWeebSh(type = "animal_cat")

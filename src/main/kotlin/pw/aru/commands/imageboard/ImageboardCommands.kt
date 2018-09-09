@@ -83,8 +83,8 @@ class ImageboardCommand(
         val args = parseable()
 
         val (r, p) = args.parseAndCreate<Pair<Rating?, Int>> {
-            val rating = option("--rating") { ratings[takeString()] ?: returnHelp() }
-            val page = option("--page") { tryTakeInt() ?: returnHelp() }
+            val rating = option("--rating", "-r") { ratings[takeString()] ?: returnHelp() }
+            val page = option("--page", "-p") { tryTakeInt() ?: returnHelp() }
 
             creator { (rating.resourceOrNull) to (page.resourceOrNull ?: 0) }
         }
@@ -93,13 +93,13 @@ class ImageboardCommand(
         val fbiDetector = tags.any(fbi::contains)
 
         val rating = when {
-            fbiDetector -> when (r) {
-                null -> SAFE
+            fbiDetector -> when {
+                r == null && !nsfwOnly -> SAFE
                 else -> {
                     send(
                         "$WARNING Questionable/Explicit Lolicon/Shotacon images is expressly by Discord.\n" +
                             "\n**Not Allowed Tags**: ${tags.filter(fbi::contains).joinToString("`, `", "`", "`")}" +
-                            "\n**Detected Rating**: ${r.shortName}"
+                            "\n**Detected Rating**: ${(r ?: EXPLICIT).shortName}"
                     ).queue()
                     return
                 }
@@ -212,7 +212,7 @@ class ImageboardCommand(
             listOf("explicit", "e") to EXPLICIT
         ).flatMap { (k, v) -> k.map { it to v } }.toMap()
 
-        val fbi = listOf("loli", "shota", "lolicon", "shotacon")
+        val fbi = listOf("loli", "shota", "lolicon", "shotacon", "child", "young", "younger", "underage", "under_age")
     }
 
     enum class Type(val title: String) {

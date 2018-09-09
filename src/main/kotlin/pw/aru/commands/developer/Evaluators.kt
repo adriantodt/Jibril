@@ -1,44 +1,45 @@
 package pw.aru.commands.developer
 
+import bsh.Interpreter
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import pw.aru.core.CommandRegistry
 import pw.aru.db.AruDB
 import javax.script.ScriptEngine
-
-object Evaluators {
-    fun newStatelessEvaluatorsMap(shardManager: ShardManager, db: AruDB): Map<String, Evaluator> {
-        return mapOf(
-            "js" to JsEvaluator(shardManager, db),
-            "bsh" to BshEvaluator(shardManager, db)
-        )
-    }
-
-    fun newPersistentEvaluatorsMap(shardManager: ShardManager, db: AruDB): Map<String, PersistentEvaluator> {
-        return mapOf(
-            "js" to PersistentJsEvaluator(shardManager, db),
-            "bsh" to PersistentBshEvaluator(shardManager, db)
-        ).configureIntegrations()
-    }
-
-    private fun Map<String, PersistentEvaluator>.configureIntegrations() = apply {
-        val globals = Globals()
-        globals["eval"] = this
-
-        forEach { (_, e) -> e["globals"] = globals }
-    }
-}
+import javax.script.ScriptEngineManager
 
 interface Evaluator {
     operator fun invoke(event: GuildMessageReceivedEvent, code: String): Any?
 }
 
-interface PersistentEvaluator : Evaluator {
-    operator fun get(key: String): Any?
-    operator fun set(key: String, value: Any?)
-}
-
-class Globals : LinkedHashMap<String, Any?>() {
-    override fun toString() = "Globals" + keys.toString()
-}
-
 operator fun ScriptEngine.set(key: String, value: Any?) = put(key, value)
+
+class JsEvaluator(private val shardManager: ShardManager, private val db: AruDB, private val registry: CommandRegistry) : Evaluator {
+    override fun invoke(event: GuildMessageReceivedEvent, code: String): Any? {
+        val engine = ScriptEngineManager().getEngineByName("nashorn")
+        engine["shards"] = shardManager
+        engine["db"] = db
+        engine["registry"] = registry
+        engine["jda"] = event.jda
+        engine["event"] = event
+        engine["guild"] = event.guild
+        engine["channel"] = event.channel
+
+        return engine.eval("imports = new JavaImporter(java.util, java.io, java.net);\n(function() {\nwith(imports) {\n$code\n}\n})()")
+    }
+}
+
+class BshEvaluator(private val shardManager: ShardManager, private val db: AruDB, private val registry: CommandRegistry) : Evaluator {
+    override fun invoke(event: GuildMessageReceivedEvent, code: String): Any? {
+        val engine = Interpreter()
+        engine["shards"] = shardManager
+        engine["db"] = db
+        engine["registry"] = registry
+        engine["jda"] = event.jda
+        engine["event"] = event
+        engine["guild"] = event.guild
+        engine["channel"] = event.channel
+
+        return engine.eval("import *;\n$code")
+    }
+}

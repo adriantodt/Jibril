@@ -71,8 +71,7 @@ class DevCmd
         when (args.takeString()) {
             "shutdown" -> shutdown()
 
-            "eval", "run" -> eval(false, args.takeRemaining())
-            "peval", "prun" -> eval(true, args.takeRemaining())
+            "eval", "run" -> eval(args.takeRemaining())
 
             "enablecallsite" -> callsite(true)
             "disablecallsite" -> callsite(false)
@@ -271,23 +270,15 @@ class DevCmd
         return System.exit(0)
     }
 
-    private val sEvals: Map<String, Evaluator> by lazy {
-        Evaluators.newStatelessEvaluatorsMap(shardManager, db)
-    }
+    private val evals: Map<String, Evaluator> = mapOf(
+        "js" to JsEvaluator(shardManager, db, registry),
+        "bsh" to BshEvaluator(shardManager, db, registry)
+    )
 
-    private val pEvals: Map<String, PersistentEvaluator> by lazy {
-        Evaluators.newPersistentEvaluatorsMap(shardManager, db)
-    }
-
-    private fun CommandContext.listEvals(persistent: Boolean) {
+    private fun CommandContext.listEvals() {
         sendEmbed {
             baseEmbed(event, "DevConsole | Available Evaluators")
-
-            description(
-                (if (persistent) pEvals else sEvals)
-                    .asSequence()
-                    .joinToString("\n\n") { (k, v) -> "``$k`` - ${v.javaClass.simpleName}" }
-            )
+            description(evals.entries.joinToString("\n\n") { (k, v) -> "``$k`` - ${v.javaClass.simpleName}" })
         }.queue()
     }
 
@@ -299,11 +290,11 @@ class DevCmd
         "Recursively interpreting code..."
     )
 
-    private fun CommandContext.eval(persistent: Boolean, args: String) {
+    private fun CommandContext.eval(args: String) {
         val (eval, code) = with(args.split(" ", limit = 2)) { get(0) to getOrElse(1) { "" } }
-        if (eval.isEmpty()) return listEvals(persistent)
+        if (eval.isEmpty()) return listEvals()
 
-        val evaluator = (if (persistent) pEvals else sEvals)[eval] ?: return showHelp()
+        val evaluator = evals[eval] ?: return showHelp()
 
         EmbedFirst(event) {
             baseEmbed("DevConsole | Evaluating...", color = Colors.blurple)
