@@ -84,7 +84,9 @@ class ErrorReporter internal constructor() {
         this.extra!![key] = value
     }
 
-    fun appendMdc() = extra("mdc", MDC.getCopyOfContextMap())
+    fun appendMdc() = appendMdc(MDC.getCopyOfContextMap())
+
+    fun appendMdc(mdc: Map<String, String>) = extra("mdc", mdc)
 
     fun logTimestamp() = apply {
         this.timestamp = currentTimeMillis()

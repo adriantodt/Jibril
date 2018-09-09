@@ -187,7 +187,7 @@ class ImageboardCommand(
             ),
             Usage(
                 CommandUsage(cmd, "Gets a random image from $name."),
-                CommandUsage("$cmd <tags...>", "Searches $name for a image with the specified tags.")
+                CommandUsage("$cmd <tags...>", "Searches $name for a image with the specified tags. The tags **must** be separated by **spaces**.")
             ),
             Note(
                 "**Magic Prefixes**:",

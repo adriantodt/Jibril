@@ -13,7 +13,7 @@ import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.emotes.THINKING
 import pw.aru.utils.emotes.X
 
-@Command("clearqueue")
+@Command("clearqueue", "cq")
 @UseFullInjector
 class ClearQueue(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "voteclearqueue"), ICommand.HelpDialogProvider {
     override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {

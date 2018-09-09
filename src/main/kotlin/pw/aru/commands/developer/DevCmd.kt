@@ -18,6 +18,7 @@ import net.dv8tion.jda.core.requests.restaction.MessageAction
 import net.dv8tion.jda.core.utils.JDALogger
 import okhttp3.OkHttpClient
 import pw.aru.Aru.sleepQuotes
+import pw.aru.commands.actions.impl.ImageBasedCommandImpl
 import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
@@ -84,7 +85,7 @@ class DevCmd
             }
 
             "reloadassets" -> reloadassets()
-            "genwebyml" -> generateWebYaml()
+            "gencmdyml" -> generateCmdYaml()
             "gencmdhtml" -> generateCmdHtml()
             "gencmdmd" -> generateCmdMd()
             "genemotelist" -> generateEmoteList()
@@ -347,7 +348,7 @@ class DevCmd
         }
     }
 
-    private fun CommandContext.generateWebYaml() {
+    private fun CommandContext.generateCmdYaml() {
         val cmdsGroup = registry.lookup.entries.groupBy { it.key.category }
         val builder = StringBuilder()
         for (category in Category.LIST) {
@@ -360,7 +361,19 @@ class DevCmd
                 if (cmdNames.size > 1) {
                     builder += "      alias: ${cmdNames.drop(1).joinToString(" ")}\n"
                 }
-                builder += "      desc: TODO\n"
+
+                if (cmd is ImageBasedCommandImpl) {
+                    builder += "      desc: \"${cmd.description.replaceEach("\n" to "\\\n", "\"" to "\\\"")}\"\n"
+                } else if (cmd is ICommand.HelpDialogProvider) {
+                    val handler = cmd.helpHandler
+                    builder += "      desc: \"${
+                    if (handler is Help) (handler.nodes.firstOrNull { it is Description } as? Description)?.value?.replaceEach("\n" to "\\\n", "\"" to "\\\"")
+                        ?: "TODO" else "TODO"
+                    }\"\n"
+                } else {
+                    builder += "      desc: TODO\n"
+                }
+
                 builder += "\n"
             }
             builder += "\n"
@@ -426,9 +439,9 @@ class DevCmd
             CommandUsage("dev peek nowplaying", "Peek musics being played."),
             UsageSeparator,
             CommandUsage("dev reloadassets", "Reloads assets."),
-            CommandUsage("dev genwebyml", "Generates the base commands.yml file."),
-            CommandUsage("dev gendcmdhtml", "Generates the html snipppet for the botlists."),
-            CommandUsage("dev gendcmdmd", "Generates the markdown snipppet for the botlists.")
+            CommandUsage("dev gencmdyml", "Generates the base commands.yml file."),
+            CommandUsage("dev gencmdhtml", "Generates the html snipppet for the botlists."),
+            CommandUsage("dev gencmdmd", "Generates the markdown snipppet for the botlists.")
         )
     )
 }

@@ -6,6 +6,7 @@ import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.requests.restaction.MessageAction
+import org.slf4j.MDC
 import pw.aru.core.commands.ICommand
 import pw.aru.core.parser.Args
 import pw.aru.core.reporting.ErrorReporter
@@ -51,16 +52,46 @@ data class CommandContext(
 
     fun send(message: Message): MessageAction = event.channel.sendMessage(message)
 
-    fun ICommand.ExceptionHandler.handleException(): (Throwable) -> Unit = {
+    fun <T, R> T.withMDC(vararg pairs: Pair<String, String>, block: T.() -> R) {
+        for ((k, v) in pairs) MDC.put(k, v)
         try {
-            handle(event, it)
-        } catch (underlying: Exception) {
+            block()
+        } finally {
+            for ((k, v) in pairs) MDC.remove(k)
+        }
+    }
+
+    fun ICommand.ExceptionHandler.handleException(): (Throwable) -> Unit {
+        val mdc = MDC.getCopyOfContextMap()
+
+        return {
+            try {
+                handle(event, it)
+            } catch (underlying: Exception) {
+                ErrorReporter()
+                    .command(this as ICommand)
+                    .throwable(it)
+                    .underlyingException(underlying)
+                    .message(event)
+                    .errorIdFromContext()
+                    .appendMdc(mdc)
+                    .report()
+                    .logToFile()
+                    .logAsError()
+                    .sendErrorMessage()
+            }
+        }
+    }
+
+    fun ICommand.exceptionHandler(): (Throwable) -> Unit {
+        val mdc = MDC.getCopyOfContextMap()
+        return {
             ErrorReporter()
-                .command(this as ICommand)
+                .command(this)
                 .throwable(it)
-                .underlyingException(underlying)
                 .message(event)
                 .errorIdFromContext()
+                .appendMdc(mdc)
                 .report()
                 .logToFile()
                 .logAsError()

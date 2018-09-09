@@ -40,8 +40,13 @@ sealed class ImageBasedCommandImpl : ICommand, ICommand.HelpDialogProvider {
             else -> throw RuntimeException("Impossible state")
         }
 
-        handle(provider.provide())
+        val image = provider.provide()
+        withMDC("command.cmdName" to cmdName, "command.uploadedImage" to image.meta) {
+            handle(image)
+        }
     }
+
+    val cmdName get() = names[0]
 
     abstract fun CommandContext.handle(image: Image)
 }
@@ -54,10 +59,10 @@ class ActionCommandImpl(
     override val provider: ImageProvider?,
     override val nsfwProvider: ImageProvider?,
     override val note: String?,
-    val anyTarget: String,
-    val noTargets: String,
-    val targetsYou: String,
-    val targetsMe: String
+    private val anyTarget: String,
+    private val noTargets: String,
+    private val targetsYou: String,
+    private val targetsMe: String
 ) : ImageBasedCommandImpl() {
     override fun CommandContext.handle(image: Image) {
         val mentions = event.message.mentionedMembers
@@ -75,14 +80,12 @@ class ActionCommandImpl(
                 "{mentions}" to mentions.toSmartString { "**${it.effectiveName}**" },
                 "{everyone}" to (mentions + author).toSmartString { "**${it.effectiveName}**" }
             ))
-            .queue()
+            .queue(null, exceptionHandler())
     }
 
     override val helpHandler = Help(
         CommandDescription(names, commandName),
-        Usage(
-            CommandUsage(names[0], description)
-        )
+        Usage(CommandUsage(cmdName, description))
     )
 }
 
@@ -94,19 +97,16 @@ class ImageCommandImpl(
     override val provider: ImageProvider?,
     override val nsfwProvider: ImageProvider?,
     override val note: String?,
-    var messages: List<String>
+    private var messages: List<String>
 ) : ImageBasedCommandImpl() {
     override fun CommandContext.handle(image: Image) {
-
         channel.sendFile(image.inputStream(), image.fileName)
             .append(messages.randomOrNull()?.replaceEach("{author}" to "**${author.effectiveName}**") ?: "")
-            .queue()
+            .queue(null, exceptionHandler())
     }
 
     override val helpHandler = Help(
         CommandDescription(names, commandName),
-        Usage(
-            CommandUsage(names[0], description)
-        )
+        Usage(CommandUsage(cmdName, description))
     )
 }

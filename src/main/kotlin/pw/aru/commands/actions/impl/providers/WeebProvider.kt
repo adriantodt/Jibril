@@ -13,11 +13,11 @@ private typealias WeebImageProvider = com.github.natanbc.weeb4j.image.ImageProvi
 class WeebProvider(
     private val provider: WeebImageProvider,
     private val cache: URLCache,
-    val type: String? = null,
-    val tags: List<String>? = null,
-    val fileType: FileType? = null,
-    val hiddenMode: HiddenMode = HiddenMode.DEFAULT,
-    val nsfwFilter: NsfwFilter = NsfwFilter.NO_NSFW
+    private val type: String? = null,
+    private val tags: List<String>? = null,
+    private val fileType: FileType? = null,
+    private val hiddenMode: HiddenMode = HiddenMode.DEFAULT,
+    private val nsfwFilter: NsfwFilter = NsfwFilter.NO_NSFW
 ) : ImageProvider {
 
     private val WeebImage.fileName: String
@@ -26,7 +26,7 @@ class WeebProvider(
     override fun provide(): Image {
         val img = provider.getRandomImage(type, tags, hiddenMode, nsfwFilter, fileType).execute()
 
-        return Image(img.fileName) {
+        return Image(img.fileName, img.url) {
             cache.cacheToFile(img.url).inputStream()
         }
     }

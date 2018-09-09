@@ -6,10 +6,12 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
+import pw.aru.core.parser.tryTakeMember
 import pw.aru.utils.Colors
 import pw.aru.utils.emotes.THINKING
 import pw.aru.utils.extensions.*
 import java.awt.Color
+import java.awt.Color.*
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.lang.reflect.Modifier
@@ -33,7 +35,7 @@ class ColorCommand : ICommand, ICommand.HelpDialogProvider {
                 if (v.isEmpty()) return showHelp()
 
                 if (v.startsWith("#") || v.startsWith("0x")) {
-                    Color.decode(v)
+                    decode(v)
                 } else if (v.contains(" ") || v.contains(",")) {
                     val parts = v.split(' ', ',').filter(String::isNotBlank)
 
@@ -59,21 +61,21 @@ class ColorCommand : ICommand, ICommand.HelpDialogProvider {
 
                 try {
                     val (h, s, v) = parts.map { it.toFloat() }
-                    Color.getHSBColor(h, s, v)
+                    getHSBColor(h, s, v)
                 } catch (_: IllegalArgumentException) {
                     return showHelp()
                 }
             }
             "random" -> {
-                with(threadLocalRandom()) { Color.getHSBColor(nextFloat(), nextFloat(), nextFloat()) }
+                with(threadLocalRandom()) { getHSBColor(nextFloat(), nextFloat(), nextFloat()) }
             }
             "member" -> {
-                author.color ?: Color.white
+                (args.tryTakeMember(guild) ?: author).color ?: white
             }
             else -> {
                 val raw = args.raw
                 if (raw.startsWith("#") || raw.startsWith("0x")) {
-                    Color.decode(raw)
+                    decode(raw)
                 } else {
                     val members = FinderUtil.findMembers(raw, guild)
 
@@ -85,7 +87,7 @@ class ColorCommand : ICommand, ICommand.HelpDialogProvider {
                             ).joinToString("\n")
                         ).queue()
 
-                        members.first().color ?: Color.white
+                        members.first().color ?: white
                     } else {
                         val colors = listOf(classOf<Color>(), classOf<Colors>())
                             .flatMap { it.fields.asIterable() }
@@ -110,14 +112,14 @@ class ColorCommand : ICommand, ICommand.HelpDialogProvider {
             val rgb1 = color.run { "rgb(red = $red, green = $green, blue = $blue)" }
             val rgb2 = color.getRGBColorComponents(null)
                 .let { (r, g, b) -> "rgb(red = ${r.format("%.3f")}, green = ${g.format("%.3f")}, blue = ${b.format("%.3f")})" }
-            val hsv = color.run { Color.RGBtoHSB(red, green, blue, null) }
+            val hsv = color.run { RGBtoHSB(red, green, blue, null) }
                 .let { (h, s, v) -> "hsv(hue = ${h.format("%.3f")}, sat = ${s.format("%.3f")}, val = ${v.format("%.3f")})" }
 
             val name = colorLookup.getOrElse(color) {
-                val (h, s, v) = color.run { Color.RGBtoHSB(red, green, blue, null) }
+                val (h, s, v) = color.run { RGBtoHSB(red, green, blue, null) }
 
                 val closest = colors.values.minBy {
-                    val (h1, s1, v1) = it.run { Color.RGBtoHSB(red, green, blue, null) }
+                    val (h1, s1, v1) = it.run { RGBtoHSB(red, green, blue, null) }
                     ((h - h1).absoluteValue + (s - s1).absoluteValue + (v - v1).absoluteValue) / 3
                 }
 
@@ -153,6 +155,7 @@ class ColorCommand : ICommand, ICommand.HelpDialogProvider {
             CommandUsage("color hsv <hue> <saturation> <value>", "Parses a color in HSV format."),
             CommandUsage("color random", "Returns a random color."),
             CommandUsage("color member", "Returns your color."),
+            CommandUsage("color member <@member>", "Returns the color of a member."),
             CommandUsage("color <mention/nickname/name[#discriminator]>", "Returns the member's color.")
         )
     )

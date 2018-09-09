@@ -3,6 +3,7 @@
 //Plugins
 
 plugins {
+    id 'java'
     //Compiles Kotlin
     id 'org.jetbrains.kotlin.jvm' version '1.2.61'
     //Adds an Executable Manifest

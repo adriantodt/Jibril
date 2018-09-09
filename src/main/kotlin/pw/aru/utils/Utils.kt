@@ -38,7 +38,7 @@ fun paste(title: String, content: String, lang: String = "none"): String {
     File("pastes").mkdirs()
 
     File("pastes/$fileId.html").writeText(
-        File("assets/aru/templates/logs.html").readText().replaceEach(
+        File("assets/aru/templates/pastes.html").readText().replaceEach(
             "{date}" to Date().toString(),
             "{title}" to title,
             "{lang}" to lang,

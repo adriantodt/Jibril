@@ -16,6 +16,7 @@
 # Runtime
 /logs/
 /reports/
+/pastes/
 /db/
 /tests/
 /url_cache/
