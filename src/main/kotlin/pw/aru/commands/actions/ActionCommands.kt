@@ -154,7 +154,7 @@ class ActionCommands(
         }
 
         actionCommand(listOf("nuzzle"), "Nuzzle Command", "Nuzzles the mentioned users.") {
-            assetProvider["assets/aru/actions/nuzzle.txt"]
+            provider = fromLinks(assetProvider["assets/aru/actions/nuzzle.txt"])
             actions(
                 anyTarget = "$CUDDLE {mentions}, you have been nuzzled by {author}",
                 noTargets = "$CUDDLE *Nuzzles~*",
