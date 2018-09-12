@@ -87,6 +87,8 @@ class ActionCommandImpl(
         CommandDescription(names, commandName),
         Usage(CommandUsage(cmdName, description))
     )
+
+    override fun toString() = "ActionCommand[$cmdName]"
 }
 
 class ImageCommandImpl(
@@ -109,4 +111,6 @@ class ImageCommandImpl(
         CommandDescription(names, commandName),
         Usage(CommandUsage(cmdName, description))
     )
+
+    override fun toString() = "ImageCommand[$cmdName]"
 }

@@ -11,11 +11,12 @@ import org.slf4j.MDC
 import pw.aru.core.commands.ICommand
 import pw.aru.snow64.Snow64
 import pw.aru.snowflake.SnowflakeConfig
+import pw.aru.utils.extensions.applyOn
 import pw.aru.utils.extensions.initials
 import pw.aru.utils.extensions.simpleName
 import java.lang.System.currentTimeMillis
 
-class ErrorReporter internal constructor() {
+class ErrorReporter {
     companion object : KLogging() {
         private val discordSnowflake by lazy { SnowflakeConfig(MiscUtil.DISCORD_EPOCH) }
     }
@@ -40,6 +41,7 @@ class ErrorReporter internal constructor() {
         this.errorId = errorId
     }
 
+    @JvmOverloads
     fun throwable(throwable: Throwable, underlyingThrowable: Throwable? = null) = apply {
         this.throwable = throwable
         if (underlyingThrowable != null) this.underlyingThrowable = underlyingThrowable
@@ -54,6 +56,7 @@ class ErrorReporter internal constructor() {
         }
     }
 
+    @JvmOverloads
     fun exception(exception: Exception, underlyingException: Exception? = null) = throwable(exception, underlyingException)
     fun underlyingException(underlyingException: Exception?) = underlyingThrowable(underlyingException)
 
@@ -79,9 +82,8 @@ class ErrorReporter internal constructor() {
         this.log = log
     }
 
-    fun extra(key: String, value: Any?) = apply {
-        if (extra != null) extra = LinkedHashMap()
-        this.extra!![key] = value
+    fun extra(key: String, value: Any?) = applyOn(extra ?: LinkedHashMap<String, Any?>().also { extra = it }) {
+        this[key] = value
     }
 
     fun appendMdc() = appendMdc(MDC.getCopyOfContextMap())
@@ -102,18 +104,10 @@ class ErrorReporter internal constructor() {
         val t = timestamp
 
         this.errorId = when {
-            ex != null && m != null -> {
-                ex.simpleName().initials() + "-" + Snow64.fromSnowflake(m)
-            }
-            ex == null && m != null -> {
-                "%" + Snow64.fromSnowflake(m)
-            }
-            ex != null && t != null -> {
-                ex.simpleName().initials() + "-T:" + Snow64.fromSnowflake(t)
-            }
-            ex == null && t != null -> {
-                "#T:" + Snow64.fromSnowflake(t)
-            }
+            ex != null && m != null -> ex.simpleName().initials() + "#" + Snow64.fromSnowflake(m)
+            ex == null && m != null -> "%" + Snow64.fromSnowflake(m)
+            ex != null && t != null -> ex.simpleName().initials() + "#T:" + Snow64.fromSnowflake(t)
+            ex == null && t != null -> "#T:" + Snow64.fromSnowflake(t)
             else -> throw IllegalStateException()
         }
     }

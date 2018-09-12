@@ -79,7 +79,7 @@ class DevCmd
             "weebsh" -> weebsh(args)
 
             "peek" -> when (args.takeString()) {
-                "nowplaying" -> peekNowPlaying(args)
+                "nowplaying", "np" -> peekNowPlaying(args)
                 else -> showHelp()
             }
 
@@ -136,7 +136,7 @@ class DevCmd
                 .entries
                 .asSequence()
                 .filter { (_, p) -> p.currentChannel != null && p.currentTrack != null }
-                .sortedByDescending { it.value.queue.size }
+                .sortedByDescending { it.value.currentChannel!!.humanUsers }
                 .drop(args.tryTakeInt()?.minus(1)?.times(10) ?: 0)
                 .take(10)
                 .forEach { (guildId, player) ->

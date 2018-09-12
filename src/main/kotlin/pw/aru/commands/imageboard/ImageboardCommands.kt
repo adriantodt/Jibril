@@ -74,8 +74,11 @@ class ImageboardCommand(
     override val category = IMAGEBOARD
 
     init {
+        ImageBoard.throwExceptionOnEOF = false
         boardCmds += commandNames.first()
     }
+
+    override fun toString() = "ImageboardCommand[$name]"
 
     override fun CommandContext.call() {
         if (nsfwOnly && !requireNSFW()) return
@@ -126,9 +129,15 @@ class ImageboardCommand(
                 baseEmbed(event, "$name | ${type.title}", image.url)
 
                 val imgTags = image.tags.sorted().let {
-                    if (it.isEmpty()) "None." else {
-                        val count = AtomicInteger(1)
+                    if (it.isEmpty()) {
+                        "None."
+                    } else {
+                        val count = AtomicInteger(
+                            //initial size to account for the description
+                            40 + image.width.toString().length + image.height.toString().length + image.rating.longName.capitalize().length + 2
+                        )
                         val tagsTaken = it.takeWhile { tag -> count.addAndGet(tag.length + 3) < 1900 }
+
                         if (tagsTaken.size != it.size) {
                             tagsTaken.joinToString("`, `", "`", "`, ${it.size - tagsTaken.size} more ...")
                         } else {
@@ -145,7 +154,6 @@ class ImageboardCommand(
                     "**Image**:"
                 )
                 image(image.url)
-                println("URL: ${image.url}")
             }.queue(null, handleException())
         } else {
             send(
