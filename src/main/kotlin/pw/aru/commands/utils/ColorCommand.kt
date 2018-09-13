@@ -6,7 +6,6 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
-import pw.aru.core.parser.tryTakeMember
 import pw.aru.utils.Colors
 import pw.aru.utils.emotes.THINKING
 import pw.aru.utils.extensions.*
@@ -70,13 +69,17 @@ class ColorCommand : ICommand, ICommand.HelpDialogProvider {
                 with(threadLocalRandom()) { getHSBColor(nextFloat(), nextFloat(), nextFloat()) }
             }
             "member" -> {
-                (args.tryTakeMember(guild) ?: author).color ?: white
+                author.color ?: white
             }
             else -> {
-                val raw = args.raw
-                if (raw.startsWith("#") || raw.startsWith("0x")) {
-                    decode(raw)
+                if (arg.startsWith("#") || arg.startsWith("0x")) {
+                    try {
+                        decode(arg)
+                    } catch (e: Exception) {
+                        return showHelp()
+                    }
                 } else {
+                    val raw = args.raw
                     val members = FinderUtil.findMembers(raw, guild)
 
                     if (members.isNotEmpty()) {
@@ -155,7 +158,6 @@ class ColorCommand : ICommand, ICommand.HelpDialogProvider {
             CommandUsage("color hsv <hue> <saturation> <value>", "Parses a color in HSV format."),
             CommandUsage("color random", "Returns a random color."),
             CommandUsage("color member", "Returns your color."),
-            CommandUsage("color member <@member>", "Returns the color of a member."),
             CommandUsage("color <mention/nickname/name[#discriminator]>", "Returns the member's color.")
         )
     )
