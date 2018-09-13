@@ -57,7 +57,7 @@ data class CommandContext(
         try {
             block()
         } finally {
-            for ((k, v) in pairs) MDC.remove(k)
+            for ((k) in pairs) MDC.remove(k)
         }
     }
 

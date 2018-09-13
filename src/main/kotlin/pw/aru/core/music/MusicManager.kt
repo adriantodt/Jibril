@@ -102,7 +102,7 @@ class MusicManager(private val shardManager: ShardManager, private val httpClien
                 fun request(retry: Boolean = true): String? {
                     httpClient.newCall {
                         url(
-                            URIBuilder("https://api.soundcloud.com/tracks/${currentTrack.identifier}")
+                            URIBuilder("https://api.soundcloud.com/tracks/${currentTrack.identifier.split('|').first()}")
                                 .addParameter("client_id", sourceManager.clientId)
                                 .build()
                                 .toURL()

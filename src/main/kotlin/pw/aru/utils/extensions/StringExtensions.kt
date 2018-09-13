@@ -12,7 +12,7 @@ fun String.replaceEach(vararg list: Pair<String, String>): String {
     // index on index that the match was found
     var textIndex = -1
     var replaceIndex = -1
-    var tempIndex = -1
+    var tempIndex: Int
 
     // index of replace array that will replace the search string found
     // NOTE: logic duplicated below START

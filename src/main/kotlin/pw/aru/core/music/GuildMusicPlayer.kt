@@ -1,10 +1,12 @@
 package pw.aru.core.music
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
+import com.sedmelluq.discord.lavaplayer.player.event.AudioEvent
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo
 import gnu.trove.list.TLongList
 import gnu.trove.list.array.TLongArrayList
 import net.dv8tion.jda.bot.sharding.ShardManager
@@ -12,6 +14,7 @@ import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.Member
 import net.dv8tion.jda.core.entities.TextChannel
 import net.dv8tion.jda.core.entities.VoiceChannel
+import pw.aru.core.reporting.ErrorReporter
 import pw.aru.utils.TaskManager.schedule
 import pw.aru.utils.TaskType
 import pw.aru.utils.emotes.*
@@ -62,6 +65,23 @@ class GuildMusicPlayer(private val shardManager: ShardManager, val musicManager:
     init {
         this.audioPlayer.addListener(this)
         guild.audioManager.sendingHandler = AudioSendHandler(audioPlayer)
+    }
+
+    override fun onEvent(event: AudioEvent) {
+        try {
+            super.onEvent(event)
+        } catch (e: Exception) {
+            ErrorReporter()
+                .exception(e)
+                .guild(guild)
+                .extra("lavaplayerEvent", event)
+                .extra("nowPlaying", currentTrack?.debugToString())
+                .extra("queueSize", queue.size)
+                .extra("queue.take(5)", queue.take(5).map(AudioTrack::debugToString))
+                .report()
+                .logToFile()
+                .logAsError()
+        }
     }
 
     override fun onTrackStart(player: AudioPlayer, track: AudioTrack) {
@@ -258,3 +278,16 @@ private fun AudioTrack.makeCloneWithData(): AudioTrack {
     track.userData = userData
     return track
 }
+
+private fun AudioTrack.debugToString(): String {
+    val name = this.javaClass.name
+    val (title, author, length, identifier, isStream, uri) = this.info
+    return "$name[title=$title, author=$author, length=$length, identifier=$identifier, isStream=$isStream, uri=$uri]"
+}
+
+private operator fun AudioTrackInfo.component1() = title
+private operator fun AudioTrackInfo.component2() = author
+private operator fun AudioTrackInfo.component3() = length
+private operator fun AudioTrackInfo.component4() = identifier
+private operator fun AudioTrackInfo.component5() = isStream
+private operator fun AudioTrackInfo.component6() = uri
