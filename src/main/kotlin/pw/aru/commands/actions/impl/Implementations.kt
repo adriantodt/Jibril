@@ -41,9 +41,7 @@ sealed class ImageBasedCommandImpl : ICommand, ICommand.HelpDialogProvider {
         }
 
         val image = provider.provide()
-        withMDC("command.cmdName" to cmdName, "command.uploadedImage" to image.meta) {
-            handle(image)
-        }
+        withMDC("command.uploadedImage" to image.meta) { handle(image) }
     }
 
     val cmdName get() = names[0]
@@ -88,7 +86,7 @@ class ActionCommandImpl(
         Usage(CommandUsage(cmdName, description))
     )
 
-    override fun toString() = "ActionCommand[$cmdName]"
+    override fun toString() = "ActionCommand[cmd = $cmdName]"
 }
 
 class ImageCommandImpl(
@@ -112,5 +110,5 @@ class ImageCommandImpl(
         Usage(CommandUsage(cmdName, description))
     )
 
-    override fun toString() = "ImageCommand[$cmdName]"
+    override fun toString() = "ImageCommand[cmd = $cmdName]"
 }

@@ -133,8 +133,13 @@ class ErrorReportHandler internal constructor(private val report: ErrorReport) {
                 append("**Report**: ").append(reportUrl).append("\n")
 
             // extra: Map<String, Any?>
-            if (extra != null)
-                append("\n**Extra**: ").append(extra.toPrettyString(4)).append("\n")
+            if (extra != null) {
+                if (reportUrl != null) {
+                    append("**Extra**: (read full report)\n")
+                } else {
+                    append("\n**Extra**: ").append(extra.toPrettyString(4)).append("\n")
+                }
+            }
 
         }.trim().toString()
 

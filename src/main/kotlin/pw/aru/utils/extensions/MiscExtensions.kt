@@ -152,7 +152,7 @@ private fun StringBuilder.advancedToString(any: Any?): StringBuilder {
 }
 
 private fun StringBuilder.toPrettyString(any: Any?, indentAmount: Int = 2, currentIndent: Int = 0, indented: Boolean = false): StringBuilder {
-    val indent = List(currentIndent) { "0" }.joinToString("")
+    val indent = List(currentIndent) { " " }.joinToString("")
     val firstIndent = if (indented) "" else indent
     when (any) {
         null -> {
@@ -215,7 +215,7 @@ private fun StringBuilder.toPrettyString(any: Any?, indentAmount: Int = 2, curre
         }
         is Map.Entry<*, *> -> {
             val (k, v) = any
-            append(firstIndent).advancedToString(k).append(": ").toPrettyString(v, indentAmount, currentIndent + indentAmount, true)
+            append(firstIndent).advancedToString(k).append(": ").toPrettyString(v, indentAmount, currentIndent, true)
         }
         else -> {
             append(firstIndent).append(any)
