@@ -6,6 +6,7 @@ import ch.qos.logback.core.helpers.ThrowableToStringArray
 import redis.clients.util.Pool
 import java.io.Closeable
 import java.util.*
+import java.util.concurrent.CompletionStage
 import java.util.concurrent.Future
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.ThreadLocalRandom
@@ -15,7 +16,14 @@ import kotlin.concurrent.thread
 
 inline fun <reified T> classOf() = T::class.java
 
+@JvmName("futureGet")
 inline operator fun <V> Future<V>.invoke(): V = get()
+
+@JvmName("completionGet")
+inline operator fun <V> CompletionStage<V>.invoke(): V = toCompletableFuture().get()
+
+@JvmName("futureCompletionGet")
+inline operator fun <V, T> T.invoke(): V where T : Future<V>, T : CompletionStage<V> = get()
 
 inline fun <K, V> Map<K, V>.ifContains(k: K, function: (V) -> Unit) {
     if (containsKey(k)) function(get(k)!!)
