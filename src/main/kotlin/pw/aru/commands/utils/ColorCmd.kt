@@ -18,7 +18,7 @@ import javax.imageio.ImageIO
 import kotlin.math.absoluteValue
 
 @Command("color")
-class ColorCommand : ICommand, ICommand.HelpDialogProvider {
+class ColorCmd : ICommand, ICommand.HelpDialogProvider {
     override val category = Category.UTILS
 
     override fun CommandContext.call() {
@@ -173,11 +173,12 @@ class ColorCommand : ICommand, ICommand.HelpDialogProvider {
         return ByteArrayOutputStream().also { ImageIO.write(image, "png", it) }.toByteArray()
     }
 
-    private val colors = listOf(classOf<Color>(), classOf<Colors>())
-        .flatMap { it.fields.asIterable() }
+    private val colors = sequenceOf(classOf<Color>(), classOf<Colors>())
+        .flatMap { it.fields.asSequence() }
         .filter { Modifier.isStatic(it.modifiers) && it.type == Color::class.java }
-        .map { it.name.let { if (it == it.toUpperCase()) it.toLowerCase() else it } to it.get(null) as Color }
+        .map { f -> f.name.let { if (it == it.toUpperCase()) it.toLowerCase() else it } to f.get(null) as Color }
         .distinct()
+        .toList()
         .toMap(LinkedHashMap())
 
     private val colorLookup = colors.entries.groupBy({ it.value }, { it.key }).mapValues { it.value[0] }

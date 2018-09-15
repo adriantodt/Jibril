@@ -20,8 +20,11 @@ class Poll : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
     override fun CommandContext.discreteCall(outer: String) {
         if (!requirePerms(Permission.MESSAGE_HISTORY)) return
 
-        val emotes = event.message.emotes.filterNot(IFakeable::isFake).map { it.asMention to "${it.name}:${it.id}" }
-        outer.split('\n')
+        val emotes = event.message.emotes.asSequence()
+            .filterNot(IFakeable::isFake)
+            .map { it.asMention to "${it.name}:${it.id}" }
+            .toList()
+        outer.splitToSequence('\n')
             .mapNotNull { pattern.find(it.trimStart())?.value ?: emotes.firstOrNull { (e) -> it.trimStart().startsWith(e) }?.second }
             .distinct()
             .forEach { event.message.addReaction(it).queue() }

@@ -33,11 +33,12 @@ class HelpCmd(private val registry: CommandRegistry) : ICommand, ICommand.HelpDi
         }
 
         task(1, TimeUnit.MINUTES) {
-            trending = registry.lookup.entries
+            trending = registry.lookup.entries.asSequence()
                 .map { it.key to trendValue(it.value) }
                 .filter { it.second != 0L && it.first.category != null }
                 .sortedBy { it.second }
                 .map { it.first }
+                .toList()
                 .reversed()
         }
     }
@@ -82,11 +83,11 @@ class HelpCmd(private val registry: CommandRegistry) : ICommand, ICommand.HelpDi
                         "$count hidden commands. Set the channel to **NSFW** to view them."
                     )
                 } else {
-                    val list = registry.lookup
-                        .entries
+                    val list = registry.lookup.entries.asSequence()
                         .filter { (c) -> c.category == category && (c !is ICommand.Permission || c.permission.test(event.member)) }
                         .map { it.value[0] }
                         .sorted()
+                        .toList()
 
                     if (list.isNotEmpty()) field(
                         "${category.categoryName}:",
@@ -115,11 +116,11 @@ class HelpCmd(private val registry: CommandRegistry) : ICommand, ICommand.HelpDi
                         "To check the command usage, type `${prefix}help <command>`."
                     )
 
-                    val list = registry.lookup
-                        .entries
+                    val list = registry.lookup.entries.asSequence()
                         .filter { (c) -> c.category == category && (c !is ICommand.Permission || c.permission.test(event.member)) }
                         .map { it.value[0] }
                         .sorted()
+                        .toList()
 
 
                     if (category.nsfw && !channel.isNSFW) {

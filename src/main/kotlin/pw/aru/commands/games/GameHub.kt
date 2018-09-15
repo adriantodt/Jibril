@@ -103,7 +103,7 @@ class GameHub(private val gameManager: GameManager) : ICommand, ICommand.HelpDia
             embed {
                 baseEmbed(event, "Aru!GameHub | ${event.guild.getMemberById(lobby.adminId).effectiveName}'s Lobby")
 
-                field("Players:", lobby.players.map { "**${it.effectiveName}**" }.sorted().limitedToString(1000))
+                field("Players:", lobby.players.asSequence().map { "**${it.effectiveName}**" }.sorted().toList().limitedToString(1000))
             }
         ).queue()
     }

@@ -13,7 +13,10 @@ class Choose : ICommand, ICommand.HelpDialogProvider {
     override val category = Category.FUN
 
     override fun CommandContext.call() {
-        val options = args.split(',').map(String::trim).filterNot(String::isEmpty)
+        val options = args.splitToSequence(',')
+            .map(String::trim)
+            .filterNot(String::isEmpty)
+            .toList()
 
         if (options.isEmpty()) return showHelp()
 

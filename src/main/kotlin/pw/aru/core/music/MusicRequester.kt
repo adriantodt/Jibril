@@ -119,7 +119,7 @@ class MusicRequester private constructor(
             }
         }
 
-        val length = playlist.tracks.map { it.info.length }.sum()
+        val length = playlist.tracks.asSequence().map { it.info.length }.sum()
         if (musicPlayer.audioPlayer.playingTrack == null || playNow) {
             musicPlayer.startNext(true)
         } else if (textChannel.canTalk()) {

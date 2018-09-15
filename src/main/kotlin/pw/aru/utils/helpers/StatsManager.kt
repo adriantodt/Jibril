@@ -50,7 +50,7 @@ open class StatsManager<T> {
         }
 
         builder.setDescription(
-            "Total: $sum\n" + items.entries
+            "Total: $sum\n" + items.entries.asSequence()
                 .map { it.key to it.value.get() }
                 .filter { it.second > 0 }
                 .sortedByDescending(Pair<T, Long>::second)
@@ -88,7 +88,7 @@ open class StatsManager<T> {
         return if (sum == 0L)
             "Nothing here, just dust."
         else
-            "Total: $sum\n" + items.entries
+            "Total: $sum\n" + items.entries.asSequence()
                 .map { it.key to it.value.get() }
                 .filter { it.second > 0 }
                 .sortedByDescending(Pair<T, Long>::second)

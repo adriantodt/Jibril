@@ -164,10 +164,16 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                             baseEmbed(event, "Aru! HungerGames | ${admin.effectiveName}'s Lobby", color = Colors.discordCanary)
                             thumbnail("https://assets.aru.pw/img/hungergames.png")
 
-                            field("Players:", players.map { "**${it.effectiveName}**" }.sorted().limitedToString(1000))
+                            field(
+                                "Players:",
+                                players.asSequence().map { "**${it.effectiveName}**" }.sorted().toList().limitedToString(1000)
+                            )
                             field(
                                 "Guests:",
-                                listOf(playerGuests.map(Member::getEffectiveName).sorted(), guests.sorted()).flatten().map { "**$it**" }.limitedToString(1000)
+                                listOf(
+                                    playerGuests.asSequence().map(Member::getEffectiveName).sorted().asIterable(),
+                                    guests.sorted()
+                                ).flatten().map { "**$it**" }.limitedToString(1000)
                             )
                         }.queue()
                         waitForNextEvent()
@@ -187,7 +193,10 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
 
                             inlineField(
                                 "Last Alive:",
-                                tributes.take(10).withIndex().joinToString("\n") { (i, it) -> "#${i + 1} - ${it.format(formatter)}" }
+                                tributes.asSequence()
+                                    .take(10)
+                                    .withIndex()
+                                    .joinToString("\n") { (i, it) -> "#${i + 1} - ${it.format(formatter)}" }
                             )
 
                             inlineField(
@@ -221,13 +230,16 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                             return
                         }
 
-                        val list = args.takeRemaining().split(',').map(String::trim)
+                        val list = args.takeRemaining()
+                            .splitToSequence(',')
+                            .map(String::trim)
                             .filterNotTo(ArrayList()) { it.isBlank() || it.contains("@everyone", true) || it.contains("@here", true) }
 
-                        val members = list.filter { FinderUtil.USER_MENTION.matcher(it).find() }
+                        val members = list.asSequence()
+                            .filter { FinderUtil.USER_MENTION.matcher(it).find() }
                             .onEach { list.remove(it) }
-                            .flatMap { it.split(" ", "\n", "\r", "\t") }
-                            .flatMap { FinderUtil.findMembers(it, event.guild) }
+                            .flatMap { it.splitToSequence(" ", "\n", "\r", "\t") }
+                            .flatMap { FinderUtil.findMembers(it, event.guild).asSequence() }
                             .toMutableList()
 
                         playerGuests.addAll(members)
@@ -245,13 +257,16 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                             return
                         }
 
-                        val list = args.takeRemaining().split(',').map(String::trim)
+                        val list = args.takeRemaining()
+                            .splitToSequence(',')
+                            .map(String::trim)
                             .filterNotTo(ArrayList()) { it.isBlank() || it.contains("@everyone", true) || it.contains("@here", true) }
 
-                        val members = list.filter { FinderUtil.USER_MENTION.matcher(it).find() }
+                        val members = list.asSequence()
+                            .filter { FinderUtil.USER_MENTION.matcher(it).find() }
                             .onEach { list.remove(it) }
-                            .flatMap { it.split(" ", "\n", "\r", "\t") }
-                            .flatMap { FinderUtil.findMembers(it, event.guild) }
+                            .flatMap { it.splitToSequence(" ", "\n", "\r", "\t") }
+                            .flatMap { FinderUtil.findMembers(it, event.guild).asSequence() }
                             .toMutableList()
 
                         members.retainAll(playerGuests)

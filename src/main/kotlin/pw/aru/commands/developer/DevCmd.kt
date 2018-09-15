@@ -132,9 +132,7 @@ class DevCmd
     private fun CommandContext.peekNowPlaying(args: Args) {
         sendEmbed {
             baseEmbed(event, "Aru! | Peek: NowPlaying")
-            wrap(musicManager.musicPlayers)
-                .entries
-                .asSequence()
+            wrap(musicManager.musicPlayers).entries.asSequence()
                 .filter { (_, p) -> p.currentChannel != null && p.currentTrack != null }
                 .sortedByDescending { it.value.currentChannel!!.humanUsers }
                 .drop(args.tryTakeInt()?.minus(1)?.times(10) ?: 0)
@@ -160,8 +158,7 @@ class DevCmd
         MessageBuilder()
             .append("**EMOTES**\n")
             .append(
-                Class.forName("pw.aru.utils.emotes.Emotes")
-                    .declaredFields
+                Class.forName("pw.aru.utils.emotes.Emotes").declaredFields.asSequence()
                     .filter { Modifier.isPublic(it.modifiers) }
                     .map { it.name to it[null].toString() }
                     .sortedBy(Pair<String, String>::first)
@@ -291,7 +288,7 @@ class DevCmd
     )
 
     private fun CommandContext.eval(args: String) {
-        val (eval, code) = with(args.split(" ", limit = 2)) { get(0) to getOrElse(1) { "" } }
+        val (eval, code) = args.split(" ", limit = 2).run { get(0) to getOrElse(1) { "" } }
         if (eval.isEmpty()) return listEvals()
 
         val evaluator = evals[eval] ?: return showHelp()

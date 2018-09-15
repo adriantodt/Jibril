@@ -19,8 +19,7 @@ class RateWaifu : ICommand, ICommand.HelpDialogProvider {
         }
 
         val toRate = if (args.isEmpty()) author.asMention
-        else args
-            .replace("<@!", "<@")
+        else args.replace("<@!", "<@")
             .splitToSequence(' ', '\r', '\n')
             .filter(String::isNotBlank)
             .joinToString(" ")
@@ -30,7 +29,7 @@ class RateWaifu : ICommand, ICommand.HelpDialogProvider {
             "mantaro", "mantaro patreon", "mantaro premium", "<@213466096718708737>", "<@302810118335102976>" -> 95
             "aru dev", "arudev", "jibrildev", "jibril dev", "<@406945939148898304>" -> 99
             "aru", "jibril", "<@406082711271374848>" -> 100
-            else -> (toRate.map(Char::toLong).map { it * 2 }.sum() + 50) % 101
+            else -> (toRate.asSequence().map(Char::toLong).map { it * 2 }.sum() + 50) % 101
         }
 
         send("$THINKING Hmmm... I think **$toRate** is worth a $rating/100, don't you?").queue()
