@@ -2,7 +2,7 @@ package pw.aru.core.config
 
 data class AruConfig(
     // dev mode
-    var dev: Boolean = false,
+    var type: String = "main",
 
     // discord token
     var botToken: String = "",

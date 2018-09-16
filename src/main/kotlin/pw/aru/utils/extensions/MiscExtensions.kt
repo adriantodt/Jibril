@@ -35,6 +35,8 @@ operator fun <T> SettableResource<T>.setValue(thisRef: Any?, property: KProperty
     setResourceAvailable(value)
 }
 
+fun multiline(vararg lines: String) = lines.joinToString("\n")
+
 // Misc
 fun <E> Iterable<E>.toSmartString(transform: ((E) -> CharSequence)? = null): String {
     val list = toMutableList()

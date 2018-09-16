@@ -39,7 +39,6 @@ data class CommandContext(
 
     fun showHelp(): Unit = throw ShowHelp
 
-    //Self-explanatory
     fun <T> returnHelp(): T = throw ShowHelp
 
     fun sendEmbed(builder: EmbedBuilder = EmbedBuilder(), init: EmbedBuilder.() -> Unit): MessageAction = event.channel.sendMessage(embed(builder, init))

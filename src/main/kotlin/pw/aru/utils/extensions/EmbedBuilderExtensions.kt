@@ -64,3 +64,7 @@ fun EmbedBuilder.description(vararg text: String) {
 fun EmbedBuilder.footer(text: String?, iconUrl: String? = null) {
     setFooter(text, iconUrl)
 }
+
+fun EmbedBuilder.title(text: String?, url: String? = null) {
+    setTitle(text, url)
+}

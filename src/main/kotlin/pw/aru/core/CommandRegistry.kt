@@ -2,29 +2,32 @@ package pw.aru.core
 
 import mu.KLogging
 import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.placeholder.PlaceholderCommand
-import pw.aru.core.commands.placeholder.ReRoutingPlaceholderCommand
+import pw.aru.core.hypervisor.AruHypervisor
 import pw.aru.utils.extensions.classOf
 
-class CommandRegistry {
-    companion object : KLogging()
+class CommandRegistry(private val hypervisor: AruHypervisor) {
+    companion object : KLogging() {
+        private val helpInterfaces = listOf(
+            classOf<ICommand.HelpDialogProvider>(),
+            classOf<ICommand.HelpProvider>(),
+            classOf<ICommand.HelpDialog>(),
+            classOf<ICommand.HelpHandler>()
+        )
+    }
 
     val commands: MutableMap<String, ICommand> = LinkedHashMap()
-    val lookup: MutableMap<ICommand, Array<String>> = LinkedHashMap()
+    val lookup: MutableMap<ICommand, MutableList<String>> = LinkedHashMap()
 
-    private val helpInterfaces = listOf(
-        classOf<ICommand.HelpDialogProvider>(),
-        classOf<ICommand.HelpProvider>(),
-        classOf<ICommand.HelpDialog>(),
-        classOf<ICommand.HelpHandler>()
-    )
+    init {
+        hypervisor.onRegistryInit(this)
+    }
 
-    private fun sanityChecks(command: ICommand, names: Array<out String>) {
-        check(names.isNotEmpty()) {
+    private fun sanityChecks(command: ICommand, names: List<String>) {
+        if (names.isEmpty()) {
             logger.error { "Command \"${command.javaClass.name}\" doesn't has any defined names." }
 
-            "empty array"
+            throw IllegalStateException("empty array")
         }
 
         val implemented = helpInterfaces.filter { it.isInstance(command) }
@@ -39,40 +42,28 @@ class CommandRegistry {
     operator fun get(key: String) = commands[key]
 
     operator fun set(vararg names: String, command: ICommand) {
-        register(names, command)
+        register(names.toList(), command)
     }
 
-    fun register(names: Array<out String>, command: ICommand) {
+    fun register(names: List<String>, command: ICommand) {
+        if (!hypervisor.filterCommand(names, command)) return
+
         sanityChecks(command, names)
 
-        val keys = names.map(String::toLowerCase).distinct().toTypedArray()
-        for (k in keys) commands[k] = command
-        lookup[command] = keys
+        val keys = names.asSequence()
+            .map(String::toLowerCase)
+            .distinct()
+            .onEach { commands[it] = command }
+
+        lookup.getOrPut(command, ::ArrayList).addAll(keys)
     }
 
-    fun registerPlaceholder(names: Array<out String>, logCalls: Boolean) {
-        val command = if (logCalls) ReRoutingPlaceholderCommand() else PlaceholderCommand
-        val keys = names.map(String::toLowerCase).distinct().toTypedArray()
+    fun registerPlaceholder(names: List<String>) {
+        if (!hypervisor.filterCommand(names, PlaceholderCommand)) return
 
-        for (k in keys) commands[k] = command
-        lookup[command] = keys
-    }
-
-    fun registerOverride(names: Array<out String>, command: ICommand): List<CommandContext> {
-        sanityChecks(command, names)
-        val keys = names.map(String::toLowerCase).distinct().toTypedArray()
-
-        val placeholder = commands[keys[0]]
-
-        val logs: List<CommandContext> = when (placeholder) {
-            is ReRoutingPlaceholderCommand -> placeholder.queue
-            is PlaceholderCommand -> emptyList()
-            else -> throw IllegalStateException("Command is not a placeholder")
-        }
-
-        for (k in keys) commands[k] = command
-        lookup[command] = keys
-
-        return logs
+        names.asSequence()
+            .map(String::toLowerCase)
+            .distinct()
+            .forEach { commands[it] = PlaceholderCommand }
     }
 }

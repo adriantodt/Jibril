@@ -19,12 +19,20 @@ import org.kodein.di.generic.bind
 import org.kodein.di.generic.eagerSingleton
 import org.kodein.di.generic.instance
 import org.kodein.di.generic.singleton
-import pw.aru.Aru.bootQuotes
+import pw.aru.Aru.*
+import pw.aru.Aru.Companion.bootQuotes
 import pw.aru.commands.games.manager.GameManager
 import pw.aru.core.CommandProcessor
 import pw.aru.core.CommandRegistry
-import pw.aru.core.commands.*
+import pw.aru.core.commands.Command
+import pw.aru.core.commands.CommandProvider
+import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.ICommandProvider
 import pw.aru.core.config.AruConfig
+import pw.aru.core.hypervisor.AruHypervisor
+import pw.aru.core.hypervisor.DevHypervisor
+import pw.aru.core.hypervisor.MainHypervisor
+import pw.aru.core.hypervisor.PatreonHypervisor
 import pw.aru.core.listeners.*
 import pw.aru.core.logging.DiscordLogBack
 import pw.aru.core.music.MusicManager
@@ -36,8 +44,6 @@ import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.TaskManager
 import pw.aru.utils.TaskManager.task
 import pw.aru.utils.TaskType
-import pw.aru.utils.api.DBLPoster
-import pw.aru.utils.api.DBotsPoster
 import pw.aru.utils.caches.URLCache
 import pw.aru.utils.extensions.classOf
 import pw.aru.utils.extensions.listener
@@ -48,7 +54,6 @@ import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
-import kotlin.collections.LinkedHashMap
 import kotlin.collections.LinkedHashSet
 
 fun startBootstrap() {
@@ -100,7 +105,7 @@ internal fun createShardManager(injector: Kodein, token: String, onAllShardsRead
 internal fun completeShardManager(shardManager: ShardManager, injector: Kodein) {
     shardManager.addEventListener(
         injector.direct.instance<MusicManagerListener>(),
-        injector.direct.instance<GuildListener>()
+        injector.direct.instance<HypervisorListener>()
     )
 
     shardManager.shardCache.forEach { it.presence.status = OnlineStatus.ONLINE }
@@ -116,7 +121,7 @@ internal fun enableDiscordLogBack(config: AruConfig) {
     DiscordLogBack.enable(config.consoleWebhook)
 }
 
-internal fun createInitialInjector(config: AruConfig): Kodein {
+internal fun createInitialInjector(config: AruConfig, aru: Aru): Kodein {
     return Kodein {
         // Install JIT Module
         installJit()
@@ -128,9 +133,15 @@ internal fun createInitialInjector(config: AruConfig): Kodein {
         // Instances
         bind<Future<ShardManager>>() with instance(CompletableFuture())
         bind<AruConfig>() with instance(config)
+        bind<Aru>() with instance(aru)
         bind<AruDB>() with singleton { AruDB() }
-        bind<CommandRegistry>() with singleton { CommandRegistry() }
-        bind<CommandProcessor>() with singleton { CommandProcessor(instance(), instance()) }
+        bind<AruHypervisor>() with when (aru) {
+            MAIN -> eagerSingleton { MainHypervisor(instance(), instance(), instance()) }
+            DEV -> eagerSingleton { DevHypervisor(instance()) }
+            PATREON -> eagerSingleton { PatreonHypervisor(instance()) }
+        }
+        bind<CommandRegistry>() with singleton { CommandRegistry(instance()) }
+        bind<CommandProcessor>() with singleton { CommandProcessor(instance(), instance(), instance()) }
         bind<EventWaiter>() with singleton { EventWaiter(TaskManager.scheduler(TaskType.BUNK), false) }
         bind<ReloadableListProvider>() with singleton { ReloadableListProvider() }
 
@@ -141,7 +152,7 @@ internal fun createInitialInjector(config: AruConfig): Kodein {
             Weeb4J.Builder()
                 .setToken(TokenType.WOLKE, config.wshToken)
                 .setHttpClient(instance())
-                .setBotInfo(if (config.dev) "AruDev!" else "Aru!", aru_version, if (config.dev) "development" else "production")
+                .setBotInfo(aru.botName, aru_version, aru.environment)
                 .build()
         }
 
@@ -159,6 +170,8 @@ internal fun createInitialInjector(config: AruConfig): Kodein {
 internal fun createFullInjector(injector: Kodein, shardManager: ShardManager): Kodein {
     (injector.direct.instance<Future<ShardManager>>() as CompletableFuture<ShardManager>).complete(shardManager)
 
+    val aru by injector.instance<Aru>()
+
     return Kodein {
         //Load initial
         extend(injector)
@@ -174,16 +187,6 @@ internal fun createFullInjector(injector: Kodein, shardManager: ShardManager): K
         bind<MusicManager>() with singleton { MusicManager(shardManager, instance(), instance()) }
         bind<GameManager>() with singleton { GameManager(dkodein) }
 
-        //Posters
-        bind<DBLPoster>() with eagerSingleton {
-            if (instance<AruConfig>().dev) DBLPoster.Dummy
-            else DBLPoster.APIImpl(shardManager, instance())
-        }
-
-        bind<DBotsPoster>() with eagerSingleton {
-            if (instance<AruConfig>().dev) DBotsPoster.Dummy
-            else DBotsPoster.APIImpl(shardManager, instance(), instance<AruConfig>().dpwToken)
-        }
     }
 }
 
@@ -226,7 +229,7 @@ internal fun initCommands(injector: DKodein, registry: CommandRegistry, commands
                 val meta = it.getAnnotation(classOf<Command>())
                 val command = newInstance(it)
 
-                registry.register(meta.value, command)
+                registry.register(meta.value.toList(), command)
             } catch (e: Exception) {
                 println("$it\n$e")
             }
@@ -247,40 +250,24 @@ internal fun initProviders(injector: DKodein, registry: CommandRegistry, command
 }
 
 internal fun createPlaceholderCommands(registry: CommandRegistry, commands: Set<Class<out ICommand>>) {
-    commands.forEach {
-        val meta = it.getAnnotation(classOf<Command>())
-        val req = it.getAnnotation(classOf<UseFullInjector>())
-
-        registry.registerPlaceholder(meta.value, req.reroute)
+    for (command in commands) {
+        registry.registerPlaceholder(command.getAnnotation(classOf<Command>()).value.toList())
     }
 }
 
-internal fun replacePlaceholderCommands(injector: DKodein, registry: CommandRegistry, commands: Set<Class<out ICommand>>): List<() -> Unit> {
-    //Used to create the commands
-    val jit = injector.jit
+internal fun replacePlaceholderCommands(injector: DKodein, registry: CommandRegistry, commands: Set<Class<out ICommand>>) {
+    with(injector.jit) {
+        commands.forEach {
+            try {
+                val meta = it.getAnnotation(classOf<Command>())
+                val command = newInstance(it)
 
-    //Grouping
-    val map = LinkedHashMap<Long, MutableList<() -> Unit>>()
-
-    for (it in commands) {
-        try {
-            //Get annotation and instantiate the command
-            val meta = it.getAnnotation(classOf<Command>())
-            val command = jit.newInstance(it)
-
-            for (context in registry.registerOverride(meta.value, command)) {
-                map.getOrPut(context.event.guild.idLong, ::ArrayList) += {
-                    command.run {
-                        context.call()
-                    }
-                }
+                registry.register(meta.value.toList(), command)
+            } catch (e: Exception) {
+                println("$it\n$e")
             }
-        } catch (e: Exception) {
-            println("$it\n$e")
         }
     }
-
-    return map.values.map { { for (f in it) f() } }
 }
 
 internal fun launchRedisCheckThread(db: AruDB) {

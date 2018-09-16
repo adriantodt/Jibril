@@ -2,7 +2,7 @@ package pw.aru.core.reporting
 
 import net.dv8tion.jda.core.entities.TextChannel
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import pw.aru.Aru.errorQuotes
+import pw.aru.Aru.Companion.errorQuotes
 import pw.aru.core.commands.help.prefix
 import pw.aru.db.AruDB
 import pw.aru.snow64.Snow64

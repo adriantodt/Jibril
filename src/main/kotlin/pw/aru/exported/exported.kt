@@ -10,9 +10,9 @@ package pw.aru.exported
 /**
  * Aru! Version
  */
-const val aru_version = "2.4.6"
+const val aru_version = "2.5"
 
 /**
  * User Agent
  */
-const val user_agent = "JDA/DiscordBot (Aru! 2.4.6)"
+const val user_agent = "JDA/DiscordBot (Aru! 2.5)"

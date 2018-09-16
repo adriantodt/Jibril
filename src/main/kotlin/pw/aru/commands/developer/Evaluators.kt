@@ -2,6 +2,7 @@ package pw.aru.commands.developer
 
 import bsh.Interpreter
 import net.dv8tion.jda.bot.sharding.ShardManager
+import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.CommandRegistry
 import pw.aru.db.AruDB
@@ -39,6 +40,12 @@ class BshEvaluator(private val shardManager: ShardManager, private val db: AruDB
         engine["event"] = event
         engine["guild"] = event.guild
         engine["channel"] = event.channel
+
+
+        fun User.a() {
+            this.avatarUrl
+        }
+
 
         return engine.eval("import *;\n$code")
     }

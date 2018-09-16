@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'pw.aru'
-version = '2.1.1-dashboard.2'
+version = '2.5-patreon'
 //Repositories and Dependencies
 repositories {
     jcenter()

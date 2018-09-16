@@ -207,7 +207,7 @@ class ImageboardCommand(
     }
 
     fun register(registry: CommandRegistry) {
-        registry.register(commandNames.toTypedArray(), this)
+        registry.register(commandNames, this)
     }
 
     companion object {

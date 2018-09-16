@@ -22,7 +22,7 @@ class HelpCmd(private val registry: CommandRegistry) : ICommand, ICommand.HelpDi
     private var trending = emptyList<ICommand>()
 
     init {
-        fun trendValue(arr: Array<out String>): Long {
+        fun trendValue(arr: List<String>): Long {
             var v = 0L
             for (it in arr) {
                 v += CommandStatsManager.day[it]?.get() ?: 0

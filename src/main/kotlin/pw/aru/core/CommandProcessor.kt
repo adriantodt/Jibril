@@ -3,7 +3,9 @@ package pw.aru.core
 import mu.KLogging
 import net.dv8tion.jda.core.Permission.*
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import pw.aru.Aru.prefixes
+import pw.aru.Aru
+import pw.aru.Aru.*
+import pw.aru.Aru.Companion.prefixes
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.ICommand.ExceptionHandler
 import pw.aru.core.commands.context.CommandContext
@@ -20,7 +22,9 @@ import pw.aru.utils.helpers.CommandStatsManager
 import redis.clients.jedis.exceptions.JedisConnectionException
 import java.util.*
 
-class CommandProcessor(private val db: AruDB, private val registry: CommandRegistry) : KLogging() {
+class CommandProcessor(private val aru: Aru, private val db: AruDB, private val registry: CommandRegistry) : KLogging() {
+
+    private val checks = CommandChecks(aru, db)
 
     var commandCount = 0
 
@@ -35,7 +39,12 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
         }
 
         val guildPrefix = try {
-            GuildSettings(db, event.guild.idLong).prefix
+            val settings = GuildSettings(db, event.guild.idLong)
+            when (aru) {
+                MAIN -> settings.mainPrefix
+                DEV -> settings.devPrefix
+                PATREON -> settings.patreonPrefix
+            }
         } catch (_: JedisConnectionException) {
             null
         }
@@ -97,10 +106,7 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
 
         val command = registry[cmd] ?: return processCustomCommand(event, cmd, args)
 
-        if (command is ICommand.Permission && !command.permission.test(event.member)) {
-            event.channel.sendMessage("$STOP B-baka, I'm not allowed to let you do that!").queue()
-            return
-        }
+        if (!checks.runChecks(event, command)) return
 
         CommandStatsManager.log(cmd)
 
@@ -139,10 +145,7 @@ class CommandProcessor(private val db: AruDB, private val registry: CommandRegis
 
         val command = registry[cmd] as? ICommand.Discrete ?: return
 
-        if (command is ICommand.Permission && !command.permission.test(event.member)) {
-            event.channel.sendMessage("$STOP B-baka, I'm not allowed to let you do that!").queue()
-            return
-        }
+        if (!checks.runChecks(event, command)) return
 
         CommandStatsManager.log(cmd)
 

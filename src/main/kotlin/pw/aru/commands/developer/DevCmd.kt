@@ -12,12 +12,14 @@ import mu.KLogging
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.MessageBuilder.SplitPolicy.NEWLINE
+import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.MessageEmbed
+import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.requests.RestAction
 import net.dv8tion.jda.core.requests.restaction.MessageAction
 import net.dv8tion.jda.core.utils.JDALogger
 import okhttp3.OkHttpClient
-import pw.aru.Aru.sleepQuotes
+import pw.aru.Aru.Companion.sleepQuotes
 import pw.aru.commands.actions.impl.ImageBasedCommandImpl
 import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Category
@@ -27,18 +29,18 @@ import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
+import pw.aru.core.hypervisor.AruHypervisor
 import pw.aru.core.music.MusicManager
-import pw.aru.core.parser.Args
-import pw.aru.core.parser.parseAndCreate
-import pw.aru.core.parser.tryTakeInt
+import pw.aru.core.parser.*
 import pw.aru.db.AruDB
+import pw.aru.db.entities.guild.GuildSettings
+import pw.aru.db.entities.user.UserSettings
 import pw.aru.exported.aru_version
 import pw.aru.utils.Colors
 import pw.aru.utils.ReloadableListProvider
-import pw.aru.utils.api.DBLPoster
-import pw.aru.utils.api.DBotsPoster
 import pw.aru.utils.commands.EmbedFirst
 import pw.aru.utils.emotes.CONFUSED
+import pw.aru.utils.emotes.SHRUG
 import pw.aru.utils.emotes.SUCCESS
 import pw.aru.utils.extensions.*
 import pw.aru.utils.limit
@@ -52,12 +54,11 @@ class DevCmd
 (
     private val httpClient: OkHttpClient,
     private val shardManager: ShardManager,
-    db: AruDB,
+    private val db: AruDB,
     private val musicManager: MusicManager,
     private val registry: CommandRegistry,
     private val weebSh: Weeb4J,
-    private val dblPoster: DBLPoster,
-    private val dpwPoster: DBotsPoster,
+    private val hypervisor: AruHypervisor,
     private val assetProvider: ReloadableListProvider
 ) : ICommand, ICommand.Permission, ICommand.HelpDialogProvider {
     companion object : KLogging()
@@ -70,6 +71,12 @@ class DevCmd
 
         when (args.takeString()) {
             "shutdown" -> shutdown()
+
+            "legacypremium", "premium" -> when (args.takeString()) {
+                "user", "u" -> userLegacyPremium(args)
+                "guild", "g" -> guildLegacyPremium(args)
+                else -> showHelp()
+            }
 
             "eval", "run" -> eval(args.takeRemaining())
 
@@ -84,12 +91,57 @@ class DevCmd
             }
 
             "reloadassets" -> reloadassets()
+            "genemotelist" -> generateEmoteList()
             "gencmdyml" -> generateCmdYaml()
             "gencmdhtml" -> generateCmdHtml()
             "gencmdmd" -> generateCmdMd()
-            "genemotelist" -> generateEmoteList()
+
             "", "check" -> adminCheck()
             else -> showHelp()
+        }
+    }
+
+    private fun CommandContext.userLegacyPremium(args: Args) {
+        val userId = args.tryTakeMember(guild)?.user?.idLong ?: args.tryTakeLong() ?: return showHelp()
+
+        // existencial crysis
+        val user: User? = shardManager.getUserById(userId)
+
+        if (user == null) {
+            send("$SHRUG User not found!").queue()
+            return
+        }
+
+        val userSettings = UserSettings(db, userId)
+
+        if (args.matchNextString("remove")) {
+            userSettings.legacyPremium = false
+            send("$SUCCESS **LegacyPremium**: User ``${user.discordTag} (${user.id})`` is no longer Premium.").queue()
+        } else {
+            userSettings.legacyPremium = true
+            send("$SUCCESS **LegacyPremium**: User ``${user.discordTag} (${user.id})`` is now Premium!").queue()
+        }
+    }
+
+    private fun CommandContext.guildLegacyPremium(args: Args) {
+        val guildId = args.tryTakeLong() ?: return showHelp()
+
+        // existencial crysis
+        val guild: Guild? = shardManager.getGuildById(guildId)
+
+        if (guild == null) {
+            send("$SHRUG Guild not found!").queue()
+            return
+        }
+
+        val guildSettings = GuildSettings(db, guildId)
+
+        if (args.matchNextString("remove")) {
+            guildSettings.legacyPremium = false
+            send("$SUCCESS **LegacyPremium**: Guild ``${guild.name} (${guild.id})`` is no longer Premium.").queue()
+        } else {
+            guildSettings.legacyPremium = true
+            send("$SUCCESS **LegacyPremium**: Guild ``${guild.name} (${guild.id})`` is now Premium!").queue()
         }
     }
 
@@ -258,8 +310,7 @@ class DevCmd
 
     private fun CommandContext.shutdown() {
         try {
-            dblPoster.postStats()
-            dpwPoster.postStats()
+            hypervisor.onBotShutdown(shardManager)
             send(sleepQuotes.random()).complete()
         } catch (ignored: Exception) {
         }
@@ -415,18 +466,24 @@ class DevCmd
             CommandUsage("dev [check]", "Checks if the user running this command is one of my developers."),
             CommandUsage("dev shutdown", "Shutdowns the bot."),
             UsageSeparator,
-            CommandUsage("dev <eval/run> <engine> <code>", "Evals a piece of code."),
-            CommandUsage("dev <peval/prun> <engine> <code>", "Evals a piece of code in a persistent environiment."),
+            CommandUsage("dev premium user <@mention/id>", "Sets an user as Premium."),
+            CommandUsage("dev premium user <@mention/id> remove", "Removes the Premium status from an user."),
+            CommandUsage("dev premium guild <@mention/id>", "Sets a guilds as Premium."),
+            CommandUsage("dev premium guild <@mention/id> remove", "Removes the Premium status from a guild."),
             UsageSeparator,
-            CommandUsage("dev enablecallsite", "Evals a piece of code in a persistent environiment."),
-            CommandUsage("dev disablecallsite", "Evals a piece of code in a persistent environiment."),
+            CommandUsage("dev <eval/run> <engine> <code>", "Evals a piece of code."),
+            UsageSeparator,
+            CommandUsage("dev enablecallsite", "Enables Callsite tracing."),
+            CommandUsage("dev disablecallsite", "Disables Callsite tracing."),
             UsageSeparator,
             CommandUsage("dev weebsh", "Dumps Weeb.sh types and tags."),
+            CommandUsage("dev weebsh -account", "Prints Weeb.sh account information."),
             CommandUsage("dev weebsh <[-type <value>] [-tags <values,...>] [-ext <value>] [-hidden <value>] [-nsfw <value>]>", "Gets a random Weeb.sh image."),
             UsageSeparator,
             CommandUsage("dev peek nowplaying", "Peek musics being played."),
             UsageSeparator,
             CommandUsage("dev reloadassets", "Reloads assets."),
+            CommandUsage("dev genemotelist", "Dumps Aru's 'emotes.kt' file on the text channel."),
             CommandUsage("dev gencmdyml", "Generates the base commands.yml file."),
             CommandUsage("dev gencmdhtml", "Generates the html snipppet for the botlists."),
             CommandUsage("dev gencmdmd", "Generates the markdown snipppet for the botlists.")

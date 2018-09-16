@@ -8,5 +8,4 @@ import pw.aru.db.base.annotations.R
 @R("pw.aru:user:settings")
 class UserSettings(db: AruDB, id: Long) : RedisObject(db, id) {
     var legacyPremium by RedisField.Boolean(false)
-
 }

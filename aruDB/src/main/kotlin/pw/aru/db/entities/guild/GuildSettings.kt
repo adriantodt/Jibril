@@ -10,7 +10,11 @@ import pw.aru.db.base.annotations.R
 
 @R("pw.aru:guild:settings")
 class GuildSettings(db: AruDB, id: Long) : RedisObject(db, id) {
-    var prefix by RedisField.NullableString()
+    var mainPrefix by RedisField.NullableString()
+    var devPrefix by RedisField.NullableString()
+    var patreonPrefix by RedisField.NullableString()
+
+    var legacyPremium by RedisField.Boolean(false)
 
     val assignableRoles: MutableMap<String, Long> = RedisHash(db, remoteId(), AsIs, ToLong)
     //val customCommands: MutableMap<String, CustomCommand> = RedisHash(db, remoteId(), AsIs, redisObject(db, ::CustomCommand))

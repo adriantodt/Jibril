@@ -8,12 +8,11 @@ import org.kodein.di.generic.instance
 import pw.aru.core.CommandRegistry
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.config.ConfigManager
+import pw.aru.core.hypervisor.AruHypervisor
 import pw.aru.core.listeners.EventListeners.queueTask
 import pw.aru.core.listeners.EventListeners.submitTask
 import pw.aru.utils.TaskManager.queue
 import pw.aru.utils.TaskType.BUNK
-import pw.aru.utils.api.DBLPoster
-import pw.aru.utils.api.DBotsPoster
 import pw.aru.utils.extensions.classOf
 import pw.aru.utils.extensions.invoke
 import pw.aru.utils.helpers.AsyncInfoMonitor
@@ -25,7 +24,7 @@ fun main(args: Array<String>) = startBootstrap()
 internal fun start() {
     // Start-up AsyncInfoMonitor
     AsyncInfoMonitor()
-    log.info("AruBot starting...")
+    log.info("Starting...")
 
     // Compute Reflections Scan async
     val scanTask = submitTask("ReflectionsScanTask") {
@@ -35,10 +34,14 @@ internal fun start() {
     val config = ConfigManager.config
     enableDiscordLogBack(config)
 
+    val aru = Aru.fromString(config.type)
+
+    log.info { "${aru.botName} is being started..." }
+
     Aru.prefixes += config.prefixes.split(',')
 
     //Create the Base Injector
-    val initInjector = createInitialInjector(config)
+    val initInjector = createInitialInjector(config, aru)
     val registry = initInjector.direct.instance<CommandRegistry>()
 
     //Launch check thread
@@ -70,7 +73,7 @@ internal fun start() {
         // Requires injector, otherCommands
         queueTask("InitCommands (Phase 2)") {
             val (toInit, toInitProviders) = otherCommands()
-            replacePlaceholderCommands(injector.direct, registry, toInit).forEach { queue(BUNK, it) }
+            replacePlaceholderCommands(injector.direct, registry, toInit)
             initProviders(initInjector.direct, registry, toInitProviders)
             executePostLoad(registry)
             log.info { "${registry.lookup.size} commands loaded!" }
@@ -82,8 +85,8 @@ internal fun start() {
         }
 
         queue(type = BUNK) {
-            injector.direct.instance<DBLPoster>().postStats()
-            injector.direct.instance<DBotsPoster>().postStats()
+            val hypervisor: AruHypervisor by injector.instance()
+            hypervisor.onBotStart(shardManager)
         }
     }
 }

@@ -8,7 +8,6 @@ import pw.aru.db.base.annotations.R
 @R("pw.aru:user:pledge")
 class UserPledge(db: AruDB, id: Long) : RedisObject(db, id) {
     var enabled by RedisField.Boolean(false)
-
-    var description by RedisField.NullableString()
+    var patronBot by RedisField.Boolean(false)
 }
 

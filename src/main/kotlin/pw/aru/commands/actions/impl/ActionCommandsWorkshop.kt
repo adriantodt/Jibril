@@ -29,7 +29,7 @@ abstract class ActionCommandsWorkshop(weebApi: Weeb4J, private val cache: URLCac
     //Builders
     protected fun actionCommand(names: List<String>, commandName: String, description: String, block: ActionCommandBuilder.() -> Unit) {
         registry.register(
-            names.toTypedArray(),
+            names,
             ActionCommandBuilder(names, category, commandName, description)
                 .apply(block)
                 .build()
@@ -38,7 +38,7 @@ abstract class ActionCommandsWorkshop(weebApi: Weeb4J, private val cache: URLCac
 
     protected fun imageCommand(names: List<String>, commandName: String, description: String, block: ImageCommandBuilder.() -> Unit) {
         registry.register(
-            names.toTypedArray(),
+            names,
             ImageCommandBuilder(names, category, commandName, description)
                 .apply(block)
                 .build()
