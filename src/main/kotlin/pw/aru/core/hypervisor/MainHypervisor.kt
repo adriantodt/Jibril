@@ -35,20 +35,18 @@ class MainHypervisor(
     }
 
     private fun postStats(catnip: Catnip) {
+        //TODO Send this stats poster to aru-secondary
         val botId = catnip.selfUser()!!.id()
         val guildCount = catnip.cache().guilds().size()
+
+        val json = MediaType.parse("application/json")
 
         // DBL
         try {
             httpClient.newCall {
                 url("https://discordbots.org/api/bots/$botId/stats")
                 header("Authorization", config.dblToken)
-                post(
-                    RequestBody.create(
-                        MediaType.parse("application/json"),
-                        jsonStringOf("server_count" to guildCount)
-                    )
-                )
+                post(RequestBody.create(json, jsonStringOf("server_count" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
             handleStatsException("DBL", e)
@@ -59,7 +57,7 @@ class MainHypervisor(
             httpClient.newCall {
                 url("https://discord.bots.gg/api/v1/bots/$botId/stats")
                 header("Authorization", config.dpwToken)
-                post(RequestBody.create(MediaType.parse("application/json"), jsonStringOf("guildCount" to guildCount)))
+                post(RequestBody.create(json, jsonStringOf("guildCount" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
             handleStatsException("Dbots.PW", e)
@@ -70,7 +68,7 @@ class MainHypervisor(
             httpClient.newCall {
                 url("https://botsfordiscord.com/api/bot/$botId")
                 header("Authorization", config.bfdToken)
-                post(RequestBody.create(MediaType.parse("application/json"), jsonStringOf("count" to guildCount)))
+                post(RequestBody.create(json, jsonStringOf("count" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
             handleStatsException("BotsForDiscord", e)
@@ -81,12 +79,7 @@ class MainHypervisor(
             httpClient.newCall {
                 url("https://botlist.space/api/bots/$botId")
                 header("Authorization", config.blsToken)
-                post(
-                    RequestBody.create(
-                        MediaType.parse("application/json"),
-                        jsonStringOf("server_count" to guildCount)
-                    )
-                )
+                post(RequestBody.create(json, jsonStringOf("server_count" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
             handleStatsException("Botlist.Space", e)
@@ -97,12 +90,7 @@ class MainHypervisor(
             httpClient.newCall {
                 url("https://divinediscordbots.com/bots/$botId/stats")
                 header("Authorization", config.ddbToken)
-                post(
-                    RequestBody.create(
-                        MediaType.parse("application/json"),
-                        jsonStringOf("server_count" to guildCount)
-                    )
-                )
+                post(RequestBody.create(json, jsonStringOf("server_count" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
             handleStatsException("DivineDiscordBots", e)
@@ -113,7 +101,7 @@ class MainHypervisor(
             httpClient.newCall {
                 url("https://discordbotlist.com/api/bots/$botId/stats")
                 header("Authorization", config.dbl2Token)
-                post(RequestBody.create(MediaType.parse("application/json"), jsonStringOf("guilds" to guildCount)))
+                post(RequestBody.create(json, jsonStringOf("guilds" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
             handleStatsException("DBL.com", e)
@@ -124,7 +112,7 @@ class MainHypervisor(
             httpClient.newCall {
                 url("https://bots.ondiscord.xyz/bot-api/bots/$botId/guilds")
                 header("Authorization", config.bodToken)
-                post(RequestBody.create(MediaType.parse("application/json"), jsonStringOf("guildCount" to guildCount)))
+                post(RequestBody.create(json, jsonStringOf("guildCount" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
             handleStatsException("BotsOnDiscord", e)
@@ -135,7 +123,7 @@ class MainHypervisor(
             httpClient.newCall {
                 url("https://discordbot.world/api/bot/$botId/stats")
                 header("Authorization", config.dbwToken)
-                post(RequestBody.create(MediaType.parse("application/json"), jsonStringOf("guild_count" to guildCount)))
+                post(RequestBody.create(json, jsonStringOf("guild_count" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
             handleStatsException("DiscordBotWorld", e)
@@ -146,7 +134,7 @@ class MainHypervisor(
             httpClient.newCall {
                 url("https://discordbots.group/api/bot/$botId")
                 header("Authorization", config.dbgToken)
-                post(RequestBody.create(MediaType.parse("application/json"), jsonStringOf("count" to guildCount)))
+                post(RequestBody.create(json, jsonStringOf("count" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
             handleStatsException("DiscordBotsGroup", e)
@@ -157,7 +145,7 @@ class MainHypervisor(
             httpClient.newCall {
                 url("https://discordsbestbots.xyz/bots/$botId")
                 header("Authorization", config.dbbToken)
-                post(RequestBody.create(MediaType.parse("application/json"), jsonStringOf("guilds" to guildCount)))
+                post(RequestBody.create(json, jsonStringOf("guilds" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
             handleStatsException("DiscordsBestBots", e)
@@ -168,7 +156,7 @@ class MainHypervisor(
             httpClient.newCall {
                 url("https://lbots.org/api/v1/bot/$botId/stats")
                 header("Authorization", config.lboToken)
-                post(RequestBody.create(MediaType.parse("application/json"), jsonStringOf("guild_count" to guildCount)))
+                post(RequestBody.create(json, jsonStringOf("guild_count" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
             handleStatsException("LBots", e)
@@ -179,12 +167,7 @@ class MainHypervisor(
             httpClient.newCall {
                 url("https://discord.boats/api/bot/$botId")
                 header("Authorization", config.dboToken)
-                post(
-                    RequestBody.create(
-                        MediaType.parse("application/json"),
-                        jsonStringOf("server_count" to guildCount)
-                    )
-                )
+                post(RequestBody.create(json, jsonStringOf("server_count" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
             handleStatsException("DiscordBoats", e)

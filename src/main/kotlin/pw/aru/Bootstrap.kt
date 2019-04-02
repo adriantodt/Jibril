@@ -34,6 +34,7 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.ICommandProvider
 import pw.aru.core.config.AruConfig
+import pw.aru.core.executor.Executable
 import pw.aru.core.hypervisor.AruHypervisor
 import pw.aru.core.hypervisor.DevHypervisor
 import pw.aru.core.hypervisor.MainHypervisor
@@ -58,6 +59,7 @@ import java.io.FileNotFoundException
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 
 class Bootstrap {
     companion object : KLogging()
@@ -190,17 +192,25 @@ class Bootstrap {
     }
 
     private fun createCommands(scanResult: ScanResult, injector: Kodein) {
-        val (commands, providers) = scanResult.use {
-            Pair(
-                scanResult.getClassesImplementing("pw.aru.core.commands.ICommand")
-                    .filter { it.hasAnnotation("pw.aru.core.commands.Command") }
-                    .loadClasses(ICommand::class.java)
-                ,
-                scanResult.getClassesImplementing("pw.aru.core.commands.ICommandProvider")
-                    .filter { it.hasAnnotation("pw.aru.core.commands.CommandProvider") }
-                    .loadClasses(ICommandProvider::class.java)
-            )
-        }
+
+        val commands = scanResult.getClassesImplementing("pw.aru.core.commands.ICommand")
+            .filter { it.hasAnnotation("pw.aru.core.commands.Command") }
+            .loadClasses(ICommand::class.java)
+
+        val providers = scanResult.getClassesImplementing("pw.aru.core.commands.ICommandProvider")
+            .filter { it.hasAnnotation("pw.aru.core.commands.CommandProvider") }
+            .loadClasses(ICommandProvider::class.java)
+
+        val standalones = scanResult.getClassesImplementing("pw.aru.core.executor.Executable")
+            .filter {
+                arrayOf(
+                    "pw.aru.core.commands.ICommand",
+                    "pw.aru.core.commands.ICommandProvider"
+                ).none(it::implementsInterface) && it.hasAnnotation("pw.aru.core.executor.RunAtStartup")
+            }
+            .loadClasses(Executable::class.java)
+
+        scanResult.close()
 
         val registry = injector.direct.instance<CommandRegistry>()
 
@@ -210,6 +220,8 @@ class Bootstrap {
                 val command = injector.jitInstance(it)
 
                 registry.register(meta.value.toList(), command)
+
+                if (command is Executable) command.run()
             } catch (e: Exception) {
                 logger.error(e) { "Error while registering $it" }
             }
@@ -217,13 +229,25 @@ class Bootstrap {
 
         providers.forEach {
             try {
-                injector.jitInstance(it).provide(registry)
+                val provider = injector.jitInstance(it)
+                provider.provide(registry)
+
+                if (provider is Executable) provider.run()
             } catch (e: Exception) {
                 logger.error(e) { "Error while registering $it" }
             }
         }
 
         logger.info { "Loaded ${registry.commands.size} commands!" }
+
+        standalones.mapNotNull {
+            try {
+                injector.jitInstance(it)
+            } catch (e: Exception) {
+                logger.error(e) { "Error while executing $it" }
+                null
+            }
+        }.forEach { thread(name = "${it.javaClass.simpleName}@RunAtStartup", block = it::run) }
     }
 
     private fun configureCatnip(catnip: Catnip, injector: Kodein): CompletableFuture<Catnip> {

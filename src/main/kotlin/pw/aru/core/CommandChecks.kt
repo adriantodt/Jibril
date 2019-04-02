@@ -12,7 +12,6 @@ import pw.aru.utils.text.STOP
 import pw.aru.utils.text.THINKING
 
 class CommandChecks(private val aru: Aru, private val db: AruDB) {
-
     fun runChecks(message: Message, command: ICommand, userPerms: Set<Permission>): Boolean {
         if (aru == Aru.PATREON && !Patreon.patreonBotGuildCheck(db, message.guild()!!)) {
             message.channel().sendMessage(
