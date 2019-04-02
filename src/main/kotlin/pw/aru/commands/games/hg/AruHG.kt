@@ -1,9 +1,9 @@
 package pw.aru.commands.games.hg
 
-import com.jagrosh.jdautilities.commons.utils.FinderUtil
-import net.dv8tion.jda.core.entities.Member
-import net.dv8tion.jda.core.entities.TextChannel
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import com.mewna.catnip.entity.channel.TextChannel
+import com.mewna.catnip.entity.guild.Member
+import com.mewna.catnip.entity.message.Message
+import gg.amy.catnip.utilities.FinderUtil
 import org.kodein.di.generic.instance
 import pw.aru.commands.games.Game
 import pw.aru.commands.games.manager.GameManager
@@ -12,6 +12,7 @@ import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.input.AsyncCommandInput
 import pw.aru.core.parser.tryTakeBoolean
 import pw.aru.core.parser.tryTakeDouble
+import pw.aru.core.reporting.ErrorReporter
 import pw.aru.hungergames.HungerGames
 import pw.aru.hungergames.data.SimpleTribute
 import pw.aru.hungergames.events.EventFormatter
@@ -24,16 +25,28 @@ import pw.aru.hungergames.loader.parseHarmfulActions
 import pw.aru.hungergames.loader.parseHarmlessActions
 import pw.aru.hungergames.phases.*
 import pw.aru.utils.Colors
-import pw.aru.utils.emotes.*
-import pw.aru.utils.extensions.*
+import pw.aru.utils.extensions.lang.format
+import pw.aru.utils.extensions.lang.limitedToString
+import pw.aru.utils.extensions.lang.split
+import pw.aru.utils.extensions.lang.toSmartString
+import pw.aru.utils.extensions.lib.description
+import pw.aru.utils.extensions.lib.field
+import pw.aru.utils.extensions.lib.inlineField
+import pw.aru.utils.extensions.lib.sendEmbed
+import pw.aru.utils.styling
+import pw.aru.utils.text.*
 import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit.MINUTES
 import java.util.concurrent.TimeUnit.SECONDS
 import kotlin.concurrent.thread
 
-class AruHG(private val manager: GameManager, override val channel: TextChannel, private val lobby: Lobby) : Game {
-
+class AruHG(
+    private val manager: GameManager,
+    override val channel: TextChannel,
+    private val admin: Member,
+    private val players: List<Member>
+) : Game {
     companion object {
         private val actions: Actions by lazy {
             fun harmlessActions(file: String) = parseHarmlessActions(loadFile(File(file)))
@@ -60,11 +73,8 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
         }
     }
 
-    override val isAlive = true
-    val players = lobby.players
     val playerGuests = LinkedHashSet<Member>()
     val guests = LinkedHashSet<String>()
-    val admin = channel.guild.getMemberById(lobby.adminId)
     var threshold = Threshold.DEFAULT.value
     var speed = Speed.DEFAULT
     var onlyKills = false
@@ -73,20 +83,29 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
     var lastGameNightCount: Int? = null
     var lastGameFeastCount: Int? = null
     var lastGameAvgDeaths: Double? = null
+    var forceStopped = false
+
+    override val isAlive
+        get() = forceStopped
 
     init {
         showHelp(true)
         startHgLobby()
     }
 
+    override fun forcestop() {
+        forceStopped = true
+    }
+
     private fun commandUsage(command: String, description: String) = "`$command` - $description"
 
     private fun showHelp(newGame: Boolean = true) {
         channel.sendEmbed {
-            baseEmbed("Aru! HungerGames", color = Colors.discordCanary)
+            author("Aru! HungerGames")
+            color(Colors.discordCanary)
             thumbnail("https://assets.aru.pw/img/hungergames.png")
             description(
-                "${if (newGame) "New game created successfully! " else ""}**${admin.effectiveName}** is the admin of the game.",
+                "${if (newGame) "New game created successfully! " else ""}**${admin.effectiveName()}** is the admin of the game.",
                 "",
                 "**HG Lobby Commands:** (without prefix; you must be the admin of the game)",
                 commandUsage("hg cancel", "Returns to the GameHub lobby."),
@@ -100,26 +119,30 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                 commandUsage("hg addall", "Add ALL members from the server as guests of the game."),
                 commandUsage("hg clearguests", "Remove all guests from the game."),
                 "",
-                commandUsage("hg threshold <suicidal/fast/default/slow/peaceful/<any decimal from 0 to 1>>", "Sets the \"madness\" of the game."),
+                commandUsage(
+                    "hg threshold <suicidal/fast/default/slow/peaceful/<any decimal from 0 to 1>>",
+                    "Sets the \"madness\" of the game."
+                ),
                 commandUsage("hg speed <insane/fast/default/slow/slowest>", "Sets the speed of the game's events."),
                 commandUsage("hg onlykills <true/false>", "Disables harmless actions from appearing on the log."),
                 "",
                 commandUsage("hg start", "Starts a new game.")
             )
-        }.queue()
+        }
     }
 
     private fun showInGameHelp() {
         channel.sendEmbed {
-            baseEmbed("Aru! HungerGames", color = Colors.discordCanary)
+            author("Aru! HungerGames")
+            color(Colors.discordCanary)
             thumbnail("https://assets.aru.pw/img/hungergames.png")
             description(
-                "**${admin.effectiveName}** is the admin of the game.",
+                "**${admin.effectiveName()}** is the admin of the game.",
                 "",
                 "**Game Commands:** (without prefix; you must be the admin of the game)",
                 commandUsage("hg cancel", "Returns to the HungerGames sub-lobby.")
             )
-        }.queue()
+        }
     }
 
     enum class Threshold(val value: Double) {
@@ -136,59 +159,66 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
 
     private fun startHgLobby() {
         object : AsyncCommandInput(manager.injector.instance(), 5, MINUTES, "hg") {
-            override fun filter(event: GuildMessageReceivedEvent) = (event.author.id == admin.id && super.filter(event))
+            override fun filter(message: Message) = (message.author().id() == admin.id() && super.filter(message))
 
             override fun timeout() {
-                channel.sendMessage("$SAD Apparently no one wanted to play anymore, so I closed the game...").queue()
+                channel.sendMessage("$SAD Apparently no one wanted to play anymore, so I closed the game...")
                 manager.remove(channel)
             }
 
             override fun CommandContext.onCommand() {
+                if (forceStopped) return
+
                 val args = parseable()
                 when (args.takeString()) {
                     "cancel" -> {
                         manager.remove(channel)
-                        send("$SUCCESS **${event.member.effectiveName}** closed HG Lobby. Returned to GameHub Lobby.").queue()
+                        manager.lobbyManager.registerLobby(channel, Lobby(admin).addPlayers(players))
+                        send("$SUCCESS **${message.member()!!.effectiveName()}** closed HG Lobby. Returned to GameHub Lobby.")
                     }
                     "start" -> {
                         startHg()
                     }
                     "exit" -> {
                         manager.remove(channel)
-                        manager.lobbyManager.registerLobby(channel, lobby)
-                        send("$SUCCESS **${event.member.effectiveName}** closed their lobby.").queue()
+                        send("$SUCCESS **${message.member()!!.effectiveName()}** closed their lobby.")
                     }
 
                     "guests", "lobby" -> {
                         sendEmbed {
-                            baseEmbed(event, "Aru! HungerGames | ${admin.effectiveName}'s Lobby", color = Colors.discordCanary)
+                            styling(message).author("Aru! HungerGames | ${admin.effectiveName()}'s Lobby").autoFooter()
+
+                            color(Colors.discordCanary)
                             thumbnail("https://assets.aru.pw/img/hungergames.png")
 
                             field(
                                 "Players:",
-                                players.asSequence().map { "**${it.effectiveName}**" }.sorted().toList().limitedToString(1000)
+                                players.asSequence().map { "**${it.effectiveName()}**" }.sorted().toList().limitedToString(
+                                    1000
+                                )
                             )
                             field(
                                 "Guests:",
                                 listOf(
-                                    playerGuests.asSequence().map(Member::getEffectiveName).sorted().asIterable(),
+                                    playerGuests.asSequence().map(Member::effectiveName).sorted().asIterable(),
                                     guests.sorted()
                                 ).flatten().map { "**$it**" }.limitedToString(1000)
                             )
-                        }.queue()
+                        }
                         waitForNextEvent()
                     }
                     "scoreboard" -> {
                         val tributes = lastGame
 
                         if (tributes == null) {
-                            send("$X Sorry, but no games on this lobby were played (and finished). There's nothing to show!").queue()
+                            send("$X Sorry, but no games on this lobby were played (and finished). There's nothing to show!")
                             waitForNextEvent()
                             return
                         }
 
                         sendEmbed {
-                            baseEmbed(event, "Aru! HungerGames | Scoreboard of Last Game", color = Colors.discordCanary)
+                            styling(message).author("Aru! HungerGames | Scoreboard of Last Game").autoFooter()
+                            color(Colors.discordCanary)
                             thumbnail("https://assets.aru.pw/img/hungergames.png")
 
                             inlineField(
@@ -219,7 +249,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                                 "",
                                 "**Cannons shots per day**: ${lastGameAvgDeaths!!.format("%.2f")}"
                             )
-                        }.queue()
+                        }
                         waitForNextEvent()
                     }
 
@@ -233,21 +263,27 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                         val list = args.takeRemaining()
                             .splitToSequence(',')
                             .map(String::trim)
-                            .filterNotTo(ArrayList()) { it.isBlank() || it.contains("@everyone", true) || it.contains("@here", true) }
+                            .filterNotTo(ArrayList()) {
+                                it.isBlank() || it.contains(
+                                    "@everyone",
+                                    true
+                                ) || it.contains("@here", true)
+                            }
 
                         val members = list.asSequence()
                             .filter { FinderUtil.USER_MENTION.matcher(it).find() }
                             .onEach { list.remove(it) }
                             .flatMap { it.splitToSequence(" ", "\n", "\r", "\t") }
-                            .flatMap { FinderUtil.findMembers(it, event.guild).asSequence() }
+                            .flatMap { FinderUtil.findMembers(it, message.guild()).asSequence() }
                             .toMutableList()
 
                         playerGuests.addAll(members)
                         guests.addAll(list)
 
-                        val display = listOf(members.map { it.effectiveName }, list).flatten().map { "**$it**" }.toSmartString()
+                        val display =
+                            listOf(members.map(Member::effectiveName), list).flatten().map { "**$it**" }.toSmartString()
 
-                        send("$SUCCESS Added $display as guests!").queue()
+                        send("$SUCCESS Added $display as guests!")
                         waitForNextEvent()
                     }
                     "rmguests" -> {
@@ -260,13 +296,18 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                         val list = args.takeRemaining()
                             .splitToSequence(',')
                             .map(String::trim)
-                            .filterNotTo(ArrayList()) { it.isBlank() || it.contains("@everyone", true) || it.contains("@here", true) }
+                            .filterNotTo(ArrayList()) {
+                                it.isBlank() || it.contains(
+                                    "@everyone",
+                                    true
+                                ) || it.contains("@here", true)
+                            }
 
                         val members = list.asSequence()
                             .filter { FinderUtil.USER_MENTION.matcher(it).find() }
                             .onEach { list.remove(it) }
                             .flatMap { it.splitToSequence(" ", "\n", "\r", "\t") }
-                            .flatMap { FinderUtil.findMembers(it, event.guild).asSequence() }
+                            .flatMap { FinderUtil.findMembers(it, message.guild()).asSequence() }
                             .toMutableList()
 
                         members.retainAll(playerGuests)
@@ -275,29 +316,32 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                         playerGuests.removeAll(members)
                         guests.removeAll(list)
 
-                        val display = listOf(members.map { it.effectiveName }, list).flatten().map { "**$it**" }.toSmartString()
+                        val display =
+                            listOf(members.map(Member::effectiveName), list).flatten().map { "**$it**" }.toSmartString()
 
-                        send("$SUCCESS Removed the guests $display!").queue()
+                        send("$SUCCESS Removed the guests $display!")
                         waitForNextEvent()
                     }
                     "addall" -> {
-                        val newGuests = event.guild.members.filterNot { players.contains(it) || playerGuests.contains(it) }
+                        val newGuests =
+                            message.guild()!!.members().filterNot { players.contains(it) || playerGuests.contains(it) }
                         playerGuests.addAll(newGuests)
-                        send("$SUCCESS Added ${newGuests.size} ${if (newGuests.size == 1) "guest" else "guests"}!").queue()
+                        send("$SUCCESS Added ${newGuests.size} ${if (newGuests.size == 1) "guest" else "guests"}!")
                         waitForNextEvent()
                     }
                     "clearguests" -> {
                         val count = playerGuests.size + guests.size
                         playerGuests.clear()
                         guests.clear()
-                        send("$SUCCESS Removed $count ${if (count == 1) "guest" else "guests"}!").queue()
+                        send("$SUCCESS Removed $count ${if (count == 1) "guest" else "guests"}!")
                         waitForNextEvent()
                     }
                     "threshold" -> {
                         if (args.isEmpty()) {
                             send(
-                                "$SUCCESS **Threshold**: ${Threshold.values().firstOrNull { it.value == threshold } ?: threshold}"
-                            ).queue()
+                                "$SUCCESS **Threshold**: ${Threshold.values().firstOrNull { it.value == threshold }
+                                    ?: threshold}"
+                            )
                             waitForNextEvent()
                             return
                         }
@@ -306,8 +350,9 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                         if (numberValue != null) {
                             threshold = numberValue
                             send(
-                                "$SUCCESS **Threshold** set to ${Threshold.values().firstOrNull { it.value == numberValue } ?: numberValue}"
-                            ).queue()
+                                "$SUCCESS **Threshold** set to ${Threshold.values().firstOrNull { it.value == numberValue }
+                                    ?: numberValue}"
+                            )
                             waitForNextEvent()
                             return
                         }
@@ -319,8 +364,9 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                         if (enumValue != null) {
                             threshold = enumValue.value
                             send(
-                                "$SUCCESS **Threshold** set to ${Threshold.values().firstOrNull { it == enumValue } ?: enumValue}"
-                            ).queue()
+                                "$SUCCESS **Threshold** set to ${Threshold.values().firstOrNull { it == enumValue }
+                                    ?: enumValue}"
+                            )
                             waitForNextEvent()
                             return
                         }
@@ -330,7 +376,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                     }
                     "speed" -> {
                         if (args.isEmpty()) {
-                            send("$SUCCESS **Speed**: $speed").queue()
+                            send("$SUCCESS **Speed**: $speed")
                             waitForNextEvent()
                             return
                         }
@@ -345,13 +391,13 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                         }
 
                         speed = enumValue
-                        send("$SUCCESS **Speed** set to $speed").queue()
+                        send("$SUCCESS **Speed** set to $speed")
                         waitForNextEvent()
 
                     }
                     "onlykills" -> {
                         if (args.isEmpty()) {
-                            send("$SUCCESS **Only Kills**: $onlyKills").queue()
+                            send("$SUCCESS **Only Kills**: $onlyKills")
                             waitForNextEvent()
                             return
                         }
@@ -364,7 +410,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
                         }
 
                         onlyKills = value
-                        send("$SUCCESS **Only Kills** set to $onlyKills").queue()
+                        send("$SUCCESS **Only Kills** set to $onlyKills")
                         waitForNextEvent()
 
                     }
@@ -395,12 +441,24 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
             threshold
         )
 
-        val gameThread = thread(name = "HungerGames-$channel") {
+        val gameThread = thread(name = "HungerGames-${channel.id()}") {
             try {
                 hungerGames.handle(channel, speed, onlyKills)
-                send("$ZAP Returning to HungerGames sub-lobby. Use `hg cancel` to return to the game lobby.").queue()
+                send("$ZAP Returning to HungerGames sub-lobby. Use `hg cancel` to return to the game lobby.")
             } catch (e: InterruptedException) {
-                send("$BANG Game finished by admin. Returning to HungerGames sub-lobby. Use `hg cancel` to return to the game lobby.").queue()
+                if (!forceStopped) {
+                    send("$BANG Game finished by admin. Returning to HungerGames sub-lobby. Use `hg cancel` to return to the game lobby.")
+                }
+            } catch (e: Exception) {
+                ErrorReporter()
+                    .logTimestamp()
+                    .exception(e)
+                    .channel(channel)
+                    .extra("game", "HungerGames")
+                    .report()
+                    .logToFile()
+                    .logAsError()
+                    .sendErrorMessage()
             }
             startHgLobby()
         }
@@ -409,12 +467,27 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
     }
 
     private fun HungerGames.handle(channel: TextChannel, speed: Speed, onlyKills: Boolean) {
-        fun send(vararg messages: Any?) {
-            channel.sendMessage(messages.joinToString("\n", transform = Any?::toString)).queue()
+        fun check() {
+            if (forceStopped) throw InterruptedException()
         }
 
-        fun quickYield() = Thread.sleep(speed.quickYield)
-        fun yield() = Thread.sleep(speed.yield)
+        fun send(vararg messages: Any?) {
+            check()
+            channel.sendMessage(messages.joinToString("\n", transform = Any?::toString))
+                .toCompletableFuture().join()
+        }
+
+        fun quickYield() {
+            check()
+            Thread.sleep(speed.quickYield)
+            check()
+        }
+
+        fun yield() {
+            check()
+            Thread.sleep(speed.yield)
+            check()
+        }
 
         var dayCount = 0
         var nightCount = 0
@@ -534,7 +607,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
 
     private fun startGameLobby(gameThread: Thread) {
         object : AsyncCommandInput(manager.injector.instance(), 30, SECONDS, "hg") {
-            override fun filter(event: GuildMessageReceivedEvent) = (event.author.id == admin.id && super.filter(event))
+            override fun filter(message: Message) = (message.author().id() == admin.id() && super.filter(message))
 
             override fun timeout() {
                 if (!gameThread.isAlive) return
@@ -542,6 +615,7 @@ class AruHG(private val manager: GameManager, override val channel: TextChannel,
             }
 
             override fun CommandContext.onCommand() {
+                if (forceStopped) return
                 if (!gameThread.isAlive) return
 
                 val args = parseable()

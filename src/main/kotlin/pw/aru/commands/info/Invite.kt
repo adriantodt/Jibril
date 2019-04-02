@@ -8,11 +8,10 @@ import pw.aru.core.commands.help.CommandDescription
 import pw.aru.core.commands.help.Description
 import pw.aru.core.commands.help.Help
 import pw.aru.utils.AruColors
-import pw.aru.utils.emotes.SMILE2
-import pw.aru.utils.extensions.baseEmbed
-import pw.aru.utils.extensions.description
-import pw.aru.utils.extensions.field
-import pw.aru.utils.extensions.thumbnail
+import pw.aru.utils.extensions.lib.description
+import pw.aru.utils.extensions.lib.field
+import pw.aru.utils.styling
+import pw.aru.utils.text.SMILE2
 
 @Command("invite", "links", "hangout")
 class Invite : ICommand, ICommand.HelpDialogProvider {
@@ -20,7 +19,10 @@ class Invite : ICommand, ICommand.HelpDialogProvider {
 
     override fun CommandContext.call() {
         sendEmbed {
-            baseEmbed(event, name = "Aru! | Invite", color = AruColors.primary)
+            styling(message)
+                .author("Aru! | Invite")
+                .autoFooter()
+            color(AruColors.primary)
 
             thumbnail("https://assets.aru.pw/img/aru_avatar.jpg")
 
@@ -35,9 +37,8 @@ class Invite : ICommand, ICommand.HelpDialogProvider {
             field("I have my own website now!", "https://aru.pw/")
             field("Want me around on your Server?", "https://add.aru.pw/")
             field("Need support? Join my Server!", "https://support.aru.pw/")
-            field("Wanna support a poor angel?", "https://patreon.aru.pw/")
-
-        }.queue()
+            field("Wanna support a poor angel?", "https://donate.aru.pw/")
+        }
     }
 
     override val helpHandler = Help(

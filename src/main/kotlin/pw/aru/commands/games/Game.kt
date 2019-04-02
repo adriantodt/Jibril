@@ -1,18 +1,19 @@
 package pw.aru.commands.games
 
-import net.dv8tion.jda.core.entities.TextChannel
+import com.mewna.catnip.entity.channel.TextChannel
+import com.mewna.catnip.entity.guild.Member
 import pw.aru.commands.games.manager.GameManager
-import pw.aru.commands.games.manager.Lobby
 
 interface Game {
     val channel: TextChannel
     val isAlive: Boolean
+    fun forcestop()
 }
 
 interface GameCreator {
     val description: GameDescription
 
-    fun create(manager: GameManager, channel: TextChannel, lobby: Lobby): Game?
+    fun create(manager: GameManager, channel: TextChannel, admin: Member, players: List<Member>): Game?
 }
 
 data class GameDescription(

@@ -13,25 +13,31 @@ class AvailableResource<T> implements Resource<T> {
 
     @Nonnull
     @Override
-    public LoadState getLoadState() {
-        return closed ? LoadState.UNAVAILABLE : LoadState.AVAILABLE;
+    public State getState() {
+        return closed ? State.UNAVAILABLE : State.AVAILABLE;
     }
 
     @Nullable
     @Override
-    public T getResource() throws IllegalStateException {
+    public T getValue() throws IllegalStateException {
         if (closed) throw new IllegalStateException("Resource is unavailable");
         return value;
     }
 
     @Nullable
     @Override
-    public Exception getResourceError() {
+    public T getOrNull() {
+        return value;
+    }
+
+    @Nullable
+    @Override
+    public Exception getLoadException() {
         return null;
     }
 
     @Override
-    public boolean loadResource() {
+    public boolean load() {
         return !closed;
     }
 

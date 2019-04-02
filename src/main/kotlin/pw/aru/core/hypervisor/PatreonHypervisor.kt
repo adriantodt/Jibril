@@ -1,17 +1,17 @@
 package pw.aru.core.hypervisor
 
-import net.dv8tion.jda.bot.sharding.ShardManager
-import net.dv8tion.jda.core.entities.Guild
+import com.mewna.catnip.Catnip
+import com.mewna.catnip.entity.guild.Guild
 import pw.aru.core.config.AruConfig
 import pw.aru.core.hypervisor.common.GuildWebhookLogger
 
 class PatreonHypervisor(config: AruConfig) : AruHypervisor {
     private val logger = GuildWebhookLogger(config.serversWebhook)
-    override fun onGuildJoin(shardManager: ShardManager, guild: Guild) {
-        logger.onGuildJoin(shardManager, guild)
+    override fun onGuildJoin(catnip: Catnip, guild: Guild) {
+        logger.onGuildJoin(catnip, guild)
     }
 
-    override fun onGuildLeave(shardManager: ShardManager, guild: Guild) {
-        logger.onGuildLeave(shardManager, guild)
+    override fun onGuildLeave(catnip: Catnip, guild: Guild) {
+        logger.onGuildLeave(catnip, guild)
     }
 }

@@ -1,18 +1,18 @@
 package pw.aru.commands.info
 
-import net.dv8tion.jda.bot.sharding.ShardManager
+import com.mewna.catnip.Catnip
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
 import pw.aru.utils.AruColors
-import pw.aru.utils.extensions.*
+import pw.aru.utils.extensions.lib.description
+import pw.aru.utils.extensions.lib.field
+import pw.aru.utils.styling
 
 @Command("about")
-@UseFullInjector
-class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDialogProvider {
+class About(private val catnip: Catnip) : ICommand, ICommand.HelpDialogProvider {
     override val category = Category.INFO
 
     override fun CommandContext.call() {
@@ -24,13 +24,12 @@ class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDia
     }
 
     private fun discordTag(id: String): String {
-        val user = shardManager.getUserById(id) ?: return "Unknown User"
-        return "**${user.name}#${user.discriminator}**"
+        return catnip.cache().user(id)?.discordTag() ?: "Unknown User"
     }
 
     private fun CommandContext.credits() {
         sendEmbed {
-            baseEmbed(event, "Aru! | Credits")
+            styling(message).author("Aru! | Credits").applyAll()
             thumbnail("https://assets.aru.pw/img/aru_avatar.jpg")
             field(
                 "Developers",
@@ -42,12 +41,13 @@ class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDia
                 "\u25AB Thanks to ${discordTag("291710319619866624")} for providing a lot of GIFs for action commands",
                 "(Also for being our first patron owo)"
             )
-        }.queue()
+        }
     }
 
     private fun CommandContext.about() {
         sendEmbed {
-            baseEmbed(event, name = "Aru! | About", color = AruColors.primary)
+            styling(message).author("Aru! | About")
+            color(AruColors.primary)
             thumbnail("https://assets.aru.pw/img/aru_avatar.jpg")
             description(
                 "Hi, I'm **Aru**, the personal angel guardian that your server needs!",
@@ -63,10 +63,10 @@ class About(private val shardManager: ShardManager) : ICommand, ICommand.HelpDia
                 "Send `$prefix${"about credits"}` to see the credits."
             )
             footer(
-                "Invite link: https://add.aru.pw/ | Requested by ${event.member.effectiveName}",
-                event.jda.selfUser.effectiveAvatarUrl
+                "Invite link: https://add.aru.pw/ | Requested by ${author.effectiveName()}",
+                self.effectiveAvatarUrl()
             )
-        }.queue()
+        }
 
     }
 

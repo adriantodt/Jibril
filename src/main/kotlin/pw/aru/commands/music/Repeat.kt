@@ -1,37 +1,36 @@
 package pw.aru.commands.music
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import pw.aru.commands.music.base.MusicPermissionCommand
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
-import pw.aru.core.music.GuildMusicPlayer
-import pw.aru.core.music.GuildMusicPlayer.RepeatMode.*
-import pw.aru.core.music.MusicManager
-import pw.aru.utils.emotes.SUCCESS
+import pw.aru.core.music.MusicPlayer
+import pw.aru.core.music.MusicSystem
+import pw.aru.core.music.entities.RepeatMode
+import pw.aru.core.music.events.ChangeRepeatModeEvent
 
 @Command("repeat")
-@UseFullInjector
-class Repeat(musicManager: MusicManager) : MusicPermissionCommand(musicManager), ICommand.HelpDialogProvider {
-    override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
+class Repeat(musicSystem: MusicSystem) : MusicPermissionCommand(musicSystem), ICommand.HelpDialogProvider {
+    override fun CommandContext.actionWithPerms(musicPlayer: MusicPlayer, currentTrack: AudioTrack) {
         val mode = when (args) {
-            "" -> musicPlayer.repeatMode.cycleNext()
-            "none", "disable", "false", "n" -> NONE
-            "song", "music", "current", "playing", "true", "s" -> SONG
-            "queue", "playlist", "list", "q" -> QUEUE
+            "" -> null
+            "none", "disable", "false", "n" -> RepeatMode.NONE
+            "song", "music", "current", "playing", "true", "s" -> RepeatMode.SONG
+            "queue", "playlist", "list", "q" -> RepeatMode.QUEUE
             else -> return showHelp()
         }
 
-        musicPlayer.repeatMode = mode
-
-        send(
-            "$SUCCESS Repeat mode set to `${mode.name.toLowerCase()}`!"
-        ).queue()
+        musicPlayer.publish(ChangeRepeatModeEvent(asMusicSource(), mode))
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("repeat"), "Repeat Command", thumbnail = "https://assets.aru.pw/img/category/music.png"),
+        CommandDescription(
+            listOf("repeat"),
+            "Repeat Command",
+            thumbnail = "https://assets.aru.pw/img/category/music.png"
+        ),
         Description(
             "Sets the repeat mode of the player.",
             "",

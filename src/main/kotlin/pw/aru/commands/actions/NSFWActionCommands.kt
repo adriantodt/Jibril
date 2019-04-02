@@ -7,8 +7,8 @@ import pw.aru.core.categories.Category
 import pw.aru.core.commands.CommandProvider
 import pw.aru.core.commands.help.prefix
 import pw.aru.utils.ReloadableListProvider
-import pw.aru.utils.caches.URLCache
-import pw.aru.utils.emotes.*
+import pw.aru.utils.URLCache
+import pw.aru.utils.text.*
 import java.io.File
 
 @CommandProvider
@@ -228,7 +228,7 @@ class NSFWActionCommands(
         }
 
         //gangbang
-        actionCommand(listOf("gangbang"), "Gangbang Command", "TODO DOCS") {
+        actionCommand(listOf("gangbang"), "Gangbang Command", "Gangbangs the mentioned users.") {
             nsfwProvider = fromLinks(assetProvider["assets/aru/nsfw_actions/gangbang.txt"])
             actions(
                 "$FUCK {everyone} are having a gangbang",

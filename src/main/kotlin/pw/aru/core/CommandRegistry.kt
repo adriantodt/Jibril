@@ -2,17 +2,14 @@ package pw.aru.core
 
 import mu.KLogging
 import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.placeholder.PlaceholderCommand
 import pw.aru.core.hypervisor.AruHypervisor
-import pw.aru.utils.extensions.classOf
+import pw.aru.utils.extensions.lang.classOf
 
 class CommandRegistry(private val hypervisor: AruHypervisor) {
     companion object : KLogging() {
         private val helpInterfaces = listOf(
             classOf<ICommand.HelpDialogProvider>(),
-            classOf<ICommand.HelpProvider>(),
-            classOf<ICommand.HelpDialog>(),
-            classOf<ICommand.HelpHandler>()
+            classOf<ICommand.HelpDialog>()
         )
     }
 
@@ -58,12 +55,4 @@ class CommandRegistry(private val hypervisor: AruHypervisor) {
         lookup.getOrPut(command, ::ArrayList).addAll(keys)
     }
 
-    fun registerPlaceholder(names: List<String>) {
-        if (!hypervisor.filterCommand(names, PlaceholderCommand)) return
-
-        names.asSequence()
-            .map(String::toLowerCase)
-            .distinct()
-            .forEach { commands[it] = PlaceholderCommand }
-    }
 }

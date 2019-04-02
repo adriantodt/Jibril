@@ -10,7 +10,7 @@ class CallableResource<T> implements Resource<T> {
     private final Object resLock = new Object();
     private Exception ex;
     private T res;
-    private LoadState state = LoadState.NOT_LOADED;
+    private State state = State.NOT_LOADED;
 
     CallableResource(Callable<T> callable, boolean reloadable) {
         this.callable = callable;
@@ -19,49 +19,53 @@ class CallableResource<T> implements Resource<T> {
 
     @Nonnull
     @Override
-    public LoadState getLoadState() {
+    public State getState() {
         return state;
     }
 
     @Nullable
     @Override
-    public T getResource() throws IllegalStateException {
+    public T getValue() throws IllegalStateException {
         synchronized (resLock) {
-            if (!loadResource()) throw new IllegalStateException("Resource is unavailable");
+            if (!load()) throw new IllegalStateException("Resource is unavailable");
             return res;
         }
     }
 
     @Nullable
     @Override
-    public Exception getResourceError() {
+    public Exception getLoadException() {
         return ex;
     }
 
     @Override
-    public boolean loadResource() {
+    public boolean load() {
         synchronized (resLock) {
-            if (state == LoadState.LOADING) throw new AssertionError("Impossible to happen?");
-            if (state == LoadState.AVAILABLE) return true;
-            if (state == LoadState.UNAVAILABLE && !reloadable) return false;
+            if (state == State.LOADING) throw new IllegalStateException("Invalid 'LOADING' state before loading.");
+            if (state == State.AVAILABLE) return true;
+            if (state == State.UNAVAILABLE && !reloadable) return false;
 
-            state = LoadState.LOADING;
+            state = State.LOADING;
 
             try {
                 res = callable.call();
-                state = LoadState.AVAILABLE;
+                state = State.AVAILABLE;
                 return true;
             } catch (Exception e) {
                 ex = e;
-                state = LoadState.UNAVAILABLE;
+                state = State.UNAVAILABLE;
                 return false;
+            } finally {
+                if (state == State.LOADING) {
+                    state = State.NOT_LOADED;
+                }
             }
         }
     }
 
     @Override
     public void close() {
-        state = LoadState.UNAVAILABLE;
+        state = State.UNAVAILABLE;
         res = null;
         ex = null;
     }

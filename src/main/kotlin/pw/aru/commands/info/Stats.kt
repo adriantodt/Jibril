@@ -1,46 +1,38 @@
 package pw.aru.commands.info
 
-import net.dv8tion.jda.bot.sharding.ShardManager
-import net.dv8tion.jda.core.entities.ISnowflake
-import pw.aru.Aru
+import com.mewna.catnip.entity.channel.Channel.ChannelType.*
+import pw.aru.AruBot.uptime
 import pw.aru.core.CommandProcessor
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
-import pw.aru.core.music.MusicManager
+import pw.aru.core.music.MusicSystem
 import pw.aru.exported.aru_version
-import pw.aru.utils.commands.EmbedFirst
-import pw.aru.utils.emotes.LOADING
-import pw.aru.utils.extensions.baseEmbed
-import pw.aru.utils.extensions.field
-import pw.aru.utils.extensions.format
-import pw.aru.utils.extensions.inlineField
-import pw.aru.utils.helpers.AsyncInfoMonitor.availableProcessors
-import pw.aru.utils.helpers.AsyncInfoMonitor.cpuUsage
-import pw.aru.utils.helpers.AsyncInfoMonitor.freeMemory
-import pw.aru.utils.helpers.AsyncInfoMonitor.maxMemory
-import pw.aru.utils.helpers.AsyncInfoMonitor.threadCount
-import pw.aru.utils.helpers.AsyncInfoMonitor.totalMemory
-import pw.aru.utils.helpers.AsyncInfoMonitor.vpsCpuUsage
-import pw.aru.utils.helpers.AsyncInfoMonitor.vpsFreeMemory
-import pw.aru.utils.helpers.AsyncInfoMonitor.vpsMaxMemory
-import pw.aru.utils.helpers.AsyncInfoMonitor.vpsUsedMemory
-import pw.aru.utils.helpers.CommandStatsManager
-import pw.aru.utils.helpers.GuildStatsManager
-import pw.aru.utils.helpers.StatsManager
-import pw.aru.utils.helpers.StatsManager.Type
-import pw.aru.utils.helpers.StatsManager.Type.*
-import java.lang.Thread.sleep
+import pw.aru.utils.*
+import pw.aru.utils.AsyncInfoMonitor.availableProcessors
+import pw.aru.utils.AsyncInfoMonitor.cpuUsage
+import pw.aru.utils.AsyncInfoMonitor.freeMemory
+import pw.aru.utils.AsyncInfoMonitor.maxMemory
+import pw.aru.utils.AsyncInfoMonitor.threadCount
+import pw.aru.utils.AsyncInfoMonitor.totalMemory
+import pw.aru.utils.AsyncInfoMonitor.vpsCpuUsage
+import pw.aru.utils.AsyncInfoMonitor.vpsFreeMemory
+import pw.aru.utils.AsyncInfoMonitor.vpsMaxMemory
+import pw.aru.utils.AsyncInfoMonitor.vpsUsedMemory
+import pw.aru.utils.StatsManager.Type
+import pw.aru.utils.StatsManager.Type.*
+import pw.aru.utils.extensions.lang.format
+import pw.aru.utils.extensions.lang.multiline
+import pw.aru.utils.extensions.lib.field
+import pw.aru.utils.extensions.lib.inlineField
+import pw.aru.utils.text.LOADING
 
 @Command("stats")
-@UseFullInjector
 class Stats
-(
-    private val shardManager: ShardManager,
-    private val musicManager: MusicManager,
+    (
+    private val musicSystem: MusicSystem,
     private val processor: CommandProcessor
 ) : ICommand, ICommand.HelpDialogProvider {
     override val category = Category.INFO
@@ -58,40 +50,44 @@ class Stats
     }
 
     private fun CommandContext.discordStats() {
-        EmbedFirst(event) {
-            baseEmbed(event, "Aru! | Discord Stats")
-            field("Uptime:", Aru.uptime)
+
+        EmbedFirst(message) {
+            styling(message).author("Aru! | Discord Stats").applyAll()
+            field("Uptime:", uptime)
             inlineField(
                 "Bot Stats:",
                 "\u25AB **Aru Version**: $aru_version",
                 "\u25AB **Threads**: ${Thread.activeCount().format("%,d")}",
-                "\u25AB **Shards**: ${shardManager.shardsTotal.format("%,d")} (Current: ${event.jda.shardInfo.shardId})",
+                "\u25AB **Shards**: ${catnip.shardManager().shardCount().format("%,d")}",
                 "\u25AB **Commands**: ${processor.commandCount.format("%,d")} executed"
             )
             inlineField("Discord Stats:", "$LOADING Gathering $LOADING")
         } then {
-            sleep(100)
 
-            val guildCount = shardManager.guildCache.size().format("%,d")
-            val uniqueUserCount = shardManager.userCache.stream().map(ISnowflake::getIdLong).distinct().count().format("%,d")
-            val textChannelCount = shardManager.textChannelCache.size().format("%,d")
-            val voiceChannelCount = shardManager.voiceChannelCache.size().format("%,d")
-            val musicCount = musicManager.musicPlayers.size().format("%,d")
-            val queueSize = musicManager.musicPlayers.valueCollection()
-                .map { it.queue.size }
-                .sum().format("%,d")
 
-            fields.remove(fields.last())
-            inlineField(
+            val guildCount = catnip.cache().guilds().size().format("%,d")
+            val userCount = catnip.cache().users().size().format("%,d")
+            val channelCounts = catnip.cache().channels().groupingBy { it.type() }.eachCount()
+            val musicCount = musicSystem.players.size().format("%,d")
+            val queueSize = musicSystem.players.valueCollection().asSequence()
+                .map { it.queue.size }.sum().format("%,d")
+
+            replaceAtIndex(
+                2,
                 "Discord Stats:",
-                "\u25AB **Servers**: $guildCount",
-                "\u25AB **Unique Users**: $uniqueUserCount",
-                "\u25AB **Text Channels**: $textChannelCount",
-                "\u25AB **Voice Channels**: $voiceChannelCount",
-                "\u25AB **Playing music on $musicCount servers**",
-                "\u25AB **$queueSize tracks queued**"
+                multiline(
+                    "\u25AB **Servers**: $guildCount",
+                    "\u25AB **Users**: $userCount",
+                    "\u25AB **Text Channels**: ${channelCounts[TEXT]?.format("%,d")}",
+                    "\u25AB **Voice Channels**: ${channelCounts[VOICE]?.format("%,d")}",
+                    "\u25AB **Categories**: ${channelCounts[CATEGORY]?.format("%,d")}",
+                    "\u25AB **Playing music on $musicCount servers**",
+                    "\u25AB **$queueSize tracks queued**"
+                ),
+                true
             )
         }
+
     }
 
     private fun <T> CommandContext.statsManager(m: StatsManager<T>, title: String, arg: String) {
@@ -107,23 +103,40 @@ class Stats
 
     private fun <T> CommandContext.statsManagerResume(m: StatsManager<T>, title: String) {
         sendEmbed {
-            baseEmbed(event, title)
+            styling(message).author(title).applyAll()
             arrayOf(MINUTE, HOUR, DAY, TOTAL).forEach {
-                field(it.name, m.resume(it))
+                field(it.name, m.takeSnapshot(it).resume())
             }
-        }.queue()
+        }
     }
 
     private fun <T> CommandContext.detailedStatsManager(m: StatsManager<T>, title: String, type: Type) {
         sendEmbed {
-            baseEmbed(event, "$title | ${type.display}")
-            m.fillEmbed(this, type)
-        }.queue()
+            styling(message).author("$title | ${type.display}").applyAll()
+
+            val (sum, items) = m.takeSnapshot(type)
+
+            if (sum == 0L) {
+                field("Nothing Here.", "Just Dust.", false)
+            } else {
+                description(
+                    "Total: $sum\n" + items.entries.asSequence()
+                        .map { it.key to it.value.get() }
+                        .filter { it.second > 0 }
+                        .sortedByDescending(Pair<T, Long>::second)
+                        .take(20)
+                        .joinToString("\n") { (k, v) ->
+                            val p = Math.round(v * 100.0f / sum)
+                            "${StatsManager.bar(p, 5)} **$k** - $p% ($v)"
+                        }
+                )
+            }
+        }
     }
 
     private fun CommandContext.serverStats() {
         sendEmbed {
-            baseEmbed(event, "Aru! | Server Stats")
+            styling(message).author("Aru! | Server Stats").applyAll()
             field(
                 "Resource Usage:",
                 "\u25AB **Threads**: $threadCount",
@@ -133,11 +146,13 @@ class Stats
             )
             field(
                 "Server:",
-                "\u25AB **RAM** (Total/Free/Used): ${vpsMaxMemory.format("%.2f")}GB/${vpsFreeMemory.format("%.2f")}GB/${vpsUsedMemory.format("%.2f")}GB",
-                "\u25AB **CPU Cores**: ${availableProcessors} cores",
+                "\u25AB **RAM** (Total/Free/Used): ${vpsMaxMemory.format("%.2f")}GB/${vpsFreeMemory.format("%.2f")}GB/${vpsUsedMemory.format(
+                    "%.2f"
+                )}GB",
+                "\u25AB **CPU Cores**: $availableProcessors cores",
                 "\u25AB **CPU Usage**: ${vpsCpuUsage.format("%.2f")}%"
             )
-        }.queue()
+        }
     }
 
     override val helpHandler = Help(
@@ -147,9 +162,15 @@ class Stats
             CommandUsage("stats [discord/d]", "Shows my general stats."),
             CommandUsage("stats <server/s>", "Shows my server's stats."),
             CommandUsage("stats <cmds/cmd/commands/c>", "Shows this session's commands stats."),
-            CommandUsage("stats <cmds/cmd/commands/c> <now/hourly/dialy/total>", "Shows detailed info about command usage."),
+            CommandUsage(
+                "stats <cmds/cmd/commands/c> <now/hourly/dialy/total>",
+                "Shows detailed info about command usage."
+            ),
             CommandUsage("stats <guilds/guild/g>", "Shows this session's guild join/leave stats."),
-            CommandUsage("stats <guilds/guild/g> <now/hourly/dialy/total>", "Shows detailed info about guild join/leave events.")
+            CommandUsage(
+                "stats <guilds/guild/g> <now/hourly/dialy/total>",
+                "Shows detailed info about guild join/leave events."
+            )
         )
     )
 }

@@ -9,10 +9,11 @@ import pw.aru.db.AruDB
 import pw.aru.db.entities.guild.GuildSettings
 import pw.aru.db.entities.user.UserSettings
 import pw.aru.utils.AruColors.primary
-import pw.aru.utils.emotes.ERROR
-import pw.aru.utils.emotes.HEART
-import pw.aru.utils.emotes.SAD
-import pw.aru.utils.extensions.*
+import pw.aru.utils.extensions.lib.field
+import pw.aru.utils.extensions.lib.footer
+import pw.aru.utils.text.ERROR
+import pw.aru.utils.text.HEART
+import pw.aru.utils.text.SAD
 
 @Command("vipstatus")
 class VipStatus(private val db: AruDB) : ICommand, ICommand.HelpDialogProvider {
@@ -30,34 +31,36 @@ class VipStatus(private val db: AruDB) : ICommand, ICommand.HelpDialogProvider {
 
     private fun CommandContext.userStatus() {
         when {
-            UserSettings(db, author.idLong).legacyPremium -> {
+            UserSettings(db, author.idAsLong()).legacyPremium -> {
                 sendEmbed {
-                    title("Your Premium Status", "https://patreon.aru.pw/")
+                    title("Your Premium Status")
+                    url("https://patreon.aru.pw/")
                     color(primary)
-                    thumbnail(author.user.effectiveAvatarUrl)
+                    thumbnail(author.effectiveAvatarUrl())
                     field("Status: LegacyPremium", "Thanks for being one of our first patrons.")
                     footer("Thank you for supporting us! $HEART")
-                }.queue()
+                }
             }
             else -> {
-                send("$ERROR You aren't a premium user. $SAD\nSupport us, be a premium user and get access to exclusive benefits!").queue()
+                send("$ERROR You aren't a premium user. $SAD\nSupport us, be a premium user and get access to exclusive benefits!")
             }
         }
     }
 
     private fun CommandContext.guildStatus() {
         when {
-            GuildSettings(db, guild.idLong).legacyPremium -> {
+            GuildSettings(db, guild.idAsLong()).legacyPremium -> {
                 sendEmbed {
-                    title("${guild.name}'s Premium Status", "https://patreon.aru.pw/")
+                    title("${guild.name()}'s Premium Status")
+                    url("https://patreon.aru.pw/")
                     color(primary)
-                    thumbnail(guild.iconUrl)
+                    thumbnail(guild.iconUrl())
                     field("Status: LegacyPremium", "Thanks for being one of our first patrons.")
                     footer("Thank you for supporting us! $HEART")
-                }.queue()
+                }
             }
             else -> {
-                send("$ERROR This guild isn't premium. $SAD").queue()
+                send("$ERROR This guild isn't premium. $SAD")
             }
         }
     }

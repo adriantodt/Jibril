@@ -6,60 +6,60 @@ import javax.annotation.Nullable;
 public class SettableResource<T> implements Resource<T> {
     private Exception ex;
     private T res;
-    private LoadState state = LoadState.NOT_LOADED;
+    private State state = State.NOT_LOADED;
 
     @Nonnull
     @Override
-    public LoadState getLoadState() {
+    public State getState() {
         return state;
     }
 
     @Nullable
     @Override
-    public T getResource() throws IllegalStateException {
-        if (state != LoadState.AVAILABLE) throw new IllegalStateException("Resource is unavailable");
+    public T getValue() throws IllegalStateException {
+        if (state != State.AVAILABLE) throw new IllegalStateException("Resource is unavailable");
         return res;
     }
 
     @Nullable
     @Override
-    public T getResourceOrNull() {
+    public T getOrNull() {
         return res;
     }
 
     @Nullable
     @Override
-    public Exception getResourceError() {
+    public Exception getLoadException() {
         return ex;
     }
 
     @Override
-    public boolean loadResource() {
-        return state != LoadState.AVAILABLE;
+    public boolean load() {
+        return state == State.AVAILABLE;
     }
 
     public void setResourceAvailable(T resource) {
         res = resource;
         ex = null;
-        state = LoadState.AVAILABLE;
+        state = State.AVAILABLE;
     }
 
     public void setResourceLoading() {
         res = null;
         ex = null;
-        state = LoadState.LOADING;
+        state = State.LOADING;
     }
 
     public void setResourceUnavailable(Exception e) {
         res = null;
         ex = e;
-        state = LoadState.UNAVAILABLE;
+        state = State.UNAVAILABLE;
     }
 
     public void setResourceUnavailable() {
         res = null;
         ex = null;
-        state = LoadState.UNAVAILABLE;
+        state = State.UNAVAILABLE;
     }
 
     @Override

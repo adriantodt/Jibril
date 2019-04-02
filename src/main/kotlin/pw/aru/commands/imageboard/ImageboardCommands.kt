@@ -1,7 +1,7 @@
 package pw.aru.commands.imageboard
 
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import net.dv8tion.jda.core.exceptions.ErrorResponseException
+import com.mewna.catnip.entity.message.Message
+import com.mewna.catnip.rest.ResponseException
 import net.kodehawa.lib.imageboards.DefaultImageBoards.*
 import net.kodehawa.lib.imageboards.ImageBoard
 import net.kodehawa.lib.imageboards.entities.Rating
@@ -18,13 +18,12 @@ import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
 import pw.aru.core.parser.parseAndCreate
 import pw.aru.core.parser.tryTakeInt
-import pw.aru.utils.emotes.DISAPPOINTED
-import pw.aru.utils.emotes.ERROR
-import pw.aru.utils.emotes.TALKING
-import pw.aru.utils.emotes.WARNING
-import pw.aru.utils.extensions.baseEmbed
-import pw.aru.utils.extensions.description
-import pw.aru.utils.extensions.image
+import pw.aru.utils.extensions.lib.description
+import pw.aru.utils.styling
+import pw.aru.utils.text.DISAPPOINTED
+import pw.aru.utils.text.ERROR
+import pw.aru.utils.text.TALKING
+import pw.aru.utils.text.WARNING
 import java.net.SocketTimeoutException
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -72,6 +71,7 @@ class ImageboardCommand(
     private val nsfwOnly: Boolean = false
 ) : ICommand, ICommand.HelpDialogProvider, ICommand.ExceptionHandler {
     override val category = IMAGEBOARD
+    override fun nsfw() = nsfwOnly
 
     init {
         ImageBoard.throwExceptionOnEOF = false
@@ -89,7 +89,7 @@ class ImageboardCommand(
             val rating = option("--rating", "-r") { ratings[takeString()] ?: returnHelp() }
             val page = option("--page", "-p") { tryTakeInt() ?: returnHelp() }
 
-            creator { (rating.resourceOrNull) to (page.resourceOrNull ?: 0) }
+            creator { (rating.orNull) to (page.orNull ?: 0) }
         }
         val tags = args.takeAllStrings()
 
@@ -101,83 +101,97 @@ class ImageboardCommand(
                 else -> {
                     send(
                         "$WARNING Questionable/Explicit Lolicon/Shotacon images is expressly by Discord.\n" +
-                            "\n**Not Allowed Tags**: ${tags.filter(fbi::contains).joinToString("`, `", "`", "`")}" +
-                            "\n**Detected Rating**: ${(r ?: EXPLICIT).shortName}"
-                    ).queue()
+                                "\n**Not Allowed Tags**: ${tags.filter(fbi::contains).joinToString("`, `", "`", "`")}" +
+                                "\n**Detected Rating**: ${(r ?: EXPLICIT).shortName}"
+                    )
                     return
                 }
             }
-            else -> if (channel.isNSFW) r else SAFE
+            else -> if (channel.nsfw()) r else SAFE
         }
 
         val type = if (tags.isNotEmpty()) SEARCH_RESULT else RANDOM_IMAGE
 
-        val image = when (type) {
-            SEARCH_RESULT -> board.search(p, 50, tags.joinToString(" "), rating?.longName)
-            RANDOM_IMAGE -> board[p, 50, rating?.longName]
-        }.blocking()
-            .filter {
-                (rating?.equals(it.rating) ?: true)
-                    && (it.tags.none(fbi::contains) || it.rating == SAFE)
-                    && validExtensions.any { ext -> it.url.endsWith(ext) }
-            }
-            .shuffled()
-            .firstOrNull()
+
+        val image = runCatching {
+            when (type) {
+                SEARCH_RESULT -> board.search(p, 50, tags.joinToString(" "), rating)
+                RANDOM_IMAGE -> board[p, 50, rating]
+            }.blocking()
+                .filter {
+                    (rating?.equals(it.rating) ?: true)
+                            && it.url != null
+                            && (it.tags.none(fbi::contains) || it.rating == SAFE)
+                            && validExtensions.any { ext -> it.url.endsWith(ext) }
+                }
+                .also {
+                    println(it)
+                }
+                .shuffled()
+                .firstOrNull()
+        }.onFailure { it.printStackTrace() }.getOrNull()
 
         if (image != null) {
-            sendEmbed {
-                baseEmbed(event, "$name | ${type.title}", image.url)
+            withMDC("image" to image.toString()) {
+                sendEmbed {
+                    styling(message)
+                        .author("$name | ${type.title}", image.url)
+                        .applyAll()
 
-                val imgTags = image.tags.sorted().let {
-                    if (it.isEmpty()) {
-                        "None."
-                    } else {
-                        val count = AtomicInteger(
-                            //initial size to account for the description
-                            40 + image.width.toString().length + image.height.toString().length + image.rating.longName.capitalize().length + 2
-                        )
-                        val tagsTaken = it.takeWhile { tag -> count.addAndGet(tag.length + 3) < 1900 }
-
-                        if (tagsTaken.size != it.size) {
-                            tagsTaken.joinToString("`, `", "`", "`, ${it.size - tagsTaken.size} more ...")
+                    val imgTags = image.tags.sorted().let {
+                        if (it.isEmpty()) {
+                            "None."
                         } else {
-                            it.joinToString("`, `", "`", "`")
+                            val count = AtomicInteger(
+                                //initial size to account for the description
+                                40 + image.width.toString().length + image.height.toString().length + image.rating.longName.capitalize().length + 2
+                            )
+                            val tagsTaken = it.takeWhile { tag -> count.addAndGet(tag.length + 3) < 1900 }
+
+                            if (tagsTaken.size != it.size) {
+                                tagsTaken.joinToString("`, `", "`", "`, ${it.size - tagsTaken.size} more ...")
+                            } else {
+                                it.joinToString("`, `", "`", "`")
+                            }
                         }
                     }
-                }
 
-                description(
-                    "**${image.width}**x**${image.height}** | **${image.rating.longName.capitalize()}**",
-                    "",
-                    "**Tags**: $imgTags",
-                    "",
-                    "**Image**:"
-                )
-                image(image.url)
-            }.queue(null, handleException())
+                    description(
+                        "**${image.width}**x**${image.height}** | **${image.rating.longName.capitalize()}**",
+                        "",
+                        "**Tags**: $imgTags",
+                        "",
+                        "**Image**:"
+                    )
+                    image(image.url)
+                }.whenComplete(handlingExceptions())
+            }
         } else {
             send(
                 "$ERROR No images found.\n\n$TALKING Did you use the right tag? Tags are imageboard-dependant and might be different."
-            ).queue()
+            )
         }
     }
 
-    override fun handle(event: GuildMessageReceivedEvent, t: Throwable) {
+    override fun handle(message: Message, t: Throwable) {
         when {
             t is RuntimeException && t.cause is SocketTimeoutException -> {
                 // Reported ErrorID: RE#Br4FAL3EAAI
                 // Imageboard request times out
-                event.channel.sendMessage("$DISAPPOINTED We're having issues with $name. Seems that we can't connect to it. Please, try again later.").queue()
+                message.channel()
+                    .sendMessage("$DISAPPOINTED We're having issues with $name. Seems that we can't connect to it. Please, try again later.")
             }
-            t is ErrorResponseException -> {
+            t is ResponseException -> {
                 // Error Message: 485593425605951500
                 // Bad image url
-                event.channel.sendMessage("$DISAPPOINTED We're having issues with $name. The image that I got was invalid. Please, try again later.").queue()
+                message.channel()
+                    .sendMessage("$DISAPPOINTED We're having issues with $name. The image that I got was invalid. Please, try again later.")
             }
             t is QueryFailedException -> {
                 // Reported ErrorID: QFE#Br4EkZsAAAA
                 // Query fails
-                event.channel.sendMessage("$DISAPPOINTED We're having issues with $name. Did you put more tags on it than the allowed by the imageboard?").queue()
+                message.channel()
+                    .sendMessage("$DISAPPOINTED We're having issues with $name. Did you put more tags on it than the allowed by the imageboard?")
             }
             else -> throw t
         }
@@ -195,12 +209,18 @@ class ImageboardCommand(
             ),
             Usage(
                 CommandUsage(cmd, "Gets a random image from $name."),
-                CommandUsage("$cmd <tags...>", "Searches $name for a image with the specified tags. The tags **must** be separated by **spaces**.")
+                CommandUsage(
+                    "$cmd <tags...>",
+                    "Searches $name for a image with the specified tags. The tags **must** be separated by **spaces**."
+                )
             ),
             Note(
                 "**Magic Prefixes**:",
                 commandUsage("$cmd --page <number> <...>", "Gets a random image from $name on the specified page."),
-                commandUsage("$cmd --rating <safe/questionable/explicit> <...>", "Gets a random image from $name on the specified page.")
+                commandUsage(
+                    "$cmd --rating <safe/questionable/explicit> <...>",
+                    "Gets a random image from $name on the specified page."
+                )
             ),
             SeeAlso.ofList(boardCmds.filterNot(cmd::equals).sorted())
         )

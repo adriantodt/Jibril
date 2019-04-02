@@ -7,8 +7,8 @@ import pw.aru.commands.actions.impl.ActionCommandsWorkshop
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.CommandProvider
 import pw.aru.utils.ReloadableListProvider
-import pw.aru.utils.caches.URLCache
-import pw.aru.utils.emotes.*
+import pw.aru.utils.URLCache
+import pw.aru.utils.text.*
 import java.io.File
 
 @CommandProvider
@@ -18,7 +18,7 @@ class ActionCommands(
     private val assetProvider: ReloadableListProvider
 ) : ActionCommandsWorkshop(weebApi, URLCache(httpClient, File("url_cache")), Category.ACTION) {
 
-    /*
+    /*A
     weeb4j: {
         types: [
             deredere, greet, insult, sleepy,
@@ -33,6 +33,7 @@ class ActionCommands(
      */
 
     override fun create() {
+
         actionCommand(listOf("pat"), "Pat Command", "Pats the mentioned users.") {
             provider = fromWeebSh(type = "pat", fileType = GIF)
             actions(

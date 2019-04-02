@@ -7,9 +7,9 @@ import pw.aru.commands.actions.impl.ActionCommandsWorkshop
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.CommandProvider
 import pw.aru.utils.ReloadableListProvider
-import pw.aru.utils.caches.URLCache
-import pw.aru.utils.emotes.CAT
-import pw.aru.utils.emotes.DOG
+import pw.aru.utils.URLCache
+import pw.aru.utils.text.CAT
+import pw.aru.utils.text.DOG
 import java.io.File
 
 @CommandProvider

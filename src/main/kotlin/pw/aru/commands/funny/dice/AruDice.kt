@@ -4,7 +4,7 @@ import pw.aru.dice.evaluator.DiceEvaluatorBuilder
 import pw.aru.dice.evaluator.DiceSolver
 import pw.aru.dice.lexer.DiceLexer
 import pw.aru.dice.parser.DiceParser
-import pw.aru.utils.extensions.randomOf
+import pw.aru.utils.extensions.lang.randomOf
 
 class AruDice(text: String) {
     companion object {
@@ -30,8 +30,8 @@ class AruDice(text: String) {
             .build()
     }
 
-    val diceExpr = DiceParser(DiceLexer(text)).parse().accept(solver)
-    val solvedValue = diceExpr.accept(evaluator)
+    val diceExpr = DiceParser(DiceLexer(text)).parse().accept(solver)!!
+    val solvedValue = diceExpr.accept(evaluator)!!
 
     private val diceText by lazy(diceExpr::toString)
     private val valueText by lazy(solvedValue::toString)

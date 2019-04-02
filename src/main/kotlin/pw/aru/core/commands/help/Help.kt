@@ -1,13 +1,12 @@
 package pw.aru.core.commands.help
 
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import pw.aru.core.commands.CommandPermission
+import com.mewna.catnip.entity.message.Message
 import pw.aru.core.commands.ICommand
+import pw.aru.core.permissions.Permissions
 import pw.aru.utils.AruColors
-import pw.aru.utils.extensions.baseEmbed
-import pw.aru.utils.extensions.embed
-import pw.aru.utils.extensions.field
-import pw.aru.utils.extensions.thumbnail
+import pw.aru.utils.extensions.lib.embed
+import pw.aru.utils.extensions.lib.field
+import pw.aru.utils.styling
 import java.awt.Color
 
 class Help(
@@ -15,46 +14,50 @@ class Help(
     vararg val nodes: HelpNode
 ) : ICommand.HelpDialog {
     val names: List<String>?
-    val description: String
+    val title: String
     val color: Color
-    val permission: CommandPermission?
+    val permissions: Permissions?
     val thumbnail: String
 
     init {
         when (d) {
             is CommandDescription -> {
                 names = d.names
-                description = d.description
+                title = d.title
                 color = d.color ?: AruColors.primary
-                permission = d.permission
+                permissions = d.permissions
                 thumbnail = d.thumbnail
             }
             is CategoryDescription -> {
                 names = null
-                description = d.description
+                title = d.title
                 color = d.color ?: AruColors.primary
-                permission = d.permission
+                permissions = d.permissions
                 thumbnail = d.thumbnail
             }
         }
     }
 
-    override fun onHelp(event: GuildMessageReceivedEvent) = embed {
-        baseEmbed(event, name = description, color = color)
+    override fun onHelp(message: Message) = embed {
+        styling(message).author(title).autoFooter()
+        color(color)
         thumbnail(thumbnail)
 
-        if (permission != null) {
-            field("Permission Required:", permission.toString())
+        if (permissions != null) {
+            field("Permissions Required:", permissions.toString().capitalize())
         }
 
         if (names != null && names.size > 1) {
-            field("Aliases:", names.drop(1).joinToString("` `", "`", "`"))
+            field("Aliases:", names.asSequence().drop(1).joinToString("` `", "`", "`"))
         }
 
         for (node in nodes) when (node) {
             is Description -> field("Description:", node.value)
             is Usage -> field("Usage:", node.nodes.joinToString("\n"))
-            is Example -> field("Example:", node.displayValues.joinToString(prefix = "```\n", separator = "\n", postfix = "\n```"))
+            is Example -> field(
+                "Example:",
+                node.displayValues.joinToString(prefix = "```\n", separator = "\n", postfix = "\n```")
+            )
             is Note -> field("Note:", node.value)
             is SeeAlso -> field("See Also:", node.value)
 

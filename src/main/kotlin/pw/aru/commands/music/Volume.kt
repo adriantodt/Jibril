@@ -1,30 +1,28 @@
 package pw.aru.commands.music
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import pw.aru.commands.music.base.MusicCommand
+import pw.aru.commands.music.base.MusicPermissionCommand
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
-import pw.aru.core.music.GuildMusicPlayer
-import pw.aru.core.music.MusicManager
+import pw.aru.core.music.MusicPlayer
+import pw.aru.core.music.MusicSystem
+import pw.aru.core.music.events.ChangeVolumeEvent
+import pw.aru.core.patreon.Patreon
 import pw.aru.db.AruDB
-import pw.aru.db.entities.guild.GuildSettings
-import pw.aru.db.entities.user.UserSettings
-import pw.aru.utils.emotes.ERROR
-import pw.aru.utils.emotes.SUCCESS
-import pw.aru.utils.emotes.VOLUME
-import pw.aru.utils.extensions.idLong
-import pw.aru.utils.extensions.multiline
+import pw.aru.utils.extensions.lang.multiline
+import pw.aru.utils.text.ERROR
+import pw.aru.utils.text.VOLUME
 
 @Command("volume", "vol")
-@UseFullInjector
-class Volume(musicManager: MusicManager, db: AruDB) : MusicCommand(musicManager), ICommand.HelpDialogProvider {
-    private val setter = SetVolume(musicManager, db)
+class Volume(musicSystem: MusicSystem, db: AruDB) : MusicCommand(musicSystem), ICommand.HelpDialogProvider {
+    private val setter = SetVolume(musicSystem, db)
 
-    override fun CommandContext.call(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
+    override fun CommandContext.call(musicPlayer: MusicPlayer, currentTrack: AudioTrack) {
         if (args.isEmpty()) {
-            send("$VOLUME Volume: **${musicPlayer.audioPlayer.volume}/150**").queue()
+            send("$VOLUME Volume: **${musicPlayer.lavaPlayer.volume()}/150**")
             return
         }
         with(setter) {
@@ -33,7 +31,11 @@ class Volume(musicManager: MusicManager, db: AruDB) : MusicCommand(musicManager)
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("volume", "vol"), "Volume Command", thumbnail = "https://assets.aru.pw/img/category/music.png"),
+        CommandDescription(
+            listOf("volume", "vol"),
+            "Volume Command",
+            thumbnail = "https://assets.aru.pw/img/category/music.png"
+        ),
         Description(
             "Gets or sets the current volume.",
             "",
@@ -48,23 +50,23 @@ class Volume(musicManager: MusicManager, db: AruDB) : MusicCommand(musicManager)
         SeeAlso["play", "queue", "pause"]
     )
 
-    private class SetVolume(musicManager: MusicManager, private val db: AruDB) : MusicPermissionCommand(musicManager, userQueued = true) {
-        override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
-            if (!GuildSettings(db, guild.idLong).legacyPremium && !UserSettings(db, author.idLong).legacyPremium) {
+    private class SetVolume(musicSystem: MusicSystem, private val db: AruDB) :
+        MusicPermissionCommand(musicSystem, userQueued = true) {
+        override fun CommandContext.actionWithPerms(musicPlayer: MusicPlayer, currentTrack: AudioTrack) {
+            if (!Patreon.isPremium(db, author)) {
                 send(
                     multiline(
                         "$ERROR This is a premium-only feature." +
-                            "In order to get premium benefits like this one, consider donating and being one of our patreons (`aru!links`).",
+                                "In order to get premium benefits like this one, consider donating and being one of our patreons (`aru!links`).",
                         "If you donate, join the support server and ask for the Premium privileges. Thanks for understanding~"
                     )
-                ).queue()
+                )
 
                 return
             }
 
             val volume = (args.toIntOrNull() ?: return showHelp()).coerceIn(1, 150)
-            musicPlayer.audioPlayer.volume = volume
-            send("$SUCCESS Volume set to **$volume/150**.").queue()
+            musicPlayer.publish(ChangeVolumeEvent(asMusicSource(), volume))
         }
     }
 }

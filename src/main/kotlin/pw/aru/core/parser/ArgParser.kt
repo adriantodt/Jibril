@@ -1,35 +1,44 @@
 package pw.aru.core.parser
 
 class Args(val raw: String) {
+    companion object {
+        val SPLIT_CHARS = charArrayOf(' ', '\r', '\n', '\t')
+    }
+
     private var remaining = raw
 
     fun isEmpty() = remaining.isEmpty()
 
     fun takeString(): String {
         val re = remaining
-        val i = re.indexOfAny(charArrayOf(' ', '\r', '\n', '\t'))
+
+        val i = re.indexOfAny(SPLIT_CHARS)
 
         if (i == -1) {
             remaining = ""
             return re
         }
 
-        remaining = re.substring(i).trimStart()
+        remaining = re.substring(i).trimStart(*SPLIT_CHARS)
         return re.substring(0, i)
     }
 
     fun peekString(): String {
         val re = remaining
-        val i = re.indexOfAny(charArrayOf(' ', '\r', '\n', '\t'))
+        val i = re.indexOfAny(SPLIT_CHARS)
         return if (i != -1) re.substring(0, i) else re
+    }
+
+    fun peekRemaining(): String {
+        return remaining
     }
 
     fun matchNextString(predicate: (String) -> Boolean): Boolean {
         val args = remaining
-        val i = args.indexOfAny(charArrayOf(' ', '\r', '\n', '\t'))
+        val i = args.indexOfAny(SPLIT_CHARS)
 
         val ne = if (i != -1) args.substring(0, i) else args
-        val re = if (i != -1) args.substring(i).trimStart() else ""
+        val re = if (i != -1) args.substring(i).trimStart(*SPLIT_CHARS) else ""
 
         val p = predicate(ne)
         if (p) remaining = re
@@ -39,10 +48,10 @@ class Args(val raw: String) {
 
     fun matchNextString(predicate: String): Boolean {
         val args = remaining
-        val i = args.indexOfAny(charArrayOf(' ', '\r', '\n', '\t'))
+        val i = args.indexOfAny(SPLIT_CHARS)
 
         val ne = if (i != -1) args.substring(0, i) else args
-        val re = if (i != -1) args.substring(i).trimStart() else ""
+        val re = if (i != -1) args.substring(i).trimStart(*SPLIT_CHARS) else ""
 
         val p = (predicate == ne)
         if (p) remaining = re
@@ -71,10 +80,10 @@ class Args(val raw: String) {
 
     fun <T> mapNextString(map: (String) -> Pair<T, Boolean>): T {
         val args = remaining
-        val i = args.indexOfAny(charArrayOf(' ', '\r', '\n', '\t'))
+        val i = args.indexOfAny(SPLIT_CHARS)
 
         val ne = if (i != -1) args.substring(0, i) else args
-        val re = if (i != -1) args.substring(i).trimStart() else ""
+        val re = if (i != -1) args.substring(i).trimStart(*SPLIT_CHARS) else ""
 
         val (t, r) = map(ne)
         if (r) remaining = re
@@ -85,7 +94,7 @@ class Args(val raw: String) {
     fun takeAllStrings(): List<String> {
         val re = remaining
         remaining = ""
-        return re.split(' ', '\r', '\n', '\t')
+        return re.split(*SPLIT_CHARS)
     }
 
     fun takeRemaining(): String {
@@ -94,12 +103,12 @@ class Args(val raw: String) {
         return re
     }
 
-    fun takeStrings() = descontructed(Args::takeString)
+    fun takeStrings() = deconstructed(Args::takeString)
 
-    fun <T> descontructed(f: Args.() -> T) = Descontructed(f)
+    fun <T> deconstructed(f: Args.() -> T) = Deconstructed(f)
 
-    inner class Descontructed<T>(private val f: Args.() -> T) {
-        operator fun get(amount: Int) = (0 until amount).map { f() }
+    inner class Deconstructed<T>(private val f: Args.() -> T) {
+        operator fun get(amount: Int) = List(amount) { f() }
         operator fun component0() = f()
         operator fun component1() = f()
         operator fun component2() = f()

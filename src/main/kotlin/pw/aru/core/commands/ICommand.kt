@@ -1,50 +1,51 @@
 package pw.aru.core.commands
 
-import net.dv8tion.jda.core.entities.MessageEmbed
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import com.mewna.catnip.entity.message.Embed
+import com.mewna.catnip.entity.message.Message
 import pw.aru.core.categories.Category
+import pw.aru.core.commands.ICommand.CustomHandler.Result
 import pw.aru.core.commands.context.CommandContext
+import pw.aru.core.permissions.Permissions
 
 interface ICommand {
     val category: Category?
 
     fun CommandContext.call()
 
+
+    fun nsfw(): Boolean {
+        return category?.nsfw ?: false
+    }
+
     interface Discrete : ICommand {
         fun CommandContext.discreteCall(outer: String)
     }
 
     interface Permission {
-        val permission: CommandPermission
+        val permissions: Permissions
     }
 
     interface ExceptionHandler {
-        fun handle(event: GuildMessageReceivedEvent, t: Throwable)
+        fun handle(message: Message, t: Throwable)
     }
 
     interface HelpDialog {
-        fun onHelp(event: GuildMessageReceivedEvent): MessageEmbed
-    }
-
-    interface HelpHandler {
-        fun onHelp(event: GuildMessageReceivedEvent)
+        fun onHelp(message: Message): Embed
     }
 
     interface HelpDialogProvider {
         val helpHandler: HelpDialog
     }
 
-    interface HelpProvider {
-        val helpHandler: HelpHandler
+    interface CustomHandler : ICommand {
+        enum class Result {
+            IGNORE, HANDLED
+        }
+
+        fun CommandContext.customCall(command: String): Result
     }
 
-    interface PostLoad {
-        fun postLoad()
-    }
-}
-
-fun ICommand.HelpDialog.toHelpHandler() = object : ICommand.HelpHandler {
-    override fun onHelp(event: GuildMessageReceivedEvent) {
-        event.channel.sendMessage(this@toHelpHandler.onHelp(event)).queue()
+    interface CustomDiscreteHandler : ICommand {
+        fun CommandContext.customCall(command: String, outer: String): Result
     }
 }

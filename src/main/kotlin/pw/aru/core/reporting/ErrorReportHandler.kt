@@ -1,22 +1,24 @@
 package pw.aru.core.reporting
 
-import net.dv8tion.jda.core.entities.TextChannel
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import pw.aru.Aru.Companion.errorQuotes
+import com.mewna.catnip.entity.channel.MessageChannel
+import com.mewna.catnip.entity.message.Message
+import pw.aru.AruBot.errorQuotes
 import pw.aru.core.commands.help.prefix
 import pw.aru.db.AruDB
 import pw.aru.snow64.Snow64
-import pw.aru.utils.emotes.PENCIL
-import pw.aru.utils.emotes.TALKING
-import pw.aru.utils.emotes.WORRIED
-import pw.aru.utils.extensions.*
+import pw.aru.utils.extensions.lang.*
+import pw.aru.utils.text.PENCIL
+import pw.aru.utils.text.TALKING
+import pw.aru.utils.text.WORRIED
 import java.io.File
 import java.lang.System.currentTimeMillis
 import java.util.*
 
 class ErrorReportHandler internal constructor(private val report: ErrorReport) {
     companion object {
-        val fileWorker = Snow64.convert(AruDB.generator).getWorker(0, 1)
+        val fileWorker = Snow64.convert(AruDB.aruSnowflakes).getWorker(0, 1)!!
+
+        lateinit var parentUrl: String
     }
 
     private var reportUrl: String? = null
@@ -75,7 +77,7 @@ class ErrorReportHandler internal constructor(private val report: ErrorReport) {
 
             // message: Message?
             if (message != null)
-                append("Message: ").append(message.contentRaw).append("\n")
+                append("Message: ").append(message.content()).append("\n")
 
             // extra: Map<String, Any?>
             if (extra != null)
@@ -85,12 +87,24 @@ class ErrorReportHandler internal constructor(private val report: ErrorReport) {
         File("reports/$fileId.html").writeText(
             File("assets/aru/templates/logs.html").readText().replaceEach(
                 "{date}" to Date(timestamp ?: currentTimeMillis()).toString(),
-                "{log}" to log.replaceEach("&" to "&amp;", "\"" to "&quot;", "'" to "&apos;", "<" to "&lt;", ">" to "&gt;"),
-                "{extra}" to extra.replaceEach("&" to "&amp;", "\"" to "&quot;", "'" to "&apos;", "<" to "&lt;", ">" to "&gt;")
+                "{log}" to log.replaceEach(
+                    "&" to "&amp;",
+                    "\"" to "&quot;",
+                    "'" to "&apos;",
+                    "<" to "&lt;",
+                    ">" to "&gt;"
+                ),
+                "{extra}" to extra.replaceEach(
+                    "&" to "&amp;",
+                    "\"" to "&quot;",
+                    "'" to "&apos;",
+                    "<" to "&lt;",
+                    ">" to "&gt;"
+                )
             )
         )
 
-        reportUrl = "https://reports.aru.pw/$fileId.html"
+        reportUrl = "$parentUrl/$fileId.html"
     }
 
     fun logToFileAndGetUrl() = logToFile().reportUrl!!
@@ -127,7 +141,7 @@ class ErrorReportHandler internal constructor(private val report: ErrorReport) {
 
             // message: Message?
             if (message != null)
-                append("**Message**: ").append(message.contentRaw).append("\n")
+                append("**Message**: ").append(message.content()).append("\n")
 
             if (reportUrl != null)
                 append("**Report**: ").append(reportUrl).append("\n")
@@ -152,11 +166,11 @@ class ErrorReportHandler internal constructor(private val report: ErrorReport) {
 
     fun sendErrorMessage() = sendErrorMessage(report.channel!!)
 
-    fun sendErrorMessage(event: GuildMessageReceivedEvent) = sendErrorMessage(event.channel)
+    fun sendErrorMessage(message: Message) = sendErrorMessage(message.channel())
 
-    fun sendErrorMessage(channel: TextChannel) = applyOn(report) {
+    fun sendErrorMessage(channel: MessageChannel) = applyOn(report) {
         channel.sendMessage(
             "$WORRIED ${errorQuotes.random()}\n\n$TALKING Eh, do you mind reporting this to my developers? (Check out `$prefix${"hangout"}`)\n$PENCIL **Error ID**: `$errorId`"
-        ).queue()
+        )
     }
 }

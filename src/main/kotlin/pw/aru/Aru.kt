@@ -1,41 +1,48 @@
 package pw.aru
 
-import pw.aru.utils.humanizedTime
+import pw.aru.sides.AruSide
 import java.io.File
-import java.lang.management.ManagementFactory
 
-enum class Aru(val botName: String, val environment: String) {
-    MAIN("Aru!", "production"),
-    DEV("AruDev!", "development"),
-    PATREON("Aru! Patreon", "production");
+enum class Aru(
+    val side: AruSide,
+    val botName: String,
+    val environment: String,
+    val prefixes: List<String>,
+    val pastesRoot: String,
+    val reportsRoot: String
+) {
+
+    MAIN(
+        side = AruSide.MAIN,
+        botName = "Aru!",
+        environment = "production",
+        prefixes = listOf("a!", "aru!", "Aru!"),
+        pastesRoot = "https://pastes.aru.pw",
+        reportsRoot = "https://reports.aru.pw"
+    ),
+
+    DEV(
+        side = AruSide.DEV,
+        botName = "AruDev!",
+        environment = "development",
+        prefixes = listOf("ad!", "arudev ", "arudev!"),
+        pastesRoot = File("pastes").absolutePath,
+        reportsRoot = File("reports").absolutePath
+    ),
+
+    PATREON(
+        side = AruSide.PATREON,
+        botName = "Aru! Patreon",
+        environment = "production",
+        prefixes = listOf("ap!", "arupatreon ", "arupatreon!"),
+        pastesRoot = "https://pastes-patreonbot.aru.pw",
+        reportsRoot = "https://reports-patreonbot.aru.pw"
+    );
 
     companion object {
-
-        fun fromString(type: String) = values().firstOrNull { type.equals(it.name, ignoreCase = true) } ?: throw IllegalArgumentException("Invalid Aru!")
-
-        //Lists
-        val developers = listOf(
-            //AdrianTodt
-            "217747278071463937",
-            //Niflheim
-            "191410544278765568"
-        )
-
-        //Prefix
-        val prefixes = ArrayList<String>()
-
-        //Assets
-        val bootQuotes get() = File("assets/aru/boot_quotes.txt").readLines()
-        val sleepQuotes get() = File("assets/aru/sleep_quotes.txt").readLines()
-        val splashes get() = File("assets/aru/splashes.txt").readLines()
-        val errorQuotes = listOf(
-            "What is happening? I'm sorry, I'm sorry, I'm sorry!",
-            "Wha? Everything caught fire! qwq",
-            "What am I supposed to do with an error? Because I got one."
-        )
-
-        //Uptime
-        val uptime get() = humanizedTime(rawUptime)
-        val rawUptime get() = ManagementFactory.getRuntimeMXBean().uptime
+        fun fromString(type: String): Aru {
+            return values().firstOrNull { type.equals(it.name, ignoreCase = true) }
+                ?: throw IllegalArgumentException("Invalid Aru!")
+        }
     }
 }

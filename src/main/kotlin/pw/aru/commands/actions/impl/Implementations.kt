@@ -7,10 +7,11 @@ import pw.aru.core.commands.help.CommandDescription
 import pw.aru.core.commands.help.CommandUsage
 import pw.aru.core.commands.help.Help
 import pw.aru.core.commands.help.Usage
-import pw.aru.utils.extensions.randomOf
-import pw.aru.utils.extensions.randomOrNull
-import pw.aru.utils.extensions.replaceEach
-import pw.aru.utils.extensions.toSmartString
+import pw.aru.utils.extensions.lang.randomOf
+import pw.aru.utils.extensions.lang.randomOrNull
+import pw.aru.utils.extensions.lang.replaceEach
+import pw.aru.utils.extensions.lang.toSmartString
+import pw.aru.utils.extensions.lib.sendMessage
 
 sealed class ImageBasedCommandImpl : ICommand, ICommand.HelpDialogProvider {
     abstract val names: List<String>
@@ -35,7 +36,10 @@ sealed class ImageBasedCommandImpl : ICommand, ICommand.HelpDialogProvider {
             sfw != null && nsfw != null -> {
                 //BEHAVIOR
                 val args = parseable()
-                if (!channel.isNSFW) sfw else if (args.takeString() == "nsfw") nsfw else randomOf(sfw, nsfw)
+                if (!channel.nsfw()) sfw else if (args.takeString() == "nsfw") nsfw else randomOf(
+                    sfw,
+                    nsfw
+                )
             }
             else -> throw RuntimeException("Impossible state")
         }
@@ -63,22 +67,25 @@ class ActionCommandImpl(
     private val targetsMe: String
 ) : ImageBasedCommandImpl() {
     override fun CommandContext.handle(image: Image) {
-        val mentions = event.message.mentionedMembers
+        val mentions = message.mentionedUsers()
 
         val f = when {
             mentions.isEmpty() -> noTargets
-            mentions.all { it == event.message.member } -> targetsYou
-            mentions.all { it == event.guild.selfMember } -> targetsMe
+            mentions.all { it == message.member() } -> targetsYou
+            mentions.all { it == message.guild()?.selfMember() } -> targetsMe
             else -> anyTarget
         }
 
-        channel.sendFile(image.inputStream(), image.fileName)
-            .append(f.replaceEach(
-                "{author}" to "**${author.effectiveName}**",
-                "{mentions}" to mentions.toSmartString { "**${it.effectiveName}**" },
-                "{everyone}" to (mentions + author).toSmartString { "**${it.effectiveName}**" }
-            ))
-            .queue(null, exceptionHandler())
+        channel.sendMessage {
+            addFile(image.fileName, image.inputStream())
+            content(
+                f.replaceEach(
+                    "{author}" to "**${author.effectiveName(guild)}**",
+                    "{mentions}" to mentions.toSmartString { "**${it.effectiveName(guild)}**" },
+                    "{everyone}" to (mentions + author).toSmartString { "**${it.effectiveName(guild)}**" }
+                )
+            )
+        }
     }
 
     override val helpHandler = Help(
@@ -100,9 +107,10 @@ class ImageCommandImpl(
     private var messages: List<String>
 ) : ImageBasedCommandImpl() {
     override fun CommandContext.handle(image: Image) {
-        channel.sendFile(image.inputStream(), image.fileName)
-            .append(messages.randomOrNull()?.replaceEach("{author}" to "**${author.effectiveName}**") ?: "")
-            .queue(null, exceptionHandler())
+        channel.sendMessage {
+            addFile(image.fileName, image.inputStream())
+            content(messages.randomOrNull()?.replaceEach("{author}" to "**${author.effectiveName(guild)}**") ?: "")
+        }
     }
 
     override val helpHandler = Help(

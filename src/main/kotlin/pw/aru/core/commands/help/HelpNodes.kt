@@ -1,22 +1,22 @@
 package pw.aru.core.commands.help
 
-import pw.aru.Aru
-import pw.aru.core.commands.CommandPermission
+import pw.aru.AruBot.prefixes
+import pw.aru.core.permissions.Permissions
 import java.awt.Color
 
 sealed class BaseDescription
 
 data class CommandDescription(
     val names: List<String>,
-    val description: String,
-    val permission: CommandPermission? = null,
+    val title: String,
+    val permissions: Permissions? = null,
     val color: Color? = null,
     val thumbnail: String = "https://i.imgur.com/uxHqhwt.png"
 ) : BaseDescription()
 
 data class CategoryDescription(
-    val description: String,
-    val permission: CommandPermission? = null,
+    val title: String,
+    val permissions: Permissions? = null,
     val color: Color? = null,
     val thumbnail: String = "https://i.imgur.com/uxHqhwt.png"
 ) : BaseDescription()
@@ -82,4 +82,4 @@ object UsageSeparator : UsageNode() {
     override fun toString() = ""
 }
 
-val prefix get() = Aru.prefixes.first()
+val prefix get() = prefixes.first()

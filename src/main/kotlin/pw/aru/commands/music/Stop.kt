@@ -1,26 +1,26 @@
 package pw.aru.commands.music
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import pw.aru.commands.music.base.MusicPermissionCommand
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
-import pw.aru.core.music.GuildMusicPlayer
-import pw.aru.core.music.MusicManager
-import pw.aru.utils.emotes.SUCCESS
+import pw.aru.core.music.MusicPlayer
+import pw.aru.core.music.MusicSystem
+import pw.aru.core.music.events.StopMusicEvent
+import pw.aru.utils.text.SUCCESS
 
 @Command("stop")
-@UseFullInjector
-class Stop(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "votestop"), ICommand.HelpDialogProvider {
-    override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
+class Stop(musicSystem: MusicSystem) : MusicPermissionCommand(musicSystem, "votestop"), ICommand.HelpDialogProvider {
+    override fun CommandContext.actionWithPerms(musicPlayer: MusicPlayer, currentTrack: AudioTrack) {
         val size = musicPlayer.queue.size
 
-        musicPlayer.stop()
+        musicPlayer.publish(StopMusicEvent(asMusicSource()))
 
         send(
             "$SUCCESS Stopped the current track and removed $size tracks from the queue."
-        ).queue()
+        )
     }
 
     override val helpHandler = Help(
@@ -38,42 +38,3 @@ class Stop(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "v
     )
 }
 
-@Command("votestop")
-@UseFullInjector
-class VoteStop(musicManager: MusicManager) : MusicVotingCommand(musicManager), ICommand.HelpDialogProvider {
-    override fun getVotes(musicPlayer: GuildMusicPlayer) = musicPlayer.voteStops
-
-    override fun CommandContext.onVoteAdded(votesLeft: Int) {
-        send(
-            "$SUCCESS Your vote to stop the music has been added. More $votesLeft votes are required to stop."
-        ).queue()
-    }
-
-    override fun CommandContext.onVoteRemoved(votesLeft: Int) {
-        send(
-            "$SUCCESS Your vote to stop the music has been removed. More $votesLeft votes are required to stop."
-        ).queue()
-    }
-
-    override fun CommandContext.onVotesReached(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
-        val size = musicPlayer.queue.size
-
-        musicPlayer.stop()
-
-        send(
-            "$SUCCESS Enough votes reached! Stopped the current track and removed $size tracks from the queue."
-        ).queue()
-    }
-
-    override val helpHandler = Help(
-        CommandDescription(listOf("votestop"), "VoteStop Command", thumbnail = "https://assets.aru.pw/img/category/music.png"),
-        Description(
-            "Create a poll to stop the current song and clear the queue.",
-            "",
-            "If 60% or more of the users listening vote, the player will be paused."
-        ),
-        SeeAlso(
-            CommandUsage("stop", "Stops the player without requiring voting.")
-        )
-    )
-}

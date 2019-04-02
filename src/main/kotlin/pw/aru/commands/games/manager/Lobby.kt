@@ -1,16 +1,51 @@
 package pw.aru.commands.games.manager
 
-import net.dv8tion.jda.core.JDA
-import net.dv8tion.jda.core.entities.Member
+import com.mewna.catnip.entity.guild.Guild
+import com.mewna.catnip.entity.guild.Member
 
 class Lobby(admin: Member) {
-    val jda: JDA = admin.jda
-    val guild: String = admin.guild.id
-    var adminId: String = admin.user.id
+    val catnip = admin.catnip()!!
+    val guildId = admin.guild().idAsLong()
+    var adminId = admin.user().idAsLong()
 
-    val players = LinkedHashSet<Member>()
+    val playerIds = LinkedHashSet<Long>()
 
     init {
-        players += admin
+        playerIds += adminId
+    }
+
+    fun guild(): Guild {
+        return catnip.cache().guild(guildId) ?: throw CleanupLobby(this, true)
+    }
+
+    fun admin(): Member {
+        return catnip.cache().member(guildId, adminId) ?: throw CleanupLobby(this, false)
+    }
+
+    fun admin(member: Member) = apply {
+        adminId = member.idAsLong()
+    }
+
+    fun players(): List<Member> {
+        val memberCache = guild().members()
+        val players = playerIds.mapNotNull(memberCache::getById)
+        playerIds.retainAll(players.map(Member::idAsLong))
+        return players
+    }
+
+    fun addPlayer(member: Member) = apply {
+        playerIds += member.idAsLong()
+    }
+
+    fun removePlayer(member: Member) = apply {
+        playerIds.remove(member.idAsLong())
+    }
+
+    fun isPlayer(member: Member): Boolean {
+        return member.idAsLong() in playerIds
+    }
+
+    fun addPlayers(players: Iterable<Member>) = apply {
+        playerIds += players.asSequence().map(Member::idAsLong)
     }
 }

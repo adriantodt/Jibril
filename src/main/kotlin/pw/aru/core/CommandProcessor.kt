@@ -1,191 +1,234 @@
 package pw.aru.core
 
+import com.mewna.catnip.entity.message.Message
+import com.mewna.catnip.entity.util.Permission.*
 import mu.KLogging
-import net.dv8tion.jda.core.Permission.*
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.Aru
 import pw.aru.Aru.*
-import pw.aru.Aru.Companion.prefixes
+import pw.aru.AruBot.prefixes
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.ICommand.ExceptionHandler
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.context.CommandContext.ShowHelp
+import pw.aru.core.parser.Args.Companion.SPLIT_CHARS
+import pw.aru.core.permissions.Permission
+import pw.aru.core.permissions.PermissionResolver
+import pw.aru.core.permissions.UserPermissions.USE_BOT
 import pw.aru.core.reporting.ErrorReporter
 import pw.aru.db.AruDB
 import pw.aru.db.entities.guild.GuildSettings
-import pw.aru.utils.emotes.DISAPPOINTED
-import pw.aru.utils.emotes.STOP
-import pw.aru.utils.extensions.ERROR_CHANNEL_PERMS
-import pw.aru.utils.extensions.ERROR_GUILD_PERMS
-import pw.aru.utils.extensions.onHelp
-import pw.aru.utils.helpers.CommandStatsManager
-import redis.clients.jedis.exceptions.JedisConnectionException
+import pw.aru.utils.CommandStatsManager
+import pw.aru.utils.extensions.aru.ERROR_CHANNEL_PERMS
+import pw.aru.utils.extensions.aru.ERROR_GUILD_PERMS
+import pw.aru.utils.extensions.aru.onHelp
+import pw.aru.utils.text.DISAPPOINTED
+import pw.aru.utils.text.STOP
 import java.util.*
+import kotlin.collections.component1
+import kotlin.collections.component2
 
-class CommandProcessor(private val aru: Aru, private val db: AruDB, private val registry: CommandRegistry) : KLogging() {
+class CommandProcessor(
+    private val aru: Aru,
+    private val db: AruDB,
+    private val registry: CommandRegistry
+) : KLogging() {
 
+    private val perms = PermissionResolver(db)
     private val checks = CommandChecks(aru, db)
 
     var commandCount = 0
 
-    fun onCommand(event: GuildMessageReceivedEvent) {
-        val raw = event.message.contentRaw
+    fun onCommand(message: Message) {
+        val raw = message.content()
 
         for (prefix in prefixes) {
             if (raw.startsWith(prefix)) {
-                process(event, raw.substring(prefix.length).trimStart())
+                process(message, raw.substring(prefix.length).trimStart())
                 return
             }
         }
 
-        val guildPrefix = try {
-            val settings = GuildSettings(db, event.guild.idLong)
+        val guildPrefix: String? = runCatching {
+            val settings = GuildSettings(db, message.guild()!!.idAsLong())
             when (aru) {
                 MAIN -> settings.mainPrefix
                 DEV -> settings.devPrefix
                 PATREON -> settings.patreonPrefix
             }
-        } catch (_: JedisConnectionException) {
-            null
-        }
+        }.onFailure { logger.error("Error while Redis:", it) }.getOrNull()
 
         if (guildPrefix != null && raw.startsWith(guildPrefix)) {
-            process(event, raw.substring(guildPrefix.length))
+            process(message, raw.substring(guildPrefix.length))
             return
         }
 
-        // onDiscreteCommand(event)
+        // onDiscreteCommand(message)
         if (raw.startsWith('[') && raw.contains(']')) {
             val (cmdRaw, cmdOuter) = raw.substring(1).trimStart().split(']', limit = 2)
 
             for (prefix in prefixes) {
                 if (cmdRaw.startsWith(prefix)) {
-                    processDiscrete(event, cmdRaw.substring(prefix.length).trimStart(), cmdOuter)
+                    processDiscrete(message, cmdRaw.substring(prefix.length).trimStart(), cmdOuter)
                     return
                 }
             }
 
             if (guildPrefix != null && cmdRaw.startsWith(guildPrefix)) {
-                processDiscrete(event, cmdRaw.substring(guildPrefix.length), cmdOuter)
+                processDiscrete(message, cmdRaw.substring(guildPrefix.length), cmdOuter)
                 return
             }
         }
     }
 
-    val permissions = arrayOf(MESSAGE_EMBED_LINKS, MESSAGE_ATTACH_FILES, MESSAGE_ADD_REACTION, MESSAGE_EXT_EMOJI)
-    private fun checkPermissions(event: GuildMessageReceivedEvent): Boolean {
-        val self = event.guild.selfMember
-        val channel = event.channel
+    val permissions = arrayOf(EMBED_LINKS, ATTACH_FILES, ADD_REACTIONS, USE_EXTERNAL_EMOJI)
+    private fun checkAruPermissions(message: Message): Boolean {
+        val self = message.guild()!!.selfMember()
+        val channel = message.channel().asTextChannel()
 
-        if (self.hasPermission(channel, *permissions)) return true
 
-        val guildCheck = self.hasPermission(*permissions)
-        val perms = permissions.map { it to self.hasPermission(channel, it) }
+        if (self.hasPermissions(channel, *permissions)) return true
 
-        event.channel.sendMessage(
+        val guildCheck = self.hasPermissions(*permissions)
+        val perms = permissions.map { it to self.hasPermissions(channel, it) }
+
+        message.channel().sendMessage(
             arrayOf(
                 "$STOP **Stop there!**",
                 "I **require** the following permissions to work:",
-                perms.joinToString("\n") { (perm, enabled) -> "${if (enabled) "✅" else "❎"} **${perm.getName()}**" },
+                perms.joinToString("\n") { (perm, enabled) ->
+                    "${if (enabled) "✅" else "❎"} **${perm.permName()}**"
+                },
                 "Sadly, I have to refuse all commands until you give me that permission. $DISAPPOINTED",
                 "",
                 if (guildCheck) ERROR_CHANNEL_PERMS else ERROR_GUILD_PERMS,
                 "If you need help on doing that, check my support server: `https://support.aru.pw/`"
             ).joinToString("\n")
-        ).queue()
+        )
 
         return false
     }
 
-    private fun process(event: GuildMessageReceivedEvent, content: String) {
-        if (!checkPermissions(event)) return
+    private fun process(message: Message, content: String) {
+        if (!checkAruPermissions(message)) return
 
-        val split = content.split(' ', limit = 2)
+        val userPerms = perms.resolve(message.member()!!)
+        if (!userPerms.contains(USE_BOT)) return // Global Blacklist
+
+        val split = content.split(*SPLIT_CHARS, limit = 2)
         val cmd = split[0].toLowerCase()
-        val args = split.getOrNull(1) ?: ""
+        val args = split.getOrNull(1)?.trimStart(*SPLIT_CHARS) ?: ""
 
-        val command = registry[cmd] ?: return processCustomCommand(event, cmd, args)
+        val command = registry[cmd] ?: return processCustomCommand(message, cmd, args, userPerms)
 
-        if (!checks.runChecks(event, command)) return
+        if (!checks.runChecks(message, command, userPerms)) return
 
         CommandStatsManager.log(cmd)
 
-        runCommand(command, event, args)
+        runCommand(command, message, args, userPerms)
 
         logger.trace {
-            "Command invoked: $cmd, by ${event.author.name}#${event.author.discriminator} with timestamp ${Date()}"
+            "Command invoked: $cmd, by ${message.author().discordTag()} with timestamp ${Date()}"
         }
     }
 
-    private fun processCustomCommand(event: GuildMessageReceivedEvent, cmd: String, args: String) {
+    private fun processCustomCommand(message: Message, cmd: String, args: String, userPerms: Set<Permission>) {
+        val ctx = CommandContext(message, args, userPerms)
+
+        if (
+            registry.lookup.keys.mapNotNull { it as? ICommand.CustomHandler }.any {
+                it.runCatching { ctx.customCall(cmd) }.getOrNull() == ICommand.CustomHandler.Result.HANDLED
+            }
+        ) return
+
         // TODO: Implement?
     }
 
-    private fun runCommand(command: ICommand, event: GuildMessageReceivedEvent, args: String) {
-        commandCount++
-        try {
-            with(command) {
-                CommandContext(event, args).call()
-            }
-        } catch (e: Exception) {
-            try {
-                handleException(command, event, e)
-            } catch (_: Exception) {
-            }
-        }
+    private fun processDiscreteCustomCommand(
+        message: Message,
+        cmd: String,
+        args: String,
+        outer: String,
+        userPerms: Set<Permission>
+    ) {
+        val ctx = CommandContext(message, args, userPerms)
 
+        if (
+            registry.lookup.keys.mapNotNull { it as? ICommand.CustomDiscreteHandler }.any {
+                it.runCatching { ctx.customCall(cmd, outer) }.getOrNull() == ICommand.CustomHandler.Result.HANDLED
+            }
+        ) return
+
+        // TODO: Implement?
     }
 
-    private fun processDiscrete(event: GuildMessageReceivedEvent, content: String, outer: String) {
-        if (!checkPermissions(event)) return
+    private fun runCommand(command: ICommand, message: Message, args: String, userPerms: Set<Permission>) {
+        commandCount++
+
+        command.runCatching {
+            CommandContext(message, args, userPerms).call()
+        }.onFailure { runCatching { handleException(command, message, it) } }
+    }
+
+    private fun processDiscrete(message: Message, content: String, outer: String) {
+        if (!checkAruPermissions(message)) return
+
+        val userPerms = perms.resolve(message.member()!!)
+        if (!userPerms.contains(USE_BOT)) return // Global Blacklist
 
         val split = content.split(' ', limit = 2)
         val cmd = split[0].toLowerCase()
         val args = split.getOrNull(1) ?: ""
 
-        val command = registry[cmd] as? ICommand.Discrete ?: return
+        val command = registry[cmd] as? ICommand.Discrete ?: return processDiscreteCustomCommand(
+            message,
+            cmd,
+            args,
+            outer,
+            userPerms
+        )
 
-        if (!checks.runChecks(event, command)) return
+        if (!checks.runChecks(message, command, userPerms)) return
 
         CommandStatsManager.log(cmd)
 
-        runDiscreteCommand(command, event, args, outer)
+        runDiscreteCommand(command, message, args, outer, userPerms)
 
         logger.trace {
-            "Discrete Command invoked: $cmd, by ${event.author.name}#${event.author.discriminator} with timestamp ${Date()}"
+            "Discrete Command invoked: $cmd, by ${message.author().discordTag()} with timestamp ${Date()}"
         }
     }
 
-    private fun runDiscreteCommand(command: ICommand.Discrete, event: GuildMessageReceivedEvent, args: String, outer: String) {
+    private fun runDiscreteCommand(
+        command: ICommand.Discrete,
+        message: Message,
+        args: String,
+        outer: String,
+        userPerms: Set<Permission>
+    ) {
         commandCount++
-        try {
-            with(command) {
-                CommandContext(event, args).discreteCall(outer)
-            }
-        } catch (e: Exception) {
-            try {
-                handleException(command, event, e)
-            } catch (_: Exception) {
-            }
-        }
+
+        command.runCatching {
+            CommandContext(message, args, userPerms).discreteCall(outer)
+        }.onFailure { runCatching { handleException(command, message, it) } }
     }
 
-    private fun handleException(c: ICommand, event: GuildMessageReceivedEvent, e: Exception) {
+    private fun handleException(c: ICommand, message: Message, t: Throwable) {
         when {
-            e == ShowHelp -> {
-                onHelp(c, event)
+            t == ShowHelp -> {
+                onHelp(c, message)
             }
 
             c is ExceptionHandler -> {
                 try {
-                    c.handle(event, e)
+                    c.handle(message, t)
                 } catch (u: Exception) {
                     ErrorReporter()
                         .command(c)
-                        .exception(e)
+                        .throwable(t)
                         .underlyingException(u)
-                        .message(event)
+                        .message(message)
                         .errorIdFromContext()
+                        .appendMdc()
                         .report()
                         .logToFile()
                         .logAsError()
@@ -196,8 +239,8 @@ class CommandProcessor(private val aru: Aru, private val db: AruDB, private val 
             else -> {
                 ErrorReporter()
                     .command(c)
-                    .exception(e)
-                    .message(event)
+                    .throwable(t)
+                    .message(message)
                     .errorIdFromContext()
                     .report()
                     .logToFile()
@@ -206,4 +249,5 @@ class CommandProcessor(private val aru: Aru, private val db: AruDB, private val 
             }
         }
     }
+
 }

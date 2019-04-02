@@ -1,23 +1,20 @@
 package pw.aru.commands.music
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import pw.aru.commands.music.base.MusicPermissionCommand
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
-import pw.aru.core.music.GuildMusicPlayer
-import pw.aru.core.music.MusicManager
-import pw.aru.utils.emotes.SUCCESS
+import pw.aru.core.music.MusicPlayer
+import pw.aru.core.music.MusicSystem
+import pw.aru.core.music.events.SkipTrackEvent
 
 @Command("skip")
-@UseFullInjector
-class Skip(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "voteskip", true), ICommand.HelpDialogProvider {
-    override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
-        send(
-            "$SUCCESS Skipping this song..."
-        ).queue()
-        musicPlayer.startNext(true)
+class Skip(musicSystem: MusicSystem) : MusicPermissionCommand(musicSystem, "voteskip", true),
+    ICommand.HelpDialogProvider {
+    override fun CommandContext.actionWithPerms(musicPlayer: MusicPlayer, currentTrack: AudioTrack) {
+        musicPlayer.publish(SkipTrackEvent(asMusicSource()))
     }
 
     override val helpHandler = Help(
@@ -36,37 +33,3 @@ class Skip(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "v
     )
 }
 
-@Command("voteskip")
-@UseFullInjector
-class VoteSkip(musicManager: MusicManager) : MusicVotingCommand(musicManager), ICommand.HelpDialogProvider {
-    override fun getVotes(musicPlayer: GuildMusicPlayer) = musicPlayer.voteSkips
-
-    override fun CommandContext.onVoteAdded(votesLeft: Int) {
-        send(
-            "$SUCCESS Your vote to skip the music has been added. More $votesLeft votes are required to skip."
-        ).queue()
-    }
-
-    override fun CommandContext.onVoteRemoved(votesLeft: Int) {
-        send(
-            "$SUCCESS Your vote to skip the music has been removed. More $votesLeft votes are required to skip."
-        ).queue()
-    }
-
-    override fun CommandContext.onVotesReached(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack, args: String) {
-        send("$SUCCESS Enough votes reached! Skipping this song...").queue()
-        musicPlayer.startNext(true)
-    }
-
-    override val helpHandler = Help(
-        CommandDescription(listOf("voteskip"), "VoteSkip Command", thumbnail = "https://assets.aru.pw/img/category/music.png"),
-        Description(
-            "Create a poll to skip the current track.",
-            "",
-            "If 60% or more of the users listening vote, the current track will be skipped."
-        ),
-        SeeAlso(
-            CommandUsage("skip", "Skips the track without requiring voting.")
-        )
-    )
-}

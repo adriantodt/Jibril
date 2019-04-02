@@ -12,7 +12,7 @@ import pw.aru.commands.actions.impl.providers.WeebProvider
 import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.ICommandProvider
-import pw.aru.utils.caches.URLCache
+import pw.aru.utils.URLCache
 
 abstract class ActionCommandsWorkshop(weebApi: Weeb4J, private val cache: URLCache, private val category: Category) : ICommandProvider {
     //You only need to implement this

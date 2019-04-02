@@ -7,11 +7,11 @@ import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.CommandDescription
 import pw.aru.core.commands.help.Description
 import pw.aru.core.commands.help.Help
-import pw.aru.utils.emotes.COIN_HEADS
-import pw.aru.utils.emotes.COIN_TAILS
-import pw.aru.utils.extensions.random
-import pw.aru.utils.extensions.stripFormatting
-import pw.aru.utils.extensions.threadLocalRandom
+import pw.aru.utils.extensions.discordapp.stripFormatting
+import pw.aru.utils.extensions.lang.random
+import pw.aru.utils.extensions.lang.randomOf
+import pw.aru.utils.text.COIN_HEADS
+import pw.aru.utils.text.COIN_TAILS
 
 @Command("coinflip", "flip", "coin")
 class CoinFlip : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
@@ -23,13 +23,13 @@ class CoinFlip : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
     )
 
     override fun CommandContext.call() {
-        send("*${sThrow.random()}*\n${if (threadLocalRandom().nextBoolean()) heads else tails}").queue()
+        send("*${sThrow.random()}*\n${randomOf(heads, tails)}")
     }
 
     override fun CommandContext.discreteCall(outer: String) {
         val toSend = outer.replace('\n', ' ').stripFormatting()
 
-        send("**$toSend**\n${if (threadLocalRandom().nextBoolean()) heads else tails}").queue()
+        send("**$toSend**\n${randomOf(heads, tails)}")
     }
 
     override val helpHandler = Help(

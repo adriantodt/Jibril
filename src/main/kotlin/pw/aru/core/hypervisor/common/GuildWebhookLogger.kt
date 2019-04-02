@@ -1,70 +1,82 @@
 package pw.aru.core.hypervisor.common
 
-import net.dv8tion.jda.bot.sharding.ShardManager
-import net.dv8tion.jda.core.EmbedBuilder
-import net.dv8tion.jda.core.Region
-import net.dv8tion.jda.core.entities.Guild
-import net.dv8tion.jda.webhook.WebhookClientBuilder
-import net.dv8tion.jda.webhook.WebhookMessageBuilder
+import com.mewna.catnip.Catnip
+import com.mewna.catnip.entity.builder.EmbedBuilder
+import com.mewna.catnip.entity.channel.GuildChannel
+import com.mewna.catnip.entity.guild.Guild
+import com.mewna.catnip.entity.message.MessageOptions
+import com.mewna.catnip.util.Utils.parseWebhook
 import pw.aru.utils.Colors
-import pw.aru.utils.extensions.*
+import pw.aru.utils.extensions.lang.multiline
+import pw.aru.utils.extensions.lang.plusAssign
+import pw.aru.utils.extensions.lib.embed
 
 class GuildWebhookLogger(private val webhook: String) {
-    fun onGuildJoin(shardManager: ShardManager, guild: Guild) {
-        sendEmbed {
-            baseEmbed("AruLog | New Server", color = Colors.discordGreen)
-            thumbnail(guild.iconUrl)
+    fun onGuildJoin(catnip: Catnip, guild: Guild) {
+        sendEmbed(catnip) {
+            author("AruLog | New Server")
+            color(Colors.discordGreen)
+            thumbnail(guild.iconUrl())
 
-            val region = guild.region.let {
-                if (it == Region.UNKNOWN) guild.regionRaw + "\\*" else it.getName()
-            }
+            val builder = StringBuilder()
 
-            description(
-                "\u25AB **Name**: ${guild.name}",
-                "**M/TC/VC**: ${guild.memberCache.size()}/${guild.textChannelCache.size()}/${guild.voiceChannelCache.size()}",
-                "\u25AB **Region**: $region",
-                "\u25AB **Owner**: ${guild.owner.user.discordTag}"
+            builder += multiline(
+                "\u25AB **Name**: ${guild.name()}",
+                "**M/TC/VC**: ${guild.memberCount()}/${guild.channels().count(GuildChannel::isText)}/${guild.channels().count(
+                    GuildChannel::isVoice
+                )}",
+                "\u25AB **Region**: ${guild.region()}",
+                "\u25AB **Owner**: ${guild.owner().user().discordTag()}"
             )
 
-            if (guild.features.isNotEmpty()) {
-                descriptionBuilder
+            if (guild.features().isNotEmpty()) {
+                builder
                     .append("\n\u25AB **Features**: ")
-                    .append(guild.features.joinToString("` `", "`", "`"))
+                    .append(guild.features().joinToString("`, `", "`", "`"))
             }
 
-            footer("Count: ${shardManager.guildCache.size()} | ID: ${guild.id}", guild.jda.selfUser.effectiveAvatarUrl)
+            footer(
+                "Count: ${catnip.cache().guilds().size()} | ID: ${guild.id()}",
+                guild.catnip().selfUser()!!.effectiveAvatarUrl()
+            )
         }
     }
 
-    fun onGuildLeave(shardManager: ShardManager, guild: Guild) {
-        sendEmbed {
-            baseEmbed("AruLog | Lost Server", color = Colors.discordRed)
-            thumbnail(guild.iconUrl)
+    fun onGuildLeave(catnip: Catnip, guild: Guild) {
+        sendEmbed(catnip) {
+            author("AruLog | Lost Server")
+            color(Colors.discordRed)
+            thumbnail(guild.iconUrl())
 
-            val region = guild.region.let {
-                if (it == Region.UNKNOWN) guild.regionRaw + "\\*" else it.getName()
-            }
+            val builder = StringBuilder()
 
-            description(
-                "\u25AB **Name**: ${guild.name}",
-                "**M/TC/VC**: ${guild.memberCache.size()}/${guild.textChannelCache.size()}/${guild.voiceChannelCache.size()}",
-                "\u25AB **Region**: $region",
-                "\u25AB **Owner**: ${guild.owner.user.discordTag}"
+            builder += multiline(
+                "\u25AB **Name**: ${guild.name()}",
+                "**M/TC/VC**: ${guild.memberCount()}/${guild.channels().count(GuildChannel::isText)}/${guild.channels().count(
+                    GuildChannel::isVoice
+                )}",
+                "\u25AB **Region**: ${guild.region()}",
+                "\u25AB **Owner**: ${guild.owner().user().discordTag()}"
             )
 
-            if (guild.features.isNotEmpty()) {
-                descriptionBuilder
+            if (guild.features().isNotEmpty()) {
+                builder
                     .append("\n\u25AB **Features**: ")
-                    .append(guild.features.joinToString("` `", "`", "`"))
+                    .append(guild.features().joinToString("`, `", "`", "`"))
             }
 
-            footer("Count: ${shardManager.guildCache.size()} | ID: ${guild.id}", guild.jda.selfUser.effectiveAvatarUrl)
+            footer(
+                "Count: ${catnip.cache().guilds().size()} | ID: ${guild.id()}",
+                guild.catnip().selfUser()!!.effectiveAvatarUrl()
+            )
         }
     }
 
-    private fun sendEmbed(embed: EmbedBuilder.() -> Unit) {
-        WebhookClientBuilder(webhook).build().use {
-            it.send(WebhookMessageBuilder().addEmbeds(pw.aru.utils.extensions.embed(init = embed)).build())
-        }
+    private fun sendEmbed(catnip: Catnip, builder: EmbedBuilder.() -> Unit) {
+        val (id, token) = parseWebhook(webhook)
+
+        catnip.rest().webhook().executeWebhook(
+            id, token, MessageOptions().embed(embed(init = builder))
+        )
     }
 }

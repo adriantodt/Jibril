@@ -6,7 +6,7 @@ import pw.aru.commands.actions.impl.ActionCommandsWorkshop
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.CommandProvider
 import pw.aru.utils.ReloadableListProvider
-import pw.aru.utils.caches.URLCache
+import pw.aru.utils.URLCache
 import java.io.File
 
 @CommandProvider

@@ -1,31 +1,28 @@
 package pw.aru.core.listeners
 
-import net.dv8tion.jda.core.Permission
-import net.dv8tion.jda.core.events.Event
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import net.dv8tion.jda.core.hooks.EventListener
+import com.mewna.catnip.entity.message.Message
+import com.mewna.catnip.entity.util.Permission.ADMINISTRATOR
+import com.mewna.catnip.entity.util.Permission.SEND_MESSAGES
 import pw.aru.core.CommandProcessor
-import pw.aru.core.listeners.EventListeners.submitTask
+import pw.aru.utils.AruTaskExecutor.queue
+import java.util.function.Consumer
 
-class CommandListener(private val processor: CommandProcessor) : EventListener {
+class CommandListener(private val processor: CommandProcessor) : Consumer<Message> {
+    override fun accept(message: Message) {
+        val guild = message.guild() ?: return
 
-    override fun onEvent(event: Event) {
-        if (event is GuildMessageReceivedEvent) onMessage(event)
-    }
+        if (message.author().bot()) return
 
-    private fun onMessage(event: GuildMessageReceivedEvent) {
-        // @formatter:off
-		if (
-            event.author.isBot
-                ||
-            !event.guild.selfMember.hasPermission(event.channel, Permission.MESSAGE_WRITE)
-                &&
-            !event.guild.selfMember.hasPermission(Permission.ADMINISTRATOR)
+        val self = message.catnip().selfUser() ?: return
+
+        val selfMember = guild.members().getById(self.idAsLong())
+
+        if (!selfMember.hasPermissions(message.channel().asGuildChannel(), SEND_MESSAGES)
+            && !selfMember.hasPermissions(ADMINISTRATOR)
         ) return
-        // @formatter:on
 
-        submitTask("Cmd:${event.author.name}#${event.author.discriminator}:${event.message.contentRaw}") {
-            processor.onCommand(event)
+        queue("Cmd:${message.author().username()}#${message.author().discriminator()}:${message.content()}") {
+            processor.onCommand(message)
         }
     }
 }

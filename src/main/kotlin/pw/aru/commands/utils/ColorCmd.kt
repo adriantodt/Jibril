@@ -1,21 +1,28 @@
 package pw.aru.commands.utils
 
-import com.jagrosh.jdautilities.commons.utils.FinderUtil
+import gg.amy.catnip.utilities.FinderUtil
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
 import pw.aru.utils.Colors
-import pw.aru.utils.emotes.THINKING
-import pw.aru.utils.extensions.*
+import pw.aru.utils.extensions.lang.classOf
+import pw.aru.utils.extensions.lang.format
+import pw.aru.utils.extensions.lib.description
+import pw.aru.utils.extensions.lib.embed
+import pw.aru.utils.text.THINKING
 import java.awt.Color
 import java.awt.Color.*
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.lang.reflect.Modifier
 import javax.imageio.ImageIO
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.component3
 import kotlin.math.absoluteValue
+import kotlin.random.Random.Default.nextFloat
 
 @Command("color")
 class ColorCmd : ICommand, ICommand.HelpDialogProvider {
@@ -66,10 +73,10 @@ class ColorCmd : ICommand, ICommand.HelpDialogProvider {
                 }
             }
             "random" -> {
-                with(threadLocalRandom()) { getHSBColor(nextFloat(), nextFloat(), nextFloat()) }
+                getHSBColor(nextFloat(), nextFloat(), nextFloat())
             }
             "member" -> {
-                author.color ?: white
+                author.color() ?: white
             }
             else -> {
                 if (arg.startsWith("#") || arg.startsWith("0x")) {
@@ -83,16 +90,22 @@ class ColorCmd : ICommand, ICommand.HelpDialogProvider {
                     val members = FinderUtil.findMembers(raw, guild)
 
                     if (members.isNotEmpty()) {
-                        if (members.size > 1) return send(
-                            arrayOf(
-                                "$THINKING Well, I found too many users. How about refining your search?",
-                                "**Users found**: ${members.joinToString(", ") { it.user.discordTag }}"
-                            ).joinToString("\n")
-                        ).queue()
+                        if (members.size > 1) {
+                            send(
+                                arrayOf(
+                                    "$THINKING Well, I found too many users. How about refining your search?",
+                                    "**Users found**: ${members.joinToString(", ") { it.user().discordTag() }}"
+                                ).joinToString("\n")
+                            )
+                            return
+                        }
 
-                        members.first().color ?: white
+                        members.first().color() ?: white
                     } else {
-                        val colors = listOf(classOf<Color>(), classOf<Colors>())
+                        val colors = listOf(
+                            classOf<Color>(),
+                            classOf<Colors>()
+                        )
                             .flatMap { it.fields.asIterable() }
                         val colorField = colors
                             .firstOrNull {
@@ -107,46 +120,52 @@ class ColorCmd : ICommand, ICommand.HelpDialogProvider {
         val rgbHex = "0x${(color.rgb and 0xffffff).toString(16)}"
         val file = "$rgbHex.png"
 
-        sendEmbed {
-            setColor(color)
-            setTitle("Here's your color!")
-            setThumbnail("attachment://$file")
+        sendMessage {
+            embed {
+                color(color)
+                title("Here's your color!")
+                thumbnail("attachment://$file")
 
-            val rgb1 = color.run { "rgb(red = $red, green = $green, blue = $blue)" }
-            val rgb2 = color.getRGBColorComponents(null)
-                .let { (r, g, b) -> "rgb(red = ${r.format("%.3f")}, green = ${g.format("%.3f")}, blue = ${b.format("%.3f")})" }
-            val hsv = color.run { RGBtoHSB(red, green, blue, null) }
-                .let { (h, s, v) -> "hsv(hue = ${h.format("%.3f")}, sat = ${s.format("%.3f")}, val = ${v.format("%.3f")})" }
+                val rgb1 = color.run { "rgb(red = $red, green = $green, blue = $blue)" }
+                val rgb2 = color.getRGBColorComponents(null)
+                    .let { (r, g, b) -> "rgb(red = ${r.format("%.3f")}, green = ${g.format("%.3f")}, blue = ${b.format("%.3f")})" }
+                val hsv = color.run { RGBtoHSB(red, green, blue, null) }
+                    .let { (h, s, v) -> "hsv(hue = ${h.format("%.3f")}, sat = ${s.format("%.3f")}, val = ${v.format("%.3f")})" }
 
-            val name = colorLookup.getOrElse(color) {
-                val (h, s, v) = color.run { RGBtoHSB(red, green, blue, null) }
+                val name = colorLookup.getOrElse(color) {
+                    val (h, s, v) = color.run { RGBtoHSB(red, green, blue, null) }
 
-                val closest = colors.values.minBy {
-                    val (h1, s1, v1) = it.run { RGBtoHSB(red, green, blue, null) }
-                    ((h - h1).absoluteValue + (s - s1).absoluteValue + (v - v1).absoluteValue) / 3
+                    val closest = colors.values.minBy {
+                        val (h1, s1, v1) = it.run { RGBtoHSB(red, green, blue, null) }
+                        ((h - h1).absoluteValue + (s - s1).absoluteValue + (v - v1).absoluteValue) / 3
+                    }
+
+                    if (closest == null) null else "${colorLookup[closest]}-alike (#${(closest.rgb and 0xffffff).toString(
+                        16
+                    )})"
                 }
 
-                if (closest == null) null else "${colorLookup[closest]}-alike (#${(closest.rgb and 0xffffff).toString(16)})"
+                description(
+                    if (name != null) "**Name**: ${name.capitalize()}" else "",
+                    "**Representations**:",
+                    "```kotlin",
+                    "//RGB as hex",
+                    "rgb(hex = $rgbHex)",
+
+                    "\n//RGB as bytes",
+                    rgb1,
+
+                    "\n//RGB as decimals",
+                    rgb2,
+
+                    "\n//HSV",
+                    hsv,
+                    "```"
+                )
             }
 
-            description(
-                if (name != null) "**Name**: ${name.capitalize()}" else "",
-                "**Representations**:",
-                "```kotlin",
-                "//RGB as hex",
-                "rgb(hex = $rgbHex)",
-
-                "\n//RGB as bytes",
-                rgb1,
-
-                "\n//RGB as decimals",
-                rgb2,
-
-                "\n//HSV",
-                hsv,
-                "```"
-            )
-        }.addFile(generate(color), file).queue()
+            addFile(file, generate(color))
+        }
     }
 
     override val helpHandler = Help(
@@ -173,7 +192,10 @@ class ColorCmd : ICommand, ICommand.HelpDialogProvider {
         return ByteArrayOutputStream().also { ImageIO.write(image, "png", it) }.toByteArray()
     }
 
-    private val colors = sequenceOf(classOf<Color>(), classOf<Colors>())
+    private val colors = sequenceOf(
+        classOf<Color>(),
+        classOf<Colors>()
+    )
         .flatMap { it.fields.asSequence() }
         .filter { Modifier.isStatic(it.modifiers) && it.type == Color::class.java }
         .map { f -> f.name.let { if (it == it.toUpperCase()) it.toLowerCase() else it } to f.get(null) as Color }

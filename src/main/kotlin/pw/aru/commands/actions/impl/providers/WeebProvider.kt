@@ -5,7 +5,7 @@ import com.github.natanbc.weeb4j.image.HiddenMode
 import com.github.natanbc.weeb4j.image.NsfwFilter
 import pw.aru.commands.actions.impl.Image
 import pw.aru.commands.actions.impl.ImageProvider
-import pw.aru.utils.caches.URLCache
+import pw.aru.utils.URLCache
 
 private typealias WeebImage = com.github.natanbc.weeb4j.image.Image
 private typealias WeebImageProvider = com.github.natanbc.weeb4j.image.ImageProvider

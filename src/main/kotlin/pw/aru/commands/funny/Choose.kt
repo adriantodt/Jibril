@@ -5,8 +5,8 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
-import pw.aru.utils.emotes.THINKING
-import pw.aru.utils.extensions.random
+import pw.aru.utils.extensions.lang.random
+import pw.aru.utils.text.THINKING
 
 @Command("choose")
 class Choose : ICommand, ICommand.HelpDialogProvider {
@@ -20,7 +20,7 @@ class Choose : ICommand, ICommand.HelpDialogProvider {
 
         if (options.isEmpty()) return showHelp()
 
-        send("$THINKING Hmmm... I choose `${options.random()}`!").queue()
+        send("$THINKING Hmmm... I choose `${options.random()}`!")
     }
 
     override val helpHandler = Help(

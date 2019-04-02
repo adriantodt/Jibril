@@ -3,21 +3,21 @@ package pw.aru.commands.music
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import gnu.trove.set.hash.TIntHashSet
 import org.apache.commons.lang3.StringUtils.replaceEach
+import pw.aru.commands.music.base.MusicPermissionCommand
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
-import pw.aru.core.music.GuildMusicPlayer
-import pw.aru.core.music.MusicManager
-import pw.aru.utils.emotes.ERROR
-import pw.aru.utils.emotes.SUCCESS
+import pw.aru.core.music.MusicPlayer
+import pw.aru.core.music.MusicSystem
+import pw.aru.utils.text.ERROR
+import pw.aru.utils.text.SUCCESS
 import java.util.concurrent.LinkedBlockingDeque
 
 @Command("removetrack", "removesong")
-@UseFullInjector
-class RemoveTrack(musicManager: MusicManager) : MusicPermissionCommand(musicManager, "voteshuffle"), ICommand.HelpDialogProvider {
-    override fun CommandContext.actionWithPerms(musicPlayer: GuildMusicPlayer, currentTrack: AudioTrack) {
+class RemoveTrack(musicSystem: MusicSystem) : MusicPermissionCommand(musicSystem, "voteshuffle"),
+    ICommand.HelpDialogProvider {
+    override fun CommandContext.actionWithPerms(musicPlayer: MusicPlayer, currentTrack: AudioTrack) {
         val list = musicPlayer.queue.toList()
 
         val selected = TIntHashSet()
@@ -38,7 +38,7 @@ class RemoveTrack(musicManager: MusicManager) : MusicPermissionCommand(musicMana
                 val range = args.split("[-~]")
 
                 if (range.size != 2) {
-                    send("$ERROR ``$param`` is not a valid range!").queue()
+                    send("$ERROR ``$param`` is not a valid range!")
                     return
                 }
 
@@ -47,18 +47,18 @@ class RemoveTrack(musicManager: MusicManager) : MusicPermissionCommand(musicMana
                     val iEnd = range[1].toInt() - 1
 
                     if (iStart < 0 || iStart >= list.size) {
-                        send("$ERROR There isn't a queued track at the position ``$iStart``!").queue()
+                        send("$ERROR There isn't a queued track at the position ``$iStart``!")
                         return
                     }
 
                     if (iEnd < 0 || iEnd >= list.size) {
-                        send("$ERROR There isn't a queued track at the position ``$iEnd``!").queue()
+                        send("$ERROR There isn't a queued track at the position ``$iEnd``!")
                         return
                     }
 
                     (iStart..iEnd).forEach { selected.add(it) }
                 } catch (ex: NumberFormatException) {
-                    send("$ERROR ``$param`` is not a valid range!").queue()
+                    send("$ERROR ``$param`` is not a valid range!")
                     return
                 }
 
@@ -67,13 +67,13 @@ class RemoveTrack(musicManager: MusicManager) : MusicPermissionCommand(musicMana
                     val i = Integer.parseInt(args) - 1
 
                     if (i < 0 || i >= list.size) {
-                        send("$ERROR There isn't a queued track at the position ``$i``!").queue()
+                        send("$ERROR There isn't a queued track at the position ``$i``!")
                         return
                     }
 
                     selected.add(i)
                 } catch (ex: NumberFormatException) {
-                    send("$ERROR ``$arg`` is not a valid number or range!").queue()
+                    send("$ERROR ``$arg`` is not a valid number or range!")
                     return
                 }
             }
@@ -81,7 +81,7 @@ class RemoveTrack(musicManager: MusicManager) : MusicPermissionCommand(musicMana
 
         musicPlayer.queue = list.filterIndexedTo(LinkedBlockingDeque()) { index, _ -> !selected.contains(index) }
 
-        send("$SUCCESS Removed **${selected.size()}** track(s) from the queue.").queue()
+        send("$SUCCESS Removed **${selected.size()}** track(s) from the queue.")
     }
 
     override val helpHandler = Help(
