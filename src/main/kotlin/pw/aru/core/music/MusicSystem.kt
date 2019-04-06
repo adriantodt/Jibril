@@ -2,6 +2,7 @@ package pw.aru.core.music
 
 import com.github.samophis.lavaclient.entities.AudioNodeOptions
 import com.github.samophis.lavaclient.entities.LavaClient
+import com.github.samophis.lavaclient.events.LavalinkPlayerEvent
 import com.mewna.catnip.entity.guild.Guild
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
@@ -20,12 +21,17 @@ import org.apache.http.client.config.RequestConfig
 import pw.aru.core.music.entities.ItemSource
 import pw.aru.core.music.entities.ItemSource.*
 import pw.aru.db.AruDB
+import pw.aru.lib.eventpipes.api.EventExecutor
+import pw.aru.lib.eventpipes.internal.DefaultKeyedEventPipe
 import java.util.concurrent.Executors.newCachedThreadPool
 
 class MusicSystem(val lavaClient: LavaClient, val db: AruDB) {
 
     val players = TLongObjectHashMap<MusicPlayer>()
+
     val playerOrderedExecutor = OrderedExecutor(newCachedThreadPool())
+    val pipeExecutor = EventExecutor.upgrade { playerOrderedExecutor.submit(this, it) }
+    val lavaPlayerEventPipe = DefaultKeyedEventPipe<Long, LavalinkPlayerEvent>(pipeExecutor)
 
     val defaultPlayerManager = playerManager()
     val patreonPlayerSources = playerManager()
@@ -52,9 +58,16 @@ class MusicSystem(val lavaClient: LavaClient, val db: AruDB) {
                 AudioNodeOptions()
                     .host("localhost")
                     .port(5000)
+                    //.password("memes")
                     .relativePath("lavalink")
             )
         )
+
+        for (node in lavaClient.nodes()) node.on {
+            if (it is LavalinkPlayerEvent) {
+                lavaPlayerEventPipe.publish(it.guildId(), it)
+            }
+        }
 
         YoutubeAudioSourceManager().apply {
             setPlaylistPageCount(4)

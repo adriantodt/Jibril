@@ -9,9 +9,9 @@ object AruColors {
     @JvmField
     val primary = Color(0xd63681)
     @JvmField
-    val light = Color(0xff66ad)
+    val light = Color(0xff6db0)
     @JvmField
-    val dark = Color(0xa60a50)
+    val dark = Color(0xa00055)
 }
 
 object Colors {

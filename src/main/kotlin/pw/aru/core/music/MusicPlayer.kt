@@ -31,7 +31,9 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
 
-class MusicPlayer(val musicSystem: MusicSystem, guild: Guild) : AbstractMusicPlayer(musicSystem, guild.catnip()) {
+class MusicPlayer(
+    val musicSystem: MusicSystem, guild: Guild
+) : AbstractMusicPlayer(musicSystem, guild.catnip(), guild.idAsLong()) {
 
     private val guildId = guild.idAsLong()
     val catnip = guild.catnip()!!

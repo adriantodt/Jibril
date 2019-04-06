@@ -28,7 +28,7 @@ dependencies {
 
     // Main APIs
     compile("com.sedmelluq:lavaplayer:1.3.10")
-    compile("com.github.samophis:LavaClient:4.0.0-beta1") //3.0.3
+    compile("com.github.samophis:LavaClient:4.0.0-fix-lenient-integers-2") //3.0.3
     compile("com.github.natanbc:weeb4j:3.5")
 
     // Useful
@@ -101,6 +101,11 @@ tasks {
     register("runAndesite", Exec::class) {
         workingDir("andesite")
         commandLine("java", "-jar", "andesite-node-0.13.0-win-x86-64.jar")
+    }
+
+    register("runLavalink", Exec::class) {
+        workingDir("lavalink")
+        commandLine("java", "-jar", "lavalink.jar")
     }
 }
 

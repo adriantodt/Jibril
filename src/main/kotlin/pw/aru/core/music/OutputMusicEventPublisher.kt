@@ -25,7 +25,7 @@ class OutputMusicEventPublisher(val io: AruIO) : OutputMusicEventAdapter() {
             publish(
                 "load-results",
                 jsonOf(
-                    "id" to event.id,
+                    "id" to event.id.toString(),
                     "results" to serialize(event.results)
                 )
             )

@@ -11,6 +11,16 @@ interface Serializer<T> {
 
     operator fun invoke(obj: String) = unserialize(obj)
 
+    fun nullable(nullStr: String = "_nil"): Serializer<T?> = Nullable(this, nullStr)
+
+    class Nullable<T>(private val parent: Serializer<T>, private val nullStr: String = "_nil") : Serializer<T?> {
+        override fun serialize(obj: T?) = obj?.let { parent.serialize(obj) } ?: nullStr
+
+        override fun unserialize(s: String): T? = if (s == nullStr) null else parent.unserialize(s)
+
+        override fun nullable(nullStr: String): Serializer<T?> = this
+    }
+
     companion object {
         fun <T> of(from: (T) -> String, to: (String) -> T): Serializer<T> = object : Serializer<T> {
             override fun serialize(obj: T) = from(obj)

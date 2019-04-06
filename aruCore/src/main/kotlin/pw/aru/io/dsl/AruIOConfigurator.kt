@@ -46,7 +46,6 @@ class AruIOConfigurator {
         }
     }
 
-
     fun configureFeed(block: FeedConfigurator.() -> Unit) {
         feedHandlers += FeedConfigurator().also(block).make()
     }

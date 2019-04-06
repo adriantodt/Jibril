@@ -13,6 +13,7 @@ version = "0.3.1"
 //Repositories and Dependencies
 repositories {
     jcenter()
+    maven { setUrl("https://jitpack.io") }
     maven { setUrl("https://dl.bintray.com/adriantodt/maven") }
     mavenLocal()
 }
@@ -24,6 +25,7 @@ dependencies {
     compile("io.lettuce:lettuce-core:5.1.3.RELEASE")
     compile("pw.aru.snowflake:snowflake-local:1.0")
     compile("pw.aru.libs:eventpipes:1.1.1")
+    compile("com.github.mewna:catnip:1.1.0")
 
     compile("com.fasterxml.jackson.core:jackson-databind:2.9.8")
     compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
