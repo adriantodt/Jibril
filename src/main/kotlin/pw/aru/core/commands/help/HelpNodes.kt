@@ -1,6 +1,6 @@
 package pw.aru.core.commands.help
 
-import pw.aru.AruBot.prefixes
+import pw.aru.Aru.Bot.prefixes
 import pw.aru.core.permissions.Permissions
 import java.awt.Color
 

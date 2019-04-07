@@ -2,7 +2,7 @@ package pw.aru.core.reporting
 
 import com.mewna.catnip.entity.channel.MessageChannel
 import com.mewna.catnip.entity.message.Message
-import pw.aru.AruBot.errorQuotes
+import pw.aru.Aru.Bot.errorQuotes
 import pw.aru.core.commands.help.prefix
 import pw.aru.db.AruDB
 import pw.aru.snow64.Snow64

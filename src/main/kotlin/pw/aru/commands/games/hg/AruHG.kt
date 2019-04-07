@@ -1,9 +1,11 @@
 package pw.aru.commands.games.hg
 
+import com.mewna.catnip.Catnip
 import com.mewna.catnip.entity.channel.TextChannel
 import com.mewna.catnip.entity.guild.Member
 import com.mewna.catnip.entity.message.Message
 import gg.amy.catnip.utilities.FinderUtil
+import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
 import pw.aru.commands.games.Game
 import pw.aru.commands.games.manager.GameManager
@@ -46,7 +48,10 @@ class AruHG(
     override val channel: TextChannel,
     private val admin: Member,
     private val players: List<Member>
-) : Game {
+) : Game, KodeinAware {
+    override val kodein = manager.kodein
+    private val catnip by instance<Catnip>()
+
     companion object {
         private val actions: Actions by lazy {
             fun harmlessActions(file: String) = parseHarmlessActions(loadFile(File(file)))
@@ -158,7 +163,7 @@ class AruHG(
     }
 
     private fun startHgLobby() {
-        object : AsyncCommandInput(manager.injector.instance(), 5, MINUTES, "hg") {
+        object : AsyncCommandInput(catnip, 5, MINUTES, "hg") {
             override fun filter(message: Message) = (message.author().id() == admin.id() && super.filter(message))
 
             override fun timeout() {
@@ -171,6 +176,7 @@ class AruHG(
 
                 val args = parseable()
                 when (args.takeString()) {
+
                     "cancel" -> {
                         manager.remove(channel)
                         manager.lobbyManager.registerLobby(channel, Lobby(admin).addPlayers(players))
@@ -606,7 +612,7 @@ class AruHG(
     }
 
     private fun startGameLobby(gameThread: Thread) {
-        object : AsyncCommandInput(manager.injector.instance(), 30, SECONDS, "hg") {
+        object : AsyncCommandInput(catnip, 30, SECONDS, "hg") {
             override fun filter(message: Message) = (message.author().id() == admin.id() && super.filter(message))
 
             override fun timeout() {

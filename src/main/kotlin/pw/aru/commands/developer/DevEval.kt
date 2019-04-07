@@ -2,7 +2,7 @@ package pw.aru.commands.developer
 
 import bsh.Interpreter
 import com.mewna.catnip.entity.message.Message
-import pw.aru.AruBot
+import pw.aru.Aru.Bot.evaluatingQuotes
 import pw.aru.core.CommandRegistry
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.parser.Args
@@ -54,7 +54,7 @@ class DevEval(db: AruDB, registry: CommandRegistry) {
 
             color(Colors.blurple)
             thumbnail("https://assets.aru.pw/img/loading.gif")
-            description("*${AruBot.evaluatingQuotes.random()}*")
+            description("*${evaluatingQuotes.random()}*")
         } then {
             kotlin.runCatching {
                 evaluator(message, code)

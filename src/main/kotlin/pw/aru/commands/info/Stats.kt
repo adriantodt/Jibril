@@ -1,7 +1,7 @@
 package pw.aru.commands.info
 
 import com.mewna.catnip.entity.channel.Channel.ChannelType.*
-import pw.aru.AruBot.uptime
+import pw.aru.Aru.Bot.uptime
 import pw.aru.core.CommandProcessor
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command

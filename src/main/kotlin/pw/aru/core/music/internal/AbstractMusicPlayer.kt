@@ -7,25 +7,21 @@ import pw.aru.core.music.MusicSystem
 import pw.aru.core.music.entities.MusicEventSource
 import pw.aru.core.music.events.*
 import pw.aru.lib.eventpipes.EventPipes.newAsyncPipe
-import pw.aru.lib.eventpipes.api.EventExecutor
 import java.io.Closeable
 import java.util.Collections.newSetFromMap
 import java.util.concurrent.ConcurrentHashMap
 
-abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip) {
+abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, guildId: Long) {
 
-    private val pipeExecutor = EventExecutor.upgrade { musicSystem.playerOrderedExecutor.submit(this, it) }
-
-    private val inputPipe = newAsyncPipe<InputMusicEvent>(pipeExecutor)
-    private val lavaClientPipe = newAsyncPipe<LavalinkEvent>(pipeExecutor)
+    private val inputPipe = newAsyncPipe<InputMusicEvent>(musicSystem.pipeExecutor)
     private val outputPipe = newAsyncPipe<OutputMusicEvent>()
     private val closeableRefs = newSetFromMap<Closeable>(ConcurrentHashMap())
 
     init {
         inputPipe.subscribe(::onInputEvent)
-        lavaClientPipe.subscribe(::onLavaClientEvent)
+        musicSystem.lavaPlayerEventPipe.subscribe(guildId, ::onLavaClientEvent)
         catnip.on(DiscordEvent.VOICE_STATE_UPDATE) {
-            if (it.userIdAsLong() == catnip.selfUser()!!.idAsLong() && it.channelIdAsLong() == 0L) {
+            if (it.userIdAsLong() == catnip.selfUser()!!.idAsLong() && it.guildIdAsLong() == guildId && it.channelIdAsLong() == 0L) {
                 publish(StopMusicEvent(MusicEventSource.MusicSystem))
             }
         }

@@ -5,7 +5,7 @@ import com.mewna.catnip.entity.util.Permission.*
 import mu.KLogging
 import pw.aru.Aru
 import pw.aru.Aru.*
-import pw.aru.AruBot.prefixes
+import pw.aru.Aru.Bot.prefixes
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.ICommand.ExceptionHandler
 import pw.aru.core.commands.context.CommandContext

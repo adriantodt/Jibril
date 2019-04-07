@@ -1,7 +1,7 @@
 package pw.aru.commands.games.manager
 
 import com.mewna.catnip.entity.channel.TextChannel
-import org.kodein.di.DKodein
+import org.kodein.di.Kodein
 import pw.aru.commands.games.Game
 import pw.aru.commands.games.GameCreator
 import pw.aru.utils.AruTaskExecutor.task
@@ -9,7 +9,7 @@ import pw.aru.utils.text.BANG
 import java.util.*
 import java.util.concurrent.TimeUnit.MINUTES
 
-class GameManager(val injector: DKodein) {
+class GameManager(val kodein: Kodein) {
     val lobbyManager = LobbyManager()
 
     val games = LinkedHashMap<Long, Game>()

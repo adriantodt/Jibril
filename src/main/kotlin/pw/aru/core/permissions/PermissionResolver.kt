@@ -3,7 +3,7 @@ package pw.aru.core.permissions
 import com.mewna.catnip.entity.guild.Member
 import com.mewna.catnip.entity.user.User
 import com.mewna.catnip.entity.util.Permission.*
-import pw.aru.AruBot.devs
+import pw.aru.Aru.Bot.devs
 import pw.aru.core.patreon.Patreon
 import pw.aru.core.permissions.MemberPermissions.*
 import pw.aru.core.permissions.UserPermissions.*

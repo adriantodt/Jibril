@@ -5,7 +5,7 @@ import com.mewna.catnip.entity.guild.Guild
 import com.mewna.catnip.entity.user.User
 import com.mewna.catnip.rest.invite.InviteCreateOptions
 import mu.KLogging
-import pw.aru.AruBot.sleepQuotes
+import pw.aru.Aru.Bot.sleepQuotes
 import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
@@ -23,7 +23,6 @@ import pw.aru.db.entities.user.UserSettings
 import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.extensions.lang.SplitPolicy
 import pw.aru.utils.extensions.lang.multiline
-import pw.aru.utils.extensions.lang.random
 import pw.aru.utils.extensions.lang.smartSplit
 import pw.aru.utils.text.SHRUG
 import pw.aru.utils.text.SUCCESS

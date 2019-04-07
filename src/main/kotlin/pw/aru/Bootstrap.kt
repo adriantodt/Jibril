@@ -20,13 +20,12 @@ import mu.KLogging
 import okhttp3.OkHttpClient
 import org.kodein.di.DKodein
 import org.kodein.di.Kodein
-import org.kodein.di.direct
 import org.kodein.di.generic.bind
 import org.kodein.di.generic.eagerSingleton
 import org.kodein.di.generic.instance
 import org.kodein.di.generic.singleton
-import pw.aru.AruBot.prefixes
-import pw.aru.AruBot.splashes
+import pw.aru.Aru.Bot.myAru
+import pw.aru.Aru.Bot.splashes
 import pw.aru.commands.games.manager.GameManager
 import pw.aru.core.CommandProcessor
 import pw.aru.core.CommandRegistry
@@ -53,7 +52,6 @@ import pw.aru.kodein.jit.jitInstance
 import pw.aru.utils.*
 import pw.aru.utils.Properties
 import pw.aru.utils.extensions.lang.classOf
-import pw.aru.utils.extensions.lang.random
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.*
@@ -75,10 +73,10 @@ class Bootstrap {
 
         startDiscordLogBack(catnip, config)
 
-        val injector = makeInjector(aru, config, catnip)
+        val kodein = makeInjector(aru, config, catnip)
 
-        configureCatnip(catnip, injector).thenAccept {
-            createCommands(scanResult, injector)
+        configureCatnip(catnip, kodein).thenAccept {
+            createCommands(scanResult, kodein)
         }
 
         connectCatnip(catnip)
@@ -129,7 +127,7 @@ class Bootstrap {
 
     private fun detectAru(config: AruConfig): Aru {
         val aru = Aru.fromString(config.type)
-        AruBot.myAru = aru
+        myAru = aru
         ErrorReportHandler.parentUrl = aru.reportsRoot
         LocalPastes.parentUrl = aru.pastesRoot
         return aru
@@ -173,7 +171,7 @@ class Bootstrap {
             }
 
             // Managers
-            bind<GameManager>() with singleton { GameManager(dkodein) }
+            bind<GameManager>() with singleton { GameManager(kodein) }
             bind<MusicSystem>() with singleton { MusicSystem(instance(), instance()) }
 
             // APIs
@@ -191,7 +189,7 @@ class Bootstrap {
         }
     }
 
-    private fun createCommands(scanResult: ScanResult, injector: Kodein) {
+    private fun createCommands(scanResult: ScanResult, kodein: Kodein) {
 
         val commands = scanResult.getClassesImplementing("pw.aru.core.commands.ICommand")
             .filter { it.hasAnnotation("pw.aru.core.commands.Command") }
@@ -212,12 +210,12 @@ class Bootstrap {
 
         scanResult.close()
 
-        val registry = injector.direct.instance<CommandRegistry>()
+        val registry by kodein.instance<CommandRegistry>()
 
         commands.forEach {
             try {
                 val meta = it.getAnnotation(classOf<Command>())
-                val command = injector.jitInstance(it)
+                val command = kodein.jitInstance(it)
 
                 registry.register(meta.value.toList(), command)
 
@@ -229,7 +227,7 @@ class Bootstrap {
 
         providers.forEach {
             try {
-                val provider = injector.jitInstance(it)
+                val provider = kodein.jitInstance(it)
                 provider.provide(registry)
 
                 if (provider is Executable) provider.run()
@@ -242,7 +240,7 @@ class Bootstrap {
 
         standalones.mapNotNull {
             try {
-                injector.jitInstance(it)
+                kodein.jitInstance(it)
             } catch (e: Exception) {
                 logger.error(e) { "Error while executing $it" }
                 null
@@ -250,25 +248,23 @@ class Bootstrap {
         }.forEach { thread(name = "${it.javaClass.simpleName}@RunAtStartup", block = it::run) }
     }
 
-    private fun configureCatnip(catnip: Catnip, injector: Kodein): CompletableFuture<Catnip> {
+    private fun configureCatnip(catnip: Catnip, kodein: Kodein): CompletableFuture<Catnip> {
+        val instance by kodein.instance<CommandListener>()
+        val hypervisor by kodein.instance<AruHypervisor>()
+
         catnip
-            .loadExtension(KodeinExtension(injector))
+            .loadExtension(KodeinExtension(kodein))
             .loadExtension(EventExtension())
 
-        catnip.on(
-            DiscordEvent.MESSAGE_CREATE,
-            injector.direct.instance<CommandListener>()
-        )
-
-        injector.direct.instance<AruHypervisor>().apply {
-            catnip.on(DiscordEvent.GUILD_CREATE) { onGuildJoin(catnip, it) }
-            catnip.on(DiscordEvent.GUILD_DELETE) { onGuildLeave(catnip, it) }
-        }
+        catnip.on(DiscordEvent.MESSAGE_CREATE, instance)
+        catnip.on(DiscordEvent.GUILD_CREATE) { hypervisor.onGuildJoin(catnip, it) }
+        catnip.on(DiscordEvent.GUILD_DELETE) { hypervisor.onGuildLeave(catnip, it) }
 
         val shardCount = catnip.gatewayInfo()!!.shards()
         var ready = 0
         val allShardsReady = CompletableFuture<Unit>()
         val onAnyReady = CompletableFuture<Catnip>()
+        val aru by kodein.instance<Aru>()
 
         catnip.on(DiscordEvent.READY) {
             onAnyReady.complete(catnip)
@@ -281,14 +277,14 @@ class Bootstrap {
                     Presence.of(
                         Presence.OnlineStatus.ONLINE,
                         Presence.Activity.of(
-                            "${prefixes[0]}help | ${splashes.random()} [$i]",
+                            "${aru.prefixes[0]}help | ${splashes.random()} [$i]",
                             Presence.ActivityType.PLAYING
                         )
                     )
                 )
             }
 
-            logger.info { "${injector.direct.instance<Aru>().botName} loaded!" }
+            logger.info { "${aru.botName} loaded!" }
         }
 
         return onAnyReady
