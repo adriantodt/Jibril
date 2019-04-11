@@ -4,14 +4,13 @@ import com.mewna.catnip.Catnip
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
-import pw.aru.core.config.AruConfig
 import pw.aru.core.reporting.ErrorReporter
 import pw.aru.utils.extensions.lib.jsonStringOf
 import pw.aru.utils.extensions.lib.newCall
 
-class MainHypervisor(
+class StatsPoster(
     private val httpClient: OkHttpClient,
-    private val config: AruConfig
+    private val tokens: Tokens
 ) {
     private fun postStats(catnip: Catnip) {
         //TODO Send this stats poster to aru-secondary
@@ -24,7 +23,7 @@ class MainHypervisor(
         try {
             httpClient.newCall {
                 url("https://discordbots.org/api/bots/$botId/stats")
-                header("Authorization", config.dblToken)
+                header("Authorization", tokens.dblToken)
                 post(RequestBody.create(json, jsonStringOf("server_count" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
@@ -35,7 +34,7 @@ class MainHypervisor(
         try {
             httpClient.newCall {
                 url("https://discord.bots.gg/api/v1/bots/$botId/stats")
-                header("Authorization", config.dpwToken)
+                header("Authorization", tokens.dpwToken)
                 post(RequestBody.create(json, jsonStringOf("guildCount" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
@@ -46,7 +45,7 @@ class MainHypervisor(
         try {
             httpClient.newCall {
                 url("https://botsfordiscord.com/api/bot/$botId")
-                header("Authorization", config.bfdToken)
+                header("Authorization", tokens.bfdToken)
                 post(RequestBody.create(json, jsonStringOf("count" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
@@ -57,7 +56,7 @@ class MainHypervisor(
         try {
             httpClient.newCall {
                 url("https://botlist.space/api/bots/$botId")
-                header("Authorization", config.blsToken)
+                header("Authorization", tokens.blsToken)
                 post(RequestBody.create(json, jsonStringOf("server_count" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
@@ -68,7 +67,7 @@ class MainHypervisor(
         try {
             httpClient.newCall {
                 url("https://divinediscordbots.com/bots/$botId/stats")
-                header("Authorization", config.ddbToken)
+                header("Authorization", tokens.ddbToken)
                 post(RequestBody.create(json, jsonStringOf("server_count" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
@@ -79,7 +78,7 @@ class MainHypervisor(
         try {
             httpClient.newCall {
                 url("https://discordbotlist.com/api/bots/$botId/stats")
-                header("Authorization", config.dbl2Token)
+                header("Authorization", tokens.dbl2Token)
                 post(RequestBody.create(json, jsonStringOf("guilds" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
@@ -90,7 +89,7 @@ class MainHypervisor(
         try {
             httpClient.newCall {
                 url("https://bots.ondiscord.xyz/bot-api/bots/$botId/guilds")
-                header("Authorization", config.bodToken)
+                header("Authorization", tokens.bodToken)
                 post(RequestBody.create(json, jsonStringOf("guildCount" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
@@ -101,7 +100,7 @@ class MainHypervisor(
         try {
             httpClient.newCall {
                 url("https://discordbot.world/api/bot/$botId/stats")
-                header("Authorization", config.dbwToken)
+                header("Authorization", tokens.dbwToken)
                 post(RequestBody.create(json, jsonStringOf("guild_count" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
@@ -112,7 +111,7 @@ class MainHypervisor(
         try {
             httpClient.newCall {
                 url("https://discordbots.group/api/bot/$botId")
-                header("Authorization", config.dbgToken)
+                header("Authorization", tokens.dbgToken)
                 post(RequestBody.create(json, jsonStringOf("count" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
@@ -123,7 +122,7 @@ class MainHypervisor(
         try {
             httpClient.newCall {
                 url("https://discordsbestbots.xyz/bots/$botId")
-                header("Authorization", config.dbbToken)
+                header("Authorization", tokens.dbbToken)
                 post(RequestBody.create(json, jsonStringOf("guilds" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
@@ -134,7 +133,7 @@ class MainHypervisor(
         try {
             httpClient.newCall {
                 url("https://lbots.org/api/v1/bot/$botId/stats")
-                header("Authorization", config.lboToken)
+                header("Authorization", tokens.lboToken)
                 post(RequestBody.create(json, jsonStringOf("guild_count" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
@@ -145,7 +144,7 @@ class MainHypervisor(
         try {
             httpClient.newCall {
                 url("https://discord.boats/api/bot/$botId")
-                header("Authorization", config.dboToken)
+                header("Authorization", tokens.dboToken)
                 post(RequestBody.create(json, jsonStringOf("server_count" to guildCount)))
             }.execute().close()
         } catch (e: Exception) {
