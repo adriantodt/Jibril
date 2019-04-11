@@ -1,4 +1,4 @@
-package pw.aru.core.hypervisor.common
+package to_secondary
 
 import com.mewna.catnip.Catnip
 import com.mewna.catnip.entity.builder.EmbedBuilder

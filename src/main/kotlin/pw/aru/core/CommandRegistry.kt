@@ -2,10 +2,9 @@ package pw.aru.core
 
 import mu.KLogging
 import pw.aru.core.commands.ICommand
-import pw.aru.core.hypervisor.AruHypervisor
 import pw.aru.utils.extensions.lang.classOf
 
-class CommandRegistry(private val hypervisor: AruHypervisor) {
+class CommandRegistry {
     companion object : KLogging() {
         private val helpInterfaces = listOf(
             classOf<ICommand.HelpDialogProvider>(),
@@ -16,10 +15,6 @@ class CommandRegistry(private val hypervisor: AruHypervisor) {
     val commands: MutableMap<String, ICommand> = LinkedHashMap()
     val lookup: MutableMap<ICommand, MutableList<String>> = LinkedHashMap()
 
-    init {
-        hypervisor.onRegistryInit(this)
-    }
-
     operator fun get(key: String) = commands[key]
 
     operator fun set(vararg names: String, command: ICommand) {
@@ -27,8 +22,6 @@ class CommandRegistry(private val hypervisor: AruHypervisor) {
     }
 
     fun register(names: List<String>, command: ICommand) {
-        if (!hypervisor.filterCommand(names, command)) return
-
         sanityChecks(command, names)
 
         val keys = names.asSequence()

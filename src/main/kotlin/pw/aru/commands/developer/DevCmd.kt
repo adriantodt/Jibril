@@ -4,7 +4,11 @@ import com.github.natanbc.weeb4j.Weeb4J
 import com.mewna.catnip.entity.guild.Guild
 import com.mewna.catnip.entity.user.User
 import com.mewna.catnip.rest.invite.InviteCreateOptions
+import gnu.trove.TDecorators.wrap
 import mu.KLogging
+import org.kodein.di.Kodein
+import org.kodein.di.KodeinAware
+import org.kodein.di.generic.instance
 import pw.aru.Aru.Bot.sleepQuotes
 import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Category
@@ -12,7 +16,7 @@ import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
-import pw.aru.core.hypervisor.AruHypervisor
+import pw.aru.core.music.MusicSystem
 import pw.aru.core.parser.*
 import pw.aru.core.permissions.Permissions
 import pw.aru.core.permissions.UserPermissions.BOT_DEVELOPER
@@ -22,23 +26,26 @@ import pw.aru.db.entities.guild.GuildSettings
 import pw.aru.db.entities.user.UserSettings
 import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.extensions.lang.SplitPolicy
+import pw.aru.utils.extensions.lang.limit
 import pw.aru.utils.extensions.lang.multiline
 import pw.aru.utils.extensions.lang.smartSplit
+import pw.aru.utils.extensions.lib.field
+import pw.aru.utils.extensions.lib.humanUsers
+import pw.aru.utils.styling
 import pw.aru.utils.text.SHRUG
 import pw.aru.utils.text.SUCCESS
 import java.lang.System.currentTimeMillis
 import java.lang.reflect.Modifier
 
 @Command("dev")
-class DevCmd
-    (
-    private val db: AruDB,
-    //private val musicManager: MusicManager,
-    registry: CommandRegistry,
-    weebSh: Weeb4J,
-    private val hypervisor: AruHypervisor,
-    private val assetProvider: ReloadableListProvider
-) : ICommand, ICommand.Permission, ICommand.HelpDialogProvider {
+class DevCmd(override val kodein: Kodein) : ICommand, ICommand.Permission, ICommand.HelpDialogProvider, KodeinAware {
+
+    private val db: AruDB by instance()
+    private val musicSystem: MusicSystem by instance()
+    private val registry: CommandRegistry by instance()
+    private val weebSh: Weeb4J by instance()
+    private val assetProvider: ReloadableListProvider by instance()
+
     private val contentGenerator = ContentGenerator(registry)
     private val devWeebSh = DevWeebSh(weebSh)
     private val devEval = DevEval(db, registry)
@@ -53,6 +60,11 @@ class DevCmd
 
         when (args.takeString()) {
             "shutdown" -> shutdown()
+
+            "peek" -> when (args.takeString()) {
+                "nowplaying", "np" -> peekNowPlaying(args)
+                else -> showHelp()
+            }
 
             "legacypremium", "premium" -> when (args.takeString()) {
                 "user", "u" -> userLegacyPremium(args)
@@ -165,6 +177,33 @@ class DevCmd
         }
     }
 
+    private fun CommandContext.peekNowPlaying(args: Args) {
+        sendEmbed {
+            styling(message).author("Aru! | Peek: NowPlaying")
+            wrap(musicSystem.players).values.asSequence()
+                .filter { it.voiceChannel != null && it.currentTrack != null }
+                .sortedByDescending { it.voiceChannel!!.humanUsers }
+                .drop(args.tryTakeInt()?.minus(1)?.times(10) ?: 0)
+                .take(10)
+                .forEach {
+                    val guild = it.guild
+                    val nowPlaying = it.currentTrack!!.info
+                    val voiceChannel = it.voiceChannel!!
+                    field(
+                        "Guild: ${guild.name()} (${guild.id()})",
+                        "**Voice Channel**: ${voiceChannel.name()} (${voiceChannel.humanUsers} listening)",
+                        "",
+                        "**Now Playing**: ",
+                        "**[${nowPlaying.title.limit(40)}](${nowPlaying.uri})** by **${nowPlaying.author}**",
+                        if (it.queue.isEmpty()) "Empty queue."
+                        else "**Queued**:\n" + it.queue.take(3).joinToString("\n") { (track) ->
+                            "**[${track.info.title.limit(40)}](${track.info.uri})** by **${track.info.author}**"
+                        }
+                    )
+                }
+        }
+    }
+
     private fun CommandContext.generateEmoteList() {
         multiline(
             "**EMOTES**",
@@ -178,7 +217,6 @@ class DevCmd
 
     private fun CommandContext.shutdown() {
         try {
-            hypervisor.onBotShutdown(catnip)
             send(sleepQuotes.random()).toCompletableFuture().join()
         } catch (ignored: Exception) {
         }
@@ -200,8 +238,6 @@ class DevCmd
             CommandUsage("dev premium guild <@mention/id> [remove]", "Set guild as Premium."),
             UsageSeparator,
             CommandUsage("dev <eval/run> <engine> <code>", "Evals a piece of code."),
-            UsageSeparator,
-            CommandUsage("dev <enablecallsite/disablecallsite>", "Callsite tracing."),
             UsageSeparator,
             CommandUsage("dev weebsh", "Weeb.sh Dump."),
             CommandUsage("dev weebsh -account", "Weeb.sh Account Dump."),

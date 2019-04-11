@@ -1,12 +1,10 @@
-package pw.aru.core.hypervisor
+package to_secondary
 
 import com.mewna.catnip.Catnip
-import com.mewna.catnip.entity.guild.Guild
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import pw.aru.core.config.AruConfig
-import pw.aru.core.hypervisor.common.GuildWebhookLogger
 import pw.aru.core.reporting.ErrorReporter
 import pw.aru.utils.extensions.lib.jsonStringOf
 import pw.aru.utils.extensions.lib.newCall
@@ -14,26 +12,7 @@ import pw.aru.utils.extensions.lib.newCall
 class MainHypervisor(
     private val httpClient: OkHttpClient,
     private val config: AruConfig
-) : AruHypervisor {
-    private val logger = GuildWebhookLogger(config.serversWebhook)
-    override fun onBotStart(catnip: Catnip) {
-        postStats(catnip)
-    }
-
-    override fun onBotShutdown(catnip: Catnip) {
-        postStats(catnip)
-    }
-
-    override fun onGuildJoin(catnip: Catnip, guild: Guild) {
-        logger.onGuildJoin(catnip, guild)
-        postStats(catnip)
-    }
-
-    override fun onGuildLeave(catnip: Catnip, guild: Guild) {
-        logger.onGuildLeave(catnip, guild)
-        postStats(catnip)
-    }
-
+) {
     private fun postStats(catnip: Catnip) {
         //TODO Send this stats poster to aru-secondary
         val botId = catnip.selfUser()!!.id()

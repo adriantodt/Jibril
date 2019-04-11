@@ -21,7 +21,6 @@ import okhttp3.OkHttpClient
 import org.kodein.di.DKodein
 import org.kodein.di.Kodein
 import org.kodein.di.generic.bind
-import org.kodein.di.generic.eagerSingleton
 import org.kodein.di.generic.instance
 import org.kodein.di.generic.singleton
 import pw.aru.Aru.Bot.myAru
@@ -34,10 +33,6 @@ import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.ICommandProvider
 import pw.aru.core.config.AruConfig
 import pw.aru.core.executor.Executable
-import pw.aru.core.hypervisor.AruHypervisor
-import pw.aru.core.hypervisor.DevHypervisor
-import pw.aru.core.hypervisor.MainHypervisor
-import pw.aru.core.hypervisor.PatreonHypervisor
 import pw.aru.core.listeners.CommandListener
 import pw.aru.core.logging.DiscordLogBack
 import pw.aru.core.music.MusicSystem
@@ -151,12 +146,7 @@ class Bootstrap {
             bind<Aru>() with instance(aru)
             bind<AruDB>() with singleton { AruDB(aru.side, 0) }
             bind<AruIO>() with singleton { instance<AruDB>().io() }
-            bind<AruHypervisor>() with when (aru) {
-                Aru.MAIN -> eagerSingleton { MainHypervisor(instance(), instance()) }
-                Aru.DEV -> eagerSingleton { DevHypervisor(instance()) }
-                Aru.PATREON -> eagerSingleton { PatreonHypervisor(instance()) }
-            }
-            bind<CommandRegistry>() with singleton { CommandRegistry(instance()) }
+            bind<CommandRegistry>() with singleton { CommandRegistry() }
             bind<CommandProcessor>() with singleton { CommandProcessor(instance(), instance(), instance()) }
             bind<ReloadableListProvider>() with singleton { ReloadableListProvider() }
             bind<PermissionResolver>() with singleton { PermissionResolver(instance()) }
@@ -250,15 +240,12 @@ class Bootstrap {
 
     private fun configureCatnip(catnip: Catnip, kodein: Kodein): CompletableFuture<Catnip> {
         val instance by kodein.instance<CommandListener>()
-        val hypervisor by kodein.instance<AruHypervisor>()
 
         catnip
             .loadExtension(KodeinExtension(kodein))
             .loadExtension(EventExtension())
 
         catnip.on(DiscordEvent.MESSAGE_CREATE, instance)
-        catnip.on(DiscordEvent.GUILD_CREATE) { hypervisor.onGuildJoin(catnip, it) }
-        catnip.on(DiscordEvent.GUILD_DELETE) { hypervisor.onGuildLeave(catnip, it) }
 
         val shardCount = catnip.gatewayInfo()!!.shards()
         var ready = 0
