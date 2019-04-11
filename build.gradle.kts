@@ -23,7 +23,7 @@ dependencies {
 
     compile(project("aruCore"))
 
-    compile("com.github.mewna:catnip:1.1.0")
+    compile("com.github.mewna:catnip:1.2.0")
     compile("com.github.queer:catnip-utilities:360b876")
 
     // Main APIs

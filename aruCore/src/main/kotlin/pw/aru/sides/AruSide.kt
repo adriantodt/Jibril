@@ -13,6 +13,15 @@ enum class AruSide(val moduleName: String) {
         "patreonbot"
     ),
 
+    WEB(
+        "web"
+    ),
+
+    AUXILIARY(
+        "auxiliary"
+    ),
+
+    @Deprecated("Deprecated side")
     SECONDARY(
         "secondary"
     )
