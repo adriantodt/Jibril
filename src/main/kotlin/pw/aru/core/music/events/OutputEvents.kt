@@ -5,7 +5,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import pw.aru.core.music.MusicPlayer
 import pw.aru.core.music.entities.*
 import pw.aru.core.music.internal.LavaplayerLoadResult
-import pw.aru.core.music.internal.TrackData
 import java.util.*
 
 sealed class OutputMusicEvent(val player: MusicPlayer, val source: MusicEventSource)
@@ -113,6 +112,6 @@ class PlayerInfoEvent(
     player: MusicPlayer,
     val timestamp: Long,
     val position: Long,
-    val currentTrack: Pair<AudioTrack, TrackData>,
-    val queue: List<Pair<AudioTrack, TrackData>>
+    val currentTrack: MusicTrack,
+    val queue: List<MusicTrack>
 ) : OutputMusicEvent(player, MusicEventSource.AndesiteNode)

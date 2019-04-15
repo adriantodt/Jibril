@@ -5,6 +5,7 @@ import com.mewna.catnip.entity.channel.MessageChannel
 import com.mewna.catnip.entity.channel.VoiceChannel
 import com.mewna.catnip.entity.message.Embed
 import com.mewna.catnip.entity.message.MessageOptions
+import com.mewna.catnip.entity.user.VoiceState
 
 inline fun message(init: MessageOptions.() -> Unit): MessageOptions =
     MessageOptions().also(init)
@@ -42,8 +43,8 @@ fun EmbedBuilder.blankField(inline: Boolean = false) {
     field("\u200E", "\u200E", inline)
 }
 
-inline val VoiceChannel.users: Int
-    get() = guild().voiceStates().count { it.channelIdAsLong() == idAsLong() }.toInt()
+inline val VoiceChannel.listeners: Collection<VoiceState>
+    get() = guild().voiceStates().find { it.channelIdAsLong() == idAsLong() }
 
 inline val VoiceChannel.humanUsers: Int
     get() = guild().voiceStates().count { it.channelIdAsLong() == idAsLong() && !catnip().cache().user(it.userId())!!.bot() }.toInt()

@@ -41,7 +41,7 @@ class MusicPlayer(
     private var lastMessage: Message? = null
 
     val lavaPlayer = musicSystem.lavaClient.newPlayer(guildId)
-    var queue = LinkedBlockingDeque<Pair<AudioTrack, TrackData>>()
+    var queue = LinkedBlockingDeque<MusicTrack>()
     var repeatMode = RepeatMode.NONE
     val voteMap = EnumMap<VoteType, TLongList>(VoteType::class.java)
 
@@ -106,25 +106,21 @@ class MusicPlayer(
     override fun onEnqueueTrackEvent(event: EnqueueTrackEvent) {
         if (!requireConnected(event.source)) return
 
-        val trackPair = event.track to TrackData(
-            event.source,
-            event.track,
-            event.trackLoadOptions
-        )
+        val musicTrack = MusicTrack(event.track, TrackData(event.source, event.track, event.trackLoadOptions))
 
         when (event.trackLoadOptions.enqueueLoadMode) {
             EnqueueLoadMode.NOW -> {
-                queue.offerFirst(trackPair)
+                queue.offerFirst(musicTrack)
                 publish(TrackQueuedEvent(this, event.source, event.track))
                 publish(SkipTrackEvent(event.source))
                 return
             }
             EnqueueLoadMode.DEFAULT -> {
-                queue.offerLast(trackPair)
+                queue.offerLast(musicTrack)
                 publish(TrackQueuedEvent(this, event.source, event.track))
             }
             EnqueueLoadMode.NEXT -> {
-                queue.offerFirst(trackPair)
+                queue.offerFirst(musicTrack)
                 publish(TrackQueuedEvent(this, event.source, event.track))
             }
         }
@@ -139,7 +135,7 @@ class MusicPlayer(
         if (!requireConnected(event.source)) return
 
         val tracks = event.playlist.tracks
-            .map { it to TrackData(event.source, it, event.trackLoadOptions) }
+            .map { MusicTrack(it, TrackData(event.source, it, event.trackLoadOptions)) }
             .let { if (event.trackLoadOptions.shufflePlaylist) it.shuffled() else it }
 
         when (event.trackLoadOptions.enqueueLoadMode) {
@@ -346,7 +342,13 @@ class MusicPlayer(
         lastPosition = event.position()
         lastTimestamp = event.timestamp()
         publish(
-            PlayerInfoEvent(this, lastTimestamp, lastPosition, currentTrack!! to lastTrackData!!, queue.toList())
+            PlayerInfoEvent(
+                this,
+                lastTimestamp,
+                lastPosition,
+                MusicTrack(currentTrack!!, lastTrackData!!),
+                queue.toList()
+            )
         )
     }
 
@@ -529,7 +531,7 @@ class MusicPlayer(
                     return
                 }
                 RepeatMode.QUEUE -> {
-                    queue.offer(lastTrack.makeClone() to lastTrackData!!)
+                    queue.offer(MusicTrack(lastTrack.makeClone(), lastTrackData!!))
                 }
             }
         }
@@ -541,13 +543,13 @@ class MusicPlayer(
             return
         }
 
-        lastTrackData = next.second
+        lastTrackData = next.data
         (lastTrackData?.source as? MusicEventSource.Discord)?.textChannel?.let { lastTextChannelId = it.idAsLong() }
-        val (start, end) = next.second.trackLoadOptions.run {
-            (startTimestamp ?: 0) to (endTimestamp ?: next.first.duration)
+        val (start, end) = next.data.trackLoadOptions.run {
+            (startTimestamp ?: 0) to (endTimestamp ?: next.track.duration)
         }
-        lavaPlayer.play(next.first, start, end)
-        setLoadOptions(next.second)
+        lavaPlayer.play(next.track, start, end)
+        setLoadOptions(next.data)
     }
 
     private fun setLoadOptions(data: TrackData) {

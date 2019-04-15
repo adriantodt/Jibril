@@ -154,14 +154,14 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
         event.player.textChannel?.run {
             when (event.source) {
                 is MusicEventSource.Dashboard -> {
-                    TODO()
+                    TODO("onTrackQueuedEvent: source is Dashboard")
                 }
                 is MusicEventSource.Discord -> {
-                    TODO()
+                    TODO("onTrackQueuedEvent: source is Discord")
                 }
                 else -> {
                     logImpossibleSource(event)
-                    TODO()
+                    TODO("onTrackQueuedEvent: source is impoossible")
                 }
             }
         }
@@ -171,14 +171,14 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
         event.player.textChannel?.run {
             when (event.source) {
                 is MusicEventSource.Dashboard -> {
-                    TODO()
+                    TODO("onPlaylistQueuedEvent: source is Dashboard")
                 }
                 is MusicEventSource.Discord -> {
-                    TODO()
+                    TODO("onPlaylistQueuedEvent: source is Discord")
                 }
                 else -> {
                     logImpossibleSource(event)
-                    TODO()
+                    TODO("onPlaylistQueuedEvent: source is impossible")
                 }
             }
         }
@@ -188,10 +188,18 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
         event.source.channel(event.player.guild)?.run {
             sendMessage(event.error.toString())
             when (event.error) {
-                ConnectionErrorType.MEMBER_NOT_CONNECTED -> TODO()
-                ConnectionErrorType.BOT_CONNECTED_TO_OTHER_CHANNEL -> TODO()
-                ConnectionErrorType.MEMBER_CHANNEL_FULL -> TODO()
-                ConnectionErrorType.BOT_CANT_CONNECT -> TODO()
+                ConnectionErrorType.MEMBER_NOT_CONNECTED -> {
+                    TODO("onConnectErrorEvent: MEMBER_NOT_CONNECTED")
+                }
+                ConnectionErrorType.BOT_CONNECTED_TO_OTHER_CHANNEL -> {
+                    TODO("onConnectErrorEvent: BOT_CONNECTED_TO_OTHER_CHANNEL")
+                }
+                ConnectionErrorType.MEMBER_CHANNEL_FULL -> {
+                    TODO("onConnectErrorEvent: MEMBER_CHANNEL_FULL")
+                }
+                ConnectionErrorType.BOT_CANT_CONNECT -> {
+                    TODO("onConnectErrorEvent: BOT_CANT_CONNECT")
+                }
             }
         }
     }

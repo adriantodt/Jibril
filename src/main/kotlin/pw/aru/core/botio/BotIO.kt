@@ -5,8 +5,7 @@ import org.json.JSONObject
 import pw.aru.core.executor.Executable
 import pw.aru.core.executor.RunAtStartup
 import pw.aru.io.AruIO
-import pw.aru.sides.AruSide
-import pw.aru.sides.AruSide.*
+import pw.aru.sides.AruSide.AUXILIARY
 import pw.aru.utils.AruTaskExecutor.task
 import java.util.concurrent.TimeUnit
 
@@ -29,7 +28,8 @@ class BotIO(val io: AruIO, val catnip: Catnip) : Executable {
         io.sendFeed(
             "bot-stats",
             JSONObject()
-                .put("guild_count", catnip.cache().guilds().count())
+                .put("user_id", catnip.selfUser()!!.id())
+                .put("guild_count", catnip.cache().guilds().size().toString())
         )
     }
 }

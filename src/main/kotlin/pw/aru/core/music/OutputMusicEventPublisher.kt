@@ -1,7 +1,9 @@
 package pw.aru.core.music
 
 import com.github.samophis.lavaclient.util.AudioTrackUtil.fromTrack
+import com.mewna.catnip.entity.channel.VoiceChannel
 import com.mewna.catnip.entity.guild.Guild
+import com.mewna.catnip.entity.guild.Member
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import org.json.JSONArray
@@ -14,6 +16,7 @@ import pw.aru.core.music.utils.ThumbnailResolver.resolveThumbnail
 import pw.aru.io.AruIO
 import pw.aru.utils.extensions.lang.especializationName
 import pw.aru.utils.extensions.lib.jsonOf
+import pw.aru.utils.extensions.lib.listeners
 
 class OutputMusicEventPublisher(val io: AruIO) : OutputMusicEventAdapter() {
     private fun publish(type: String, data: JSONObject) {
@@ -23,9 +26,11 @@ class OutputMusicEventPublisher(val io: AruIO) : OutputMusicEventAdapter() {
     override fun onLoadResultsEvent(event: LoadResultsEvent) {
         if (event.source is MusicEventSource.Dashboard) {
             publish(
-                "load-results",
+                "load_results",
                 jsonOf(
-                    "id" to event.id.toString(),
+                    "player" to serialize(event.player),
+                    "source" to serialize(event.player.guild, event.source),
+                    "results_id" to event.id.toString(),
                     "results" to serialize(event.results)
                 )
             )
@@ -33,71 +38,115 @@ class OutputMusicEventPublisher(val io: AruIO) : OutputMusicEventAdapter() {
     }
 
     override fun onTrackQueuedEvent(event: TrackQueuedEvent) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        publish(
+            "track_queued",
+            jsonOf(
+                "player" to serialize(event.player),
+                "source" to serialize(event.player.guild, event.source),
+                "track" to serialize(event.track)
+            )
+        )
     }
 
     override fun onPlaylistQueuedEvent(event: PlaylistQueuedEvent) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("onPlaylistQueuedEvent")
     }
 
     override fun onConnectErrorEvent(event: ConnectErrorEvent) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("onConnectErrorEvent")
     }
 
     override fun onMusicStartedEvent(event: MusicStartedEvent) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("onMusicStartedEvent")
     }
 
     override fun onChangedVolumeEvent(event: ChangedVolumeEvent) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("onChangedVolumeEvent")
     }
 
     override fun onChangedPauseStateEvent(event: ChangedPauseStateEvent) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("onChangedPauseStateEvent")
     }
 
     override fun onChangedRepeatModeEvent(event: ChangedRepeatModeEvent) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("onChangedRepeatModeEvent")
     }
 
     override fun onQueueShuffledEvent(event: QueueShuffledEvent) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("onQueueShuffledEvent")
     }
 
     override fun onQueueClearedEvent(event: QueueClearedEvent) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("onQueueClearedEvent")
     }
 
     override fun onTrackGotStuckEvent(event: TrackGotStuckEvent) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("onTrackGotStuckEvent")
     }
 
     override fun onTrackErroredEvent(event: TrackErroredEvent) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("onTrackErroredEvent")
     }
 
     override fun onTrackSkippedEvent(event: TrackSkippedEvent) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("onTrackSkippedEvent")
     }
 
     override fun onNextTrackEvent(event: NextTrackEvent) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("onNextTrackEvent")
     }
 
     override fun onMusicEndedEvent(event: MusicEndedEvent) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("onMusicEndedEvent")
     }
 
     override fun onChangedVoteEvent(event: ChangedVoteEvent) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("onChangedVoteEvent")
     }
 
     override fun onListenersLeftEvent(event: ListenersLeftEvent) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("onListenersLeftEvent")
     }
 
     override fun onPlayerInfoEvent(event: PlayerInfoEvent) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("onPlayerInfoEvent")
+    }
+
+    private fun serialize(guild: Guild): JSONObject {
+        return jsonOf(
+            "id" to guild.id(),
+            "name" to guild.name(),
+            "icon" to (guild.iconUrl() ?: "https://cdn.discordapp.com/embed/avatars/${guild.idAsLong() % 5}.png"),
+            "region" to guild.region()
+        )
+    }
+
+    private fun serialize(channel: VoiceChannel): JSONObject {
+        return jsonOf(
+            "id" to channel.id(),
+            "name" to channel.name(),
+            "listeners" to JSONArray(channel.listeners.map { serialize(it.member()!!) })
+        )
+    }
+
+    private fun serialize(member: Member): JSONObject {
+        val user = member.user()
+        return jsonOf(
+            "id" to member.id(),
+            "username" to user.username(),
+            "discriminator" to user.discriminator(),
+            "discordTag" to user.discordTag(),
+            "avatar" to user.effectiveAvatarUrl(),
+            "nick" to member.nick(),
+            "effectiveName" to member.effectiveName()
+        )
+    }
+
+    private fun serialize(player: MusicPlayer): JSONObject {
+        return jsonOf(
+            "guild" to serialize(player.guild),
+            "voiceChannel" to player.voiceChannel?.let(this::serialize)
+        )
     }
 
     private fun serialize(guild: Guild, source: MusicEventSource): JSONObject {
@@ -112,46 +161,18 @@ class OutputMusicEventPublisher(val io: AruIO) : OutputMusicEventAdapter() {
                 return jsonOf("authority" to "voting_system")
             }
             is MusicEventSource.Dashboard -> {
-                val j = JSONObject()
-                j.put("source", "dashboard")
-
-                guild.members().getById(source.userId)?.let { member ->
-                    val user = member.user()
-                    j.put(
-                        "data",
-                        jsonOf(
-                            "username" to user.username(),
-                            "discriminator" to user.discriminator(),
-                            "discordTag" to user.discordTag(),
-                            "avatar" to user.effectiveAvatarUrl(),
-                            "nick" to member.nick(),
-                            "effectiveName" to member.effectiveName()
-                        )
-                    )
-                }
-
-                return j
+                return jsonOf(
+                    "source" to "dashboard",
+                    "id" to source.userId.toString(),
+                    "member" to guild.members().getById(source.userId)?.let(this::serialize)
+                )
             }
             is MusicEventSource.Discord -> {
-                val j = JSONObject()
-                j.put("source", "discord")
-
-                source.member(guild)?.let { member ->
-                    val user = member.user()
-                    j.put(
-                        "data",
-                        jsonOf(
-                            "username" to user.username(),
-                            "discriminator" to user.discriminator(),
-                            "discordTag" to user.discordTag(),
-                            "avatar" to user.effectiveAvatarUrl(),
-                            "nick" to member.nick(),
-                            "effectiveName" to member.effectiveName()
-                        )
-                    )
-                }
-
-                return j
+                return jsonOf(
+                    "source" to "discord",
+                    "id" to source.user.id(),
+                    "member" to source.member(guild)?.let(this::serialize)
+                )
             }
         }
     }
@@ -189,24 +210,6 @@ class OutputMusicEventPublisher(val io: AruIO) : OutputMusicEventAdapter() {
         }
     }
 
-    private fun serialize(results: AudioPlaylist): JSONObject {
-        val j = JSONObject()
-
-        val ja = JSONArray()
-
-        for (track in results.tracks) {
-            ja.put(serialize(track))
-        }
-
-        j.put("tracks", ja)
-
-        results.selectedTrack?.info?.identifier.let {
-            j.put("selected", ja.withIndex().find { (it.value as JSONObject).get("identifier") == it }!!.index)
-        }
-
-        return j
-    }
-
     private fun serialize(track: AudioTrack): JSONObject {
         val info = track.info
 
@@ -222,4 +225,15 @@ class OutputMusicEventPublisher(val io: AruIO) : OutputMusicEventAdapter() {
         )
     }
 
+    private fun serialize(playlist: AudioPlaylist): JSONObject {
+        val tracks = JSONArray(playlist.tracks.map(this::serialize))
+
+        return jsonOf(
+            "name" to playlist.name,
+            "tracks" to tracks,
+            "selected" to playlist.selectedTrack?.info?.identifier?.let {
+                tracks.withIndex().firstOrNull { (_, value) -> (value as JSONObject)["identifier"] == it }?.index
+            }
+        )
+    }
 }
