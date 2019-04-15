@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.3.21"
+    kotlin("jvm") version "1.3.30"
     application
-    id("com.github.ben-manes.versions") version "0.20.0"
+    id("com.github.ben-manes.versions") version "0.21.0"
 }
 
 group = "pw.aru"
@@ -11,9 +11,9 @@ version = "3.0"
 
 repositories {
     jcenter()
-    maven { setUrl("https://jitpack.io") }
-    maven { setUrl("https://dl.bintray.com/adriantodt/maven") }
-    maven { setUrl("https://dl.bintray.com/kodehawa/maven") }
+    maven { url = uri("https://jitpack.io") }
+    maven { url = uri("https://dl.bintray.com/adriantodt/maven") }
+    maven { url = uri("https://dl.bintray.com/kodehawa/maven") }
     mavenLocal()
 }
 
@@ -23,11 +23,11 @@ dependencies {
 
     compile(project("aruCore"))
 
-    compile("com.github.mewna:catnip:1.2.0")
-    compile("com.github.queer:catnip-utilities:360b876")
+    compile("com.github.mewna:catnip:1.2.1")
+    compile("com.github.queer:catnip-utilities:87b35df")
 
     // Main APIs
-    compile("com.sedmelluq:lavaplayer:1.3.10")
+    compile("com.sedmelluq:lavaplayer:1.3.16")
     compile("com.github.samophis:LavaClient:4.0.0-fix-lenient-integers-2") //3.0.3
     compile("com.github.natanbc:weeb4j:3.5")
 
@@ -50,7 +50,7 @@ dependencies {
     compile("org.apache-extras.beanshell:bsh:2.0b6")
 
     //Scanning and Injections
-    compile("io.github.classgraph:classgraph:4.6.13")
+    compile("io.github.classgraph:classgraph:4.8.24")
     compile("org.kodein.di:kodein-di-generic-jvm:6.1.0")
     compile("pw.aru.kt:kodein-jit-bindings:2.1")
 
