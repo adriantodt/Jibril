@@ -22,6 +22,7 @@ dependencies {
     compile(kotlin("stdlib-jdk8"))
     compile(kotlin("reflect"))
 
+    compile("com.github.mewna:catnip:1.2.1")
     compile("io.lettuce:lettuce-core:5.1.6.RELEASE")
     compile("pw.aru.snowflake:snowflake-local:1.0")
     compile("pw.aru.libs:eventpipes:1.2")
