@@ -55,7 +55,7 @@ class Queue(musicSystem: MusicSystem) : MusicCommand(musicSystem), ICommand.Help
                         .drop(page * 5)
                         .take(5)
                         .joinToString("\n") { (index, t) ->
-                            "**#${index + 1} [${t.first.info.title}](${t.first.info.uri})** - (`${musicLength(t.first.info.length)}`)"
+                            "**#${index + 1} [${t.info.title}](${t.info.uri})** - (`${musicLength(t.info.length)}`)"
                         }
                 }
             )

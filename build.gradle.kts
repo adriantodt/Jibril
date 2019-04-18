@@ -24,7 +24,7 @@ dependencies {
     compile(project("aruCore"))
 
     compile("com.github.mewna:catnip:1.2.1")
-    compile("com.github.queer:catnip-utilities:87b35df")
+    compile("com.github.queer:catnip-utilities:360b876")
 
     // Main APIs
     compile("com.sedmelluq:lavaplayer:1.3.16")

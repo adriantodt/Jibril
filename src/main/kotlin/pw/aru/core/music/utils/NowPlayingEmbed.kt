@@ -1,10 +1,9 @@
 package pw.aru.core.music.utils
 
 import com.mewna.catnip.entity.guild.Member
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import pw.aru.core.music.MusicPlayer
 import pw.aru.core.music.entities.MusicEventSource
-import pw.aru.core.music.internal.TrackData
+import pw.aru.core.music.entities.MusicTrack
 import pw.aru.utils.AruColors
 import pw.aru.utils.extensions.lib.description
 import pw.aru.utils.extensions.lib.embed
@@ -88,9 +87,9 @@ object NowPlayingEmbed {
         )
     }
 
-    fun musicLength(queue: Iterable<Pair<AudioTrack, TrackData>>): String {
-        val length = queue.asSequence().filterNot { (it) -> it.info.isStream }.map { (it) -> it.duration }.sum()
-        val streamCount = queue.count { (it) -> it.info.isStream }
+    fun musicLength(queue: Iterable<MusicTrack>): String {
+        val length = queue.asSequence().filterNot { it.info.isStream }.map { it.duration }.sum()
+        val streamCount = queue.count { it.info.isStream }
 
         if (length == 0L && streamCount != 0) {
             return "$streamCount streams"

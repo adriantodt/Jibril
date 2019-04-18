@@ -13,7 +13,7 @@ private typealias WeebImageProvider = com.github.natanbc.weeb4j.image.ImageProvi
 class WeebProvider(
     private val provider: WeebImageProvider,
     private val cache: URLCache,
-    private val type: String? = null,
+    val type: String? = null,
     private val tags: List<String>? = null,
     private val fileType: FileType? = null,
     private val hiddenMode: HiddenMode = HiddenMode.DEFAULT,
