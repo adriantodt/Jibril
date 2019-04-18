@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm") version "1.3.30"
     application
@@ -32,9 +30,7 @@ dependencies {
     compile("com.github.natanbc:weeb4j:3.5")
 
     // Useful
-    //compile("com.sedmelluq:jda-nas:1.0.6")
     compile("net.kodehawa:imageboard-api:2.0.7")
-    //compile("com.ztomic:wkhtmltopdf-java:0.0.1") //Maybe later
 
     // Open-Source Libraries
     compile("pw.aru.discord:dice-notation:1.0")

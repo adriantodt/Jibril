@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 /**
  * A Resource, in sum, is an object capable of holding a state regarding the object or calculation it holds.
@@ -54,6 +55,10 @@ public interface Resource<T> extends Closeable {
         SettableResource<T> resource = settable();
         resource.setResourceAvailable(value);
         return resource;
+    }
+
+    static <T> Resource<T> ofFuture(Future<T> future) {
+        return new FutureResource<>(future);
     }
 
     @SuppressWarnings("unchecked")

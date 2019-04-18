@@ -30,7 +30,7 @@ class MusicSystem(val lavaClient: LavaClient, val db: AruDB) {
     val players = TLongObjectHashMap<MusicPlayer>()
 
     val playerOrderedExecutor = OrderedExecutor(newCachedThreadPool())
-    val pipeExecutor = EventExecutor.upgrade { playerOrderedExecutor.submit(this, it) }
+    val pipeExecutor = EventExecutor.upgradeKeyed { key, runnable -> playerOrderedExecutor.submit(key, runnable) }
     val lavaPlayerEventPipe = DefaultKeyedEventPipe<Long, LavalinkPlayerEvent>(pipeExecutor)
 
     val defaultPlayerManager = playerManager()

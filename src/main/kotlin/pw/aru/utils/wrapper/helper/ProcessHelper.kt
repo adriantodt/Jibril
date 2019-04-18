@@ -10,5 +10,4 @@ open class ProcessHelper(
 ) {
     val executable: String = if (SystemUtils.IS_OS_WINDOWS) winExec else unixExec
     val workDir: File = File(workDir).apply { mkdirs() }
-
 }

@@ -2,6 +2,7 @@ package pw.aru.utils
 
 import okhttp3.OkHttpClient
 import pw.aru.exported.user_agent
+import pw.aru.utils.extensions.lib.body
 import pw.aru.utils.extensions.lib.newCall
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
@@ -23,7 +24,7 @@ class URLCache(private val httpClient: OkHttpClient, private var cacheDir: File)
         httpClient.newCall {
             url(url)
             header("User-Agent", user_agent)
-        }.execute().body()!!.use { it.source().inputStream().copyTo(file.outputStream()) }
+        }.execute().body { it.source().inputStream().copyTo(file.outputStream()) }
 
         return file
     }

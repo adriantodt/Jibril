@@ -5,8 +5,10 @@ import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceMan
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import okhttp3.OkHttpClient
+import okhttp3.ResponseBody
 import org.apache.http.client.utils.URIBuilder
 import org.json.JSONObject
+import pw.aru.utils.extensions.lib.body
 import pw.aru.utils.extensions.lib.newCall
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -46,7 +48,7 @@ object ThumbnailResolver {
                         }
 
                         return try {
-                            JSONObject(response.body()!!.string())
+                            JSONObject(response.body(ResponseBody::string))
                                 .getString("artwork_url")
                                 .replace("large", "t500x500")
                         } catch (_: Exception) {
