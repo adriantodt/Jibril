@@ -44,13 +44,13 @@ tasks.withType<KotlinCompile> {
 
 val sourceJar = task("sourceJar", Jar::class) {
     dependsOn(tasks["classes"])
-    classifier = "sources"
+    archiveClassifier.set("sources")
     from(sourceSets["main"].allSource)
 }
 
 publishing {
     publications {
-        create("mavenJava", MavenPublication::class.java).apply {
+        create("mavenJava", MavenPublication::class.java) {
             groupId = project.group.toString()
             artifactId = project.name
             version = project.version.toString()
