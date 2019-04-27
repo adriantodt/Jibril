@@ -2,9 +2,9 @@
 
 package pw.aru.utils.extensions.lib
 
-import pw.aru.snowflake.entities.SnowflakeDatacenter
-import pw.aru.snowflake.entities.SnowflakeGenerator
-import pw.aru.snowflake.entities.SnowflakeWorker
+import pw.aru.libs.snowflake.entities.SnowflakeDatacenter
+import pw.aru.libs.snowflake.entities.SnowflakeGenerator
+import pw.aru.libs.snowflake.entities.SnowflakeWorker
 
 inline operator fun SnowflakeGenerator.get(datacenter: Long, worker: Long): SnowflakeWorker =
     getWorker(datacenter, worker)

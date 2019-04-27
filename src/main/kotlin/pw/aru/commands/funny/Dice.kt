@@ -10,8 +10,8 @@ import pw.aru.core.commands.help.CommandDescription
 import pw.aru.core.commands.help.Description
 import pw.aru.core.commands.help.Example
 import pw.aru.core.commands.help.Help
-import pw.aru.dice.exceptions.EvaluationException
-import pw.aru.dice.exceptions.SyntaxException
+import pw.aru.libs.dicenotation.exceptions.EvaluationException
+import pw.aru.libs.dicenotation.exceptions.SyntaxException
 import pw.aru.utils.extensions.discordapp.stripFormatting
 import pw.aru.utils.text.GAME_DIE
 

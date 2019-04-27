@@ -22,7 +22,7 @@ class Volume(musicSystem: MusicSystem, db: AruDB) : MusicCommand(musicSystem), I
 
     override fun CommandContext.call(musicPlayer: MusicPlayer, currentTrack: AudioTrack) {
         if (args.isEmpty()) {
-            send("$VOLUME Volume: **${musicPlayer.lavaPlayer.volume()}/150**")
+            send("$VOLUME Volume: **${musicPlayer.andePlayer.volume()}/150**")
             return
         }
         with(setter) {

@@ -5,10 +5,10 @@ import io.lettuce.core.api.StatefulRedisConnection
 import pw.aru.db.base.RedisObject
 import pw.aru.db.base.metadata.RedisObjectMetadata
 import pw.aru.io.AruIO
+import pw.aru.libs.snowflake.SnowflakeConfig
+import pw.aru.libs.snowflake.entities.SnowflakeWorker
+import pw.aru.libs.snowflake.local.LocalGenerator
 import pw.aru.sides.AruSide
-import pw.aru.snowflake.SnowflakeConfig
-import pw.aru.snowflake.entities.SnowflakeWorker
-import pw.aru.snowflake.local.LocalGenerator
 import java.io.Closeable
 
 class AruDB(val side: AruSide, val sideId: Long, val uri: String = DEFAULT_REDIS_URI) : Closeable {

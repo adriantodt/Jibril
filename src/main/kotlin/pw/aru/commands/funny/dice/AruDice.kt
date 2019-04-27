@@ -1,14 +1,13 @@
 package pw.aru.commands.funny.dice
 
-import pw.aru.dice.evaluator.DiceEvaluatorBuilder
-import pw.aru.dice.evaluator.DiceSolver
-import pw.aru.dice.lexer.DiceLexer
-import pw.aru.dice.parser.DiceParser
+import pw.aru.libs.dicenotation.evaluator.DiceEvaluatorBuilder
+import pw.aru.libs.dicenotation.evaluator.DiceSolver
+import pw.aru.libs.dicenotation.lexer.DiceLexer
+import pw.aru.libs.dicenotation.parser.DiceParser
 import pw.aru.utils.extensions.lang.randomOf
 
 class AruDice(text: String) {
     companion object {
-
         private val dice = ShadowDice()
         private val solver = DiceSolver(dice::roll)
         private val evaluator = DiceEvaluatorBuilder()

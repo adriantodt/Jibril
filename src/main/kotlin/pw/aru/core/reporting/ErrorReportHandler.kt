@@ -5,7 +5,7 @@ import com.mewna.catnip.entity.message.Message
 import pw.aru.Aru.Bot.errorQuotes
 import pw.aru.core.commands.help.prefix
 import pw.aru.db.AruDB
-import pw.aru.snow64.Snow64
+import pw.aru.libs.snowflake.snow64.Snow64
 import pw.aru.utils.extensions.lang.*
 import pw.aru.utils.text.PENCIL
 import pw.aru.utils.text.TALKING

@@ -36,9 +36,9 @@ object NowPlayingEmbed {
                 "**[${trackInfo.title}](${trackInfo.uri})** by **${trackInfo.author}**",
                 "",
                 "$PLAY ${progressBar(
-                    currentTrack.position,
+                    player.lastPosition,
                     currentTrack.duration
-                )} (`${musicLength(currentTrack.duration - currentTrack.position)}`)",
+                )} (`${musicLength(currentTrack.duration - player.lastPosition)}`)",
                 "",
                 "**Voice Channel**: ${voiceChannel!!.name()}"
             )
@@ -55,6 +55,9 @@ object NowPlayingEmbed {
             }
             is MusicEventSource.Discord -> {
                 inlineField("Requested by:", "**${trackData.source.member(guild)!!.effectiveName()}**")
+            }
+            else -> {
+
             }
         }
 

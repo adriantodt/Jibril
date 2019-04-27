@@ -25,7 +25,12 @@
 
     <root level="INFO">
         <appender-ref ref="console"/>
-        <appender-ref ref="file"/>
         <appender-ref ref="discord"/>
+        <appender-ref ref="file"/>
     </root>
+
+    <!--
+    <logger name="pw.aru.libs.andeclient.internal.AndesiteNodeImpl" level="trace">
+    </logger>
+    -->
 </configuration>

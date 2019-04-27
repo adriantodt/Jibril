@@ -8,8 +8,8 @@ import com.mewna.catnip.util.Utils.DISCORD_EPOCH
 import mu.KLogging
 import org.slf4j.MDC
 import pw.aru.core.commands.ICommand
-import pw.aru.snow64.Snow64
-import pw.aru.snowflake.SnowflakeConfig
+import pw.aru.libs.snowflake.SnowflakeConfig
+import pw.aru.libs.snowflake.snow64.Snow64
 import pw.aru.utils.extensions.lang.applyOn
 import pw.aru.utils.extensions.lang.initials
 import pw.aru.utils.extensions.lang.simpleName

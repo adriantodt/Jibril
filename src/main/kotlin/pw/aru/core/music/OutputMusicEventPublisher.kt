@@ -1,6 +1,5 @@
 package pw.aru.core.music
 
-import com.github.samophis.lavaclient.util.AudioTrackUtil.fromTrack
 import com.mewna.catnip.entity.channel.VoiceChannel
 import com.mewna.catnip.entity.guild.Guild
 import com.mewna.catnip.entity.guild.Member
@@ -14,6 +13,7 @@ import pw.aru.core.music.internal.LavaplayerLoadResult
 import pw.aru.core.music.internal.OutputMusicEventAdapter
 import pw.aru.core.music.utils.ThumbnailResolver.resolveThumbnail
 import pw.aru.io.AruIO
+import pw.aru.libs.andeclient.util.AudioTrackUtil.fromTrack
 import pw.aru.utils.extensions.lang.especializationName
 import pw.aru.utils.extensions.lib.jsonOf
 import pw.aru.utils.extensions.lib.listeners

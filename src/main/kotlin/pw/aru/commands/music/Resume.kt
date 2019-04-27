@@ -17,7 +17,7 @@ import pw.aru.utils.text.X
 class Resume(musicSystem: MusicSystem) : MusicPermissionCommand(musicSystem, "voteresume"),
     ICommand.HelpDialogProvider {
     override fun CommandContext.actionWithPerms(musicPlayer: MusicPlayer, currentTrack: AudioTrack) {
-        if (!musicPlayer.lavaPlayer.paused()) {
+        if (!musicPlayer.andePlayer.paused()) {
             send(
                 "$X The music is already playing, silly!\n\n$THINKING Maybe you want to pause the music with ``$prefix${"pause"}``, instead?"
             )

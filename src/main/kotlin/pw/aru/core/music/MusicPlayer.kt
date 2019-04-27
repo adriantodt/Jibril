@@ -1,6 +1,5 @@
 package pw.aru.core.music
 
-import com.github.samophis.lavaclient.events.*
 import com.mewna.catnip.entity.channel.TextChannel
 import com.mewna.catnip.entity.channel.VoiceChannel
 import com.mewna.catnip.entity.guild.Guild
@@ -13,7 +12,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist
 import gg.amy.catnip.utilities.waiter.EventExtension
-import gnu.trove.list.TLongList
 import pw.aru.core.music.entities.*
 import pw.aru.core.music.events.*
 import pw.aru.core.music.internal.AbstractMusicPlayer
@@ -21,15 +19,23 @@ import pw.aru.core.music.internal.LavaplayerLoadHandler
 import pw.aru.core.music.internal.LavaplayerLoadResult
 import pw.aru.core.music.internal.TrackData
 import pw.aru.core.music.utils.NowPlayingEmbed.nowPlayingEmbed
+import pw.aru.libs.andeclient.events.player.PlayerUpdateEvent
+import pw.aru.libs.andeclient.events.track.TrackEndEvent
+import pw.aru.libs.andeclient.events.track.TrackExceptionEvent
+import pw.aru.libs.andeclient.events.track.TrackStartEvent
+import pw.aru.libs.andeclient.events.track.TrackStuckEvent
 import pw.aru.utils.AruTaskExecutor.queue
 import pw.aru.utils.extensions.lang.getValue
 import pw.aru.utils.extensions.lang.roundRobinFlatten
 import pw.aru.utils.extensions.lib.humanUsers
+import java.lang.System.currentTimeMillis
 import java.net.URL
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 class MusicPlayer(
     val musicSystem: MusicSystem, guild: Guild
@@ -40,14 +46,16 @@ class MusicPlayer(
     private var lastTextChannelId: Long = 0
     private var lastMessage: Message? = null
 
-    val lavaPlayer = musicSystem.lavaClient.newPlayer(guildId)
+    val andePlayer = musicSystem.andeClient.newPlayer(guildId)
     var queue = LinkedBlockingDeque<MusicTrack>()
     var repeatMode = RepeatMode.NONE
-    val voteMap = EnumMap<VoteType, TLongList>(VoteType::class.java)
+    val voteMap = EnumMap<VoteType, HashSet<Long>>(VoteType::class.java)
 
     var lastPosition: Long = -1
     var lastTimestamp: Long = -1
     var lastTrackData: TrackData? = null
+    var lastNowPlayingSent: Long = -1
+    private val nowPlayingLock = ReentrantLock()
 
     var destroyed: Boolean = false
 
@@ -58,22 +66,23 @@ class MusicPlayer(
         get() = catnip.cache().voiceState(guildId, catnip.selfUser()!!.idAsLong())?.channel()
 
     val currentTrack: AudioTrack?
-        get() = lavaPlayer.playingTrack()
+        get() = andePlayer.playingTrack()
 
     val textChannel: TextChannel?
         get() = catnip.cache().channel(guildId, lastTextChannelId)?.asTextChannel()
 
-    init {
-        lavaPlayer.connect(musicSystem.lavaClient.bestNode())
-    }
+    fun sendOrUpdateNowPlaying(memberRequested: Member? = null, logTime: Boolean = true) {
+        nowPlayingLock.withLock {
+            if (lastNowPlayingSent + 1000 > currentTimeMillis()) return
 
-    fun sendOrUpdateNowPlaying(memberRequested: Member? = null) {
-        val m = lastMessage
-        if (m != null) {
-            m.edit(nowPlayingEmbed(this, memberRequested)).thenAccept { lastMessage = it }
-        } else {
-            val sentMessage by textChannel?.sendMessage(nowPlayingEmbed(this, memberRequested))
-            sentMessage?.let { lastMessage = it }
+            val m = lastMessage
+            if (m != null) {
+                m.edit(nowPlayingEmbed(this, memberRequested)).thenAccept { lastMessage = it }
+            } else {
+                val sentMessage by textChannel?.sendMessage(nowPlayingEmbed(this, memberRequested))
+                sentMessage?.let { lastMessage = it }
+            }
+            if (logTime) lastNowPlayingSent = currentTimeMillis()
         }
     }
 
@@ -81,16 +90,19 @@ class MusicPlayer(
         val m = lastMessage
 
         if (m != null) {
+            lastMessage = null
             try {
                 m.delete()
+                lastMessage = null
             } catch (_: Exception) {
             }
         }
 
-        sendOrUpdateNowPlaying(memberRequested)
+        sendOrUpdateNowPlaying(memberRequested, false)
     }
 
     override fun onLoadItemEvent(event: LoadItemEvent) {
+        if (!requireConnected(event.source)) return
         eagerHandle(event)
 
         try {
@@ -125,7 +137,7 @@ class MusicPlayer(
             }
         }
 
-        if (lavaPlayer.playingTrack() == null) {
+        if (andePlayer.playingTrack() == null) {
             publish(MusicStartedEvent(this, event.source))
             startNext()
         }
@@ -155,7 +167,7 @@ class MusicPlayer(
             }
         }
 
-        if (lavaPlayer.playingTrack() == null) {
+        if (andePlayer.playingTrack() == null) {
             publish(MusicStartedEvent(this, event.source))
             startNext()
         }
@@ -164,7 +176,7 @@ class MusicPlayer(
     override fun onChangeVolumeEvent(event: ChangeVolumeEvent) {
         eagerHandle(event)
 
-        lavaPlayer.volume(event.volume)
+        andePlayer.controls().volume(event.volume).execute()
         publish(ChangedVolumeEvent(this, event.source, event.volume))
     }
 
@@ -173,20 +185,20 @@ class MusicPlayer(
 
         when (event.state) {
             null -> {
-                if (lavaPlayer.paused()) {
-                    lavaPlayer.resume()
+                if (andePlayer.paused()) {
+                    andePlayer.controls().resume().execute()
                     publish(ChangedPauseStateEvent(this, event.source, PauseState.RESUMED))
                 } else {
-                    lavaPlayer.pause()
+                    andePlayer.controls().pause().execute()
                     publish(ChangedPauseStateEvent(this, event.source, PauseState.PAUSED))
                 }
             }
             PauseState.PAUSED -> {
-                if (!lavaPlayer.paused()) lavaPlayer.pause()
+                if (!andePlayer.paused()) andePlayer.controls().pause().execute()
                 publish(ChangedPauseStateEvent(this, event.source, event.state))
             }
             PauseState.RESUMED -> {
-                if (lavaPlayer.paused()) lavaPlayer.resume()
+                if (andePlayer.paused()) andePlayer.controls().resume().execute()
                 publish(ChangedPauseStateEvent(this, event.source, event.state))
             }
         }
@@ -208,7 +220,7 @@ class MusicPlayer(
     override fun onChangeMusicPositionEvent(event: ChangeMusicPositionEvent) {
         eagerHandle(event)
 
-        lavaPlayer.seek(event.position)
+        andePlayer.controls().seek(event.position).execute()
     }
 
     override fun onShuffleQueueEvent(event: ShuffleQueueEvent) {
@@ -272,7 +284,7 @@ class MusicPlayer(
         }
 
         val requiredVotes = (voiceChannel!!.humanUsers * 0.6).toInt()
-        val voteCount = votes.size()
+        val voteCount = votes.size
         val votesReached = requiredVotes >= voteCount
         publish(ChangedVoteEvent(this, event.source, event.type, toAdd, requiredVotes - voteCount))
 
@@ -334,7 +346,6 @@ class MusicPlayer(
     }
 
     override fun onTrackStartEvent(event: TrackStartEvent) {
-        lavaPlayer.resume()
         publish(NextTrackEvent(this, event.track()))
     }
 
@@ -483,7 +494,11 @@ class MusicPlayer(
             return false
         }
 
-        if (botVoiceChannel != null && memberVoiceChannel != botVoiceChannel) {
+        if (botVoiceChannel != null) {
+            if (memberVoiceChannel == botVoiceChannel) {
+                return true
+            }
+
             publish(ConnectErrorEvent(this, source, ConnectionErrorType.BOT_CONNECTED_TO_OTHER_CHANNEL))
             return false
         }
@@ -512,8 +527,8 @@ class MusicPlayer(
             .action { connected.complete(it) }
 
         catnip.openVoiceConnection(guildId.toString(), memberVoiceChannel.id())
-        connected.thenAccept {
-            lavaPlayer.initialize(
+        connected.thenAcceptAsync {
+            andePlayer.handleVoiceServerUpdate(
                 catnip.cache().voiceState(it.guildId(), catnip.selfUser()!!.id())!!.sessionId()!!,
                 it.token(),
                 it.endpoint()
@@ -527,7 +542,10 @@ class MusicPlayer(
             @Suppress("NON_EXHAUSTIVE_WHEN")
             when (repeatMode) {
                 RepeatMode.SONG -> if (!isSkipped) {
-                    lavaPlayer.play(lastTrack.makeClone())
+                    val (start, end) = lastTrackData!!.trackLoadOptions.run {
+                        (startTimestamp ?: 0) to (endTimestamp ?: lastTrack.duration)
+                    }
+                    andePlayer.controls().play().track(lastTrack.makeClone()).start(start).end(end).execute()
                     return
                 }
                 RepeatMode.QUEUE -> {
@@ -548,7 +566,7 @@ class MusicPlayer(
         val (start, end) = next.data.trackLoadOptions.run {
             (startTimestamp ?: 0) to (endTimestamp ?: next.track.duration)
         }
-        lavaPlayer.play(next.track, start, end)
+        andePlayer.controls().play().track(next.track).start(start).end(end).execute()
         setLoadOptions(next.data)
     }
 
@@ -572,11 +590,11 @@ class MusicPlayer(
             }
         )
 
-        lavaPlayer.stop()
+        andePlayer.controls().stop().execute()
         destroyed = true
         queue.clear()
         catnip.closeVoiceConnection(guildId.toString())
-        lavaPlayer.destroy()
+        andePlayer.destroy()
 
         //gc
         lastTrackData = null

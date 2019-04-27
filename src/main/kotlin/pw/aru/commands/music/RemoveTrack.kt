@@ -1,7 +1,6 @@
 package pw.aru.commands.music
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
-import gnu.trove.set.hash.TIntHashSet
 import org.apache.commons.lang3.StringUtils.replaceEach
 import pw.aru.commands.music.base.MusicPermissionCommand
 import pw.aru.core.commands.Command
@@ -20,7 +19,7 @@ class RemoveTrack(musicSystem: MusicSystem) : MusicPermissionCommand(musicSystem
     override fun CommandContext.actionWithPerms(musicPlayer: MusicPlayer, currentTrack: AudioTrack) {
         val list = musicPlayer.queue.toList()
 
-        val selected = TIntHashSet()
+        val selected = HashSet<Int>()
 
         val last = list.size.toString()
 
@@ -81,11 +80,15 @@ class RemoveTrack(musicSystem: MusicSystem) : MusicPermissionCommand(musicSystem
 
         musicPlayer.queue = list.filterIndexedTo(LinkedBlockingDeque()) { index, _ -> !selected.contains(index) }
 
-        send("$SUCCESS Removed **${selected.size()}** track(s) from the queue.")
+        send("$SUCCESS Removed **${selected.size}** track(s) from the queue.")
     }
 
     override val helpHandler = Help(
-        CommandDescription(listOf("removetrack", "removesong"), "RemoveTrack Command", thumbnail = "https://assets.aru.pw/img/category/music.png"),
+        CommandDescription(
+            listOf("removetrack", "removesong"),
+            "RemoveTrack Command",
+            thumbnail = "https://assets.aru.pw/img/category/music.png"
+        ),
         Description("Remove the specified track from the queue."),
         Usage(
             CommandUsage("removetrack first", "Remove the first track."),

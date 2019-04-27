@@ -14,7 +14,8 @@ version = "0.4.2"
 repositories {
     jcenter()
     maven { url = uri("https://jitpack.io") }
-    maven { url = uri("https://dl.bintray.com/adriantodt/maven") }
+    maven { url = uri("https://dl.bintray.com/arudiscord/maven") }
+    maven { url = uri("https://dl.bintray.com/arudiscord/kotlin") }
     mavenLocal()
 }
 
@@ -24,8 +25,8 @@ dependencies {
 
     compile("com.github.mewna:catnip:1.2.1")
     compile("io.lettuce:lettuce-core:5.1.6.RELEASE")
-    compile("pw.aru.snowflake:snowflake-local:1.0")
-    compile("pw.aru.libs:eventpipes:1.3")
+    compile("pw.aru.libs:snowflake-local:1.0")
+    compile("pw.aru.libs:eventpipes:1.3.1")
 
     compile("com.fasterxml.jackson.core:jackson-databind:2.9.8")
     compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")

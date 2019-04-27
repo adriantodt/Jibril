@@ -137,9 +137,10 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
                 .action { e ->
                     if (e.emoji().name() == X) {
                         channel.sendMessage("$DISAPPOINTED Music choice canceled!")
+                        it.delete()
 
                         if (player.currentTrack == null) {
-                            player.publish(StopMusicEvent(MusicEventSource.MusicSystem))
+                            player.publish(StopMusicEvent(MusicEventSource.MusicSystem, silent = true))
                         }
                     } else {
                         val selected = dialog.tracks[indices.indexOf(e.emoji().name())]
@@ -212,21 +213,21 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
             when (event.source) {
                 is MusicEventSource.Dashboard -> {
                     sendMessage(
-                        "$VOLUME Volume set to **${event.player.lavaPlayer.volume()}/150** by **${event.source.member(
+                        "$VOLUME Volume set to **${event.player.andePlayer.volume()}/150** by **${event.source.member(
                             event.player.guild
                         )!!.effectiveName()}**, on the Dashboard.."
                     )
                 }
                 is MusicEventSource.Discord -> {
                     sendMessage(
-                        "$VOLUME Volume set to **${event.player.lavaPlayer.volume()}/150** by **${event.source.member(
+                        "$VOLUME Volume set to **${event.player.andePlayer.volume()}/150** by **${event.source.member(
                             event.player.guild
                         )!!.effectiveName()}**, on the Dashboard.."
                     )
                 }
                 else -> {
                     logImpossibleSource(event)
-                    sendMessage("$VOLUME Volume set to **${event.player.lavaPlayer.volume()}/150**.")
+                    sendMessage("$VOLUME Volume set to **${event.player.andePlayer.volume()}/150**.")
                 }
             }
         }
@@ -526,9 +527,10 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
         val guild = event.player.guild
         val user = event.player.lastTrackData?.source?.member(guild)?.user()
         val db = event.player.musicSystem.db
+        val lastNowPlayingSent = event.player.lastNowPlayingSent
 
-        if (user != null && (Patreon.isPremium(db, guild, user)) || (Patreon.isGuildPremium(db, guild))) {
-            if (event.timestamp > 0 && event.timestamp / 10000 % 30 == 0L) {
+        if ((user != null && Patreon.isPremium(db, guild, user)) || (Patreon.isGuildPremium(db, guild))) {
+            if (lastNowPlayingSent + 24000 < event.timestamp) {
                 event.player.sendOrUpdateNowPlaying()
             }
         }

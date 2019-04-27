@@ -16,7 +16,7 @@ import pw.aru.utils.text.X
 @Command("voteresume")
 class VoteResume(musicSystem: MusicSystem) : MusicActionCommand(musicSystem), ICommand.HelpDialogProvider {
     override fun CommandContext.action(musicPlayer: MusicPlayer, currentTrack: AudioTrack) {
-        if (!musicPlayer.lavaPlayer.paused()) {
+        if (!musicPlayer.andePlayer.paused()) {
             send(
                 "$X The music is already playing, silly!\n\n$THINKING Maybe you want to pause the music with ``$prefix${"votepause"}``, instead?"
             )

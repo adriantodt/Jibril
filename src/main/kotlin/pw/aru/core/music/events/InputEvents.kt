@@ -5,49 +5,51 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import pw.aru.core.music.entities.*
 import java.util.*
 
-sealed class InputMusicEvent(val source: MusicEventSource)
+sealed class InputMusicEvent {
+    abstract val source: MusicEventSource
+}
 
-class LoadItemEvent(
-    source: MusicEventSource,
+data class LoadItemEvent(
+    override val source: MusicEventSource,
     val id: UUID,
     val itemIdentifier: String,
     val itemSourceType: ItemSource,
     val loadItemMode: LoadItemMode,
     val trackLoadOptions: TrackLoadOptions
-) : InputMusicEvent(source)
+) : InputMusicEvent()
 
-class EnqueueTrackEvent(
-    source: MusicEventSource,
+data class EnqueueTrackEvent(
+    override val source: MusicEventSource,
     val track: AudioTrack,
     val trackLoadOptions: TrackLoadOptions
-) : InputMusicEvent(source)
+) : InputMusicEvent()
 
-class EnqueuePlaylistEvent(
-    source: MusicEventSource,
+data class EnqueuePlaylistEvent(
+    override val source: MusicEventSource,
     val playlist: AudioPlaylist,
     val trackLoadOptions: TrackLoadOptions
-) : InputMusicEvent(source)
+) : InputMusicEvent()
 
-class ChangeVolumeEvent(source: MusicEventSource, val volume: Int) : InputMusicEvent(source)
+data class ChangeVolumeEvent(override val source: MusicEventSource, val volume: Int) : InputMusicEvent()
 
-class ChangePauseStateEvent(source: MusicEventSource, val state: PauseState?) : InputMusicEvent(source)
+data class ChangePauseStateEvent(override val source: MusicEventSource, val state: PauseState?) : InputMusicEvent()
 
-class ChangeRepeatModeEvent(source: MusicEventSource, val mode: RepeatMode?) : InputMusicEvent(source)
+data class ChangeRepeatModeEvent(override val source: MusicEventSource, val mode: RepeatMode?) : InputMusicEvent()
 
-class ChangeMusicPositionEvent(source: MusicEventSource, val position: Long) : InputMusicEvent(source)
+data class ChangeMusicPositionEvent(override val source: MusicEventSource, val position: Long) : InputMusicEvent()
 
-class ShuffleQueueEvent(source: MusicEventSource) : InputMusicEvent(source)
+data class ShuffleQueueEvent(override val source: MusicEventSource) : InputMusicEvent()
 
-class ClearQueueEvent(source: MusicEventSource) : InputMusicEvent(source)
+data class ClearQueueEvent(override val source: MusicEventSource) : InputMusicEvent()
 
-class RemoveTrackEvent(source: MusicEventSource, val range: IntRange) : InputMusicEvent(source)
+data class RemoveTrackEvent(override val source: MusicEventSource, val range: IntRange) : InputMusicEvent()
 
-class SkipTrackEvent(source: MusicEventSource) : InputMusicEvent(source)
+data class SkipTrackEvent(override val source: MusicEventSource) : InputMusicEvent()
 
-class StopMusicEvent(source: MusicEventSource, val silent: Boolean = false) : InputMusicEvent(source)
+data class StopMusicEvent(override val source: MusicEventSource, val silent: Boolean = false) : InputMusicEvent()
 
-class ToggleVoteEvent(source: MusicEventSource, val type: VoteType) : InputMusicEvent(source)
+data class ToggleVoteEvent(override val source: MusicEventSource, val type: VoteType) : InputMusicEvent()
 
-object DiscordListenersLeftEvent : InputMusicEvent(MusicEventSource.MusicSystem)
-
-//output
+object DiscordListenersLeftEvent : InputMusicEvent() {
+    override val source: MusicEventSource = MusicEventSource.MusicSystem
+}

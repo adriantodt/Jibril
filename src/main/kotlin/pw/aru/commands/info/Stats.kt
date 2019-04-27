@@ -68,8 +68,8 @@ class Stats
             val guildCount = catnip.cache().guilds().size().format("%,d")
             val userCount = catnip.cache().users().size().format("%,d")
             val channelCounts = catnip.cache().channels().groupingBy { it.type() }.eachCount()
-            val musicCount = musicSystem.players.size().format("%,d")
-            val queueSize = musicSystem.players.valueCollection().asSequence()
+            val musicCount = musicSystem.players.size.format("%,d")
+            val queueSize = musicSystem.players.values.asSequence()
                 .map { it.queue.size }.sum().format("%,d")
 
             replaceAtIndex(

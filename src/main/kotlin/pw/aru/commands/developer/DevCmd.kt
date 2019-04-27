@@ -4,7 +4,6 @@ import com.github.natanbc.weeb4j.Weeb4J
 import com.mewna.catnip.entity.guild.Guild
 import com.mewna.catnip.entity.user.User
 import com.mewna.catnip.rest.invite.InviteCreateOptions
-import gnu.trove.TDecorators.wrap
 import mu.KLogging
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -180,7 +179,7 @@ class DevCmd(override val kodein: Kodein) : ICommand, ICommand.Permission, IComm
     private fun CommandContext.peekNowPlaying(args: Args) {
         sendEmbed {
             styling(message).author("Aru! | Peek: NowPlaying")
-            wrap(musicSystem.players).values.asSequence()
+            musicSystem.players.values.asSequence()
                 .filter { it.voiceChannel != null && it.currentTrack != null }
                 .sortedByDescending { it.voiceChannel!!.humanUsers }
                 .drop(args.tryTakeInt()?.minus(1)?.times(10) ?: 0)

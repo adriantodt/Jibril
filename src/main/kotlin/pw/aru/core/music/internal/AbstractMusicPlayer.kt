@@ -1,17 +1,25 @@
 package pw.aru.core.music.internal
 
-import com.github.samophis.lavaclient.events.*
 import com.mewna.catnip.Catnip
 import com.mewna.catnip.shard.DiscordEvent
+import mu.KLogging
 import pw.aru.core.music.MusicSystem
 import pw.aru.core.music.entities.MusicEventSource
 import pw.aru.core.music.events.*
 import pw.aru.lib.eventpipes.EventPipes.newAsyncPipe
+import pw.aru.libs.andeclient.events.AndePlayerEvent
+import pw.aru.libs.andeclient.events.player.PlayerUpdateEvent
+import pw.aru.libs.andeclient.events.track.TrackEndEvent
+import pw.aru.libs.andeclient.events.track.TrackExceptionEvent
+import pw.aru.libs.andeclient.events.track.TrackStartEvent
+import pw.aru.libs.andeclient.events.track.TrackStuckEvent
 import java.io.Closeable
 import java.util.Collections.newSetFromMap
 import java.util.concurrent.ConcurrentHashMap
 
 abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, guildId: Long) {
+
+    companion object : KLogging()
 
     private val inputPipe = newAsyncPipe<InputMusicEvent>(musicSystem.pipeExecutor)
     private val outputPipe = newAsyncPipe<OutputMusicEvent>()
@@ -19,7 +27,7 @@ abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, gui
 
     init {
         inputPipe.subscribe(::onInputEvent)
-        musicSystem.lavaPlayerEventPipe.subscribe(guildId, ::onLavaClientEvent)
+        musicSystem.playerEventPipe.subscribe(guildId, ::onAndePlayerEvent)
         catnip.on(DiscordEvent.VOICE_STATE_UPDATE) {
             if (it.userIdAsLong() == catnip.selfUser()!!.idAsLong() && it.guildIdAsLong() == guildId && it.channelIdAsLong() == 0L) {
                 publish(StopMusicEvent(MusicEventSource.MusicSystem))
@@ -28,21 +36,25 @@ abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, gui
     }
 
     private fun onInputEvent(event: InputMusicEvent) {
-        when (event) {
-            is LoadItemEvent -> onLoadItemEvent(event)
-            is EnqueueTrackEvent -> onEnqueueTrackEvent(event)
-            is EnqueuePlaylistEvent -> onEnqueuePlaylistEvent(event)
-            is ChangeVolumeEvent -> onChangeVolumeEvent(event)
-            is ChangePauseStateEvent -> onChangePauseStateEvent(event)
-            is ChangeRepeatModeEvent -> onChangeRepeatModeEvent(event)
-            is ChangeMusicPositionEvent -> onChangeMusicPositionEvent(event)
-            is ShuffleQueueEvent -> onShuffleQueueEvent(event)
-            is ClearQueueEvent -> onClearQueueEvent(event)
-            is RemoveTrackEvent -> onRemoveTrackEvent(event)
-            is SkipTrackEvent -> onSkipTrackEvent(event)
-            is StopMusicEvent -> onStopMusicEvent(event)
-            is ToggleVoteEvent -> onToggleVoteEvent(event)
-            is DiscordListenersLeftEvent -> onDiscordListenersLeftEvent(event)
+        try {
+            when (event) {
+                is LoadItemEvent -> onLoadItemEvent(event)
+                is EnqueueTrackEvent -> onEnqueueTrackEvent(event)
+                is EnqueuePlaylistEvent -> onEnqueuePlaylistEvent(event)
+                is ChangeVolumeEvent -> onChangeVolumeEvent(event)
+                is ChangePauseStateEvent -> onChangePauseStateEvent(event)
+                is ChangeRepeatModeEvent -> onChangeRepeatModeEvent(event)
+                is ChangeMusicPositionEvent -> onChangeMusicPositionEvent(event)
+                is ShuffleQueueEvent -> onShuffleQueueEvent(event)
+                is ClearQueueEvent -> onClearQueueEvent(event)
+                is RemoveTrackEvent -> onRemoveTrackEvent(event)
+                is SkipTrackEvent -> onSkipTrackEvent(event)
+                is StopMusicEvent -> onStopMusicEvent(event)
+                is ToggleVoteEvent -> onToggleVoteEvent(event)
+                is DiscordListenersLeftEvent -> onDiscordListenersLeftEvent(event)
+            }
+        } catch (e: Exception) {
+            logger.error(e) { "error on InputMusicEvent event $event" }
         }
     }
 
@@ -74,13 +86,17 @@ abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, gui
 
     protected abstract fun onDiscordListenersLeftEvent(event: DiscordListenersLeftEvent)
 
-    private fun onLavaClientEvent(event: LavalinkEvent) {
-        when (event) {
-            is TrackStartEvent -> onTrackStartEvent(event)
-            is PlayerUpdateEvent -> onPlayerUpdateEvent(event)
-            is TrackStuckEvent -> onTrackStuckEvent(event)
-            is TrackExceptionEvent -> onTrackExceptionEvent(event)
-            is TrackEndEvent -> onTrackEndEvent(event)
+    private fun onAndePlayerEvent(event: AndePlayerEvent) {
+        try {
+            when (event) {
+                is TrackStartEvent -> onTrackStartEvent(event)
+                is PlayerUpdateEvent -> onPlayerUpdateEvent(event)
+                is TrackStuckEvent -> onTrackStuckEvent(event)
+                is TrackExceptionEvent -> onTrackExceptionEvent(event)
+                is TrackEndEvent -> onTrackEndEvent(event)
+            }
+        } catch (e: Exception) {
+            logger.error(e) { "error on AndePlayer event $event" }
         }
     }
 

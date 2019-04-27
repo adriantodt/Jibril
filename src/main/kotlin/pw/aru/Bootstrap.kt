@@ -4,8 +4,6 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.natanbc.weeb4j.TokenType
 import com.github.natanbc.weeb4j.Weeb4J
-import com.github.samophis.lavaclient.entities.LavaClient
-import com.github.samophis.lavaclient.entities.LavaClientOptions
 import com.mewna.catnip.Catnip
 import com.mewna.catnip.CatnipOptions
 import com.mewna.catnip.entity.user.Presence
@@ -42,10 +40,11 @@ import pw.aru.core.reporting.LocalPastes
 import pw.aru.db.AruDB
 import pw.aru.exported.aru_version
 import pw.aru.io.AruIO
-import pw.aru.kodein.jit.installJit
-import pw.aru.kodein.jit.jitInstance
+import pw.aru.libs.andeclient.entities.AndeClient
+import pw.aru.libs.kodein.jit.installJit
+import pw.aru.libs.kodein.jit.jitInstance
+import pw.aru.libs.properties.Properties
 import pw.aru.utils.*
-import pw.aru.utils.Properties
 import pw.aru.utils.extensions.lang.classOf
 import java.io.File
 import java.io.FileNotFoundException
@@ -56,8 +55,6 @@ import kotlin.concurrent.thread
 
 class Bootstrap {
     companion object : KLogging()
-
-    enum class Mode { SYNC, ASYNC }
 
     fun boot() {
         val scanResult = doScanResult()
@@ -70,7 +67,7 @@ class Bootstrap {
 
         val kodein = makeInjector(aru, config, catnip)
 
-        configureCatnip(catnip, kodein).thenAccept {
+        configureCatnip(catnip, kodein).thenAcceptAsync {
             createCommands(scanResult, kodein)
         }
 
@@ -152,12 +149,8 @@ class Bootstrap {
             bind<PermissionResolver>() with singleton { PermissionResolver(instance()) }
             bind<Catnip>() with instance(catnip)
 
-            bind<LavaClient>() with singleton {
-                LavaClient.from(
-                    LavaClientOptions()
-                        .userId(catnip.selfUser()!!.idAsLong())
-                        .shardCount(catnip.gatewayInfo()!!.shards())
-                )
+            bind<AndeClient>() with singleton {
+                AndeClient.andeClient(catnip.selfUser()!!.idAsLong()).create()
             }
 
             // Managers
@@ -284,6 +277,7 @@ class Bootstrap {
 }
 
 fun main() {
+    File(".vertx").deleteRecursively()
     AsyncInfoMonitor()
     Locale.setDefault(Locale("en", "US"))
 

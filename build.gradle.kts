@@ -12,6 +12,9 @@ version = "3.0"
 repositories {
     jcenter()
     maven { url = uri("https://jitpack.io") }
+    maven { url = uri("https://dl.bintray.com/arudiscord/maven") }
+    maven { url = uri("https://dl.bintray.com/arudiscord/kotlin") }
+    maven { url = uri("https://dl.bintray.com/arudiscord/hg") }
     maven { url = uri("https://dl.bintray.com/adriantodt/maven") }
     maven { url = uri("https://dl.bintray.com/kodehawa/maven") }
     mavenLocal()
@@ -28,19 +31,19 @@ dependencies {
 
     // Main APIs
     compile("com.sedmelluq:lavaplayer:1.3.16")
-    compile("com.github.samophis:LavaClient:4.0.0-fix-lenient-integers-2") //3.0.3
     compile("com.github.natanbc:weeb4j:3.5")
+    compile("pw.aru.libs:andeclient:1.0-SNAPSHOT")
 
     // Useful
     compile("net.kodehawa:imageboard-api:2.0.7")
 
     // Open-Source Libraries
-    compile("pw.aru.discord:dice-notation:1.0")
-    compile("pw.aru.utils:properties:1.2")
-    compile("pw.aru.snowflake:snowflake-local:1.0")
-    compile("pw.aru.hungergames:hg-engine:1.0")
-    compile("pw.aru.hungergames:hg-loader:1.0")
-    compile("pw.aru.api:DD4J:1.0.1")
+    compile("pw.aru.libs:dice-notation:1.1")
+    compile("pw.aru.libs:properties:1.2")
+    compile("pw.aru.libs:snowflake-local:1.0")
+    compile("pw.aru.libs:DD4J:1.0")
+    compile("pw.aru.hg:hg-engine:1.0")
+    compile("pw.aru.hg:hg-loader:1.0")
 
     //Helping stuff
     compile("org.apache.commons:commons-lang3:3.8.1")
@@ -50,7 +53,7 @@ dependencies {
     //Scanning and Injections
     compile("io.github.classgraph:classgraph:4.8.24")
     compile("org.kodein.di:kodein-di-generic-jvm:6.1.0")
-    compile("pw.aru.kt:kodein-jit-bindings:2.1")
+    compile("pw.aru.libs:kodein-jit-bindings:2.2")
 
     //Logging
 }
@@ -98,12 +101,7 @@ tasks {
 
     register("runAndesite", Exec::class) {
         workingDir("andesite")
-        commandLine("java", "-jar", "andesite-node-0.13.0-win-x86-64.jar")
-    }
-
-    register("runLavalink", Exec::class) {
-        workingDir("lavalink")
-        commandLine("java", "-jar", "lavalink.jar")
+        commandLine("java", "-jar", "andesite.jar") //-node-0.13.1-win-x86-64
     }
 }
 
