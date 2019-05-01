@@ -27,6 +27,7 @@ import pw.aru.hg.loader.loadFile
 import pw.aru.hg.loader.parseHarmfulActions
 import pw.aru.hg.loader.parseHarmlessActions
 import pw.aru.utils.Colors
+import pw.aru.utils.extensions.discordapp.safeUserInput
 import pw.aru.utils.extensions.lang.format
 import pw.aru.utils.extensions.lang.limitedToString
 import pw.aru.utils.extensions.lang.split
@@ -110,7 +111,7 @@ class AruHG(
             color(Colors.discordCanary)
             thumbnail("https://assets.aru.pw/img/hungergames.png")
             description(
-                "${if (newGame) "New game created successfully! " else ""}**${admin.effectiveName()}** is the admin of the game.",
+                "${if (newGame) "New game created successfully! " else ""}**${admin.effectiveName().safeUserInput()}** is the admin of the game.",
                 "",
                 "**HG Lobby Commands:** (without prefix; you must be the admin of the game)",
                 commandUsage("hg cancel", "Returns to the GameHub lobby."),
@@ -142,7 +143,7 @@ class AruHG(
             color(Colors.discordCanary)
             thumbnail("https://assets.aru.pw/img/hungergames.png")
             description(
-                "**${admin.effectiveName()}** is the admin of the game.",
+                "**${admin.effectiveName().safeUserInput()}** is the admin of the game.",
                 "",
                 "**Game Commands:** (without prefix; you must be the admin of the game)",
                 commandUsage("hg cancel", "Returns to the HungerGames sub-lobby.")
@@ -180,14 +181,14 @@ class AruHG(
                     "cancel" -> {
                         manager.remove(channel)
                         manager.lobbyManager.registerLobby(channel, Lobby(admin).addPlayers(players))
-                        send("$SUCCESS **${message.member()!!.effectiveName()}** closed HG Lobby. Returned to GameHub Lobby.")
+                        send("$SUCCESS **${message.member()!!.effectiveName().safeUserInput()}** closed HG Lobby. Returned to GameHub Lobby.")
                     }
                     "start" -> {
                         startHg()
                     }
                     "exit" -> {
                         manager.remove(channel)
-                        send("$SUCCESS **${message.member()!!.effectiveName()}** closed their lobby.")
+                        send("$SUCCESS **${message.member()!!.effectiveName().safeUserInput()}** closed their lobby.")
                     }
 
                     "guests", "lobby" -> {
@@ -199,7 +200,7 @@ class AruHG(
 
                             field(
                                 "Players:",
-                                players.asSequence().map { "**${it.effectiveName()}**" }.sorted().toList().limitedToString(
+                                players.asSequence().map { "**${it.effectiveName().safeUserInput()}**" }.sorted().toList().limitedToString(
                                     1000
                                 )
                             )

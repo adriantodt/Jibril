@@ -8,6 +8,7 @@ import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
 import pw.aru.core.permissions.MemberPermissions
+import pw.aru.utils.extensions.discordapp.safeUserInput
 import pw.aru.utils.extensions.lang.limitedToString
 import pw.aru.utils.extensions.lib.embed
 import pw.aru.utils.extensions.lib.field
@@ -125,7 +126,7 @@ class GameHub(private val gameManager: GameManager) : ICommand, ICommand.HelpDia
 
                 field(
                     "Players:",
-                    lobby.players().asSequence().map { "**${it.effectiveName()}**" }.sorted().toList().limitedToString(
+                    lobby.players().asSequence().map { "**${it.effectiveName().safeUserInput()}**" }.sorted().toList().limitedToString(
                         1000
                     )
                 )
@@ -138,11 +139,11 @@ class GameHub(private val gameManager: GameManager) : ICommand, ICommand.HelpDia
         val created = lobby.adminId == author.idAsLong()
 
         channel.sendMessage(
-            if (created) "$SUCCESS **${author.effectiveName()}** created a new lobby!\n" +
+            if (created) "$SUCCESS **${author.effectiveName().safeUserInput()}** created a new lobby!\n" +
                     "Other players can run ``${prefix}gamehub join`` to join it!\n" +
                     "Use  ``${prefix}gamehub play <game>`` to start a game!"
             else
-                "$ERROR S-sorry, but a lobby (created by **${lobby.admin().effectiveName()}**) already exists!\n" +
+                "$ERROR S-sorry, but a lobby (created by **${lobby.admin().effectiveName().safeUserInput()}**) already exists!\n" +
                         "Use ``${prefix}gamehub join`` to join it!"
         )
     }
@@ -164,7 +165,7 @@ class GameHub(private val gameManager: GameManager) : ICommand, ICommand.HelpDia
                 lobby.addPlayer(member)
 
                 channel.sendMessage(
-                    "$SUCCESS **${member.effectiveName()}** joined **${lobby.admin().effectiveName()}**'s lobby!"
+                    "$SUCCESS **${member.effectiveName().safeUserInput()}** joined **${lobby.admin().effectiveName().safeUserInput()}**'s lobby!"
                 )
             }
         }
@@ -179,13 +180,13 @@ class GameHub(private val gameManager: GameManager) : ICommand, ICommand.HelpDia
             lobby.adminId == author.idAsLong() -> {
                 lobbyManager.removeLobby(channel)
 
-                channel.sendMessage("$SUCCESS **${author.effectiveName()}** closed their lobby.")
+                channel.sendMessage("$SUCCESS **${author.effectiveName().safeUserInput()}** closed their lobby.")
             }
 
             lobby.isPlayer(author) -> {
                 lobby.removePlayer(author)
                 channel.sendMessage(
-                    "$SUCCESS **${author.effectiveName()}** left **${lobby.admin().effectiveName()}**'s lobby!"
+                    "$SUCCESS **${author.effectiveName().safeUserInput()}** left **${lobby.admin().effectiveName().safeUserInput()}**'s lobby!"
                 )
             }
 

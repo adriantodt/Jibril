@@ -16,6 +16,9 @@ import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
 import pw.aru.core.music.MusicSystem
+import pw.aru.core.music.entities.MusicEventSource
+import pw.aru.core.music.events.StopMusicEvent
+import pw.aru.core.music.events.StopMusicEvent.Reason.BOT_SHUTTING_DOWN
 import pw.aru.core.parser.*
 import pw.aru.core.permissions.Permissions
 import pw.aru.core.permissions.UserPermissions.BOT_DEVELOPER
@@ -216,6 +219,10 @@ class DevCmd(override val kodein: Kodein) : ICommand, ICommand.Permission, IComm
 
     private fun CommandContext.shutdown() {
         try {
+            musicSystem.players.forEachValue(4) {
+                it.publish(StopMusicEvent(MusicEventSource.MusicSystem, BOT_SHUTTING_DOWN))
+            }
+
             send(sleepQuotes.random()).toCompletableFuture().join()
         } catch (ignored: Exception) {
         }

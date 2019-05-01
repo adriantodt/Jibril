@@ -11,6 +11,7 @@ import mu.KLogging
 import pw.aru.core.commands.help.prefix
 import pw.aru.core.music.entities.*
 import pw.aru.core.music.events.*
+import pw.aru.core.music.events.StopMusicEvent.Reason.*
 import pw.aru.core.music.internal.LavaplayerLoadResult
 import pw.aru.core.music.internal.OutputMusicEventAdapter
 import pw.aru.core.music.utils.NowPlayingEmbed.musicLength
@@ -18,6 +19,7 @@ import pw.aru.core.patreon.Patreon
 import pw.aru.core.reporting.ErrorReporter
 import pw.aru.db.AruDB
 import pw.aru.utils.AruColors
+import pw.aru.utils.extensions.discordapp.safeUserInput
 import pw.aru.utils.extensions.lang.toStringReflexively
 import pw.aru.utils.extensions.lib.sendEmbed
 import pw.aru.utils.text.*
@@ -131,7 +133,7 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
                     channel.sendMessage("$DISAPPOINTED Music choice canceled!")
 
                     if (player.currentTrack == null) {
-                        player.publish(StopMusicEvent(MusicEventSource.MusicSystem))
+                        player.publish(StopMusicEvent(MusicEventSource.MusicSystem, MUSIC_SELECTION_CANCELLED))
                     }
                 }
                 .action { e ->
@@ -140,7 +142,7 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
                         it.delete()
 
                         if (player.currentTrack == null) {
-                            player.publish(StopMusicEvent(MusicEventSource.MusicSystem, silent = true))
+                            player.publish(StopMusicEvent(MusicEventSource.MusicSystem, MUSIC_SELECTION_CANCELLED))
                         }
                     } else {
                         val selected = dialog.tracks[indices.indexOf(e.emoji().name())]
@@ -186,20 +188,34 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
     }
 
     override fun onConnectErrorEvent(event: ConnectErrorEvent) {
-        event.source.channel(event.player.guild)?.run {
-            sendMessage(event.error.toString())
+        val source = event.source as? MusicEventSource.Discord ?: return
+
+        source.textChannel.run {
             when (event.error) {
                 ConnectionErrorType.MEMBER_NOT_CONNECTED -> {
-                    TODO("onConnectErrorEvent: MEMBER_NOT_CONNECTED")
+                    sendMessage(
+                        "$X **${source.member(event.player.guild)!!.effectiveName().safeUserInput()}**, I can't play music if you're not connected to any channel!"
+                    )
                 }
                 ConnectionErrorType.BOT_CONNECTED_TO_OTHER_CHANNEL -> {
-                    TODO("onConnectErrorEvent: BOT_CONNECTED_TO_OTHER_CHANNEL")
+                    sendMessage(
+                        "$X **${source.member(event.player.guild)!!.effectiveName().safeUserInput()}**, I'm already connected to ${event.player.voiceChannel?.name()}!"
+                    )
                 }
                 ConnectionErrorType.MEMBER_CHANNEL_FULL -> {
-                    TODO("onConnectErrorEvent: MEMBER_CHANNEL_FULL")
+                    sendMessage(
+                        "$X **${source.member(event.player.guild)!!.effectiveName().safeUserInput()}**, the channel you're connected to is full!"
+                    )
                 }
                 ConnectionErrorType.BOT_CANT_CONNECT -> {
-                    TODO("onConnectErrorEvent: BOT_CANT_CONNECT")
+                    sendMessage(
+                        "$X **${source.member(event.player.guild)!!.effectiveName().safeUserInput()}**, I need permission to **Connect** and **Speak** in that voice channel so I can play music!"
+                    )
+                }
+                ConnectionErrorType.BOT_CONNECT_TIMEOUT -> {
+                    sendMessage(
+                        "$X **${source.member(event.player.guild)!!.effectiveName().safeUserInput()}**, I couldn't connect to the voice channel. Mind reporting this to my developer? (Check out `a!hangout`)"
+                    )
                 }
             }
         }
@@ -213,21 +229,21 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
             when (event.source) {
                 is MusicEventSource.Dashboard -> {
                     sendMessage(
-                        "$VOLUME Volume set to **${event.player.andePlayer.volume()}/150** by **${event.source.member(
-                            event.player.guild
-                        )!!.effectiveName()}**, on the Dashboard.."
+                        "$VOLUME Volume set to **${event.volume}/150** by **${
+                        event.source.member(event.player.guild)!!.effectiveName().safeUserInput()
+                        }**, on the Dashboard.."
                     )
                 }
                 is MusicEventSource.Discord -> {
                     sendMessage(
-                        "$VOLUME Volume set to **${event.player.andePlayer.volume()}/150** by **${event.source.member(
-                            event.player.guild
-                        )!!.effectiveName()}**, on the Dashboard.."
+                        "$VOLUME Volume set to **${event.volume}/150** by **${
+                        event.source.member(event.player.guild)!!.effectiveName().safeUserInput()
+                        }**, on the Dashboard.."
                     )
                 }
                 else -> {
                     logImpossibleSource(event)
-                    sendMessage("$VOLUME Volume set to **${event.player.andePlayer.volume()}/150**.")
+                    sendMessage("$VOLUME Volume set to **${event.volume}/150**.")
                 }
             }
         }
@@ -239,10 +255,10 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
                 PauseState.PAUSED -> {
                     when (event.source) {
                         is MusicEventSource.Dashboard -> {
-                            sendMessage("$PLAY Music paused by **${event.source.member(event.player.guild)!!.effectiveName()}**, on the Dashboard.\nType `$prefix${"resume"}` to resume the player.")
+                            sendMessage("$PLAY Music paused by **${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**, on the Dashboard.\nType `$prefix${"resume"}` to resume the player.")
                         }
                         is MusicEventSource.Discord -> {
-                            sendMessage("$PLAY Music paused by **${event.source.member(event.player.guild)!!.effectiveName()}**.\nType `$prefix${"resume"}` to resume the player.")
+                            sendMessage("$PLAY Music paused by **${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**.\nType `$prefix${"resume"}` to resume the player.")
                         }
                         is MusicEventSource.VotingSystem -> {
                             sendMessage(
@@ -259,10 +275,10 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
                 PauseState.RESUMED -> {
                     when (event.source) {
                         is MusicEventSource.Dashboard -> {
-                            sendMessage("$PLAY Music resumed by **${event.source.member(event.player.guild)!!.effectiveName()}**, on the Dashboard.")
+                            sendMessage("$PLAY Music resumed by **${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**, on the Dashboard.")
                         }
                         is MusicEventSource.Discord -> {
-                            sendMessage("$PLAY Music resumed by **${event.source.member(event.player.guild)!!.effectiveName()}**.")
+                            sendMessage("$PLAY Music resumed by **${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**.")
                         }
                         is MusicEventSource.VotingSystem -> {
                             sendMessage(
@@ -286,14 +302,14 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
                     sendMessage(
                         "$SUCCESS Repeat mode set to ${event.mode.name.toLowerCase().capitalize()} by **${event.source.member(
                             event.player.guild
-                        )!!.effectiveName()}**, on the Dashboard."
+                        )!!.effectiveName().safeUserInput()}**, on the Dashboard."
                     )
                 }
                 is MusicEventSource.Discord -> {
                     sendMessage(
                         "$SUCCESS Repeat mode set to ${event.mode.name.toLowerCase().capitalize()} by **${event.source.member(
                             event.player.guild
-                        )!!.effectiveName()}**."
+                        )!!.effectiveName().safeUserInput()}**."
                     )
                 }
                 else -> {
@@ -311,12 +327,12 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
             when (event.source) {
                 is MusicEventSource.Dashboard -> {
                     sendMessage(
-                        "$THUMBSUP1 Queue was shuffled by **${event.source.member(event.player.guild)!!.effectiveName()}**, on the Dashboard."
+                        "$THUMBSUP1 Queue was shuffled by **${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**, on the Dashboard."
                     )
                 }
                 is MusicEventSource.Discord -> {
                     sendMessage(
-                        "$THUMBSUP1 Queue was shuffled by **${event.source.member(event.player.guild)!!.effectiveName()}**!"
+                        "$THUMBSUP1 Queue was shuffled by **${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**!"
                     )
                 }
                 MusicEventSource.VotingSystem -> {
@@ -339,12 +355,12 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
             when (event.source) {
                 is MusicEventSource.Dashboard -> {
                     sendMessage(
-                        "$THUMBSUP1 Queue was cleared by **${event.source.member(event.player.guild)!!.effectiveName()}**, on the Dashboard."
+                        "$THUMBSUP1 Queue was cleared by **${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**, on the Dashboard."
                     )
                 }
                 is MusicEventSource.Discord -> {
                     sendMessage(
-                        "$THUMBSUP1 Queue was cleared by **${event.source.member(event.player.guild)!!.effectiveName()}**!"
+                        "$THUMBSUP1 Queue was cleared by **${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**!"
                     )
                 }
                 MusicEventSource.VotingSystem -> {
@@ -383,12 +399,12 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
             when (event.source) {
                 is MusicEventSource.Dashboard -> {
                     sendMessage(
-                        "$THUMBSUP1 Music was skipped by **${event.source.member(event.player.guild)!!.effectiveName()}**, on the Dashboard."
+                        "$THUMBSUP1 Music was skipped by **${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**, on the Dashboard."
                     )
                 }
                 is MusicEventSource.Discord -> {
                     sendMessage(
-                        "$THUMBSUP1 Music was skipped by **${event.source.member(event.player.guild)!!.effectiveName()}**!"
+                        "$THUMBSUP1 Music was skipped by **${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**!"
                     )
                 }
                 MusicEventSource.VotingSystem -> {
@@ -434,12 +450,12 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
                         }
                         is MusicEventSource.Dashboard -> {
                             sendMessage(
-                                "$THUMBSUP1 Music was stopped by **${event.source.member(event.player.guild)!!.effectiveName()}**, on the Dashboard."
+                                "$THUMBSUP1 Music was stopped by **${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**, on the Dashboard."
                             )
                         }
                         is MusicEventSource.Discord -> {
                             sendMessage(
-                                "$THUMBSUP1 Music was stopped by **${event.source.member(event.player.guild)!!.effectiveName()}**!"
+                                "$THUMBSUP1 Music was stopped by **${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**!"
                             )
                         }
                     }
@@ -449,13 +465,28 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
                         "*Seems like no one is coming... D-did I do something wrong?* $SHRUG\n I left the voice channel and stopped the queue."
                     )
                 }
-                is MusicStopReason.ChannelDeleted -> {
-                    sendMessage(
-                        if (Random.nextInt(20) == 1)
-                            "$BEG Apparently the channel I was playing got deleted. *That's so sad add me to another channel and play Despacito."
-                        else
-                            "$BEG Apparently the channel I was playing got deleted."
-                    )
+                is MusicStopReason.SystemReason -> {
+                    when (event.reason.reason) {
+                        CHANNEL_DELETED -> {
+                            sendMessage(
+                                if (Random.nextInt(20) == 1)
+                                    "$BEG Apparently the channel I was playing got deleted. *That's so sad add me to another channel and play Despacito.*"
+                                else
+                                    "$BEG Apparently the channel I was playing got deleted."
+                            )
+                        }
+                        BOT_SHUTTING_DOWN -> {
+                            sendMessage(
+                                if (Random.nextInt(20) == 1)
+                                    "$BEG Sorry, but the bot is shutting down. *That's so sad can we play Despacito after I got online again?*"
+                                else
+                                    "$BEG Sorry, but the bot is shutting down."
+                            )
+                        }
+                        SILENT, MUSIC_SELECTION_CANCELLED -> {
+                            //nop
+                        }
+                    }
                 }
                 is MusicStopReason.QueueEnded -> {
                     sendMessage(
@@ -466,9 +497,6 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
                                     "$BEG If I were a good bot, please consider donating to keep the bot alive. It's as simple as `aru!links`."
                         }
                     )
-                }
-                is MusicStopReason.SilentQuit -> {
-                    //nop
                 }
             }
 
@@ -489,10 +517,10 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
 
             val what = when (event.source) {
                 is MusicEventSource.Dashboard -> {
-                    "**${event.source.member(event.player.guild)!!.effectiveName()}**'s vote to $action, on the Dashboard,"
+                    "**${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**'s vote to $action, on the Dashboard,"
                 }
                 is MusicEventSource.Discord -> {
-                    "**${event.source.member(event.player.guild)!!.effectiveName()}**'s vote to $action"
+                    "**${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**'s vote to $action"
                 }
                 else -> throw IllegalStateException("wtf event source")
             }

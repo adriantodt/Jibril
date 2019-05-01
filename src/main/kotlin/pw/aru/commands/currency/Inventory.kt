@@ -111,7 +111,7 @@ enum class ItemType {
     ;
 
     open fun sameKind(metadata1: JSONObject, metadata2: JSONObject): Boolean {
-        return metadata1.toMap() == metadata2.toMap()
+        return metadata1.similar(metadata2)
     }
 
     open fun merge(metadata1: JSONObject, metadata2: JSONObject): JSONObject {

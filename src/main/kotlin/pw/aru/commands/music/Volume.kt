@@ -11,6 +11,7 @@ import pw.aru.core.music.MusicPlayer
 import pw.aru.core.music.MusicSystem
 import pw.aru.core.music.events.ChangeVolumeEvent
 import pw.aru.core.patreon.Patreon
+import pw.aru.core.permissions.UserPermissions
 import pw.aru.db.AruDB
 import pw.aru.utils.extensions.lang.multiline
 import pw.aru.utils.text.ERROR
@@ -53,7 +54,7 @@ class Volume(musicSystem: MusicSystem, db: AruDB) : MusicCommand(musicSystem), I
     private class SetVolume(musicSystem: MusicSystem, private val db: AruDB) :
         MusicPermissionCommand(musicSystem, userQueued = true) {
         override fun CommandContext.actionWithPerms(musicPlayer: MusicPlayer, currentTrack: AudioTrack) {
-            if (!Patreon.isPremium(db, author)) {
+            if (permissions.contains(UserPermissions.BOT_DEVELOPER) && !Patreon.isPremium(db, author)) {
                 send(
                     multiline(
                         "$ERROR This is a premium-only feature." +

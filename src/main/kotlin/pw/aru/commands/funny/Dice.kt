@@ -12,6 +12,7 @@ import pw.aru.core.commands.help.Example
 import pw.aru.core.commands.help.Help
 import pw.aru.libs.dicenotation.exceptions.EvaluationException
 import pw.aru.libs.dicenotation.exceptions.SyntaxException
+import pw.aru.utils.extensions.discordapp.safeUserInput
 import pw.aru.utils.extensions.discordapp.stripFormatting
 import pw.aru.utils.text.GAME_DIE
 
@@ -42,13 +43,13 @@ class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider, ICommand.
     }
 
     override fun CommandContext.call() {
-        send("$GAME_DIE **${author.effectiveName()}**, ${resolveRoll(args)}")
+        send("$GAME_DIE **${author.effectiveName().safeUserInput()}**, ${resolveRoll(args)}")
     }
 
     override fun CommandContext.customCall(command: String): Result {
         if (dicePattern.matchEntire(command) == null) return Result.IGNORE
 
-        send("$GAME_DIE **${author.effectiveName()}**, ${resolveRoll(command + args)}")
+        send("$GAME_DIE **${author.effectiveName().safeUserInput()}**, ${resolveRoll(command + args)}")
 
         return Result.HANDLED
     }
@@ -59,7 +60,7 @@ class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider, ICommand.
         val toSend = outer.replace('\n', ' ').stripFormatting().trim()
 
         if (toSend.isEmpty()) {
-            send("$GAME_DIE **${author.effectiveName()}**, ${resolveRoll(command + args)}")
+            send("$GAME_DIE **${author.effectiveName().safeUserInput()}**, ${resolveRoll(command + args)}")
         } else {
             send("**$toSend**\n$GAME_DIE ${resolveRoll(args)}")
         }

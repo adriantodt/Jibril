@@ -4,6 +4,7 @@
 
 package pw.aru.utils.extensions.lang
 
+import kotlin.math.min
 
 fun String.replaceEach(vararg list: Pair<String, String>): String {
     if (isEmpty() || list.isEmpty()) return this
@@ -15,53 +16,10 @@ fun String.replaceEach(vararg list: Pair<String, String>): String {
     var textIndex = -1
     var replaceIndex = -1
     var tempIndex: Int
-
-    // index of replace array that will replace the search string found
-    // NOTE: logic duplicated below START
-    for ((i, pair) in list.withIndex()) {
-        val (search) = pair
-        if (noMoreMatchesForReplIndex[i] || search.isEmpty()) continue
-        tempIndex = indexOf(search)
-
-        // see if we need to keep searching for this
-        if (tempIndex == -1) {
-            noMoreMatchesForReplIndex[i] = true
-        } else if (textIndex == -1 || tempIndex < textIndex) {
-            textIndex = tempIndex
-            replaceIndex = i
-        }
-    }
-    // NOTE: logic mostly below END
-
-    // no search strings found, we are done
-    if (textIndex == -1) return this
-
     var start = 0
 
-    // get a good guess on the size of the result buffer so it doesn't have to double if it goes over a bit
-    var increase = 0
-
-    // count the replacement text elements that are larger than their corresponding text being replaced
-    for ((search, replacement) in list) {
-        val greater = replacement.length - search.length
-        // assume 3 matches
-        if (greater > 0) increase += 3 * greater
-    }
-    // have upper-bound at 20% increase, then let Java take over
-    increase = kotlin.math.min(increase, length / 5)
-
-    val buf = StringBuilder(length + increase)
-
-    while (textIndex != -1) {
-        for (i in start until textIndex) buf.append(this[i])
-        buf.append(list[replaceIndex].second)
-
-        start = textIndex + list[replaceIndex].first.length
-
-        textIndex = -1
-        replaceIndex = -1
-        // find the next earliest match
-        // NOTE: logic mostly duplicated above START
+    // index of replace array that will replace the search string found
+    fun doNext() {
         for ((i, pair) in list.withIndex()) {
             val (search) = pair
             if (noMoreMatchesForReplIndex[i] || search.isEmpty()) continue
@@ -75,10 +33,34 @@ fun String.replaceEach(vararg list: Pair<String, String>): String {
                 replaceIndex = i
             }
         }
-        // NOTE: logic duplicated above END
     }
 
-    for (i in start until length) buf.append(this[i])
+    doNext()
+
+    // no search strings found, we are done
+    if (textIndex == -1) return this
+
+    // get a good guess on the size of the result buffer so it doesn't have to double if it goes over a bit
+    // count the replacement text elements that are larger than their corresponding text being replaced
+    // have upper-bound at 20% increase, then let Java take over
+    val buf = StringBuilder(
+        length + min(length / 5, 3 * list.sumBy { (s, r) -> min(r.length - s.length, 0) })
+    )
+
+    while (textIndex != -1) {
+        for (i in start until textIndex) buf.append(this[i])
+        val (replaced, replacement) = list[replaceIndex]
+        buf.append(replacement)
+
+        start = textIndex + replaced.length
+
+        textIndex = -1
+        replaceIndex = -1
+
+        doNext()
+    }
+
+    buf.append(this, start, length)
 
     return buf.toString()
 }

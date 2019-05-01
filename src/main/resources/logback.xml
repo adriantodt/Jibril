@@ -29,8 +29,8 @@
         <appender-ref ref="file"/>
     </root>
 
-    <!--
+    <!-- -->
     <logger name="pw.aru.libs.andeclient.internal.AndesiteNodeImpl" level="trace">
     </logger>
-    -->
+    <!-- -->
 </configuration>

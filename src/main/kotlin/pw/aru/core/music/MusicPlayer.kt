@@ -6,7 +6,6 @@ import com.mewna.catnip.entity.guild.Guild
 import com.mewna.catnip.entity.guild.Member
 import com.mewna.catnip.entity.message.Message
 import com.mewna.catnip.entity.util.Permission
-import com.mewna.catnip.entity.voice.VoiceServerUpdate
 import com.mewna.catnip.shard.DiscordEvent
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
@@ -14,6 +13,7 @@ import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist
 import gg.amy.catnip.utilities.waiter.EventExtension
 import pw.aru.core.music.entities.*
 import pw.aru.core.music.events.*
+import pw.aru.core.music.events.StopMusicEvent.Reason.SILENT
 import pw.aru.core.music.internal.AbstractMusicPlayer
 import pw.aru.core.music.internal.LavaplayerLoadHandler
 import pw.aru.core.music.internal.LavaplayerLoadResult
@@ -28,8 +28,10 @@ import pw.aru.utils.AruTaskExecutor.queue
 import pw.aru.utils.extensions.lang.getValue
 import pw.aru.utils.extensions.lang.roundRobinFlatten
 import pw.aru.utils.extensions.lib.humanUsers
+import reactor.adapter.rxjava.toMono
 import java.lang.System.currentTimeMillis
 import java.net.URL
+import java.time.Duration
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.LinkedBlockingDeque
@@ -258,7 +260,7 @@ class MusicPlayer(
 
         when (event.source) {
             MusicEventSource.MusicSystem -> {
-                stop(if (event.silent) MusicStopReason.SilentQuit else MusicStopReason.ChannelDeleted)
+                stop(MusicStopReason.SystemReason(event.reason ?: SILENT))
             }
             is MusicEventSource.Dashboard, is MusicEventSource.Discord -> {
                 stop(MusicStopReason.UserCommand(event.source))
@@ -352,12 +354,13 @@ class MusicPlayer(
     override fun onPlayerUpdateEvent(event: PlayerUpdateEvent) {
         lastPosition = event.position()
         lastTimestamp = event.timestamp()
+        val currentTrack = event.player().playingTrack() ?: return
         publish(
             PlayerInfoEvent(
                 this,
                 lastTimestamp,
                 lastPosition,
-                MusicTrack(currentTrack!!, lastTrackData!!),
+                MusicTrack(currentTrack, lastTrackData!!),
                 queue.toList()
             )
         )
@@ -520,20 +523,25 @@ class MusicPlayer(
             }
         }
 
-        val connected = CompletableFuture<VoiceServerUpdate>()
-
-        catnip.extensionManager().extension(EventExtension::class.java)!!.waitForEvent(DiscordEvent.VOICE_SERVER_UPDATE)
-            .condition { it.guildIdAsLong() == guildId }
-            .action { connected.complete(it) }
+        val nextVsu = catnip.observe(DiscordEvent.VOICE_SERVER_UPDATE)
+            .filter { it.guildIdAsLong() == guildId }
+            .singleOrError().toMono()
 
         catnip.openVoiceConnection(guildId.toString(), memberVoiceChannel.id())
-        connected.thenAcceptAsync {
-            andePlayer.handleVoiceServerUpdate(
-                catnip.cache().voiceState(it.guildId(), catnip.selfUser()!!.id())!!.sessionId()!!,
-                it.token(),
-                it.endpoint()
-            )
-        }.join()
+
+        val vsu = nextVsu.block(Duration.ofSeconds(45))
+
+        if (vsu == null) {
+            publish(ConnectErrorEvent(this, source, ConnectionErrorType.BOT_CONNECT_TIMEOUT))
+            return false
+        }
+
+        andePlayer.handleVoiceServerUpdate(
+            catnip.cache().voiceState(vsu.guildId(), catnip.selfUser()!!.id())!!.sessionId()!!,
+            vsu.token(),
+            vsu.endpoint()
+        )
+
         return true
     }
 
@@ -563,26 +571,23 @@ class MusicPlayer(
 
         lastTrackData = next.data
         (lastTrackData?.source as? MusicEventSource.Discord)?.textChannel?.let { lastTextChannelId = it.idAsLong() }
-        val (start, end) = next.data.trackLoadOptions.run {
-            (startTimestamp ?: 0) to (endTimestamp ?: next.track.duration)
-        }
-        andePlayer.controls().play().track(next.track).start(start).end(end).execute()
-        setLoadOptions(next.data)
-    }
+        andePlayer.controls().play().apply {
+            track(next.track)
+            val (_, _, volume, _, startTimestamp, endTimestamp) = next.data.trackLoadOptions
+            volume(volume)
+            start(startTimestamp)
+            end(endTimestamp)
+        }.execute()
 
-    private fun setLoadOptions(data: TrackData) {
-        val (source, options) = data
-        options.apply {
-            volume?.let {
-                publish(ChangeVolumeEvent(source, it))
-            }
-            repeatMode?.let {
-                publish(ChangeRepeatModeEvent(source, it))
-            }
+        next.data.trackLoadOptions.repeatMode?.let {
+            publish(ChangeRepeatModeEvent(next.data.source, it))
         }
+
     }
 
     private fun stop(reason: MusicStopReason) {
+        musicSystem.players.remove(guildId)
+
         publish(
             when (reason) {
                 is MusicStopReason.UserCommand -> MusicEndedEvent(this, reason.source, reason)

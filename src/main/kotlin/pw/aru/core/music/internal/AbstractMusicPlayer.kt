@@ -6,6 +6,7 @@ import mu.KLogging
 import pw.aru.core.music.MusicSystem
 import pw.aru.core.music.entities.MusicEventSource
 import pw.aru.core.music.events.*
+import pw.aru.core.music.events.StopMusicEvent.Reason.CHANNEL_DELETED
 import pw.aru.lib.eventpipes.EventPipes.newAsyncPipe
 import pw.aru.libs.andeclient.events.AndePlayerEvent
 import pw.aru.libs.andeclient.events.player.PlayerUpdateEvent
@@ -30,7 +31,7 @@ abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, gui
         musicSystem.playerEventPipe.subscribe(guildId, ::onAndePlayerEvent)
         catnip.on(DiscordEvent.VOICE_STATE_UPDATE) {
             if (it.userIdAsLong() == catnip.selfUser()!!.idAsLong() && it.guildIdAsLong() == guildId && it.channelIdAsLong() == 0L) {
-                publish(StopMusicEvent(MusicEventSource.MusicSystem))
+                publish(StopMusicEvent(MusicEventSource.MusicSystem, CHANNEL_DELETED))
             }
         }
     }

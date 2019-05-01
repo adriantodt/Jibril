@@ -46,7 +46,14 @@ data class RemoveTrackEvent(override val source: MusicEventSource, val range: In
 
 data class SkipTrackEvent(override val source: MusicEventSource) : InputMusicEvent()
 
-data class StopMusicEvent(override val source: MusicEventSource, val silent: Boolean = false) : InputMusicEvent()
+data class StopMusicEvent(override val source: MusicEventSource, val reason: Reason? = null) : InputMusicEvent() {
+    enum class Reason {
+        SILENT,
+        CHANNEL_DELETED,
+        MUSIC_SELECTION_CANCELLED,
+        BOT_SHUTTING_DOWN
+    }
+}
 
 data class ToggleVoteEvent(override val source: MusicEventSource, val type: VoteType) : InputMusicEvent()
 

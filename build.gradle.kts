@@ -26,13 +26,16 @@ dependencies {
 
     compile(project("aruCore"))
 
-    compile("com.github.mewna:catnip:1.2.1")
+    compile("com.github.mewna:catnip:1.2.3")
     compile("com.github.queer:catnip-utilities:360b876")
+    compile("io.projectreactor.addons:reactor-adapter:3.2.2.RELEASE")
+    compile("io.reactivex.rxjava2:rxkotlin:2.2.0")
+
 
     // Main APIs
     compile("com.sedmelluq:lavaplayer:1.3.16")
     compile("com.github.natanbc:weeb4j:3.5")
-    compile("pw.aru.libs:andeclient:1.0-SNAPSHOT")
+    compile("pw.aru.libs:andeclient:1.2")
 
     // Useful
     compile("net.kodehawa:imageboard-api:2.0.7")
