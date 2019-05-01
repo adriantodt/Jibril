@@ -1,7 +1,6 @@
 package pw.aru.commands.actions
 
 import com.github.natanbc.weeb4j.Weeb4J
-import okhttp3.OkHttpClient
 import pw.aru.commands.actions.impl.ActionCommandsWorkshop
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.CommandProvider
@@ -9,14 +8,13 @@ import pw.aru.core.commands.help.prefix
 import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.URLCache
 import pw.aru.utils.text.*
-import java.io.File
 
 @CommandProvider
 class NSFWActionCommands(
-    httpClient: OkHttpClient,
+    cache: URLCache,
     weebApi: Weeb4J,
     private val assetProvider: ReloadableListProvider
-) : ActionCommandsWorkshop(weebApi, URLCache(httpClient, File("url_cache")), Category.NSFW_ACTION) {
+) : ActionCommandsWorkshop(weebApi, cache, Category.NSFW_ACTION) {
     override fun create() {
         //69
         actionCommand(listOf("69"), "69 Command", "Hey, that's lewd!") {
@@ -30,7 +28,11 @@ class NSFWActionCommands(
         }
 
         //anal
-        actionCommand(listOf("anal", "fuckanal"), "Anal Command", "Fucks the ass of the mentioned users... Hey, that's lewd!") {
+        actionCommand(
+            listOf("anal", "fuckanal"),
+            "Anal Command",
+            "Fucks the ass of the mentioned users... Hey, that's lewd!"
+        ) {
             nsfwProvider = fromLinks(assetProvider["assets/aru/nsfw_actions/anal.txt"])
             actions(
                 "$FUCK {author} is fucking {mentions}'s ass",
@@ -41,7 +43,11 @@ class NSFWActionCommands(
         }
 
         //analcum
-        actionCommand(listOf("analcum", "cumanal", "fuckanalcum"), "Anal Cum Command", "Cums inside... Okay, that's enough. And lewd.") {
+        actionCommand(
+            listOf("analcum", "cumanal", "fuckanalcum"),
+            "Anal Cum Command",
+            "Cums inside... Okay, that's enough. And lewd."
+        ) {
             nsfwProvider = fromLinks(assetProvider["assets/aru/nsfw_actions/analcum.txt"])
             actions(
                 "$FUCK {author} is cumming inside {mentions}'s ass",
@@ -52,7 +58,11 @@ class NSFWActionCommands(
         }
 
         //analplay
-        actionCommand(listOf("analplay", "analforeplay", "foreplayanal"), "Anal Play Command", "Plays with... Okay, that's enough. And lewd.") {
+        actionCommand(
+            listOf("analplay", "analforeplay", "foreplayanal"),
+            "Anal Play Command",
+            "Plays with... Okay, that's enough. And lewd."
+        ) {
             nsfwProvider = fromLinks(assetProvider["assets/aru/nsfw_actions/analplay.txt"])
             actions(
                 "$FUCK {author} is playing with {mentions}'s ass",
@@ -74,7 +84,11 @@ class NSFWActionCommands(
         }
 
         //blowjobcum
-        actionCommand(listOf("blowjobcum", "cumblowjob"), "Blowjob Cum Command", "Cums while someone is doing you a blowjob.") {
+        actionCommand(
+            listOf("blowjobcum", "cumblowjob"),
+            "Blowjob Cum Command",
+            "Cums while someone is doing you a blowjob."
+        ) {
             nsfwProvider = fromLinks(assetProvider["assets/aru/nsfw_actions/blowjobcum.txt"])
             actions(
                 "$FUCK {author} is sucking {mentions}'s dick... $CUM",
@@ -96,7 +110,11 @@ class NSFWActionCommands(
         }
 
         //boobjobcum
-        actionCommand(listOf("boobjobcum", "cumboobjob", "titjobcum", "cumtitjob"), "Boobjob Cum Command", "Cums while someone is doing you a boobjob.") {
+        actionCommand(
+            listOf("boobjobcum", "cumboobjob", "titjobcum", "cumtitjob"),
+            "Boobjob Cum Command",
+            "Cums while someone is doing you a boobjob."
+        ) {
             nsfwProvider = fromLinks(assetProvider["assets/aru/nsfw_actions/boobjobcum.txt"])
             actions(
                 "$BOOBS {author} is giving {mentions} a boobjob... $CUM",
@@ -173,7 +191,11 @@ class NSFWActionCommands(
         }
 
         //cum
-        actionCommand(listOf("cum", "fuckcum", "cumfuck"), "Cum (Classical) Command", "Cums inside the mentioned users' pussy. That's messy... And lewd.\nCheck `${prefix}gasm` too!") {
+        actionCommand(
+            listOf("cum", "fuckcum", "cumfuck"),
+            "Cum (Classical) Command",
+            "Cums inside the mentioned users' pussy. That's messy... And lewd.\nCheck `${prefix}gasm` too!"
+        ) {
             nsfwProvider = fromLinks(assetProvider["assets/aru/nsfw_actions/cum.txt"])
             actions(
                 "$FUCK {mentions}, {author} is cumming inside you",
@@ -195,7 +217,11 @@ class NSFWActionCommands(
         }
 
         //feetjobcum
-        actionCommand(listOf("feetjobcum", "cumfeetjob", "footjobcum", "cumfootjob"), "Feetjob Cum Command", "Cums while someone is doing you a feetjob.") {
+        actionCommand(
+            listOf("feetjobcum", "cumfeetjob", "footjobcum", "cumfootjob"),
+            "Feetjob Cum Command",
+            "Cums while someone is doing you a feetjob."
+        ) {
             nsfwProvider = fromLinks(assetProvider["assets/aru/nsfw_actions/feetjobcum.txt"])
             actions(
                 "$FUCK {author} is giving {mentions} a feetjob... $CUM",
@@ -217,7 +243,11 @@ class NSFWActionCommands(
         }
 
         //fucktease
-        actionCommand(listOf("fucktease"), "Fucktease Command", "Teases the mentioned users... God, you're really lewd.") {
+        actionCommand(
+            listOf("fucktease"),
+            "Fucktease Command",
+            "Teases the mentioned users... God, you're really lewd."
+        ) {
             nsfwProvider = fromLinks(assetProvider["assets/aru/nsfw_actions/fucktease.txt"])
             actions(
                 "$FUCK {mentions}, {author} is teasing you to fuck him",
@@ -239,7 +269,11 @@ class NSFWActionCommands(
         }
 
         //gasm
-        actionCommand(listOf("gasm", "orgasm"), "Orgasm Command", "When you're a girl and someone breaks your decency. That's messy... And lewd.\nCheck `${prefix}cum` too!") {
+        actionCommand(
+            listOf("gasm", "orgasm"),
+            "Orgasm Command",
+            "When you're a girl and someone breaks your decency. That's messy... And lewd.\nCheck `${prefix}cum` too!"
+        ) {
             nsfwProvider = fromLinks(assetProvider["assets/aru/nsfw_actions/gasm.txt"])
             actions(
                 "$GASM {mentions}, {author} is having an orgasm",
@@ -261,7 +295,11 @@ class NSFWActionCommands(
         }
 
         //handjobcum
-        actionCommand(listOf("handjobcum", "cumhandjob"), "Handjob Cum Command", "Cums while someone is doing you a handjob.") {
+        actionCommand(
+            listOf("handjobcum", "cumhandjob"),
+            "Handjob Cum Command",
+            "Cums while someone is doing you a handjob."
+        ) {
             nsfwProvider = fromLinks(assetProvider["assets/aru/nsfw_actions/handjobcum.txt"])
             actions(
                 "$FUCK {author} is giving {mentions} a handjob... $CUM",
@@ -382,7 +420,11 @@ class NSFWActionCommands(
         }
 
         //weirdfuck
-        actionCommand(listOf("weirdfuck", "sillyfuck"), "Weird Fuck Command", "Fucks the mentioned users... in a very weird way.") {
+        actionCommand(
+            listOf("weirdfuck", "sillyfuck"),
+            "Weird Fuck Command",
+            "Fucks the mentioned users... in a very weird way."
+        ) {
             nsfwProvider = fromLinks(assetProvider["assets/aru/nsfw_actions/weirdfuck.txt"])
             actions(
                 "$FUCK {mentions}, {author} is fucking you in a... rather weird way",

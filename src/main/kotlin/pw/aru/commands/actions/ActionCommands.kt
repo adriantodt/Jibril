@@ -2,21 +2,19 @@ package pw.aru.commands.actions
 
 import com.github.natanbc.weeb4j.Weeb4J
 import com.github.natanbc.weeb4j.image.FileType.GIF
-import okhttp3.OkHttpClient
 import pw.aru.commands.actions.impl.ActionCommandsWorkshop
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.CommandProvider
 import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.URLCache
 import pw.aru.utils.text.*
-import java.io.File
 
 @CommandProvider
 class ActionCommands(
-    httpClient: OkHttpClient,
+    cache: URLCache,
     weebApi: Weeb4J,
     private val assetProvider: ReloadableListProvider
-) : ActionCommandsWorkshop(weebApi, URLCache(httpClient, File("url_cache")), Category.ACTION) {
+) : ActionCommandsWorkshop(weebApi, cache, Category.ACTION) {
 
     /*A
     weeb4j: {

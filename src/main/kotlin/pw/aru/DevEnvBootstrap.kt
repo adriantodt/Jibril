@@ -1,5 +1,6 @@
 package pw.aru
 
+import pw.aru.core.logging.DiscordLogBack
 import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
@@ -10,65 +11,72 @@ import pw.aru.main as bootstrapMain
 object DevEnvBootstrap {
     @JvmStatic
     fun main(args: Array<String>) {
-        val devenv = ThreadGroup("devenv")
-        val startupLock = CompletableFuture<Unit>()
+        try {
+            val devenv = ThreadGroup("devenv")
+            val startupLock = CompletableFuture<Unit>()
 
-        fun startDevEnv() {
-            val redis = ProcessBuilder()
-                .directory(File("redis"))
-                .command("redis/redis-server.exe", "redis.conf")
-                .start()
+            fun startDevEnv() {
+                val redis = ProcessBuilder()
+                    .directory(File("redis"))
+                    .command("redis/redis-server.exe", "redis.conf")
+                    .start()
 
-            val andesite = ProcessBuilder()
-                .directory(File("andesite"))
-                .command("java", "-Xms128m", "-Xmx128m", "-jar", "andesite.jar")
-                .start()
+                val andesite = ProcessBuilder()
+                    .directory(File("andesite"))
+                    .command("java", "-Xms128m", "-Xmx128m", "-jar", "andesite.jar")
+                    .start()
 
-            startupLock.complete(Unit)
+                startupLock.complete(Unit)
 
-            object : Thread("Redis-LogThread") {
-                init {
-                    start()
+                object : Thread("Redis-LogThread") {
+                    init {
+                        start()
+                    }
+
+                    override fun run() {
+                        val reader = BufferedReader(InputStreamReader(redis.inputStream))
+                        while (!interrupted()) {
+                            try {
+                                println(reader.readLine() ?: return)
+                            } catch (e: IOException) {
+                                e.printStackTrace()
+                            }
+
+                        }
+                    }
+
                 }
 
-                override fun run() {
-                    val reader = BufferedReader(InputStreamReader(redis.inputStream))
-                    while (!interrupted()) {
-                        try {
-                            println(reader.readLine() ?: return)
-                        } catch (e: IOException) {
-                            e.printStackTrace()
-                        }
+                object : Thread("Andesite-LogThread") {
+                    init {
+                        start()
+                    }
 
+                    override fun run() {
+                        val reader = BufferedReader(InputStreamReader(andesite.inputStream))
+                        while (!interrupted()) {
+                            try {
+                                println(reader.readLine() ?: return)
+                            } catch (e: IOException) {
+                                e.printStackTrace()
+                            }
+
+                        }
                     }
                 }
 
             }
 
-            object : Thread("Andesite-LogThread") {
-                init {
-                    start()
-                }
+            Thread(devenv, ::startDevEnv, "DevEnv-Main").start()
 
-                override fun run() {
-                    val reader = BufferedReader(InputStreamReader(andesite.inputStream))
-                    while (!interrupted()) {
-                        try {
-                            println(reader.readLine() ?: return)
-                        } catch (e: IOException) {
-                            e.printStackTrace()
-                        }
+            startupLock.join()
 
-                    }
-                }
-            }
-
+            bootstrapMain()
+        } catch (e: Exception) {
+            DiscordLogBack.disable()
+            Bootstrap.logger.error("Error during load!", e)
+            Bootstrap.logger.error("Impossible to continue, aborting...")
+            System.exit(-1)
         }
-
-        Thread(devenv, ::startDevEnv, "DevEnv-Main").start()
-
-        startupLock.join()
-
-        bootstrapMain()
     }
 }
