@@ -110,6 +110,7 @@ class Bootstrap {
                 ),
             Vertx.vertx(
                 VertxOptions()
+                    .setEventLoopPoolSize(5)
                     .setAddressResolverOptions(
                         AddressResolverOptions().addServer("8.8.8.8")
                     )

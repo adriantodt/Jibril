@@ -1,6 +1,6 @@
 package pw.aru.utils
 
-import pw.aru.utils.extensions.lang.threadFactory
+import pw.aru.utils.extensions.lang.threadGroupBasedFactory
 import java.lang.Thread.currentThread
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ScheduledFuture
@@ -11,7 +11,7 @@ import java.util.function.Supplier
 object AruTaskExecutor {
     private val scheduler = ScheduledThreadPoolExecutor(
         minOf(Runtime.getRuntime().availableProcessors(), 4),
-        threadFactory(nameFormat = "Priority Task Thread-%d")
+        threadGroupBasedFactory("AruTaskExecutor")
     )
 
     fun task(

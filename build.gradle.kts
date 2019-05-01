@@ -35,7 +35,7 @@ dependencies {
     // Main APIs
     compile("com.sedmelluq:lavaplayer:1.3.16")
     compile("com.github.natanbc:weeb4j:3.5")
-    compile("pw.aru.libs:andeclient:1.2")
+    compile("pw.aru.libs:andeclient:1.3.2")
 
     // Useful
     compile("net.kodehawa:imageboard-api:2.0.7")

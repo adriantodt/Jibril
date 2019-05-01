@@ -10,24 +10,50 @@ import pw.aru.io.entities.CommandResult
 import pw.aru.io.entities.FeedMessage
 import pw.aru.lib.eventpipes.EventPipes.newAsyncPipe
 import pw.aru.sides.AruSide
+import pw.aru.utils.extensions.lang.threadGroupBasedFactory
 import pw.aru.utils.extensions.lib.jsonStringOf
+import java.io.Closeable
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.Executors.newSingleThreadExecutor
 
-class AruIO(val db: AruDB) {
+class AruIO(val db: AruDB) : Closeable {
     private var receiveFeeds = false
     private val feedHandlers = CopyOnWriteArrayList<FeedConsumer>()
     private var receiveCommands = false
     private val commandHandlers = CopyOnWriteArrayList<CallHandler>()
 
-    private val feedPipe by lazy { newAsyncPipe<FeedMessage>(newSingleThreadExecutor()) }
+    private val feedPipeExecutor by lazy { newSingleThreadExecutor(threadGroupBasedFactory("AruIO-feedPipeExecutor")) }
+    private val feedPipe by lazy { newAsyncPipe<FeedMessage>(feedPipeExecutor) }
     private val feedWhiteList = CopyOnWriteArraySet<String>()
-    private val commandPipe by lazy { newAsyncPipe<CommandCall>(newSingleThreadExecutor()) }
+    private val commandPipeExecutor by lazy { newSingleThreadExecutor(threadGroupBasedFactory("AruIO-commandPipeExecutor")) }
+    private val commandPipe by lazy { newAsyncPipe<CommandCall>(commandPipeExecutor) }
     private val commandWhiteList = CopyOnWriteArraySet<String>()
     private val subConnection by lazy { db.client.connectPubSub() }
+
+    override fun close() {
+        if (receiveFeeds) {
+            feedHandlers.clear()
+            feedPipe.close()
+            feedPipeExecutor.shutdown()
+            feedWhiteList.clear()
+        }
+
+        if (receiveCommands) {
+            commandHandlers.clear()
+            commandPipe.close()
+            commandPipeExecutor.shutdown()
+            commandWhiteList.clear()
+        }
+
+        if (receiveFeeds || receiveCommands) {
+            subConnection.close()
+            receiveFeeds = false
+            receiveCommands = false
+        }
+    }
 
     fun configure(block: AruIOConfigurator.() -> Unit) {
         val (sidesRegistered, feedsRegistered, commandsRegistered) = AruIOConfigurator().also(block)

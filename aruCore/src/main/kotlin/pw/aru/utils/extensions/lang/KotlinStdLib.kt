@@ -55,6 +55,21 @@ fun threadFactory(
     }
 }
 
+
+fun threadGroupBasedFactory(name: String): (Runnable) -> Thread {
+    val group = ThreadGroup(name)
+    val count = AtomicLong(0)
+
+    return {
+        object : Thread(group, "$name-${count.getAndIncrement()}") {
+            override fun run() {
+                it.run()
+            }
+        }
+    }
+}
+
+
 inline fun <T> Semaphore.acquiring(permits: Int = 1, run: () -> T): T {
     acquire(permits)
     try {

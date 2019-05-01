@@ -2,7 +2,6 @@ package pw.aru.core.music
 
 import com.mewna.catnip.entity.guild.Guild
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
-import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.beam.BeamAudioSourceManager
@@ -20,7 +19,9 @@ import pw.aru.lib.eventpipes.api.EventExecutor
 import pw.aru.lib.eventpipes.internal.DefaultKeyedEventPipe
 import pw.aru.libs.andeclient.entities.AndeClient
 import pw.aru.libs.andeclient.events.AndePlayerEvent
+import pw.aru.libs.andeclient.util.AudioTrackManager
 import pw.aru.utils.AruTaskExecutor.queue
+import pw.aru.utils.extensions.lang.threadGroupBasedFactory
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors.newCachedThreadPool
 
@@ -28,14 +29,16 @@ class MusicSystem(val andeClient: AndeClient, val db: AruDB) {
 
     val players = ConcurrentHashMap<Long, MusicPlayer>()
 
-    val playerOrderedExecutor = OrderedExecutor(newCachedThreadPool())
+    private val playerOrderedExecutor = OrderedExecutor(
+        newCachedThreadPool(threadGroupBasedFactory("MusicPlayerOrderedExecutor"))
+    )
     val pipeExecutor = EventExecutor.upgradeKeyed { key, runnable -> playerOrderedExecutor.submit(key, runnable) }
     val playerEventPipe = DefaultKeyedEventPipe<Long, AndePlayerEvent>(pipeExecutor)
 
-    val defaultPlayerManager = playerManager()
-    val patreonPlayerSources = playerManager()
-    val httpSafePlayerSource = playerManager()
-    val devPlayerSources = playerManager()
+    private val defaultPlayerSources = AudioTrackManager()
+    private val patreonPlayerSources = AudioTrackManager()
+    private val httpSafePlayerSource = AudioTrackManager()
+    private val devPlayerSources = AudioTrackManager()
 
     val sources: Map<ItemSource, AudioPlayerManager>
 
@@ -66,7 +69,7 @@ class MusicSystem(val andeClient: AndeClient, val db: AruDB) {
             configureRequests {
                 RequestConfig.copy(it).setCookieSpec(CookieSpecs.IGNORE_COOKIES).build()
             }
-        }.register(defaultPlayerManager)
+        }.register(defaultPlayerSources)
 
         YoutubeAudioSourceManager().apply {
             setPlaylistPageCount(128)
@@ -78,26 +81,24 @@ class MusicSystem(val andeClient: AndeClient, val db: AruDB) {
 
         SoundCloudAudioSourceManager()
             .apply { queue { updateClientId() } }
-            .register(defaultPlayerManager, patreonPlayerSources, devPlayerSources)
+            .register(defaultPlayerSources, patreonPlayerSources, devPlayerSources)
         BandcampAudioSourceManager()
-            .register(defaultPlayerManager, patreonPlayerSources, devPlayerSources)
+            .register(defaultPlayerSources, patreonPlayerSources, devPlayerSources)
         TwitchStreamAudioSourceManager()
-            .register(defaultPlayerManager, patreonPlayerSources, devPlayerSources)
+            .register(defaultPlayerSources, patreonPlayerSources, devPlayerSources)
         BeamAudioSourceManager()
-            .register(defaultPlayerManager, patreonPlayerSources, devPlayerSources)
+            .register(defaultPlayerSources, patreonPlayerSources, devPlayerSources)
 
         HttpAudioSourceManager()
             .register(httpSafePlayerSource, devPlayerSources)
 
         sources = mapOf(
-            DEFAULT to defaultPlayerManager,
+            DEFAULT to defaultPlayerSources,
             PATREON to patreonPlayerSources,
             HTTP_SAFE to httpSafePlayerSource,
             DEV to devPlayerSources
         )
     }
-
-    private fun playerManager(): AudioPlayerManager = DefaultAudioPlayerManager()
 
     private fun <T : AudioSourceManager> T.register(vararg managers: AudioPlayerManager) = apply {
         for (manager in managers) manager.registerSourceManager(this)
