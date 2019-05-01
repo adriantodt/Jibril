@@ -155,35 +155,48 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
 
     override fun onTrackQueuedEvent(event: TrackQueuedEvent) {
         event.player.textChannel?.run {
-            when (event.source) {
-                is MusicEventSource.Dashboard -> {
-                    TODO("onTrackQueuedEvent: source is Dashboard")
-                }
-                is MusicEventSource.Discord -> {
-                    TODO("onTrackQueuedEvent: source is Discord")
-                }
+            val who = when (event.source) {
+                is MusicEventSource.Dashboard -> "**${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**, on the Dashboard,"
+                is MusicEventSource.Discord -> "**${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**"
                 else -> {
                     logImpossibleSource(event)
-                    TODO("onTrackQueuedEvent: source is impoossible")
+                    throw IllegalStateException("wtf event source ${event.source}")
                 }
             }
+
+            val what = "`${event.track.info.title}` (${musicLength(event.track.info.length)})"
+
+            val where = when (event.track.data.trackLoadOptions.enqueueLoadMode) {
+                EnqueueLoadMode.DEFAULT -> "to the queue"
+                EnqueueLoadMode.NOW -> "to the start of the queue"
+                EnqueueLoadMode.NEXT -> "to the start of the queue"
+            }
+
+            sendMessage("$THUMBSUP1 $who added $what to $where.")
         }
     }
 
     override fun onPlaylistQueuedEvent(event: PlaylistQueuedEvent) {
         event.player.textChannel?.run {
-            when (event.source) {
-                is MusicEventSource.Dashboard -> {
-                    TODO("onPlaylistQueuedEvent: source is Dashboard")
-                }
-                is MusicEventSource.Discord -> {
-                    TODO("onPlaylistQueuedEvent: source is Discord")
-                }
+            val who = when (event.source) {
+                is MusicEventSource.Dashboard -> "**${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**, on the Dashboard,"
+                is MusicEventSource.Discord -> "**${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**"
                 else -> {
                     logImpossibleSource(event)
-                    TODO("onPlaylistQueuedEvent: source is impossible")
+                    throw IllegalStateException("wtf event source ${event.source}")
                 }
             }
+
+            val length = event.playlist.tracks.asSequence().map { it.info.length }.sum()
+            val what = "`${event.playlist.name}` (${musicLength(length)})"
+
+            val where = when (event.trackLoadOptions.enqueueLoadMode) {
+                EnqueueLoadMode.DEFAULT -> "to the queue"
+                EnqueueLoadMode.NOW -> "to the start of the queue"
+                EnqueueLoadMode.NEXT -> "to the start of the queue"
+            }
+
+            sendMessage("$THUMBSUP1 $who added $what to $where.")
         }
     }
 
@@ -522,7 +535,10 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
                 is MusicEventSource.Discord -> {
                     "**${event.source.member(event.player.guild)!!.effectiveName().safeUserInput()}**'s vote to $action"
                 }
-                else -> throw IllegalStateException("wtf event source")
+                else -> {
+                    logImpossibleSource(event)
+                    throw IllegalStateException("wtf event source ${event.source}")
+                }
             }
 
             val happened = if (event.added) " has been added." else " has been removed."

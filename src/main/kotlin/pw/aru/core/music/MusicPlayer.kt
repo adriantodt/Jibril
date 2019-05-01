@@ -125,17 +125,17 @@ class MusicPlayer(
         when (event.trackLoadOptions.enqueueLoadMode) {
             EnqueueLoadMode.NOW -> {
                 queue.offerFirst(musicTrack)
-                publish(TrackQueuedEvent(this, event.source, event.track))
+                publish(TrackQueuedEvent(this, event.source, musicTrack))
                 publish(SkipTrackEvent(event.source))
                 return
             }
             EnqueueLoadMode.DEFAULT -> {
                 queue.offerLast(musicTrack)
-                publish(TrackQueuedEvent(this, event.source, event.track))
+                publish(TrackQueuedEvent(this, event.source, musicTrack))
             }
             EnqueueLoadMode.NEXT -> {
                 queue.offerFirst(musicTrack)
-                publish(TrackQueuedEvent(this, event.source, event.track))
+                publish(TrackQueuedEvent(this, event.source, musicTrack))
             }
         }
 
@@ -155,17 +155,17 @@ class MusicPlayer(
         when (event.trackLoadOptions.enqueueLoadMode) {
             EnqueueLoadMode.NOW -> {
                 tracks.reversed().forEach { queue.offerFirst(it) }
-                publish(PlaylistQueuedEvent(this, event.source, event.playlist))
+                publish(PlaylistQueuedEvent(this, event.source, event.playlist, event.trackLoadOptions))
                 publish(SkipTrackEvent(event.source))
                 return
             }
             EnqueueLoadMode.DEFAULT -> {
                 tracks.forEach { queue.offerLast(it) }
-                publish(PlaylistQueuedEvent(this, event.source, event.playlist))
+                publish(PlaylistQueuedEvent(this, event.source, event.playlist, event.trackLoadOptions))
             }
             EnqueueLoadMode.NEXT -> {
                 tracks.reversed().forEach { queue.offerFirst(it) }
-                publish(PlaylistQueuedEvent(this, event.source, event.playlist))
+                publish(PlaylistQueuedEvent(this, event.source, event.playlist, event.trackLoadOptions))
             }
         }
 

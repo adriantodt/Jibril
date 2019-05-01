@@ -20,13 +20,14 @@ class LoadResultsEvent(
 class TrackQueuedEvent(
     player: MusicPlayer,
     source: MusicEventSource,
-    val track: AudioTrack
+    val track: MusicTrack
 ) : OutputMusicEvent(player, source)
 
 class PlaylistQueuedEvent(
     player: MusicPlayer,
     source: MusicEventSource,
-    val playlist: AudioPlaylist
+    val playlist: AudioPlaylist,
+    val trackLoadOptions: TrackLoadOptions
 ) : OutputMusicEvent(player, source)
 
 class ConnectErrorEvent(

@@ -25,6 +25,7 @@ import pw.aru.Aru.Bot.splashes
 import pw.aru.commands.games.manager.GameManager
 import pw.aru.core.CommandProcessor
 import pw.aru.core.CommandRegistry
+import pw.aru.core.GuildWebhookLogger
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.ICommandProvider
@@ -54,7 +55,23 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 class Bootstrap {
-    companion object : KLogging()
+    companion object : KLogging() {
+        @JvmStatic
+        fun main(args: Array<String>) {
+            File(".vertx").deleteRecursively()
+            AsyncInfoMonitor()
+            Locale.setDefault(Locale("en", "US"))
+
+            try {
+                Bootstrap().boot()
+            } catch (e: Exception) {
+                DiscordLogBack.disable()
+                Bootstrap.logger.error("Error during load!", e)
+                Bootstrap.logger.error("Impossible to continue, aborting...")
+                System.exit(-1)
+            }
+        }
+    }
 
     fun boot() {
         val scanResult = doScanResult()
@@ -72,7 +89,6 @@ class Bootstrap {
         }
 
         connectCatnip(catnip)
-
     }
 
     private fun doScanResult(): ScanResult {
@@ -251,6 +267,11 @@ class Bootstrap {
             if (++ready == shardCount) allShardsReady.complete(Unit)
         }
 
+        val config: AruConfig by kodein.instance()
+        val guildLogger = GuildWebhookLogger(config.serversWebhook)
+        catnip.on(DiscordEvent.GUILD_AVAILABLE, guildLogger::onGuildJoin)
+        catnip.on(DiscordEvent.GUILD_DELETE, guildLogger::onGuildLeave)
+
         allShardsReady.thenAcceptAsync {
             AruTaskExecutor.task(1, TimeUnit.MINUTES) {
                 for (i in 0 until shardCount) catnip.presence(
@@ -272,21 +293,5 @@ class Bootstrap {
 
     private fun connectCatnip(catnip: Catnip) {
         catnip.connect()
-    }
-
-}
-
-fun main() {
-    File(".vertx").deleteRecursively()
-    AsyncInfoMonitor()
-    Locale.setDefault(Locale("en", "US"))
-
-    try {
-        Bootstrap().boot()
-    } catch (e: Exception) {
-        DiscordLogBack.disable()
-        Bootstrap.logger.error("Error during load!", e)
-        Bootstrap.logger.error("Impossible to continue, aborting...")
-        System.exit(-1)
     }
 }
