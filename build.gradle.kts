@@ -91,20 +91,7 @@ const val aru_version = "$version"
 /**
  * User Agent
  */
-const val user_agent = "catnip/DiscordBot (Aru! $version)"
+const val user_agent = "Aru/Discord (Aru! $version)"
 """.trim()
     )
 }
-
-tasks {
-    register("runLocalRedis", Exec::class) {
-        workingDir("db")
-        commandLine("db/redis-server.exe", "./redis.conf")
-    }
-
-    register("runAndesite", Exec::class) {
-        workingDir("andesite")
-        commandLine("java", "-jar", "andesite.jar") //-node-0.13.1-win-x86-64
-    }
-}
-

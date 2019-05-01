@@ -15,4 +15,4 @@ const val aru_version = "3.0"
 /**
  * User Agent
  */
-const val user_agent = "catnip/DiscordBot (Aru! 3.0)"
+const val user_agent = "Aru/Discord (Aru! 3.0)"
