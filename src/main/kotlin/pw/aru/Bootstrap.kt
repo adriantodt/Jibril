@@ -119,6 +119,7 @@ class Bootstrap {
     private fun makeCatnipAsync(config: AruConfig): CompletableFuture<Catnip> {
         return Catnip.catnipAsync(
             CatnipOptions(config.botToken)
+                .memberChunkTimeout(15000L)
                 .cacheFlags(setOf(CacheFlag.DROP_GAME_STATUSES)) // I guess we don't need it
                 .presence(
                     Presence.of(
