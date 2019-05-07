@@ -146,7 +146,7 @@ class ImageboardCommand(
                                 //initial size to account for the description
                                 40 + image.width.toString().length + image.height.toString().length + image.rating.longName.capitalize().length + 2
                             )
-                            val tagsTaken = it.takeWhile { tag -> count.addAndGet(tag.length + 3) < 1900 }
+                            val tagsTaken = it.takeWhile { tag -> count.addAndGet(tag.length + 3) < 1800 }
 
                             if (tagsTaken.size != it.size) {
                                 tagsTaken.joinToString("`, `", "`", "`, ${it.size - tagsTaken.size} more ...")
