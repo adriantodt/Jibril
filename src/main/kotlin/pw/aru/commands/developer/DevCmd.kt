@@ -224,6 +224,8 @@ class DevCmd(override val kodein: Kodein) : ICommand, ICommand.Permission, IComm
             }
 
             send(sleepQuotes.random()).toCompletableFuture().join()
+
+            catnip.shutdown(true)
         } catch (ignored: Exception) {
         }
 

@@ -6,7 +6,6 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 import java.util.concurrent.CompletableFuture
-import pw.aru.main as bootstrapMain
 
 object DevEnvBootstrap {
     @JvmStatic
@@ -65,13 +64,21 @@ object DevEnvBootstrap {
                     }
                 }
 
+                Runtime.getRuntime().addShutdownHook(
+                    object : Thread("Kill-DevEnd") {
+                        override fun run() {
+                            redis.destroyForcibly()
+                            andesite.destroyForcibly()
+                        }
+                    }
+                )
             }
 
             Thread(devenv, ::startDevEnv, "DevEnv-Main").start()
 
             startupLock.join()
 
-            bootstrapMain()
+            Bootstrap.main()
         } catch (e: Exception) {
             DiscordLogBack.disable()
             Bootstrap.logger.error("Error during load!", e)

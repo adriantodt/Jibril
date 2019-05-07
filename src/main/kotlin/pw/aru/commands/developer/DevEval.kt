@@ -1,6 +1,5 @@
 package pw.aru.commands.developer
 
-import bsh.Interpreter
 import com.mewna.catnip.entity.message.Message
 import pw.aru.Aru.Bot.evaluatingQuotes
 import pw.aru.core.CommandRegistry
@@ -27,8 +26,7 @@ class DevEval(db: AruDB, registry: CommandRegistry) {
     }
 
     private val evals: Map<String, Evaluator> = mapOf(
-        "js" to JsEvaluator(db, registry),
-        "bsh" to BshEvaluator(db, registry)
+        "js" to JsEvaluator(db, registry)
     )
 
     private fun CommandContext.listEvals() {
@@ -110,19 +108,5 @@ class DevEval(db: AruDB, registry: CommandRegistry) {
         }
 
         private operator fun ScriptEngine.set(key: String, value: Any?) = put(key, value)
-    }
-
-    class BshEvaluator(private val db: AruDB, private val registry: CommandRegistry) : Evaluator {
-        override fun invoke(message: Message, code: String): Any? {
-            val engine = Interpreter()
-            engine["db"] = db
-            engine["registry"] = registry
-            engine["catnip"] = message.catnip()
-            engine["message"] = message
-            engine["guild"] = message.guild()
-            engine["channel"] = message.channel()
-
-            return engine.eval("import *;\n$code")
-        }
     }
 }

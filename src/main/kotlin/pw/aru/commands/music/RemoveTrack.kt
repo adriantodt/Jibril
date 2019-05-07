@@ -1,7 +1,6 @@
 package pw.aru.commands.music
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
-import org.apache.commons.lang3.StringUtils.replaceEach
 import pw.aru.commands.music.base.MusicPermissionCommand
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
@@ -9,6 +8,7 @@ import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
 import pw.aru.core.music.MusicPlayer
 import pw.aru.core.music.MusicSystem
+import pw.aru.utils.extensions.lang.replaceEach
 import pw.aru.utils.text.ERROR
 import pw.aru.utils.text.SUCCESS
 import java.util.concurrent.LinkedBlockingDeque
@@ -24,10 +24,10 @@ class RemoveTrack(musicSystem: MusicSystem) : MusicPermissionCommand(musicSystem
         val last = list.size.toString()
 
         for (param in args.split(' ')) {
-            val arg = replaceEach(
-                param,
-                arrayOf("first", "next", "last"),
-                arrayOf("1", "1", last)
+            val arg = param.replaceEach(
+                "first" to "1",
+                "next" to "1",
+                "last" to last
             )
 
             if (arg == "all") {

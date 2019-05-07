@@ -3,7 +3,7 @@ package pw.aru.utils
 import pw.aru.exported.user_agent
 import pw.aru.utils.extensions.lang.send
 import java.io.File
-import java.net.URI
+import java.net.URI.create
 import java.net.http.HttpClient
 import java.net.http.HttpResponse.BodyHandlers
 import java.util.concurrent.ConcurrentHashMap
@@ -23,10 +23,12 @@ class URLCache(private val httpClient: HttpClient, private var cacheDir: File) {
 
         //Download and Cache
 
-        httpClient.send(BodyHandlers.ofFile(file.toPath())) {
-            uri(URI.create(url))
-            header("User-Agent", user_agent)
-        }
+        httpClient.runCatching {
+            send(BodyHandlers.ofFile(file.toPath())) {
+                uri(create(url))
+                header("User-Agent", user_agent)
+            }
+        }.onFailure { throw RuntimeException("Error while caching $url", it) }
 
         return file
     }

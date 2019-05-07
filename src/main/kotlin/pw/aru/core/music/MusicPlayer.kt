@@ -10,7 +10,6 @@ import com.mewna.catnip.shard.DiscordEvent
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist
-import gg.amy.catnip.utilities.waiter.EventExtension
 import pw.aru.core.music.entities.*
 import pw.aru.core.music.events.*
 import pw.aru.core.music.events.StopMusicEvent.Reason.SILENT
@@ -28,14 +27,14 @@ import pw.aru.utils.AruTaskExecutor.queue
 import pw.aru.utils.extensions.lang.getValue
 import pw.aru.utils.extensions.lang.roundRobinFlatten
 import pw.aru.utils.extensions.lib.humanUsers
-import reactor.adapter.rxjava.toMono
+import reactor.adapter.rxjava.toFlux
+import reactor.core.publisher.toMono
 import java.lang.System.currentTimeMillis
 import java.net.URL
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.LinkedBlockingDeque
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
@@ -251,8 +250,9 @@ class MusicPlayer(
     override fun onSkipTrackEvent(event: SkipTrackEvent) {
         eagerHandle(event)
 
-        publish(TrackSkippedEvent(this, event.source))
-        startNext(currentTrack, true)
+        val maySkip = andePlayer.playingTrack() != null
+        if (maySkip) publish(TrackSkippedEvent(this, event.source))
+        startNext(currentTrack, maySkip)
     }
 
     override fun onStopMusicEvent(event: StopMusicEvent) {
@@ -311,9 +311,9 @@ class MusicPlayer(
         var channelId = voiceChannel!!.idAsLong()
         val selfId = catnip.selfUser()!!.idAsLong()
 
-        catnip.extensionManager().extension(EventExtension::class.java)!!
-            .waitForEvent(DiscordEvent.VOICE_STATE_UPDATE)
-            .condition {
+        catnip.observe(DiscordEvent.VOICE_STATE_UPDATE)
+            .toFlux()
+            .filter {
                 when {
                     //someone joined
                     it.channelIdAsLong() == channelId && it.userIdAsLong() != selfId -> {
@@ -333,16 +333,18 @@ class MusicPlayer(
                     else -> false
                 }
             }
-            .timeout(2, TimeUnit.MINUTES) {
-                if (destroyed) return@timeout
-
-                stop(MusicStopReason.LeftAlone)
+            .timeout(Duration.ofMinutes(2)) {
+                if (!destroyed) {
+                    stop(MusicStopReason.LeftAlone)
+                }
             }
-            .action {
-                if (destroyed) return@action
-
-                if (it.channel() != null) {
-                    publish(ListenersLeftEvent(this, ListenersLeftState.RETURNED))
+            .toMono()
+            .toFuture()
+            .thenAcceptAsync {
+                if (!destroyed) {
+                    if (it.channel() != null) {
+                        publish(ListenersLeftEvent(this, ListenersLeftState.RETURNED))
+                    }
                 }
             }
     }
@@ -524,15 +526,18 @@ class MusicPlayer(
         }
 
         val nextVsu = catnip.observe(DiscordEvent.VOICE_SERVER_UPDATE)
+            .toFlux()
             .filter { it.guildIdAsLong() == guildId }
-            .singleOrError().toMono()
+            .toMono()
+            .cache()
 
-        catnip.openVoiceConnection(guildId.toString(), memberVoiceChannel.id())
+        catnip.openVoiceConnection(guildId, memberVoiceChannel.idAsLong())
 
-        val vsu = nextVsu.block(Duration.ofSeconds(45))
+        val vsu = nextVsu.runCatching { block(Duration.ofSeconds(45)) }.getOrNull()
 
         if (vsu == null) {
             publish(ConnectErrorEvent(this, source, ConnectionErrorType.BOT_CONNECT_TIMEOUT))
+            catnip.closeVoiceConnection(guildId)
             return false
         }
 
@@ -570,7 +575,7 @@ class MusicPlayer(
         }
 
         lastTrackData = next.data
-        (lastTrackData?.source as? MusicEventSource.Discord)?.textChannel?.let { lastTextChannelId = it.idAsLong() }
+        (next.data.source as? MusicEventSource.Discord)?.textChannel?.let { lastTextChannelId = it.idAsLong() }
         andePlayer.controls().play().apply {
             track(next.track)
             val (_, _, volume, _, startTimestamp, endTimestamp) = next.data.trackLoadOptions

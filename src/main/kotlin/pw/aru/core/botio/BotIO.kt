@@ -1,6 +1,7 @@
 package pw.aru.core.botio
 
 import com.mewna.catnip.Catnip
+import mu.KLogging
 import org.json.JSONObject
 import pw.aru.core.executor.Executable
 import pw.aru.core.executor.RunAtStartup
@@ -11,11 +12,17 @@ import java.util.concurrent.TimeUnit
 
 @RunAtStartup
 class BotIO(val io: AruIO, val catnip: Catnip) : Executable {
+    companion object : KLogging()
+
     override fun run() {
         io.configure {
-            feed(AUXILIARY, "startup") { publishStats() }
+            feed(AUXILIARY, "startup") {
+                logger.info("Auxiliary Online, send stats.")
+                publishStats()
+            }
         }
 
+        logger.info("Sending startup!")
         io.sendFeed(
             "startup",
             JSONObject()

@@ -16,7 +16,6 @@ import java.io.Closeable
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.Executors.newSingleThreadExecutor
 
 class AruIO(val db: AruDB) : Closeable {
@@ -27,10 +26,8 @@ class AruIO(val db: AruDB) : Closeable {
 
     private val feedPipeExecutor by lazy { newSingleThreadExecutor(threadGroupBasedFactory("AruIO-feedPipeExecutor")) }
     private val feedPipe by lazy { newAsyncPipe<FeedMessage>(feedPipeExecutor) }
-    private val feedWhiteList = CopyOnWriteArraySet<String>()
     private val commandPipeExecutor by lazy { newSingleThreadExecutor(threadGroupBasedFactory("AruIO-commandPipeExecutor")) }
     private val commandPipe by lazy { newAsyncPipe<CommandCall>(commandPipeExecutor) }
-    private val commandWhiteList = CopyOnWriteArraySet<String>()
     private val subConnection by lazy { db.client.connectPubSub() }
 
     override fun close() {
@@ -38,14 +35,12 @@ class AruIO(val db: AruDB) : Closeable {
             feedHandlers.clear()
             feedPipe.close()
             feedPipeExecutor.shutdown()
-            feedWhiteList.clear()
         }
 
         if (receiveCommands) {
             commandHandlers.clear()
             commandPipe.close()
             commandPipeExecutor.shutdown()
-            commandWhiteList.clear()
         }
 
         if (receiveFeeds || receiveCommands) {
@@ -142,6 +137,7 @@ class AruIO(val db: AruDB) : Closeable {
         db.conn.async().publish(
             "${db.side.moduleName}:feed.secondary",
             jsonStringOf(
+                "source" to db.side,
                 "type" to type,
                 "data" to data
             )
@@ -158,17 +154,15 @@ class AruIO(val db: AruDB) : Closeable {
         subConnection.addListener(
             object : RedisPubSubAdapter<String, String>() {
                 override fun message(channel: String, message: String) {
-                    if (channel in feedWhiteList) {
-                        val j = message.runCatching { JSONObject(message) }.getOrNull() ?: return
+                    val j = message.runCatching { JSONObject(message) }.getOrNull() ?: return
 
-                        feedPipe.publish(
-                            FeedMessage(
-                                j.optEnum(AruSide::class.java, "source") ?: return,
-                                j.optString("type") ?: return,
-                                j.optJSONObject("data") ?: return
-                            )
+                    feedPipe.publish(
+                        FeedMessage(
+                            j.optEnum(AruSide::class.java, "source") ?: return,
+                            j.optString("type") ?: return,
+                            j.optJSONObject("data") ?: return
                         )
-                    }
+                    )
                 }
             }
         )
@@ -191,18 +185,16 @@ class AruIO(val db: AruDB) : Closeable {
         subConnection.addListener(
             object : RedisPubSubAdapter<String, String>() {
                 override fun message(channel: String, message: String) {
-                    if (channel in commandWhiteList) {
-                        val j = message.runCatching { JSONObject(message) }.getOrNull() ?: return
+                    val j = message.runCatching { JSONObject(message) }.getOrNull() ?: return
 
-                        commandPipe.publish(
-                            CommandCall(
-                                j.optEnum(AruSide::class.java, "source") ?: return,
-                                j.optString("id") ?: return,
-                                j.optString("method") ?: return,
-                                j.optJSONObject("data") ?: return
-                            )
+                    commandPipe.publish(
+                        CommandCall(
+                            j.optEnum(AruSide::class.java, "source") ?: return,
+                            j.optString("id") ?: return,
+                            j.optString("method") ?: return,
+                            j.optJSONObject("data") ?: return
                         )
-                    }
+                    )
                 }
             }
         )

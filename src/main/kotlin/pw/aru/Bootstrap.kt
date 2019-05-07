@@ -6,6 +6,7 @@ import com.github.natanbc.weeb4j.TokenType
 import com.github.natanbc.weeb4j.Weeb4J
 import com.mewna.catnip.Catnip
 import com.mewna.catnip.CatnipOptions
+import com.mewna.catnip.cache.CacheFlag
 import com.mewna.catnip.entity.user.Presence
 import com.mewna.catnip.shard.DiscordEvent
 import gg.amy.catnip.utilities.waiter.EventExtension
@@ -57,7 +58,7 @@ import kotlin.concurrent.thread
 class Bootstrap {
     companion object : KLogging() {
         @JvmStatic
-        fun main(args: Array<String>) {
+        fun main(vararg args: String) {
             File(".vertx").deleteRecursively()
             AsyncInfoMonitor()
             Locale.setDefault(Locale("en", "US"))
@@ -118,6 +119,7 @@ class Bootstrap {
     private fun makeCatnipAsync(config: AruConfig): CompletableFuture<Catnip> {
         return Catnip.catnipAsync(
             CatnipOptions(config.botToken)
+                .cacheFlags(setOf(CacheFlag.DROP_GAME_STATUSES)) // I guess we don't need it
                 .presence(
                     Presence.of(
                         Presence.OnlineStatus.DND,
@@ -269,7 +271,7 @@ class Bootstrap {
 
         val config: AruConfig by kodein.instance()
         val guildLogger = GuildWebhookLogger(config.serversWebhook)
-        catnip.on(DiscordEvent.GUILD_AVAILABLE, guildLogger::onGuildJoin)
+        catnip.on(DiscordEvent.GUILD_CREATE, guildLogger::onGuildJoin)
         catnip.on(DiscordEvent.GUILD_DELETE, guildLogger::onGuildLeave)
 
         allShardsReady.thenAcceptAsync {

@@ -106,15 +106,20 @@ inline operator fun Appendable.plusAssign(other: Char) {
 }
 
 
-inline fun <E> List<E>.random(): E = this[Random.nextInt(this.size)]
+inline fun <E> List<E>.random(): E = this[randomIndex(this.size)]
 
-inline fun <E> List<E>.randomOrNull(): E? = this.getOrNull(Random.nextInt(this.size))
+inline fun <E> List<E>.randomOrNull(): E? = this.getOrNull(randomIndex(this.size))
 
-inline fun <E> Array<E>.random(): E = this[Random.nextInt(this.size)]
+inline fun <E> Array<E>.random(): E = this[randomIndex(this.size)]
 
-inline fun <E> Array<E>.randomOrNull(): E? = this.getOrNull(Random.nextInt(this.size))
+inline fun <E> Array<E>.randomOrNull(): E? = this.getOrNull(randomIndex(this.size))
 
 inline fun <E> randomOf(vararg objects: E): E = objects.random()
+
+@PublishedApi
+internal inline fun randomIndex(max: Int): Int {
+    return if (max == 0) 0 else Random.nextInt(max)
+}
 
 fun <T> Iterable<Iterable<T>>.roundRobinFlatten(): List<T> {
     val result = ArrayList<T>()

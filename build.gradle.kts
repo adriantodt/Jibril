@@ -1,13 +1,15 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.3.30"
+    kotlin("jvm") version "1.3.31"
     application
+    id("com.github.johnrengelman.shadow") version "5.0.0"
     id("com.github.ben-manes.versions") version "0.21.0"
 }
 
 group = "pw.aru"
-version = "3.0"
+version = "3.0.4"
 
 repositories {
     jcenter()
@@ -27,15 +29,18 @@ dependencies {
     compile(project("aruCore"))
 
     compile("com.github.mewna:catnip:1.2.3")
-    compile("com.github.queer:catnip-utilities:360b876")
+    compile("com.github.queer:catnip-utilities:360b876") {
+        isTransitive = false
+    }
     compile("io.projectreactor.addons:reactor-adapter:3.2.2.RELEASE")
     compile("io.reactivex.rxjava2:rxkotlin:2.2.0")
 
-
     // Main APIs
-    compile("com.sedmelluq:lavaplayer:1.3.16")
     compile("com.github.natanbc:weeb4j:3.5")
     compile("pw.aru.libs:andeclient:1.3.2")
+    compile("com.sedmelluq:lavaplayer:1.3.17") {
+        exclude(group = "com.sedmelluq", module = "lavaplayer-natives")
+    }
 
     // Useful
     compile("net.kodehawa:imageboard-api:2.0.7")
@@ -48,17 +53,10 @@ dependencies {
     compile("pw.aru.hg:hg-engine:1.0")
     compile("pw.aru.hg:hg-loader:1.0")
 
-    //Helping stuff
-    compile("org.apache.commons:commons-lang3:3.8.1")
-    compile("org.apache.commons:commons-collections4:4.1")
-    compile("org.apache-extras.beanshell:bsh:2.0b6")
-
     //Scanning and Injections
     compile("io.github.classgraph:classgraph:4.8.24")
     compile("org.kodein.di:kodein-di-generic-jvm:6.1.0")
     compile("pw.aru.libs:kodein-jit-bindings:2.2")
-
-    //Logging
 }
 
 tasks.withType<KotlinCompile> {
@@ -66,7 +64,12 @@ tasks.withType<KotlinCompile> {
 }
 
 configure<ApplicationPluginConvention> {
-    mainClassName = "pw.aru.Init"
+    mainClassName = "pw.aru.Bootstrap"
+}
+
+tasks.withType<ShadowJar> {
+    archiveClassifier.set("")
+    configurations = listOf(project.configurations.runtime.get())
 }
 
 with(rootProject.file("src/main/kotlin/pw/aru/exported/exported.kt")) {

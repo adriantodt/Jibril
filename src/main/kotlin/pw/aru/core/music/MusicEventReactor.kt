@@ -6,7 +6,6 @@ import com.mewna.catnip.shard.DiscordEvent
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import gg.amy.catnip.utilities.FutureUtil
-import gg.amy.catnip.utilities.waiter.EventExtension
 import mu.KLogging
 import pw.aru.core.commands.help.prefix
 import pw.aru.core.music.entities.*
@@ -23,6 +22,7 @@ import pw.aru.utils.extensions.discordapp.safeUserInput
 import pw.aru.utils.extensions.lang.toStringReflexively
 import pw.aru.utils.extensions.lib.sendEmbed
 import pw.aru.utils.text.*
+import reactor.adapter.rxjava.toMono
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
@@ -116,37 +116,40 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
                     "${index + 1}\u20E3 **[${it.info.title}](${it.info.uri}) (${musicLength(it.info.length)})**"
                 }
             )
-        }.thenAccept {
+        }.thenAccept { m ->
             val indices = dialog.tracks.indices.map { i -> "${i + 1}\u20E3" }
 
-            FutureUtil.awaitAll(indices.map(it::react)).thenRun { it.react(X) }
+            FutureUtil.awaitAll(indices.map(m::react)).thenRun { m.react(X) }
 
-            it.catnip().extension(EventExtension::class.java)!!
-                .waitForEvent(DiscordEvent.MESSAGE_REACTION_ADD)
-                .condition { e ->
-                    e.channelId() == it.channelId() &&
-                            e.messageId() == it.id() &&
+            m.catnip().observe(DiscordEvent.MESSAGE_REACTION_ADD)
+                .filter { e ->
+                    e.channelId() == m.channelId() &&
+                            e.messageId() == m.id() &&
                             e.userId() == author.id() &&
                             (e.emoji().name() == X || indices.contains(e.emoji().name()))
                 }
+                .firstElement()
                 .timeout(30, TimeUnit.SECONDS) {
+                    it.onComplete()
                     channel.sendMessage("$DISAPPOINTED Music choice canceled!")
 
                     if (player.currentTrack == null) {
                         player.publish(StopMusicEvent(MusicEventSource.MusicSystem, MUSIC_SELECTION_CANCELLED))
                     }
                 }
-                .action { e ->
+                .toMono()
+                .toFuture()
+                .thenAccept { e ->
                     if (e.emoji().name() == X) {
                         channel.sendMessage("$DISAPPOINTED Music choice canceled!")
-                        it.delete()
+                        m.delete()
 
                         if (player.currentTrack == null) {
                             player.publish(StopMusicEvent(MusicEventSource.MusicSystem, MUSIC_SELECTION_CANCELLED))
                         }
                     } else {
                         val selected = dialog.tracks[indices.indexOf(e.emoji().name())]
-                        it.delete()
+                        m.delete()
                         player.publish(EnqueueTrackEvent(source, selected, trackLoadOptions))
                     }
                 }

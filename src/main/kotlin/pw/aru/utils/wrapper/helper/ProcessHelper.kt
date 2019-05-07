@@ -1,6 +1,6 @@
 package pw.aru.utils.wrapper.helper
 
-import org.apache.commons.lang3.SystemUtils
+import pw.aru.utils.OSUtils
 import java.io.File
 
 open class ProcessHelper(
@@ -8,6 +8,6 @@ open class ProcessHelper(
     winExec: String,
     workDir: String
 ) {
-    val executable: String = if (SystemUtils.IS_OS_WINDOWS) winExec else unixExec
+    val executable: String = if (OSUtils.isWindows) winExec else unixExec
     val workDir: File = File(workDir).apply { mkdirs() }
 }

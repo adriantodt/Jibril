@@ -4,8 +4,7 @@ import ch.qos.logback.classic.Level.*
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.pattern.CompositeConverter
 import ch.qos.logback.core.pattern.color.ANSIConstants.*
-import org.apache.commons.lang3.SystemUtils.IS_OS_UNIX
-import org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS_10
+import pw.aru.utils.OSUtils
 
 class LevelHighlighter : CompositeConverter<ILoggingEvent>() {
 
@@ -20,6 +19,7 @@ class LevelHighlighter : CompositeConverter<ILoggingEvent>() {
             WARN_INT -> BOLD + YELLOW_FG
             DEBUG_INT -> MAGENTA_FG
             INFO_INT -> CYAN_FG
+            TRACE_INT -> BOLD + BLUE_FG
             else -> DEFAULT_FG
         }
     }
@@ -27,6 +27,6 @@ class LevelHighlighter : CompositeConverter<ILoggingEvent>() {
     companion object {
         private const val resetColor = "${ESC_START}0;$DEFAULT_FG$ESC_END"
         private val RUNNING_ON_INTELLIJ = System.getProperty("java.class.path").contains("idea_rt.jar")
-        private val isSupported = IS_OS_UNIX || IS_OS_WINDOWS_10 || RUNNING_ON_INTELLIJ
+        private val isSupported = OSUtils.isUnix || OSUtils.isOS("Windows 10") || RUNNING_ON_INTELLIJ
     }
 }

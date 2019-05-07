@@ -5,6 +5,7 @@ import com.mewna.catnip.entity.builder.EmbedBuilder
 import com.mewna.catnip.entity.channel.GuildChannel
 import com.mewna.catnip.entity.guild.Guild
 import com.mewna.catnip.entity.message.MessageOptions
+import com.mewna.catnip.util.Utils.parseWebhook
 import pw.aru.utils.Colors
 import pw.aru.utils.extensions.lang.multiline
 import pw.aru.utils.extensions.lang.plusAssign
@@ -72,7 +73,10 @@ class GuildWebhookLogger(private val webhook: String) {
     }
 
     private fun sendEmbed(catnip: Catnip, builder: EmbedBuilder.() -> Unit) {
-        catnip.parseWebhook(webhook)
-            .thenAccept { it.executeWebhook(MessageOptions().embed(embed(init = builder))) }
+        val (id, token) = parseWebhook(webhook)
+
+        catnip.rest().webhook().executeWebhook(
+            id, token, MessageOptions().embed(embed(init = builder))
+        )
     }
 }

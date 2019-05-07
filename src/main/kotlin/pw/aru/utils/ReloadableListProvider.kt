@@ -1,8 +1,8 @@
 package pw.aru.utils
 
-import org.apache.commons.collections4.list.AbstractListDecorator
 import java.io.File
 import java.lang.ref.WeakReference
+import java.util.concurrent.CopyOnWriteArrayList
 
 interface Reloadable {
     fun reload()
@@ -29,12 +29,13 @@ class ReloadableListProvider : Reloadable {
     }
 }
 
-class ReloadableList(private val file: File) : AbstractListDecorator<String>(), Reloadable {
+class ReloadableList(private val file: File) : CopyOnWriteArrayList<String>(), Reloadable {
     init {
         reload()
     }
 
     override fun reload() {
-        setCollection(file.readLines())
+        clear()
+        addAll(file.readLines())
     }
 }

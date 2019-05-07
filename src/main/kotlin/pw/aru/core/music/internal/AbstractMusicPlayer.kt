@@ -2,6 +2,7 @@ package pw.aru.core.music.internal
 
 import com.mewna.catnip.Catnip
 import com.mewna.catnip.shard.DiscordEvent
+import io.vertx.core.eventbus.MessageConsumer
 import mu.KLogging
 import pw.aru.core.music.MusicSystem
 import pw.aru.core.music.entities.MusicEventSource
@@ -27,13 +28,15 @@ abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, gui
     private val closeableRefs = newSetFromMap<Closeable>(ConcurrentHashMap())
 
     init {
-        inputPipe.subscribe(::onInputEvent)
-        musicSystem.playerEventPipe.subscribe(guildId, ::onAndePlayerEvent)
+        closeableRefs += inputPipe.subscribe(::onInputEvent)
+        closeableRefs += musicSystem.playerEventPipe.subscribe(guildId, ::onAndePlayerEvent)
         catnip.on(DiscordEvent.VOICE_STATE_UPDATE) {
-            if (it.userIdAsLong() == catnip.selfUser()!!.idAsLong() && it.guildIdAsLong() == guildId && it.channelIdAsLong() == 0L) {
-                publish(StopMusicEvent(MusicEventSource.MusicSystem, CHANNEL_DELETED))
+            if (it.userIdAsLong() == catnip.selfUser()!!.idAsLong()) {
+                if (it.guildIdAsLong() == guildId && it.channelIdAsLong() == 0L) {
+                    publish(StopMusicEvent(MusicEventSource.MusicSystem, CHANNEL_DELETED))
+                }
             }
-        }
+        }.asCloseable()
     }
 
     private fun onInputEvent(event: InputMusicEvent) {
@@ -126,5 +129,11 @@ abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, gui
 
     fun publish(event: InputMusicEvent) {
         inputPipe.publish(event)
+    }
+}
+
+private fun <T> MessageConsumer<T>.asCloseable(): Closeable {
+    return Closeable {
+        unregister()
     }
 }

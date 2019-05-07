@@ -23,7 +23,7 @@ fun Args.tryTakeTimeMillis(): Long? {
             }
             colonBased.matches(it) -> {
                 colonBasedReader.findAll(it).map { m -> m.groupValues[1].toLong() }.toList().asReversed()
-                    .zip(TimeUnit.values().asIterable().drop(4)) { v, u -> u.toMillis(v) }.sum() to true
+                    .zip(TimeUnit.values().drop(3)) { v, u -> u.toMillis(v) }.sum() to true
             }
             else -> null to false
         }

@@ -19,7 +19,7 @@ import pw.aru.utils.text.GAME_DIE
 @Command("dice", "roll")
 class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider, ICommand.CustomHandler,
     ICommand.CustomDiscreteHandler {
-    private val dicePattern = Regex("\\d+?[Dd]\\d+")
+    private val dicePattern = Regex("\\d*[Dd]\\d+")
     override val category = Category.FUN
 
     fun resolveRoll(args: String, simple: Boolean = false): String {
