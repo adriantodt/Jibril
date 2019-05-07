@@ -27,6 +27,7 @@ fun main() {
             log.info { "devIO received hello" }
             devIO.sendFeed("bye")
             log.info { "devIO sent bye" }
+            System.exit(0)
         }
     }
 
@@ -34,6 +35,6 @@ fun main() {
     devIO.sendFeed("hi")
     log.info { "devIO sent hi" }
 
-
+    //block main thread so java doesn't sleep
     Object().let { synchronized(it) { it.wait() } }
 }
