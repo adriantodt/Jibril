@@ -35,6 +35,6 @@ fun main() {
     devIO.sendFeed("hi")
     log.info { "devIO sent hi" }
 
-    //block main thread so java doesn't sleep
+    //block main thread so java doesn't commit System.exit
     Object().let { synchronized(it) { it.wait() } }
 }
