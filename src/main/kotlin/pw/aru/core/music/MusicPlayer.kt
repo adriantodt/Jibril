@@ -272,7 +272,7 @@ class MusicPlayer(
     override fun onToggleVoteEvent(event: ToggleVoteEvent) {
         eagerHandle(event)
 
-        val votes = voteMap[event.type]!!
+        val votes = voteMap.getOrPut(event.type, ::HashSet)
 
         val id = event.source.member(guild)?.idAsLong()
             ?: throw IllegalStateException("wtf event source is ${event.source}")
