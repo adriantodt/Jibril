@@ -99,7 +99,7 @@ class HelpCmd(private val registry: CommandRegistry) : ICommand, ICommand.HelpDi
                                 permissions
                             ))
                         }
-                        .partition { (c) -> c.nsfw() }
+                        .partition { (c) -> !channel.nsfw() && c.nsfw() }
                         .apply { count += first.size }
                         .second.asSequence()
                         .map { it.value[0] }
