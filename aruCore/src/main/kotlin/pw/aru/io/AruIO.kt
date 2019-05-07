@@ -1,6 +1,7 @@
 package pw.aru.io
 
 import io.lettuce.core.pubsub.RedisPubSubAdapter
+import mu.KLogging
 import org.json.JSONObject
 import pw.aru.db.AruDB
 import pw.aru.io.dsl.AruIOConfigurator
@@ -16,14 +17,20 @@ import java.io.Closeable
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.Executors.newSingleThreadExecutor
 
 class AruIO(val db: AruDB) : Closeable {
+    companion object : KLogging() {
+        private val EMPTY = JSONObject()
+    }
+
     private var receiveFeeds = false
     private val feedHandlers = CopyOnWriteArrayList<FeedConsumer>()
     private var receiveCommands = false
     private val commandHandlers = CopyOnWriteArrayList<CallHandler>()
 
+    private val feedWhiteList = CopyOnWriteArraySet<String>()
     private val feedPipeExecutor by lazy { newSingleThreadExecutor(threadGroupBasedFactory("AruIO-feedPipeExecutor")) }
     private val feedPipe by lazy { newAsyncPipe<FeedMessage>(feedPipeExecutor) }
     private val commandPipeExecutor by lazy { newSingleThreadExecutor(threadGroupBasedFactory("AruIO-commandPipeExecutor")) }
@@ -31,7 +38,10 @@ class AruIO(val db: AruDB) : Closeable {
     private val subConnection by lazy { db.client.connectPubSub() }
 
     override fun close() {
+        logger.trace { "aruIO received close, cleaning up..." }
+
         if (receiveFeeds) {
+            feedWhiteList.clear()
             feedHandlers.clear()
             feedPipe.close()
             feedPipeExecutor.shutdown()
@@ -76,7 +86,10 @@ class AruIO(val db: AruDB) : Closeable {
 
         if (setupFeeds) setupFeedHandle()
 
-        subConnection.sync().subscribe(*targets.map { "${it.moduleName}:channel.feed" }.toTypedArray())
+        val channels = targets.map { "${it.moduleName}:channel.feed" }
+        feedWhiteList += channels
+        logger.trace { "listening to $channels for feeds" }
+        subConnection.sync().subscribe(*channels.toTypedArray())
     }
 
     fun listenCommands() {
@@ -85,6 +98,7 @@ class AruIO(val db: AruDB) : Closeable {
 
         if (setupCommands) setupCommandHandle()
 
+        logger.trace { "listening for commands" }
         subConnection.sync().subscribe("${db.side.moduleName}:channel.input")
     }
 
@@ -96,7 +110,8 @@ class AruIO(val db: AruDB) : Closeable {
         commandHandlers += handler
     }
 
-    fun sendCommand(target: AruSide, method: String, data: JSONObject): CommandResult {
+    fun sendCommand(target: AruSide, method: String, data: JSONObject = EMPTY): CommandResult {
+        logger.trace { "sending command to $target | raw is $method, $data" }
         val inputChannel = "${target.moduleName}:channel.input"
         val outputChannel = "${target.moduleName}:channel.output"
         val cmdId = UUID.randomUUID().toString()
@@ -106,8 +121,9 @@ class AruIO(val db: AruDB) : Closeable {
             .filter { it.channel == outputChannel }
             .map { it.message.runCatching(::JSONObject).getOrNull() }
             .filter { it?.optString("id") == cmdId }
+            .cache()
 
-        db.conn.async().publish(
+        db.conn.sync().publish(
             inputChannel,
             jsonStringOf(
                 "source" to db.side,
@@ -133,11 +149,11 @@ class AruIO(val db: AruDB) : Closeable {
         }
     }
 
-    fun sendFeed(type: String, data: JSONObject) {
-        db.conn.async().publish(
-            "${db.side.moduleName}:feed.secondary",
+    fun sendFeed(type: String, data: JSONObject = EMPTY) {
+        logger.trace { "sending feed | raw is $type, $data" }
+        db.conn.sync().publish(
+            "${db.side.moduleName}:channel.feed",
             jsonStringOf(
-                "source" to db.side,
                 "type" to type,
                 "data" to data
             )
@@ -145,6 +161,8 @@ class AruIO(val db: AruDB) : Closeable {
     }
 
     private fun setupFeedHandle() {
+        logger.trace { "setting up feed handle" }
+
         feedPipe.subscribe {
             for (handler in feedHandlers) {
                 it.runCatching(handler)
@@ -154,21 +172,28 @@ class AruIO(val db: AruDB) : Closeable {
         subConnection.addListener(
             object : RedisPubSubAdapter<String, String>() {
                 override fun message(channel: String, message: String) {
-                    val j = message.runCatching { JSONObject(message) }.getOrNull() ?: return
+                    if (channel in feedWhiteList) {
+                        logger.trace { "new feed received | raw is $channel, $message" }
+                        val j = message.runCatching { JSONObject(message) }.getOrNull() ?: return
 
-                    feedPipe.publish(
-                        FeedMessage(
-                            j.optEnum(AruSide::class.java, "source") ?: return,
-                            j.optString("type") ?: return,
-                            j.optJSONObject("data") ?: return
+                        val moduleName = channel.splitToSequence(':').first()
+                        AruSide.values().first { it.moduleName == moduleName }
+
+                        feedPipe.publish(
+                            FeedMessage(
+                                AruSide.values().first { it.moduleName == moduleName },
+                                j.optString("type") ?: return,
+                                j.optJSONObject("data") ?: return
+                            )
                         )
-                    )
+                    }
                 }
             }
         )
     }
 
     private fun setupCommandHandle() {
+        logger.trace { "setting up command handle" }
         commandPipe.subscribe {
             for (handler in commandHandlers) {
                 val response = it.runCatching(handler).getOrNull()
@@ -184,7 +209,10 @@ class AruIO(val db: AruDB) : Closeable {
 
         subConnection.addListener(
             object : RedisPubSubAdapter<String, String>() {
+                private val ourChannel = "${db.side.moduleName}:channel.input"
                 override fun message(channel: String, message: String) {
+                    if (channel != ourChannel) return
+                    logger.trace { "new command received | raw is $channel, $message" }
                     val j = message.runCatching { JSONObject(message) }.getOrNull() ?: return
 
                     commandPipe.publish(

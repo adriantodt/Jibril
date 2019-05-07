@@ -2,27 +2,22 @@ package pw.aru.sides
 
 enum class AruSide(val moduleName: String) {
     MAIN(
-        "mainbot"
+        "pw.aru.mainbot"
     ),
 
     DEV(
-        "devbot"
+        "pw.aru.devbot"
     ),
 
     PATREON(
-        "patreonbot"
+        "pw.aru.patreonbot"
     ),
 
     WEB(
-        "web"
+        "pw.aru.web"
     ),
 
     AUXILIARY(
-        "auxiliary"
-    ),
-
-    @Deprecated("Deprecated side")
-    SECONDARY(
-        "secondary"
+        "pw.aru.auxiliary"
     )
 }
