@@ -6,12 +6,27 @@ import com.mewna.catnip.entity.channel.GuildChannel
 import com.mewna.catnip.entity.guild.Guild
 import com.mewna.catnip.entity.message.MessageOptions
 import com.mewna.catnip.util.Utils.parseWebhook
+import mu.KLogging
+import org.apache.commons.lang3.tuple.ImmutablePair
 import pw.aru.utils.Colors
 import pw.aru.utils.extensions.lang.multiline
 import pw.aru.utils.extensions.lang.plusAssign
 import pw.aru.utils.extensions.lib.embed
+import java.util.regex.Pattern
 
-class GuildWebhookLogger(private val webhook: String) {
+class GuildWebhookLogger(webhook: String) {
+    companion object : KLogging()
+
+    val id: String
+    val token: String
+
+    init {
+        val matcher = Pattern.compile("https://discordapp\\.com/api/webhooks/(\\d+)/([\\w\\W]+)").matcher(webhook)
+        matcher.find()
+        id = matcher.group(1)
+        token = matcher.group(2)
+    }
+
     fun onGuildJoin(guild: Guild) {
         sendEmbed(guild.catnip()) {
             author("AruLog | New Server")
@@ -25,7 +40,7 @@ class GuildWebhookLogger(private val webhook: String) {
                 "**M/TC/VC**: ${guild.memberCount()}/${guild.channels().count(GuildChannel::isText)}/${guild.channels().count(
                     GuildChannel::isVoice
                 )}",
-                "\u25AB **Region**: ${guild.region()}",
+                "\u25AB **Region**: `${guild.region()}`",
                 "\u25AB **Owner**: ${guild.owner().user().discordTag()}"
             )
 
@@ -34,6 +49,8 @@ class GuildWebhookLogger(private val webhook: String) {
                     .append("\n\u25AB **Features**: ")
                     .append(guild.features().joinToString("`, `", "`", "`"))
             }
+
+            description(builder.toString())
 
             footer(
                 "Count: ${guild.catnip().cache().guilds().size()} | ID: ${guild.id()}",
@@ -52,18 +69,10 @@ class GuildWebhookLogger(private val webhook: String) {
 
             builder += multiline(
                 "\u25AB **Name**: ${guild.name()}",
-                "**M/TC/VC**: ${guild.memberCount()}/${guild.channels().count(GuildChannel::isText)}/${guild.channels().count(
-                    GuildChannel::isVoice
-                )}",
-                "\u25AB **Region**: ${guild.region()}",
-                "\u25AB **Owner**: ${guild.owner().user().discordTag()}"
+                "\u25AB **Region**: `${guild.region()}`"
             )
 
-            if (guild.features().isNotEmpty()) {
-                builder
-                    .append("\n\u25AB **Features**: ")
-                    .append(guild.features().joinToString("`, `", "`", "`"))
-            }
+            description(builder.toString())
 
             footer(
                 "Count: ${guild.catnip().cache().guilds().size()} | ID: ${guild.id()}",
@@ -73,8 +82,6 @@ class GuildWebhookLogger(private val webhook: String) {
     }
 
     private fun sendEmbed(catnip: Catnip, builder: EmbedBuilder.() -> Unit) {
-        val (id, token) = parseWebhook(webhook)
-
         catnip.rest().webhook().executeWebhook(
             id, token, MessageOptions().embed(embed(init = builder))
         )

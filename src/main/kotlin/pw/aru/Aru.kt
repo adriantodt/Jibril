@@ -18,7 +18,7 @@ enum class Aru(
         side = AruSide.MAIN,
         botName = "Aru!",
         environment = "production",
-        prefixes = listOf("a!", "aru!", "Aru!"),
+        prefixes = listOf("a!", "aru!", "Aru!", "aru "),
         pastesRoot = "https://pastes.aru.pw",
         reportsRoot = "https://reports.aru.pw"
     ),

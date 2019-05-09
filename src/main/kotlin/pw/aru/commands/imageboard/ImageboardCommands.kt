@@ -124,9 +124,6 @@ class ImageboardCommand(
                             && (it.tags.none(fbi::contains) || it.rating == SAFE)
                             && validExtensions.any { ext -> it.url.endsWith(ext) }
                 }
-                .also {
-                    println(it)
-                }
                 .shuffled()
                 .firstOrNull()
         }.onFailure { it.printStackTrace() }.getOrNull()

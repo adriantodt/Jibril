@@ -137,9 +137,7 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
                         player.publish(StopMusicEvent(MusicEventSource.MusicSystem, MUSIC_SELECTION_CANCELLED))
                     }
                 }
-                .toMono()
-                .toFuture()
-                .thenAccept { e ->
+                .subscribe { e ->
                     if (e.emoji().name() == X) {
                         channel.sendMessage("$DISAPPOINTED Music choice canceled!")
                         m.delete()

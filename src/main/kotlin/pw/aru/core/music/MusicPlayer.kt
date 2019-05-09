@@ -26,7 +26,10 @@ import pw.aru.libs.andeclient.events.track.TrackStuckEvent
 import pw.aru.utils.AruTaskExecutor.queue
 import pw.aru.utils.extensions.lang.getValue
 import pw.aru.utils.extensions.lang.roundRobinFlatten
-import pw.aru.utils.extensions.lib.humanUsers
+import pw.aru.utils.extensions.lib.component1
+import pw.aru.utils.extensions.lib.component2
+import pw.aru.utils.extensions.lib.component3
+import pw.aru.utils.extensions.lib.humanUsersCount
 import reactor.adapter.rxjava.toFlux
 import reactor.core.publisher.toMono
 import java.lang.System.currentTimeMillis
@@ -35,6 +38,8 @@ import java.time.Duration
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.LinkedBlockingDeque
+import java.util.concurrent.Semaphore
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
@@ -285,7 +290,7 @@ class MusicPlayer(
             votes.remove(id)
         }
 
-        val requiredVotes = (voiceChannel!!.humanUsers * 0.6).toInt()
+        val requiredVotes = (voiceChannel!!.humanUsersCount * 0.6).toInt()
         val voteCount = votes.size
         val votesReached = requiredVotes >= voteCount
         publish(ChangedVoteEvent(this, event.source, event.type, toAdd, requiredVotes - voteCount))
@@ -305,47 +310,55 @@ class MusicPlayer(
         )
     }
 
+    private val listenersLeftLock = Semaphore(1)
+
     override fun onDiscordListenersLeftEvent(event: DiscordListenersLeftEvent) {
+        if (!listenersLeftLock.tryAcquire()) return
         publish(ListenersLeftEvent(this, ListenersLeftState.LEFT_ALONE))
+        andePlayer.controls().pause().execute()
 
         var channelId = voiceChannel!!.idAsLong()
         val selfId = catnip.selfUser()!!.idAsLong()
 
         catnip.observe(DiscordEvent.VOICE_STATE_UPDATE)
-            .toFlux()
             .filter {
+                val (_, stateChannelId, stateUserId) = it
+
                 when {
                     //someone joined
-                    it.channelIdAsLong() == channelId && it.userIdAsLong() != selfId -> {
+                    stateChannelId == channelId && stateUserId != selfId -> {
                         true
                     }
                     //bot moved to another channel (or channel deleted)
-                    it.userIdAsLong() == selfId && it.channelIdAsLong() != channelId -> {
+                    stateUserId == selfId && stateChannelId != channelId -> {
                         val channel = it.channel()
 
                         if (channel == null) {
                             true
                         } else {
                             channelId = channel.idAsLong()
-                            channel.humanUsers > 0
+                            channel.humanUsersCount > 0
                         }
                     }
                     else -> false
                 }
             }
-            .timeout(Duration.ofMinutes(2)) {
+            .take(1)
+            .singleElement()
+            .timeout(2, TimeUnit.MINUTES) {
                 if (!destroyed) {
                     stop(MusicStopReason.LeftAlone)
                 }
+                listenersLeftLock.release()
             }
-            .toMono()
-            .toFuture()
-            .thenAcceptAsync {
+            .subscribe {
                 if (!destroyed) {
                     if (it.channel() != null) {
+                        andePlayer.controls().resume().execute()
                         publish(ListenersLeftEvent(this, ListenersLeftState.RETURNED))
                     }
                 }
+                listenersLeftLock.release()
             }
     }
 

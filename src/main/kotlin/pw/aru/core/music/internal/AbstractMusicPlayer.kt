@@ -2,7 +2,6 @@ package pw.aru.core.music.internal
 
 import com.mewna.catnip.Catnip
 import com.mewna.catnip.shard.DiscordEvent
-import io.vertx.core.eventbus.MessageConsumer
 import mu.KLogging
 import pw.aru.core.music.MusicSystem
 import pw.aru.core.music.entities.MusicEventSource
@@ -15,9 +14,9 @@ import pw.aru.libs.andeclient.events.track.TrackEndEvent
 import pw.aru.libs.andeclient.events.track.TrackExceptionEvent
 import pw.aru.libs.andeclient.events.track.TrackStartEvent
 import pw.aru.libs.andeclient.events.track.TrackStuckEvent
+import pw.aru.utils.extensions.lib.*
 import java.io.Closeable
-import java.util.Collections.newSetFromMap
-import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 
 abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, guildId: Long) {
 
@@ -25,15 +24,23 @@ abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, gui
 
     private val inputPipe = newAsyncPipe<InputMusicEvent>(musicSystem.pipeExecutor)
     private val outputPipe = newAsyncPipe<OutputMusicEvent>()
-    private val closeableRefs = newSetFromMap<Closeable>(ConcurrentHashMap())
+    private val closeableRefs = CopyOnWriteArrayList<Closeable>()
 
     init {
         closeableRefs += inputPipe.subscribe(::onInputEvent)
         closeableRefs += musicSystem.playerEventPipe.subscribe(guildId, ::onAndePlayerEvent)
-        catnip.on(DiscordEvent.VOICE_STATE_UPDATE) {
-            if (it.userIdAsLong() == catnip.selfUser()!!.idAsLong()) {
-                if (it.guildIdAsLong() == guildId && it.channelIdAsLong() == 0L) {
+        closeableRefs += catnip.on(DiscordEvent.VOICE_STATE_UPDATE) {
+            val (g, channelId, userId) = it
+            val selfId = catnip.selfUser()!!.idAsLong()
+            if (g == guildId) {
+                if (userId == selfId && channelId == 0L) {
                     publish(StopMusicEvent(MusicEventSource.MusicSystem, CHANNEL_DELETED))
+                }
+
+                it.guild()!!.selfMember().voiceState().channel()?.let { c ->
+                    if (c.humanUsersCount == 0) {
+                        publish(DiscordListenersLeftEvent)
+                    }
                 }
             }
         }.asCloseable()
@@ -129,11 +136,5 @@ abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, gui
 
     fun publish(event: InputMusicEvent) {
         inputPipe.publish(event)
-    }
-}
-
-private fun <T> MessageConsumer<T>.asCloseable(): Closeable {
-    return Closeable {
-        unregister()
     }
 }

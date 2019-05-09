@@ -3,9 +3,7 @@ package pw.aru.core.input
 import com.mewna.catnip.Catnip
 import com.mewna.catnip.entity.message.Message
 import com.mewna.catnip.shard.DiscordEvent
-import gg.amy.catnip.utilities.waiter.EventExtension
 import pw.aru.core.commands.context.CommandContext
-import pw.aru.utils.extensions.lang.classOf
 import java.util.concurrent.TimeUnit
 
 abstract class AsyncInput protected constructor(
@@ -25,11 +23,13 @@ abstract class AsyncInput protected constructor(
     protected abstract fun timeout()
 
     protected fun waitForNextEvent() {
-        catnip.extension(classOf<EventExtension>())!!
-            .waitForEvent(DiscordEvent.MESSAGE_CREATE)
-            .condition(::filter)
-            .timeout(timeout, unit, ::timeout)
-            .action(::call)
+        catnip.observe(DiscordEvent.MESSAGE_CREATE)
+            .filter(::filter)
+            .singleElement()
+            .timeout(timeout, unit) {
+                timeout()
+            }
+            .subscribe(::call)
     }
 }
 

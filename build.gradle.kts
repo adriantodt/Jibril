@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "pw.aru"
-version = "3.0.5"
+version = "3.0.7"
 
 repositories {
     jcenter()
@@ -32,8 +32,8 @@ dependencies {
     compile("com.github.queer:catnip-utilities:360b876") {
         isTransitive = false
     }
-    compile("io.projectreactor.addons:reactor-adapter:3.2.2.RELEASE")
-    compile("io.reactivex.rxjava2:rxkotlin:2.2.0")
+    compile("io.projectreactor.addons:reactor-adapter:3.2.3.RELEASE")
+    compile("io.reactivex.rxjava2:rxkotlin:2.3.0")
 
     // Main APIs
     compile("com.github.natanbc:weeb4j:3.5")
@@ -41,6 +41,15 @@ dependencies {
     compile("com.sedmelluq:lavaplayer:1.3.17") {
         exclude(group = "com.sedmelluq", module = "lavaplayer-natives")
     }
+
+    //trying last Netty
+    val netty_version = "4.1.36.Final"
+    compile("io.netty:netty-codec-http2:$netty_version")
+    compile("io.netty:netty-handler-proxy:$netty_version")
+    compile("io.netty:netty-resolver-dns:$netty_version")
+    compile("io.netty:netty-transport:$netty_version")
+    compile("io.netty:netty-buffer:$netty_version")
+    compile("io.netty:netty-common:$netty_version")
 
     // Useful
     compile("net.kodehawa:imageboard-api:2.0.7")
@@ -54,7 +63,7 @@ dependencies {
     compile("pw.aru.hg:hg-loader:1.0")
 
     //Scanning and Injections
-    compile("io.github.classgraph:classgraph:4.8.24")
+    compile("io.github.classgraph:classgraph:4.8.27")
     compile("org.kodein.di:kodein-di-generic-jvm:6.1.0")
     compile("pw.aru.libs:kodein-jit-bindings:2.2")
 }

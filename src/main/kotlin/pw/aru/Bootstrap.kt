@@ -253,9 +253,7 @@ class Bootstrap {
     private fun configureCatnip(catnip: Catnip, kodein: Kodein): CompletableFuture<Catnip> {
         val instance by kodein.instance<CommandListener>()
 
-        catnip
-            .loadExtension(KodeinExtension(kodein))
-            .loadExtension(EventExtension())
+        catnip.loadExtension(KodeinExtension(kodein))
 
         catnip.on(DiscordEvent.MESSAGE_CREATE, instance)
 
@@ -271,6 +269,7 @@ class Bootstrap {
         }
 
         val config: AruConfig by kodein.instance()
+
         val guildLogger = GuildWebhookLogger(config.serversWebhook)
         catnip.on(DiscordEvent.GUILD_CREATE, guildLogger::onGuildJoin)
         catnip.on(DiscordEvent.GUILD_DELETE, guildLogger::onGuildLeave)

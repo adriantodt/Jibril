@@ -23,7 +23,7 @@ dependencies {
     compile(kotlin("stdlib-jdk8"))
     compile(kotlin("reflect"))
 
-    compile("io.projectreactor:reactor-core:3.2.8.RELEASE")
+    compile("io.projectreactor:reactor-core:3.2.9.RELEASE")
     compile("com.github.mewna:catnip:1.2.3")
     compile("io.lettuce:lettuce-core:5.1.6.RELEASE")
     compile("pw.aru.libs:snowflake-local:1.0")

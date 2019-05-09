@@ -3,9 +3,12 @@ package pw.aru.utils.extensions.lib
 import com.mewna.catnip.entity.builder.EmbedBuilder
 import com.mewna.catnip.entity.channel.MessageChannel
 import com.mewna.catnip.entity.channel.VoiceChannel
+import com.mewna.catnip.entity.guild.Member
 import com.mewna.catnip.entity.message.Embed
 import com.mewna.catnip.entity.message.MessageOptions
 import com.mewna.catnip.entity.user.VoiceState
+import io.vertx.core.eventbus.MessageConsumer
+import java.io.Closeable
 
 inline fun message(init: MessageOptions.() -> Unit): MessageOptions =
     MessageOptions().also(init)
@@ -46,5 +49,17 @@ fun EmbedBuilder.blankField(inline: Boolean = false) {
 inline val VoiceChannel.listeners: Collection<VoiceState>
     get() = guild().voiceStates().find { it.channelIdAsLong() == idAsLong() }
 
-inline val VoiceChannel.humanUsers: Int
+inline val VoiceChannel.humanUsersCount: Int
     get() = guild().voiceStates().count { it.channelIdAsLong() == idAsLong() && !catnip().cache().user(it.userId())!!.bot() }.toInt()
+
+fun Member.voiceState() = guild().voiceStates().getById(idAsLong())
+
+operator fun VoiceState.component1() = guildIdAsLong()
+operator fun VoiceState.component2() = channelIdAsLong()
+operator fun VoiceState.component3() = userIdAsLong()
+
+fun <T> MessageConsumer<T>.asCloseable(): Closeable {
+    return Closeable {
+        this.unregister()
+    }
+}

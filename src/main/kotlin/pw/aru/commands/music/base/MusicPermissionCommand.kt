@@ -7,7 +7,7 @@ import pw.aru.core.music.MusicPlayer
 import pw.aru.core.music.MusicSystem
 import pw.aru.core.permissions.MemberPermissions
 import pw.aru.utils.extensions.lang.anyOf
-import pw.aru.utils.extensions.lib.humanUsers
+import pw.aru.utils.extensions.lib.humanUsersCount
 import pw.aru.utils.text.STOP
 import pw.aru.utils.text.THINKING
 
@@ -26,7 +26,7 @@ abstract class MusicPermissionCommand(
             val currentTrackData = musicPlayer.lastTrackData
 
             return anyOf(
-                currentChannel?.humanUsers?.equals(1) ?: true,
+                currentChannel?.humanUsersCount?.equals(1) ?: true,
                 userQueued && currentTrackData?.source?.member(guild)?.equals(author) ?: true,
                 permissions.contains(MemberPermissions.DJ)
             )

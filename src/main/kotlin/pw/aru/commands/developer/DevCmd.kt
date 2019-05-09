@@ -32,7 +32,7 @@ import pw.aru.utils.extensions.lang.limit
 import pw.aru.utils.extensions.lang.multiline
 import pw.aru.utils.extensions.lang.smartSplit
 import pw.aru.utils.extensions.lib.field
-import pw.aru.utils.extensions.lib.humanUsers
+import pw.aru.utils.extensions.lib.humanUsersCount
 import pw.aru.utils.styling
 import pw.aru.utils.text.SHRUG
 import pw.aru.utils.text.SUCCESS
@@ -184,7 +184,7 @@ class DevCmd(override val kodein: Kodein) : ICommand, ICommand.Permission, IComm
             styling(message).author("Aru! | Peek: NowPlaying")
             musicSystem.players.values.asSequence()
                 .filter { it.voiceChannel != null && it.currentTrack != null }
-                .sortedByDescending { it.voiceChannel!!.humanUsers }
+                .sortedByDescending { it.voiceChannel!!.humanUsersCount }
                 .drop(args.tryTakeInt()?.minus(1)?.times(10) ?: 0)
                 .take(10)
                 .forEach {
@@ -193,7 +193,7 @@ class DevCmd(override val kodein: Kodein) : ICommand, ICommand.Permission, IComm
                     val voiceChannel = it.voiceChannel!!
                     field(
                         "Guild: ${guild.name()} (${guild.id()})",
-                        "**Voice Channel**: ${voiceChannel.name()} (${voiceChannel.humanUsers} listening)",
+                        "**Voice Channel**: ${voiceChannel.name()} (${voiceChannel.humanUsersCount} listening)",
                         "",
                         "**Now Playing**: ",
                         "**[${nowPlaying.title.limit(40)}](${nowPlaying.uri})** by **${nowPlaying.author}**",
