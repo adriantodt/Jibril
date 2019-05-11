@@ -78,16 +78,22 @@ configure<ApplicationPluginConvention> {
     mainClassName = "pw.aru.Bootstrap"
 }
 
+tasks.withType<ShadowJar> {
+    configurations = listOf(project.configurations.runtime.get())
+}
+
+val shadowJar by tasks.getting
+
 configure<DockerExtension> {
     this.name = "adriantodt/aru:$version"
-    files("build/libs/aru-$version-all.jar")
+
+    dependsOn(shadowJar)
+    files(shadowJar.outputs)
+
     copySpec.from("run/assets").into("assets")
     buildArgs(mapOf("version" to version.toString(), "jattachVersion" to "v1.5"))
 }
 
-tasks.withType<ShadowJar> {
-    configurations = listOf(project.configurations.runtime.get())
-}
 
 with(rootProject.file("src/main/kotlin/pw/aru/exported/exported.kt")) {
     parentFile.mkdirs()
@@ -114,11 +120,4 @@ const val aru_version = "$version"
 const val user_agent = "Aru/Discord (Aru! $version)"
 """.trim()
     )
-}
-
-tasks {
-    val docker by getting
-    val shadowJar by getting
-
-    docker.dependsOn(shadowJar)
 }
