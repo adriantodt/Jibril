@@ -162,7 +162,7 @@ class Bootstrap {
             // Instances
             bind<AruConfig>() with instance(config)
             bind<Aru>() with instance(aru)
-            bind<AruDB>() with singleton { AruDB(aru.side, 0) }
+            bind<AruDB>() with singleton { AruDB(aru.side, 0, "redis://redis:6379") }
             bind<AruIO>() with singleton { instance<AruDB>().io() }
             bind<CommandRegistry>() with singleton { CommandRegistry() }
             bind<CommandProcessor>() with singleton { CommandProcessor(instance(), instance(), instance()) }

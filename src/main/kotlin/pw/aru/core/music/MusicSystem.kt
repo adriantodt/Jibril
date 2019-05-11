@@ -61,7 +61,9 @@ class MusicSystem(val andeClient: AndeClient, val db: AruDB) {
             }
         }
 
-        andeClient.newNode().create()
+        andeClient.newNode()
+            .host("andesite")
+            .create()
 
         YoutubeAudioSourceManager().apply {
             setPlaylistPageCount(4)
