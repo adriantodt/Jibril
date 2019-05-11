@@ -119,6 +119,6 @@ const val user_agent = "Aru/Discord (Aru! $version)"
 tasks {
     val docker by getting
     val shadowJar by getting
-    
-    shadowJar.dependsOn(docker)
+
+    docker.dependsOn(shadowJar)
 }
