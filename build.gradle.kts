@@ -89,6 +89,7 @@ configure<DockerExtension> {
 
     dependsOn(shadowJar)
     files(shadowJar.outputs)
+    files("jlink.sh")
 
     copySpec.from("run/assets").into("assets")
     buildArgs(mapOf("version" to version.toString(), "jattachVersion" to "v1.5"))
