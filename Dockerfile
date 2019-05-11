@@ -11,6 +11,6 @@ RUN chmod +x /bin/jattach
 WORKDIR /aru
 
 COPY assets assets
-COPY assets/aru-${version}-all.jar aru.jar
+COPY aru-${version}-all.jar aru.jar
 
 CMD ["java", "-jar", "aru.jar"]
