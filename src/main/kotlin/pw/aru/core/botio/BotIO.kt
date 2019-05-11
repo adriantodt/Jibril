@@ -28,7 +28,7 @@ class BotIO(val io: AruIO, val catnip: Catnip) : Executable {
             JSONObject()
         )
 
-        task(1, TimeUnit.MINUTES) { publishStats() }
+        task(5, TimeUnit.MINUTES) { publishStats() }
     }
 
     private fun publishStats() {

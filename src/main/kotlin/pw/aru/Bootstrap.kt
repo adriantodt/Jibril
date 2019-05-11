@@ -9,7 +9,6 @@ import com.mewna.catnip.CatnipOptions
 import com.mewna.catnip.cache.CacheFlag
 import com.mewna.catnip.entity.user.Presence
 import com.mewna.catnip.shard.DiscordEvent
-import gg.amy.catnip.utilities.waiter.EventExtension
 import io.github.classgraph.ClassGraph
 import io.github.classgraph.ScanResult
 import io.vertx.core.Vertx
@@ -47,11 +46,13 @@ import pw.aru.libs.kodein.jit.jitInstance
 import pw.aru.libs.properties.Properties
 import pw.aru.utils.*
 import pw.aru.utils.extensions.lang.classOf
+import pw.aru.utils.extensions.lang.threadGroupBasedFactory
 import java.io.File
 import java.io.FileNotFoundException
 import java.net.http.HttpClient
 import java.util.*
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
@@ -170,7 +171,9 @@ class Bootstrap {
             bind<Catnip>() with instance(catnip)
 
             bind<AndeClient>() with singleton {
-                AndeClient.andeClient(catnip.selfUser()!!.idAsLong()).create()
+                AndeClient.andeClient(catnip.selfUser()!!.idAsLong())
+                    .httpClient(instance())
+                    .create()
             }
 
             // Managers
@@ -178,7 +181,12 @@ class Bootstrap {
             bind<MusicSystem>() with singleton { MusicSystem(instance(), instance()) }
 
             // APIs
-            bind<HttpClient>() with singleton { HttpClient.newHttpClient() }
+            bind<HttpClient>() with singleton {
+                HttpClient.newBuilder()
+                    .version(HttpClient.Version.HTTP_1_1)
+                    .executor(Executors.newFixedThreadPool(16, threadGroupBasedFactory("HttpClient")))
+                    .build()
+            }
 
             bind<Weeb4J>() with singleton {
                 Weeb4J.Builder()

@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.palantir.gradle.docker.DockerExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -6,10 +7,11 @@ plugins {
     application
     id("com.github.johnrengelman.shadow") version "5.0.0"
     id("com.github.ben-manes.versions") version "0.21.0"
+    id("com.palantir.docker") version "0.21.0"
 }
 
 group = "pw.aru"
-version = "3.0.7"
+version = "3.0.8"
 
 repositories {
     jcenter()
@@ -37,7 +39,7 @@ dependencies {
 
     // Main APIs
     compile("com.github.natanbc:weeb4j:3.5")
-    compile("pw.aru.libs:andeclient:1.3.2")
+    compile("pw.aru.libs:andeclient:1.3.3")
     compile("com.sedmelluq:lavaplayer:1.3.17") {
         exclude(group = "com.sedmelluq", module = "lavaplayer-natives")
     }
@@ -76,8 +78,13 @@ configure<ApplicationPluginConvention> {
     mainClassName = "pw.aru.Bootstrap"
 }
 
+configure<DockerExtension> {
+    this.name = "adriantodt/aru:$version"
+    files("build/libs/aru-$version-all.jar", "run/assets")
+    buildArgs(mapOf("version" to version.toString(), "jattachVersion" to "v1.5"))
+}
+
 tasks.withType<ShadowJar> {
-    archiveClassifier.set("")
     configurations = listOf(project.configurations.runtime.get())
 }
 
