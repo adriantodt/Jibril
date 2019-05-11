@@ -185,7 +185,6 @@ class Bootstrap {
             bind<OkHttpClient>() with singleton { OkHttpClient() }
             bind<HttpClient>() with singleton {
                 HttpClient.newBuilder()
-                    .version(HttpClient.Version.HTTP_1_1)
                     .executor(Executors.newFixedThreadPool(16, threadGroupBasedFactory("HttpClient")))
                     .build()
             }
