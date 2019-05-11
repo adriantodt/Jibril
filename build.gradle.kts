@@ -80,7 +80,8 @@ configure<ApplicationPluginConvention> {
 
 configure<DockerExtension> {
     this.name = "adriantodt/aru:$version"
-    files("build/libs/aru-$version-all.jar", "run/assets")
+    files("build/libs/aru-$version-all.jar")
+    copySpec.from("run/assets").into("assets")
     buildArgs(mapOf("version" to version.toString(), "jattachVersion" to "v1.5"))
 }
 
