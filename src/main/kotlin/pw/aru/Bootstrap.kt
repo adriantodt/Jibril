@@ -15,6 +15,7 @@ import io.vertx.core.Vertx
 import io.vertx.core.VertxOptions
 import io.vertx.core.dns.AddressResolverOptions
 import mu.KLogging
+import okhttp3.OkHttpClient
 import org.kodein.di.DKodein
 import org.kodein.di.Kodein
 import org.kodein.di.generic.bind
@@ -181,6 +182,7 @@ class Bootstrap {
             bind<MusicSystem>() with singleton { MusicSystem(instance(), instance()) }
 
             // APIs
+            bind<OkHttpClient>() with singleton { OkHttpClient() }
             bind<HttpClient>() with singleton {
                 HttpClient.newBuilder()
                     .version(HttpClient.Version.HTTP_1_1)
@@ -191,6 +193,7 @@ class Bootstrap {
             bind<Weeb4J>() with singleton {
                 Weeb4J.Builder()
                     .setToken(TokenType.WOLKE, config.wshToken)
+                    .setHttpClient(instance())
                     .setBotInfo(aru.botName, aru_version, aru.environment)
                     .build()
             }

@@ -33,6 +33,7 @@ dependencies {
     compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
 
     compile("org.json:json:20180813")
+    compile("com.squareup.okhttp3:okhttp:3.14.1")
     compile("org.kodein.di:kodein-di-generic-jvm:6.1.0")
 
     compile("ch.qos.logback:logback-classic:1.2.3")

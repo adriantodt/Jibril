@@ -1,6 +1,7 @@
 package pw.aru.commands.actions
 
 import com.github.natanbc.weeb4j.Weeb4J
+import okhttp3.OkHttpClient
 import pw.aru.commands.actions.impl.ActionCommandsWorkshop
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.CommandProvider
@@ -8,13 +9,14 @@ import pw.aru.core.commands.help.prefix
 import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.URLCache
 import pw.aru.utils.text.*
+import java.io.File
 
 @CommandProvider
 class NSFWActionCommands(
-    cache: URLCache,
+    httpClient: OkHttpClient,
     weebApi: Weeb4J,
     private val assetProvider: ReloadableListProvider
-) : ActionCommandsWorkshop(weebApi, cache, Category.NSFW_ACTION) {
+) : ActionCommandsWorkshop(weebApi, URLCache(httpClient, File("url_cache")), Category.NSFW_ACTION) {
     override fun create() {
         //69
         actionCommand(listOf("69"), "69 Command", "Hey, that's lewd!") {

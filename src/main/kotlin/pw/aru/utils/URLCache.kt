@@ -1,14 +1,13 @@
 package pw.aru.utils
 
+import okhttp3.OkHttpClient
 import pw.aru.exported.user_agent
-import pw.aru.utils.extensions.lang.send
+import pw.aru.utils.extensions.lib.body
+import pw.aru.utils.extensions.lib.newCall
 import java.io.File
-import java.net.URI.create
-import java.net.http.HttpClient
-import java.net.http.HttpResponse.BodyHandlers
 import java.util.concurrent.ConcurrentHashMap
 
-class URLCache(private val httpClient: HttpClient, private var cacheDir: File) {
+class URLCache(private val httpClient: OkHttpClient, private var cacheDir: File) {
     private val cachedLinks = ConcurrentHashMap<String, File>()
 
     init {
@@ -22,13 +21,10 @@ class URLCache(private val httpClient: HttpClient, private var cacheDir: File) {
         if (file.exists()) return file
 
         //Download and Cache
-
-        httpClient.runCatching {
-            send(BodyHandlers.ofFile(file.toPath())) {
-                uri(create(url))
-                header("User-Agent", user_agent)
-            }
-        }.onFailure { throw RuntimeException("Error while caching $url", it) }
+        httpClient.newCall {
+            url(url)
+            header("User-Agent", user_agent)
+        }.execute().body { it.source().inputStream().copyTo(file.outputStream()) }
 
         return file
     }

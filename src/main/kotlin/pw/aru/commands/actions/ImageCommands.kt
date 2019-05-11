@@ -2,6 +2,7 @@ package pw.aru.commands.actions
 
 import com.github.natanbc.weeb4j.Weeb4J
 import com.github.natanbc.weeb4j.image.NsfwFilter.ONLY_NSFW
+import okhttp3.OkHttpClient
 import pw.aru.commands.actions.impl.ActionCommandsWorkshop
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.CommandProvider
@@ -9,13 +10,14 @@ import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.URLCache
 import pw.aru.utils.text.CAT
 import pw.aru.utils.text.DOG
+import java.io.File
 
 @CommandProvider
 class ImageCommands(
-    cache: URLCache,
+    httpClient: OkHttpClient,
     weebApi: Weeb4J,
     private val assetProvider: ReloadableListProvider
-) : ActionCommandsWorkshop(weebApi, cache, Category.IMAGE) {
+) : ActionCommandsWorkshop(weebApi, URLCache(httpClient, File("url_cache")), Category.IMAGE) {
     override fun create() {
         imageCommand(listOf("cat"), "Cat Command", "Sends a random cat image.") {
             provider = fromWeebSh(type = "animal_cat")
