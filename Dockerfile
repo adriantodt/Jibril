@@ -1,4 +1,4 @@
-FROM openjdk:12 AS builder
+FROM openjdk:11 AS builder
 
 ARG version
 
