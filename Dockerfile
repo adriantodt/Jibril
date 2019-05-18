@@ -1,4 +1,4 @@
-FROM adoptopenjdk:openjdk8-jre-slim
+FROM adoptopenjdk/openjdk8:jre
 
 ARG version
 ARG jattachVersion
