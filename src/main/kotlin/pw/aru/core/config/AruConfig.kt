@@ -7,15 +7,10 @@ data class AruConfig(
     // discord token
     var botToken: String = "",
 
-    // botlists token
-    var dblToken: String = "",
-    var dpwToken: String = "",
+
     var wshToken: String = "",
 
     // logging
     var consoleWebhook: String = "",
-    var serversWebhook: String = "",
-
-    // prefixes
-    var prefixes: String = ""
+    var serversWebhook: String = ""
 )

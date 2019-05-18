@@ -5,30 +5,28 @@
 plugins {
     id 'java'
     //Compiles Kotlin
-    id 'org.jetbrains.kotlin.jvm' version '1.2.70'
+    id 'org.jetbrains.kotlin.jvm' version '1.3.31'
     //Adds an Executable Manifest
     id 'application'
     //Creates FatJars
     id 'com.github.johnrengelman.shadow' version '2.0.4'
     //Version checking
     id "com.github.ben-manes.versions" version "0.20.0"
+    //Docker
+    id "com.palantir.docker" version "0.21.0"
 }
 
 group = 'pw.aru'
-version = '2.5'
+version = '2.6-LTS'
 mainClassName = 'pw.aru.Bootstrap'
-
-// Minified Splash
-({ String l, String v ->
-    def d = "$l ${(v.size() + l.size() + 1) % 2 != 0 ? "-" : "--"} v$v"
-    def w = (0..(30 - d.size() / 2)).collect { it % 2 != 0 ? '-' : '=' }.join ''
-    println "|$w| $d |${w.reverse()}|"
-})('Aru!', version)
 
 //Repositories and Dependencies
 repositories {
     jcenter()
     maven { url = 'https://dl.bintray.com/adriantodt/maven' }
+    maven { url = 'https://dl.bintray.com/arudiscord/maven' }
+    maven { url = 'https://dl.bintray.com/arudiscord/kotlin' }
+    maven { url = 'https://dl.bintray.com/arudiscord/hg' }
     maven { url = 'https://dl.bintray.com/kodehawa/maven' }
     mavenLocal()
 }
@@ -38,41 +36,40 @@ dependencies {
     compile project('aruDB')
 
     //Source of memes
-    compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.2.70'
-    compile 'org.jetbrains.kotlin:kotlin-reflect:1.2.70'
+    compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.31'
+    compile 'org.jetbrains.kotlin:kotlin-reflect:1.3.31'
 
     // Main APIs
-    compile 'net.dv8tion:JDA:3.7.1_422'
-    compile 'com.sedmelluq:lavaplayer:1.3.7'
+    compile 'net.dv8tion:JDA:3.8.3_463'
+    compile 'com.sedmelluq:lavaplayer:1.3.17'
     compile 'com.github.natanbc:discordbots-api:3.3.3'
     compile 'com.github.natanbc:weeb4j:3.5'
 
     // Useful
     compile 'com.sedmelluq:jda-nas:1.0.6'
-    compile 'com.jagrosh:jda-utilities-menu:2.1.4'
-    compile 'net.kodehawa:imageboard-api:2.0.5'
+    compile 'com.jagrosh:jda-utilities-menu:2.1.5'
+    compile("net.kodehawa:imageboard-api:2.0.7")
 
     // Open-Source Libraries
-    compile 'pw.aru.discord:dice-notation:1.0'
-    compile 'pw.aru.utils:properties:1.1'
-    compile 'pw.aru.utils:simple-ipc:1.3'
-    compile 'pw.aru.snowflake:snowflake-local:1.0'
-    compile 'pw.aru.hungergames:hg-engine:1.0'
-    compile 'pw.aru.hungergames:hg-loader:1.0'
-    compile 'pw.aru.api:DD4J:1.0.1'
-
-    //Helping stuff
-    compile 'org.apache.commons:commons-lang3:3.8'
-    compile 'org.apache-extras.beanshell:bsh:2.0b6'
+    compile("pw.aru.libs:dice-notation:1.1")
+    compile("pw.aru.libs:properties:1.2")
+    compile("pw.aru.libs:snowflake-local:1.0")
+    compile("pw.aru.libs:DD4J:1.0")
+    compile("pw.aru.hg:hg-engine:1.0")
+    compile("pw.aru.hg:hg-loader:1.0")
 
     //Scanning and Injections
-    compile 'io.github.lukehutch:fast-classpath-scanner:3.1.12'
-    compile 'org.kodein.di:kodein-di-generic-jvm:5.0.0'
-    compile 'pw.aru.kt:kodein-jit-bindings:1.1.1'
+    compile("io.github.classgraph:classgraph:4.8.36")
+    compile("org.kodein.di:kodein-di-generic-jvm:6.2.0")
+    compile("pw.aru.libs:kodein-jit-bindings:2.2")
+
+    //Helping stuff
+    compile 'org.apache.commons:commons-lang3:3.9'
+    compile 'org.apache-extras.beanshell:bsh:2.0b6'
 
     //Logging
     compile 'ch.qos.logback:logback-classic:1.2.3'
-    compile 'io.github.microutils:kotlin-logging:1.5.9'
+    compile 'io.github.microutils:kotlin-logging:1.6.26'
 }
 
 //FILE src/main/kotlin/aru/exported/exported.kt
@@ -103,7 +100,9 @@ const val user_agent = "JDA/DiscordBot (Aru! ${version})"
 
 //BELOW: TASKS AND CONFIGS YOU PROBABLY DON'T NEED TO TWEAK MORE THAN ONCE IN A LIFETIME
 
-task packAssets(type: Zip) { baseName = 'assets'; from file('./assets'); destinationDir = file('build/assets'); version = '' }
+task packAssets(type: Zip) {
+    baseName = 'assets'; from file('./assets'); destinationDir = file('build/assets'); version = ''
+}
 task wrapper(type: Wrapper) { gradleVersion = '4.6' }
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -112,5 +111,11 @@ artifacts { archives shadowJar }
 tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
 task cleanDistArchives(type: Delete) { delete files(distTar, distZip, jar) }
 [jar, distZip, distTar].each { it.with { classifier = 'trash'; finalizedBy cleanDistArchives } }
-shadowJar.classifier = ''
 dependencyUpdates.revision = 'release'
+
+docker {
+    name = "adriantodt/aru:${version}"
+    files("build/libs/aru-${version}-all.jar")
+    copySpec.from("run/assets").into("assets")
+    buildArgs([version: version.toString(), jattachVersion: "v1.5"])
+}

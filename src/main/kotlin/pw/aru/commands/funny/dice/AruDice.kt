@@ -1,9 +1,9 @@
 package pw.aru.commands.funny.dice
 
-import pw.aru.dice.evaluator.DiceEvaluatorBuilder
-import pw.aru.dice.evaluator.DiceSolver
-import pw.aru.dice.lexer.DiceLexer
-import pw.aru.dice.parser.DiceParser
+import pw.aru.libs.dicenotation.evaluator.DiceEvaluatorBuilder
+import pw.aru.libs.dicenotation.evaluator.DiceSolver
+import pw.aru.libs.dicenotation.lexer.DiceLexer
+import pw.aru.libs.dicenotation.parser.DiceParser
 import pw.aru.utils.extensions.randomOf
 
 class AruDice(text: String) {

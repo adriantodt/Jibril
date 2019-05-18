@@ -12,6 +12,7 @@ import pw.aru.utils.emotes.ERROR
 import pw.aru.utils.extensions.*
 import pw.aru.utils.helpers.CommandStatsManager
 import java.util.concurrent.TimeUnit
+import kotlin.collections.random
 
 @Command("help", "h")
 class HelpCmd(private val registry: CommandRegistry) : ICommand, ICommand.HelpDialogProvider {
@@ -60,31 +61,39 @@ class HelpCmd(private val registry: CommandRegistry) : ICommand, ICommand.HelpDi
                 "To check the command usage, type `${prefix}help <command>`."
             )
 
-            footer("${registry.lookup.size} commands | Requested by ${event.member.effectiveName}", event.author.effectiveAvatarUrl)
+            footer(
+                "${registry.lookup.size} commands | Requested by ${author.effectiveName}",
+                author.user.effectiveAvatarUrl
+            )
 
             val t = trending
             if (t.isNotEmpty()) {
                 field(
                     "Trending:",
                     t.asSequence()
-                        .filter { c -> (c !is ICommand.Permission || c.permission.test(event.member)) && (c.category?.nsfw != true || channel.isNSFW) }
+                        .filter { c -> (c !is ICommand.Permission || c.permission.test(author)) && (!c.nsfw() || channel.isNSFW) }
                         .take(10)
                         .joinToString(prefix = "`", separator = "` `", postfix = "`") { registry.lookup[it]!![0] }
                 )
             }
 
+            var count = 0
+
             Category.LIST.forEach { category ->
                 if (category.nsfw && !channel.isNSFW) {
-                    val count = registry.lookup
-                        .count { (c) -> c.category == category && (c !is ICommand.Permission || c.permission.test(event.member)) }
+                    count += registry.lookup
+                        .count { (c) ->
+                            c.category == category && (c !is ICommand.Permission || c.permission.test(author))
+                        }
 
-                    if (count > 0) field(
-                        "${category.categoryName}:",
-                        "$count hidden commands. Set the channel to **NSFW** to view them."
-                    )
                 } else {
                     val list = registry.lookup.entries.asSequence()
-                        .filter { (c) -> c.category == category && (c !is ICommand.Permission || c.permission.test(event.member)) }
+                        .filter { (c) ->
+                            c.category == category && (c !is ICommand.Permission || c.permission.test(author))
+                        }
+                        .partition { (c) -> !channel.isNSFW && c.nsfw() }
+                        .apply { count += first.size }
+                        .second.asSequence()
                         .map { it.value[0] }
                         .sorted()
                         .toList()
@@ -95,6 +104,11 @@ class HelpCmd(private val registry: CommandRegistry) : ICommand, ICommand.HelpDi
                     )
                 }
             }
+
+            if (count > 0) field(
+                "More...",
+                "$count hidden commands. Set the channel to **NSFW** to view them."
+            )
         }.queue()
     }
 
@@ -106,7 +120,7 @@ class HelpCmd(private val registry: CommandRegistry) : ICommand, ICommand.HelpDi
 
         Category.SEARCH.ifContains(args) { category ->
             if (category.help != null) {
-                send(category.help.onHelp(event)).queue()
+                send(category.help.onHelp(event))
             } else {
                 sendEmbed {
                     baseEmbed(event, "Aru! | Help: ${category.categoryName}")
@@ -117,7 +131,9 @@ class HelpCmd(private val registry: CommandRegistry) : ICommand, ICommand.HelpDi
                     )
 
                     val list = registry.lookup.entries.asSequence()
-                        .filter { (c) -> c.category == category && (c !is ICommand.Permission || c.permission.test(event.member)) }
+                        .filter { (c) ->
+                            c.category == category && (c !is ICommand.Permission || c.permission.test(author))
+                        }
                         .map { it.value[0] }
                         .sorted()
                         .toList()
@@ -125,7 +141,9 @@ class HelpCmd(private val registry: CommandRegistry) : ICommand, ICommand.HelpDi
 
                     if (category.nsfw && !channel.isNSFW) {
                         val count = registry.lookup
-                            .count { (c) -> c.category == category && (c !is ICommand.Permission || c.permission.test(event.member)) }
+                            .count { (c) ->
+                                c.category == category && (c !is ICommand.Permission || c.permission.test(author))
+                            }
 
                         if (count > 0) description(
                             "$count hidden commands. Set the channel to **NSFW** to view them."
@@ -137,7 +155,10 @@ class HelpCmd(private val registry: CommandRegistry) : ICommand, ICommand.HelpDi
                         ) else description("There's only dust here.")
                     }
 
-                    footer("${list.size} commands | Requested by ${event.member.effectiveName}", event.author.effectiveAvatarUrl)
+                    footer(
+                        "${list.size} commands | Requested by ${author.effectiveName}",
+                        author.user.effectiveAvatarUrl
+                    )
                 }.queue()
             }
 

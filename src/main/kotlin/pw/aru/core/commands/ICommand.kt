@@ -3,10 +3,15 @@ package pw.aru.core.commands
 import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.core.categories.Category
+import pw.aru.core.commands.ICommand.CustomHandler.Result
 import pw.aru.core.commands.context.CommandContext
 
 interface ICommand {
     val category: Category?
+
+    fun nsfw(): Boolean {
+        return category?.nsfw ?: false
+    }
 
     fun CommandContext.call()
 
@@ -40,6 +45,18 @@ interface ICommand {
 
     interface PostLoad {
         fun postLoad()
+    }
+
+    interface CustomHandler : ICommand {
+        enum class Result {
+            IGNORE, HANDLED
+        }
+
+        fun CommandContext.customCall(command: String): Result
+    }
+
+    interface CustomDiscreteHandler : ICommand {
+        fun CommandContext.customCall(command: String, outer: String): Result
     }
 }
 

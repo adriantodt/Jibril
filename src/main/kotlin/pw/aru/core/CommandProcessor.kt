@@ -5,7 +5,7 @@ import net.dv8tion.jda.core.Permission.*
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import pw.aru.Aru
 import pw.aru.Aru.*
-import pw.aru.Aru.Companion.prefixes
+import pw.aru.Aru.Bot.prefixes
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.ICommand.ExceptionHandler
 import pw.aru.core.commands.context.CommandContext
@@ -117,7 +117,32 @@ class CommandProcessor(private val aru: Aru, private val db: AruDB, private val 
         }
     }
 
-    private fun processCustomCommand(event: GuildMessageReceivedEvent, cmd: String, args: String) {
+    private fun processCustomCommand(message: GuildMessageReceivedEvent, cmd: String, args: String) {
+        val ctx = CommandContext(message, args)
+
+        if (
+            registry.lookup.keys.mapNotNull { it as? ICommand.CustomHandler }.any {
+                it.runCatching { ctx.customCall(cmd) }.getOrNull() == ICommand.CustomHandler.Result.HANDLED
+            }
+        ) return
+
+        // TODO: Implement?
+    }
+
+    private fun processDiscreteCustomCommand(
+        message: GuildMessageReceivedEvent,
+        cmd: String,
+        args: String,
+        outer: String
+    ) {
+        val ctx = CommandContext(message, args)
+
+        if (
+            registry.lookup.keys.mapNotNull { it as? ICommand.CustomDiscreteHandler }.any {
+                it.runCatching { ctx.customCall(cmd, outer) }.getOrNull() == ICommand.CustomHandler.Result.HANDLED
+            }
+        ) return
+
         // TODO: Implement?
     }
 
@@ -143,7 +168,8 @@ class CommandProcessor(private val aru: Aru, private val db: AruDB, private val 
         val cmd = split[0].toLowerCase()
         val args = split.getOrNull(1) ?: ""
 
-        val command = registry[cmd] as? ICommand.Discrete ?: return
+        val command =
+            registry[cmd] as? ICommand.Discrete ?: return processDiscreteCustomCommand(event, cmd, args, outer)
 
         if (!checks.runChecks(event, command)) return
 

@@ -5,6 +5,7 @@ package pw.aru
 import mu.KotlinLogging.logger
 import org.kodein.di.direct
 import org.kodein.di.generic.instance
+import pw.aru.Aru.Bot.aru
 import pw.aru.core.CommandRegistry
 import pw.aru.core.commands.UseFullInjector
 import pw.aru.core.config.ConfigManager
@@ -19,7 +20,7 @@ import pw.aru.utils.helpers.AsyncInfoMonitor
 
 val log = logger("pw.aru.Bootstrap")
 
-fun main(args: Array<String>) = startBootstrap()
+fun main() = startBootstrap()
 
 internal fun start() {
     // Start-up AsyncInfoMonitor
@@ -34,11 +35,9 @@ internal fun start() {
     val config = ConfigManager.config
     enableDiscordLogBack(config)
 
-    val aru = Aru.fromString(config.type)
+    Aru.myAru = Aru.fromString(config.type)
 
     log.info { "${aru.botName} is being started..." }
-
-    Aru.prefixes += config.prefixes.split(',')
 
     //Create the Base Injector
     val initInjector = createInitialInjector(config, aru)

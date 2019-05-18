@@ -4,38 +4,110 @@ import pw.aru.utils.humanizedTime
 import java.io.File
 import java.lang.management.ManagementFactory
 
-enum class Aru(val botName: String, val environment: String) {
-    MAIN("Aru!", "production"),
-    DEV("AruDev!", "development"),
-    PATREON("Aru! Patreon", "production");
+enum class Aru(
+    val botName: String,
+    val environment: String,
+    val prefixes: List<String>,
+    val pastesRoot: String,
+    val reportsRoot: String
+) {
 
-    companion object {
+    MAIN(
+        botName = "Aru!",
+        environment = "production",
+        prefixes = listOf("a!", "aru!", "Aru!", "aru "),
+        pastesRoot = "https://pastes.aru.pw",
+        reportsRoot = "https://reports.aru.pw"
+    ),
 
-        fun fromString(type: String) = values().firstOrNull { type.equals(it.name, ignoreCase = true) } ?: throw IllegalArgumentException("Invalid Aru!")
+    DEV(
+        botName = "AruDev!",
+        environment = "development",
+        prefixes = listOf("ad!", "arudev ", "arudev!"),
+        pastesRoot = File("pastes").absolutePath,
+        reportsRoot = File("reports").absolutePath
+    ),
 
-        //Lists
-        val developers = listOf(
-            //AdrianTodt
-            "217747278071463937",
-            //Niflheim
-            "191410544278765568"
-        )
+    PATREON(
+        botName = "Aru! Patreon",
+        environment = "production",
+        prefixes = listOf("ap!", "arupatreon ", "arupatreon!"),
+        pastesRoot = "https://pastes-patreonbot.aru.pw",
+        reportsRoot = "https://reports-patreonbot.aru.pw"
+    );
+
+    companion object Bot {
+        //Global aru "definition"s
+        val aru get() = myAru
+
+        //Uptime
+        val uptime get() = humanizedTime(rawUptime)
+        val rawUptime get() = ManagementFactory.getRuntimeMXBean().uptime
 
         //Prefix
-        val prefixes = ArrayList<String>()
+        val prefixes get() = aru.prefixes
 
         //Assets
-        val bootQuotes get() = File("assets/aru/boot_quotes.txt").readLines()
-        val sleepQuotes get() = File("assets/aru/sleep_quotes.txt").readLines()
-        val splashes get() = File("assets/aru/splashes.txt").readLines()
-        val errorQuotes = listOf(
+        val devs = arrayOf(
+            //AdrianTodt
+            "217747278071463937"
+        )
+
+        val sleepQuotes = arrayOf(
+            "*goes to sleep*",
+            "*hugs pillow*",
+            "*hugs blanket*",
+            "*hugs Sora*",
+            "*hugs Shiro*"
+        )
+
+        val splashes = arrayOf(
+            "Hello everyone!",
+            "Hi! I'm Aru!",
+            "with Kotlin",
+            "now with Catnip",
+            "with music",
+            "with you",
+            "with games",
+            "I'm cute!",
+            "pat meeee!",
+            "Here to help you!",
+            "Listen to some music!",
+            "I want food!",
+            "I'm an angel, you b-baka!",
+            "I'm not lewd, you're lewd!",
+            "owo",
+            "uwu",
+            "awau",
+            "lewdie!",
+            "Whoa.",
+            "What's a pancake?",
+            "Need support? Check aru!hangout",
+            "Discord needs more pink.",
+            "Be a Patreon! Check aru!links",
+            "Now with a Patreon Bot!"
+        )
+
+        val errorQuotes = arrayOf(
             "What is happening? I'm sorry, I'm sorry, I'm sorry!",
             "Wha? Everything caught fire! qwq",
             "What am I supposed to do with an error? Because I got one."
         )
 
-        //Uptime
-        val uptime get() = humanizedTime(rawUptime)
-        val rawUptime get() = ManagementFactory.getRuntimeMXBean().uptime
+        val evaluatingQuotes = arrayOf(
+            "Creating Pylons of Java...",
+            "Warming up compilers...",
+            "Starting up Reflections...",
+            "Building Abstract Syntax Trees...",
+            "Recursively interpreting code..."
+        )
+
+        fun fromString(type: String): Aru {
+            return values().firstOrNull { type.equals(it.name, ignoreCase = true) }
+                ?: throw IllegalArgumentException("Invalid Aru!")
+        }
+
+        //internal stuff
+        internal lateinit var myAru: Aru
     }
 }

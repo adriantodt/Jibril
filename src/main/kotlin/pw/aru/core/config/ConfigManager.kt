@@ -2,7 +2,7 @@ package pw.aru.core.config
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import pw.aru.utils.Properties
+import pw.aru.libs.properties.Properties
 import java.io.File
 import java.io.FileNotFoundException
 

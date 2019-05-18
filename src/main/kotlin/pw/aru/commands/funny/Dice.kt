@@ -4,18 +4,21 @@ import pw.aru.commands.funny.dice.AruDice
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
+import pw.aru.core.commands.ICommand.CustomHandler.Result
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.CommandDescription
 import pw.aru.core.commands.help.Description
 import pw.aru.core.commands.help.Example
 import pw.aru.core.commands.help.Help
-import pw.aru.dice.exceptions.EvaluationException
-import pw.aru.dice.exceptions.SyntaxException
+import pw.aru.libs.dicenotation.exceptions.EvaluationException
+import pw.aru.libs.dicenotation.exceptions.SyntaxException
 import pw.aru.utils.emotes.GAME_DIE
 import pw.aru.utils.extensions.stripFormatting
 
 @Command("dice", "roll")
-class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
+class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider, ICommand.CustomHandler,
+    ICommand.CustomDiscreteHandler {
+    private val dicePattern = Regex("\\d*[Dd]\\d+")
     override val category = Category.FUN
 
     private fun resolveRoll(args: String, simple: Boolean = false): String {
@@ -48,6 +51,27 @@ class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider {
         if (toSend.isEmpty()) return call()
 
         send("**$toSend**\n$GAME_DIE ${resolveRoll(args)}").queue()
+    }
+
+    override fun CommandContext.customCall(command: String): Result {
+        if (dicePattern.matchEntire(command) == null) return Result.IGNORE
+
+        send("$GAME_DIE **${author.effectiveName}**, ${resolveRoll(command + args)}").queue()
+
+        return Result.HANDLED
+    }
+
+    override fun CommandContext.customCall(command: String, outer: String): Result {
+        if (dicePattern.matchEntire(command) == null) return Result.IGNORE
+
+        val toSend = outer.replace('\n', ' ').stripFormatting().trim()
+
+        if (toSend.isEmpty()) {
+            send("$GAME_DIE **${author.effectiveName}**, ${resolveRoll(command + args)}").queue()
+        } else {
+            send("**$toSend**\n$GAME_DIE ${resolveRoll(args)}").queue()
+        }
+        return Result.HANDLED
     }
 
     override val helpHandler = Help(

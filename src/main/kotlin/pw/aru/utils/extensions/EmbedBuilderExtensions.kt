@@ -12,7 +12,7 @@ fun EmbedBuilder.baseEmbed(
     name: String,
     url: String? = null,
     image: String? = event.jda.selfUser.effectiveAvatarUrl,
-    color: Color? = event.guild.selfMember.color ?: AruColors.primary
+    color: Color? = AruColors.primary
 ) {
     author(name, url, image)
     color(color)

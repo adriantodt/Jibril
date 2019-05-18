@@ -21,7 +21,7 @@ enum class CommandPermission(val permName: String) {
             || BOT_DEVELOPER.test(member)
     },
     BOT_DEVELOPER("Bot Developer") {
-        override fun test(member: Member) = Aru.developers.contains(member.user.id)
+        override fun test(member: Member) = Aru.devs.contains(member.user.id)
     };
 
     abstract fun test(member: Member): Boolean

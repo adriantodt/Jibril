@@ -1,25 +1,14 @@
 # GitIgnore for Aru
-
-# IntelliJ
 /.idea/
 /.gradle/
 /build/
 /out/
+/aruCore/build/
+/aruCore/out/
 *.iml
 
-# Generated files
-/src/main/kotlin/aru/exported/exported.kt
-/src/main/resources/aru/assets/assets.zip
-
-# Gradle
-
 # Runtime
-/logs/
-/reports/
-/pastes/
 /db/
 /tests/
-/url_cache/
-/img_assets/
-*.log
-aru.properties
+/run/*
+!/run/assets/

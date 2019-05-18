@@ -72,6 +72,7 @@ class ImageboardCommand(
     private val nsfwOnly: Boolean = false
 ) : ICommand, ICommand.HelpDialogProvider, ICommand.ExceptionHandler {
     override val category = IMAGEBOARD
+    override fun nsfw() = nsfwOnly
 
     init {
         ImageBoard.throwExceptionOnEOF = false
@@ -113,8 +114,8 @@ class ImageboardCommand(
         val type = if (tags.isNotEmpty()) SEARCH_RESULT else RANDOM_IMAGE
 
         val image = when (type) {
-            SEARCH_RESULT -> board.search(p, 50, tags.joinToString(" "), rating?.longName)
-            RANDOM_IMAGE -> board[p, 50, rating?.longName]
+            SEARCH_RESULT -> board.search(p, 50, tags.joinToString(" "), rating)
+            RANDOM_IMAGE -> board[p, 50, rating]
         }.blocking()
             .filter {
                 (rating?.equals(it.rating) ?: true)
@@ -136,7 +137,7 @@ class ImageboardCommand(
                             //initial size to account for the description
                             40 + image.width.toString().length + image.height.toString().length + image.rating.longName.capitalize().length + 2
                         )
-                        val tagsTaken = it.takeWhile { tag -> count.addAndGet(tag.length + 3) < 1900 }
+                        val tagsTaken = it.takeWhile { tag -> count.addAndGet(tag.length + 3) < 1800 }
 
                         if (tagsTaken.size != it.size) {
                             tagsTaken.joinToString("`, `", "`", "`, ${it.size - tagsTaken.size} more ...")

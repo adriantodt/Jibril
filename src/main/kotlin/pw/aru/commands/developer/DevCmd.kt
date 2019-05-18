@@ -19,7 +19,7 @@ import net.dv8tion.jda.core.requests.RestAction
 import net.dv8tion.jda.core.requests.restaction.MessageAction
 import net.dv8tion.jda.core.utils.JDALogger
 import okhttp3.OkHttpClient
-import pw.aru.Aru.Companion.sleepQuotes
+import pw.aru.Aru.Bot.sleepQuotes
 import pw.aru.commands.actions.impl.ImageBasedCommandImpl
 import pw.aru.core.CommandRegistry
 import pw.aru.core.categories.Category
