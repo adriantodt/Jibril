@@ -17,7 +17,7 @@ plugins {
 }
 
 group = 'pw.aru'
-version = '2.6-LTS'
+version = '2.6.1-LTS'
 mainClassName = 'pw.aru.Bootstrap'
 
 //Repositories and Dependencies

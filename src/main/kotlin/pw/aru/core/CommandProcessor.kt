@@ -102,7 +102,7 @@ class CommandProcessor(private val aru: Aru, private val db: AruDB, private val 
 
         val split = content.split(' ', limit = 2)
         val cmd = split[0].toLowerCase()
-        val args = split.getOrNull(1) ?: ""
+        val args = split.getOrNull(1)?.trim() ?: ""
 
         val command = registry[cmd] ?: return processCustomCommand(event, cmd, args)
 
@@ -166,7 +166,7 @@ class CommandProcessor(private val aru: Aru, private val db: AruDB, private val 
 
         val split = content.split(' ', limit = 2)
         val cmd = split[0].toLowerCase()
-        val args = split.getOrNull(1) ?: ""
+        val args = split.getOrNull(1)?.trim() ?: ""
 
         val command =
             registry[cmd] as? ICommand.Discrete ?: return processDiscreteCustomCommand(event, cmd, args, outer)
