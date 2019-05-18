@@ -114,6 +114,7 @@ task cleanDistArchives(type: Delete) { delete files(distTar, distZip, jar) }
 dependencyUpdates.revision = 'release'
 
 docker {
+    dependsOn shadowJar
     name = "adriantodt/aru:${version}"
     files("build/libs/aru-${version}-all.jar")
     copySpec.from("run/assets").into("assets")
