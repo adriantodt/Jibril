@@ -135,7 +135,7 @@ internal fun createInitialInjector(config: AruConfig, aru: Aru): Kodein {
         bind<Future<ShardManager>>() with instance(CompletableFuture())
         bind<AruConfig>() with instance(config)
         bind<Aru>() with instance(aru)
-        bind<AruDB>() with singleton { AruDB() }
+        bind<AruDB>() with singleton { AruDB("redis://redis:6379") }
         bind<AruHypervisor>() with when (aru) {
             MAIN -> eagerSingleton { MainHypervisor(instance()) }
             DEV -> eagerSingleton { DevHypervisor(instance()) }
