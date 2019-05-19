@@ -118,7 +118,7 @@ class ImageboardCommand(
             RANDOM_IMAGE -> board[p, 50, rating]
         }.blocking()
             .filter {
-                (rating?.equals(it.rating) ?: true)
+                it.runCatching { url }.isSuccess && (rating?.equals(it.rating) ?: true)
                     && (it.tags.none(fbi::contains) || it.rating == SAFE)
                     && validExtensions.any { ext -> it.url.endsWith(ext) }
             }
