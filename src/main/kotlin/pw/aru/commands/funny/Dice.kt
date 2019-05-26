@@ -69,7 +69,7 @@ class Dice : ICommand, ICommand.Discrete, ICommand.HelpDialogProvider, ICommand.
         if (toSend.isEmpty()) {
             send("$GAME_DIE **${author.effectiveName}**, ${resolveRoll(command + args)}").queue()
         } else {
-            send("**$toSend**\n$GAME_DIE ${resolveRoll(args)}").queue()
+            send("**$toSend**\n$GAME_DIE ${resolveRoll(command + args)}").queue()
         }
         return Result.HANDLED
     }
