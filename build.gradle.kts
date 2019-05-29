@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "pw.aru"
-version = "3.0.10"
+version = "3.0.11"
 
 repositories {
     jcenter()
@@ -70,17 +70,25 @@ dependencies {
     compile("pw.aru.libs:kodein-jit-bindings:2.2")
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+tasks {
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "1.8"
+    }
+
+    withType<ShadowJar> {
+        configurations = listOf(project.configurations.runtime.get())
+    }
+
+    register("createRunDir", Copy::class) {
+        from("runDir")
+        into("run")
+    }
 }
 
 configure<ApplicationPluginConvention> {
     mainClassName = "pw.aru.Bootstrap"
 }
 
-tasks.withType<ShadowJar> {
-    configurations = listOf(project.configurations.runtime.get())
-}
 
 val shadowJar by tasks.getting
 
@@ -89,9 +97,8 @@ configure<DockerExtension> {
 
     dependsOn(shadowJar)
     files(shadowJar.outputs)
-    files("jlink.sh")
+    copySpec.from("runDir").into("run")
 
-    copySpec.from("run/assets").into("assets")
     buildArgs(mapOf("version" to version.toString(), "jattachVersion" to "v1.5"))
 }
 

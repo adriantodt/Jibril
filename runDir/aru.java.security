@@ -1,0 +1,5 @@
+#
+# Disable CHACHA20-POLY1305 algorithms
+#
+jdk.tls.disabledAlgorithms=SSLv3, RC4, DES, MD5withRSA, DH keySize < 1024, \
+    EC keySize < 224, 3DES_EDE_CBC, CHACHA20-POLY1305, anon, NULL

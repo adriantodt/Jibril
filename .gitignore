@@ -10,7 +10,6 @@
 # Runtime
 /db/
 /tests/
-/run/*
-!/run/assets/
+/run/
 /andesite/
 /lavalink/
