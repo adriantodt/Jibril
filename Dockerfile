@@ -30,6 +30,7 @@ RUN wget https://github.com/apangin/jattach/releases/download/$jattachVersion/ja
 RUN chmod +x /bin/jattach
 
 COPY run/assets assets
+COPY run/aru.java.security aru.java.security
 COPY --from=builder /aru /aru
 
-CMD ["jrt/bin/java", "-Djava.security.properties=aru.java.security", "-jar", "aru.jar"]
+CMD ["jrt/bin/java", "-Djava.security.properties=./aru.java.security", "-jar", "aru.jar"]
