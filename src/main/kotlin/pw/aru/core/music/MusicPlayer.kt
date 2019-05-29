@@ -370,12 +370,14 @@ class MusicPlayer(
         lastPosition = event.position()
         lastTimestamp = event.timestamp()
         val currentTrack = event.player().playingTrack() ?: return
+        val trackData = lastTrackData ?: return
+
         publish(
             PlayerInfoEvent(
                 this,
                 lastTimestamp,
                 lastPosition,
-                MusicTrack(currentTrack, lastTrackData!!),
+                MusicTrack(currentTrack, trackData),
                 queue.toList()
             )
         )
