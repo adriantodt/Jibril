@@ -32,4 +32,4 @@ RUN chmod +x /bin/jattach
 COPY run/assets assets
 COPY --from=builder /aru /aru
 
-CMD ["jrt/bin/java", "-jar", "-Djava.security.properties=aru.java.security", "aru.jar"]
+CMD ["jrt/bin/java", "-Djava.security.properties=aru.java.security", "-jar", "aru.jar"]

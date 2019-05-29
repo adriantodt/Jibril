@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "pw.aru"
-version = "3.0.11"
+version = "3.0.12"
 
 repositories {
     jcenter()
