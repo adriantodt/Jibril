@@ -2,6 +2,7 @@ package pw.aru.utils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 public class SettableResource<T> implements Resource<T> {
     private Exception ex;
@@ -31,6 +32,12 @@ public class SettableResource<T> implements Resource<T> {
     @Override
     public Exception getLoadException() {
         return ex;
+    }
+
+    @Nonnull
+    @Override
+    public T getOrDefault(@Nonnull T defValue) {
+        return Objects.requireNonNullElse(res, defValue);
     }
 
     @Override

@@ -1,7 +1,5 @@
 package pw.aru
 
-import com.fasterxml.jackson.module.kotlin.convertValue
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.natanbc.weeb4j.TokenType
 import com.github.natanbc.weeb4j.Weeb4J
 import com.mewna.catnip.Catnip
@@ -21,7 +19,7 @@ import org.kodein.di.Kodein
 import org.kodein.di.generic.bind
 import org.kodein.di.generic.instance
 import org.kodein.di.generic.singleton
-import pw.aru.Aru.Bot.myAru
+import pw.aru.Aru.Bot.aru
 import pw.aru.Aru.Bot.splashes
 import pw.aru.commands.games.manager.GameManager
 import pw.aru.core.CommandProcessor
@@ -30,7 +28,6 @@ import pw.aru.core.GuildWebhookLogger
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.ICommandProvider
-import pw.aru.core.config.AruConfig
 import pw.aru.core.executor.Executable
 import pw.aru.core.listeners.CommandListener
 import pw.aru.core.logging.DiscordLogBack
@@ -44,12 +41,10 @@ import pw.aru.io.AruIO
 import pw.aru.libs.andeclient.entities.AndeClient
 import pw.aru.libs.kodein.jit.installJit
 import pw.aru.libs.kodein.jit.jitInstance
-import pw.aru.libs.properties.Properties
 import pw.aru.utils.*
 import pw.aru.utils.extensions.lang.classOf
 import pw.aru.utils.extensions.lang.threadGroupBasedFactory
 import java.io.File
-import java.io.FileNotFoundException
 import java.net.http.HttpClient
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -80,14 +75,15 @@ class Bootstrap {
 
     fun boot() {
         val scanResult = doScanResult()
-        val config = loadConfig()
 
-        val catnip = makeCatnipAsync(config).join()
-        val aru = detectAru(config)
+        val catnip = makeCatnipAsync().join()
 
-        startDiscordLogBack(catnip, config)
+        ErrorReportHandler.parentUrl = aru.reportsRoot
+        LocalPastes.parentUrl = aru.pastesRoot
 
-        val kodein = makeInjector(aru, config, catnip)
+        startDiscordLogBack(catnip)
+
+        val kodein = makeInjector(catnip)
 
         configureCatnip(catnip, kodein).thenAcceptAsync {
             createCommands(scanResult, kodein)
@@ -104,25 +100,9 @@ class Bootstrap {
             .scan()
     }
 
-    private fun loadConfig(): AruConfig {
-        val mapper = jacksonObjectMapper()
-        val file = File("aru.properties")
-        val backupFile = File("aru.properties.bkp")
-
-        try {
-            return mapper.convertValue(Properties.fromFile(file))
-        } catch (e: Exception) {
-            if (e !is FileNotFoundException) file.renameTo(backupFile)
-            Properties().apply {
-                putAll(mapper.convertValue<Map<String, String>>(AruConfig()))
-            }.storeToString("Aru Config")
-            throw e
-        }
-    }
-
-    private fun makeCatnipAsync(config: AruConfig): CompletableFuture<Catnip> {
+    private fun makeCatnipAsync(): CompletableFuture<Catnip> {
         return Catnip.catnipAsync(
-            CatnipOptions(config.botToken)
+            CatnipOptions(Aru.EnvVars.BOT_TOKEN)
                 .memberChunkTimeout(15000L)
                 .cacheFlags(setOf(CacheFlag.DROP_GAME_STATUSES)) // I guess we don't need it
                 .presence(
@@ -141,19 +121,11 @@ class Bootstrap {
         )
     }
 
-    private fun detectAru(config: AruConfig): Aru {
-        val aru = Aru.fromString(config.type)
-        myAru = aru
-        ErrorReportHandler.parentUrl = aru.reportsRoot
-        LocalPastes.parentUrl = aru.pastesRoot
-        return aru
+    private fun startDiscordLogBack(catnip: Catnip) {
+        DiscordLogBack.enable(catnip, Aru.EnvVars.CONSOLE_WEBHOOK)
     }
 
-    private fun startDiscordLogBack(catnip: Catnip, config: AruConfig) {
-        DiscordLogBack.enable(catnip, config.consoleWebhook)
-    }
-
-    private fun makeInjector(aru: Aru, config: AruConfig, catnip: Catnip): Kodein {
+    private fun makeInjector(catnip: Catnip): Kodein {
         return Kodein {
             // Install JIT Module
             installJit()
@@ -163,9 +135,14 @@ class Bootstrap {
             bind<DKodein>() with singleton { dkodein }
 
             // Instances
-            bind<AruConfig>() with instance(config)
             bind<Aru>() with instance(aru)
-            bind<AruDB>() with singleton { AruDB(aru.side, 0, if (dev) "redis://localhost:6379" else "redis://redis:6379") }
+            bind<AruDB>() with singleton {
+                AruDB(
+                    aru.side,
+                    0,
+                    if (dev) "redis://localhost:6379" else "redis://redis:6379"
+                )
+            }
             bind<AruIO>() with singleton { instance<AruDB>().io() }
             bind<CommandRegistry>() with singleton { CommandRegistry() }
             bind<CommandProcessor>() with singleton { CommandProcessor(instance(), instance(), instance()) }
@@ -193,7 +170,7 @@ class Bootstrap {
 
             bind<Weeb4J>() with singleton {
                 Weeb4J.Builder()
-                    .setToken(TokenType.WOLKE, config.wshToken)
+                    .setToken(TokenType.WOLKE, Aru.EnvVars.WEEBSH_TOKEN)
                     .setHttpClient(instance())
                     .setBotInfo(aru.botName, aru_version, aru.environment)
                     .build()
@@ -280,9 +257,7 @@ class Bootstrap {
             if (++ready == shardCount) allShardsReady.complete(Unit)
         }
 
-        val config: AruConfig by kodein.instance()
-
-        val guildLogger = GuildWebhookLogger(config.serversWebhook)
+        val guildLogger = GuildWebhookLogger(Aru.EnvVars.SERVERS_WEBHOOK)
         catnip.on(DiscordEvent.GUILD_CREATE, guildLogger::onGuildJoin)
         catnip.on(DiscordEvent.GUILD_DELETE, guildLogger::onGuildLeave)
 

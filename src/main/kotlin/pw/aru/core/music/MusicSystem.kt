@@ -43,14 +43,14 @@ class MusicSystem(val andeClient: AndeClient, val db: AruDB) {
     val sources: Map<ItemSource, AudioPlayerManager>
 
     private val discordListener = MusicEventReactor(db)
-    private val dashboardListener = OutputMusicEventPublisher(db.io())
+    //private val dashboardListener = OutputMusicEventPublisher(db.io())
 
     operator fun get(guild: Guild): MusicPlayer = players.computeIfAbsent(guild.idAsLong()) { setupPlayer(guild) }
 
     private fun setupPlayer(guild: Guild): MusicPlayer {
         return MusicPlayer(this, guild).apply {
             subscribe(discordListener)
-            subscribe(dashboardListener)
+            //subscribe(dashboardListener)
         }
     }
 

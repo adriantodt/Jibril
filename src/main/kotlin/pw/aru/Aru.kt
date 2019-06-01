@@ -1,6 +1,7 @@
 package pw.aru
 
 import pw.aru.sides.AruSide
+import pw.aru.utils.extensions.lang.environiment
 import pw.aru.utils.humanizedTime
 import java.io.File
 import java.lang.management.ManagementFactory
@@ -41,9 +42,22 @@ enum class Aru(
         reportsRoot = "https://reports-patreonbot.aru.pw"
     );
 
+    object EnvVars {
+        val BOT_TYPE by environiment
+
+        val BOT_TOKEN by environiment
+        val WEEBSH_TOKEN by environiment
+
+        val CONSOLE_WEBHOOK by environiment
+        val SERVERS_WEBHOOK by environiment
+    }
+
     companion object Bot {
         //Global aru "definition"s
-        val aru get() = myAru
+        val aru by lazy {
+            values().firstOrNull { EnvVars.BOT_TYPE.equals(it.name, ignoreCase = true) }
+                ?: throw IllegalArgumentException("Invalid Aru!")
+        }
 
         //Uptime
         val uptime get() = humanizedTime(rawUptime)
@@ -106,13 +120,5 @@ enum class Aru(
             "Building Abstract Syntax Trees...",
             "Recursively interpreting code..."
         )
-
-        fun fromString(type: String): Aru {
-            return values().firstOrNull { type.equals(it.name, ignoreCase = true) }
-                ?: throw IllegalArgumentException("Invalid Aru!")
-        }
-
-        //internal stuff
-        internal lateinit var myAru: Aru
     }
 }

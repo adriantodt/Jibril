@@ -10,8 +10,17 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.concurrent.thread
+import kotlin.properties.ReadOnlyProperty
 import kotlin.random.Random
 import kotlin.reflect.KProperty
+
+val environiment = object : ReadOnlyProperty<Any?, String> {
+    private val env by lazy { System.getenv() }
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>): String {
+        return env.get(property.name) ?: throw IllegalStateException("No environiment property ${property.name}")
+    }
+}
 
 inline fun <reified T> classOf() = T::class.java
 

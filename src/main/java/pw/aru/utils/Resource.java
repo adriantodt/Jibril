@@ -3,6 +3,7 @@ package pw.aru.utils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.Closeable;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -22,9 +23,8 @@ import java.util.concurrent.Future;
  * <li>{@link Resource#close()} must clear any held resources and set the state to {@link State#UNAVAILABLE}.</li>
  * <li>{@link Resource#getValue()} must throw an {@link IllegalStateException} if the resource is unavailable.</li>
  * <li>{@link Resource#getOrNull()} and {@link Resource#getOrDefault(Object)} must NOT throw even if the resource is unavailable.</li>
- * <ul>
+ * <li>{@link Resource#getOrDefault(Object)} may never return null.</li>
  * <li>If your {@link Resource#load()} implementation throws, override the default implementation of {@link Resource#getOrNull()} and {@link Resource#getOrDefault(Object)}.</li>
- * </ul>
  * </ul>
  *
  * @param <T> the type of the returned object or the result of the calculation.
@@ -82,9 +82,9 @@ public interface Resource<T> extends Closeable {
         return null;
     }
 
-    default T getOrDefault(T defValue) {
-        if (load()) return getValue();
-        return defValue;
+    @Nonnull
+    default T getOrDefault(@Nonnull T defValue) {
+        return Objects.requireNonNullElse(getValue(), defValue);
     }
 
     @Override

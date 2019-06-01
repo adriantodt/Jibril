@@ -32,6 +32,18 @@ class UnavailableResource implements Resource {
         return false;
     }
 
+    @Nullable
+    @Override
+    public Object getOrNull() {
+        return null;
+    }
+
+    @Nonnull
+    @Override
+    public Object getOrDefault(@Nonnull Object defValue) {
+        return defValue;
+    }
+
     @Override
     public void close() {
     }

@@ -2,6 +2,7 @@ package pw.aru.utils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 class AvailableResource<T> implements Resource<T> {
     private boolean closed = false;
@@ -28,6 +29,12 @@ class AvailableResource<T> implements Resource<T> {
     @Override
     public T getOrNull() {
         return value;
+    }
+
+    @Nonnull
+    @Override
+    public T getOrDefault(@Nonnull T defValue) {
+        return Objects.requireNonNullElse(value, defValue);
     }
 
     @Nullable
