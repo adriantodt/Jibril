@@ -15,8 +15,8 @@ class WeebVerifier(val registry: CommandRegistry, val weebSh: Weeb4J) : Executab
         val allTypes by weebSh.imageProvider.imageTypes.submit()
         val usedTypes = registry.lookup.keys.asSequence()
             .mapNotNull { it as? ImageBasedCommandImpl }
-            .flatMap { c -> sequenceOf(c.provider, c.nsfwProvider).mapNotNull { it as? WeebProvider } }
-            .map { it.type }
+            .flatMap { c -> sequenceOf(c.provider, c.nsfwProvider) }
+            .mapNotNull { (it as? WeebProvider)?.type }
             .toHashSet()
 
         val newTypes = allTypes.types.filter { it !in usedTypes }
