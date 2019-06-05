@@ -27,7 +27,7 @@ object DevEnvBootstrap {
 
                 startupLock.complete(Unit)
 
-                object : Thread("Redis-LogThread") {
+                object : Thread("Redis-RunThread") {
                     init {
                         start()
                     }
@@ -46,7 +46,7 @@ object DevEnvBootstrap {
 
                 }
 
-                object : Thread("Andesite-LogThread") {
+                object : Thread("Andesite-RunThread") {
                     init {
                         start()
                     }
