@@ -17,6 +17,9 @@ class GuildSettings(db: AruDB, id: Long) : RedisObject(db, id) {
     var legacyPremium by RedisField.Boolean(false)
     var premiumSince by RedisField.NullableLong()
 
+    //begin guild configuration
+    var showImageboardInfo by RedisField.Boolean(true)
+
     val assignableRoles: MutableMap<String, Long> = RedisHash(db, remoteId(), AsIs, ToLong)
     //val customCommands: MutableMap<String, CustomCommand> = RedisHash(db, remoteId(), AsIs, redisObject(db, ::CustomCommand))
 

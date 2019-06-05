@@ -9,7 +9,6 @@ import pw.aru.utils.extensions.lang.randomOf
 class AruDice(text: String) {
     companion object {
         private val dice = ShadowDice()
-        private val solver = DiceSolver(dice::roll)
         private val evaluator = DiceEvaluatorBuilder()
             .value("pi", Math.PI)
             .value("e", Math.E)
@@ -19,14 +18,17 @@ class AruDice(text: String) {
             .function("cos") { Math.cos(it[0].toDouble()) }
             .function("tan") { Math.tan(it[0].toDouble()) }
             .function("random") { dice.roll(it[0].toInt()) }
+            .function("average") { sequenceOf(*it).map(Number::toDouble).average() }
             .function("any") { randomOf(*it) }
             .function("int") { it[0].toInt() }
             .function("double") { it[0].toDouble() }
-            .functionAlias("random", "rand", "rdn", "r")
+            .functionAlias("random", "rand", "rdn", "r", "roll")
+            .functionAlias("average", "avg")
             .functionAlias("sin", "sen")
             .functionAlias("int", "integer", "long")
             .functionAlias("double", "float", "decimal")
             .build()
+        private val solver = DiceSolver(dice::roll)
     }
 
     val diceExpr = DiceParser(DiceLexer(text)).parse().accept(solver)!!

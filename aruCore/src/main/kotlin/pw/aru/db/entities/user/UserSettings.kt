@@ -13,4 +13,7 @@ class UserSettings(db: AruDB, id: Long) : RedisObject(db, id) {
     var legacyPremium by RedisField.Boolean(false)
     var premiumSince by RedisField.NullableLong()
     var premiumAmount by RedisField.Int(0)
+
+    //begin user configurations
+    var showImageboardInfo by RedisField.NullableBoolean()
 }

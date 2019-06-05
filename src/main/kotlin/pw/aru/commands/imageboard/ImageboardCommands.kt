@@ -18,6 +18,9 @@ import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
 import pw.aru.core.parser.parseAndCreate
 import pw.aru.core.parser.tryTakeInt
+import pw.aru.db.AruDB
+import pw.aru.db.entities.guild.GuildSettings
+import pw.aru.db.entities.user.UserSettings
 import pw.aru.utils.extensions.lib.description
 import pw.aru.utils.styling
 import pw.aru.utils.text.DISAPPOINTED
@@ -28,36 +31,36 @@ import java.net.SocketTimeoutException
 import java.util.concurrent.atomic.AtomicInteger
 
 @CommandProvider
-class ImageboardCommands : ICommandProvider {
+class ImageboardCommands(private val db: AruDB) : ICommandProvider {
 
     override fun provide(r: CommandRegistry) {
         ImageboardCommand(
-            listOf("rule34", "r34"), "Rule34",
+            listOf("rule34", "r34"), "Rule34", db,
             board = RULE34, nsfwOnly = true
         ).register(r)
 
         ImageboardCommand(
-            listOf("e621"), "e621",
+            listOf("e621"), "e621", db,
             board = E621, nsfwOnly = true
         ).register(r)
 
         ImageboardCommand(
-            listOf("yandere"), "Yande.re",
+            listOf("yandere"), "Yande.re", db,
             board = YANDERE, nsfwOnly = true
         ).register(r)
 
         ImageboardCommand(
-            listOf("konachan"), "Konachan",
+            listOf("konachan"), "Konachan", db,
             board = KONACHAN
         ).register(r)
 
         ImageboardCommand(
-            listOf("danbooru"), "Danbooru",
+            listOf("danbooru"), "Danbooru", db,
             board = DANBOORU
         ).register(r)
 
         ImageboardCommand(
-            listOf("safebooru"), "Safebooru",
+            listOf("safebooru"), "Safebooru", db,
             board = SAFEBOORU
         ).register(r)
     }
@@ -67,6 +70,7 @@ class ImageboardCommands : ICommandProvider {
 class ImageboardCommand(
     private val commandNames: List<String>,
     private val name: String,
+    private val db: AruDB,
     private val board: ImageBoard<*>,
     private val nsfwOnly: Boolean = false
 ) : ICommand, ICommand.HelpDialogProvider, ICommand.ExceptionHandler {
@@ -135,31 +139,37 @@ class ImageboardCommand(
                         .author("$name | ${type.title}", image.url)
                         .applyAll()
 
-                    val imgTags = image.tags.sorted().let {
-                        if (it.isEmpty()) {
-                            "None."
-                        } else {
-                            val count = AtomicInteger(
-                                //initial size to account for the description
-                                40 + image.width.toString().length + image.height.toString().length + image.rating.longName.capitalize().length + 2
-                            )
-                            val tagsTaken = it.takeWhile { tag -> count.addAndGet(tag.length + 3) < 1800 }
+                    val showInfo = UserSettings(db, author.idAsLong()).showImageboardInfo
+                        ?: GuildSettings(db, guild.idAsLong()).showImageboardInfo
 
-                            if (tagsTaken.size != it.size) {
-                                tagsTaken.joinToString("`, `", "`", "`, ${it.size - tagsTaken.size} more ...")
+                    if (showInfo) {
+                        val imgTags = image.tags.sorted().let {
+                            if (it.isEmpty()) {
+                                "None."
                             } else {
-                                it.joinToString("`, `", "`", "`")
+                                val count = AtomicInteger(
+                                    //initial size to account for the description
+                                    40 + image.width.toString().length + image.height.toString().length + image.rating.longName.capitalize().length + 2
+                                )
+                                val tagsTaken = it.takeWhile { tag -> count.addAndGet(tag.length + 3) < 1800 }
+
+                                if (tagsTaken.size != it.size) {
+                                    tagsTaken.joinToString("`, `", "`", "`, ${it.size - tagsTaken.size} more ...")
+                                } else {
+                                    it.joinToString("`, `", "`", "`")
+                                }
                             }
                         }
+
+                        description(
+                            "**${image.width}**x**${image.height}** | **${image.rating.longName.capitalize()}**",
+                            "",
+                            "**Tags**: $imgTags",
+                            "",
+                            "**Image**:"
+                        )
                     }
 
-                    description(
-                        "**${image.width}**x**${image.height}** | **${image.rating.longName.capitalize()}**",
-                        "",
-                        "**Tags**: $imgTags",
-                        "",
-                        "**Image**:"
-                    )
                     image(image.url)
                 }.whenComplete(handlingExceptions())
             }
