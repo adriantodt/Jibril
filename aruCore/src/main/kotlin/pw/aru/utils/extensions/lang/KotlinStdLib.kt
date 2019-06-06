@@ -4,10 +4,7 @@
 
 package pw.aru.utils.extensions.lang
 
-import java.util.concurrent.CompletionStage
-import java.util.concurrent.Future
-import java.util.concurrent.Semaphore
-import java.util.concurrent.ThreadFactory
+import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.concurrent.thread
 import kotlin.properties.ReadOnlyProperty
@@ -43,6 +40,27 @@ inline operator fun <V> CompletionStage<V>.getValue(r: Any?, p: KProperty<*>): V
 @JvmName("futureCompletionGetValue")
 inline operator fun <V, T> T.getValue(r: Any?, p: KProperty<*>): V where T : Future<V>, T : CompletionStage<V> = get()
 
+private fun <T> CompletionStage<T>.stageToFuture(): CompletableFuture<T> {
+    return if (this is CompletableFuture<*>) {
+        this as CompletableFuture<T>
+    } else {
+        toCompletableFuture()
+    }
+}
+
+fun <T> Array<CompletionStage<T>>.awaitAll(): CompletionStage<Void> {
+    return CompletableFuture.allOf(
+        *map { it.stageToFuture() }
+            .toTypedArray()
+    )
+}
+
+fun <T> Collection<CompletionStage<T>>.awaitAll(): CompletionStage<Void> {
+    return CompletableFuture.allOf(
+        *map { it.stageToFuture() }
+            .toTypedArray()
+    )
+}
 
 inline fun <K, V> Map<K, V>.ifContains(k: K, function: (V) -> Unit) {
     if (containsKey(k)) function(get(k)!!)

@@ -1,11 +1,11 @@
 package pw.aru.commands.utils
 
-import gg.amy.catnip.utilities.FinderUtil
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
+import pw.aru.libs.catnip.entityfinder.EntityFinder
 import pw.aru.utils.text.DISAPPOINTED
 import pw.aru.utils.text.ERROR
 import pw.aru.utils.text.SUCCESS
@@ -19,7 +19,7 @@ class Avatar : ICommand, ICommand.HelpDialogProvider {
         val user = if (args.isEmpty()) {
             message.member()!!
         } else {
-            val list = FinderUtil.findMembers(args, guild)
+            val list = EntityFinder.findMembers(args, guild)
             if (list.isEmpty()) {
                 send("$ERROR Aw, I couldn't find a member with that name $DISAPPOINTED")
                 return

@@ -78,17 +78,19 @@ class Args(val raw: String) {
         return pairs.firstOrNull { (_, v) -> matchNextString(v) }?.first
     }
 
-    fun <T> mapNextString(map: (String) -> Pair<T, Boolean>): T {
+    data class MapResult<T>(val result: T, val consumed: Boolean)
+
+    fun <T> mapNextString(map: (String) -> MapResult<T>): T {
         val args = remaining
         val i = args.indexOfAny(SPLIT_CHARS)
 
         val ne = if (i != -1) args.substring(0, i) else args
         val re = if (i != -1) args.substring(i).trimStart(*SPLIT_CHARS) else ""
 
-        val (t, r) = map(ne)
-        if (r) remaining = re
+        val r = map(ne)
+        if (r.consumed) remaining = re
 
-        return t
+        return r.result
     }
 
     fun takeAllStrings(): List<String> {
@@ -102,32 +104,6 @@ class Args(val raw: String) {
         remaining = ""
         return re
     }
-
-    fun takeStrings() = deconstructed(Args::takeString)
-
-    fun <T> deconstructed(f: Args.() -> T) = Deconstructed(f)
-
-    inner class Deconstructed<T>(private val f: Args.() -> T) {
-        operator fun get(amount: Int) = List(amount) { f() }
-        operator fun component0() = f()
-        operator fun component1() = f()
-        operator fun component2() = f()
-        operator fun component3() = f()
-        operator fun component4() = f()
-        operator fun component5() = f()
-        operator fun component6() = f()
-        operator fun component7() = f()
-        operator fun component8() = f()
-        operator fun component9() = f()
-        operator fun component10() = f()
-        operator fun component11() = f()
-        operator fun component12() = f()
-        operator fun component13() = f()
-        operator fun component14() = f()
-        operator fun component15() = f()
-        operator fun component16() = f()
-        operator fun component17() = f()
-        operator fun component18() = f()
-        operator fun component19() = f()
-    }
 }
+
+fun <T> T?.toMapResult() = Args.MapResult(this, this != null)

@@ -31,9 +31,6 @@ dependencies {
     compile(project("aruCore"))
 
     compile("com.github.mewna:catnip:1.2.3")
-    compile("com.github.queer:catnip-utilities:360b876") {
-        isTransitive = false
-    }
     compile("io.projectreactor.addons:reactor-adapter:3.2.3.RELEASE")
     compile("io.reactivex.rxjava2:rxkotlin:2.3.0")
 
@@ -57,6 +54,7 @@ dependencies {
     compile("net.kodehawa:imageboard-api:2.0.7")
 
     // Open-Source Libraries
+    compile("pw.aru.libs:catnip-entityfinder:1.0")
     compile("pw.aru.libs:dice-notation:1.1")
     compile("pw.aru.libs:properties:1.2")
     compile("pw.aru.libs:snowflake-local:1.0")

@@ -5,7 +5,6 @@ import com.mewna.catnip.entity.guild.Member
 import com.mewna.catnip.shard.DiscordEvent
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
-import gg.amy.catnip.utilities.FutureUtil
 import mu.KLogging
 import pw.aru.core.commands.help.prefix
 import pw.aru.core.music.entities.*
@@ -19,10 +18,10 @@ import pw.aru.core.reporting.ErrorReporter
 import pw.aru.db.AruDB
 import pw.aru.utils.AruColors
 import pw.aru.utils.extensions.discordapp.safeUserInput
+import pw.aru.utils.extensions.lang.awaitAll
 import pw.aru.utils.extensions.lang.toStringReflexively
 import pw.aru.utils.extensions.lib.sendEmbed
 import pw.aru.utils.text.*
-import reactor.adapter.rxjava.toMono
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
@@ -119,7 +118,7 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
         }.thenAccept { m ->
             val indices = dialog.tracks.indices.map { i -> "${i + 1}\u20E3" }
 
-            FutureUtil.awaitAll(indices.map(m::react)).thenRun { m.react(X) }
+            indices.map(m::react).awaitAll().thenRun { m.react(X) }
 
             m.catnip().observe(DiscordEvent.MESSAGE_REACTION_ADD)
                 .filter { e ->

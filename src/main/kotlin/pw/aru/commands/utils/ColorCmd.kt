@@ -1,11 +1,11 @@
 package pw.aru.commands.utils
 
-import gg.amy.catnip.utilities.FinderUtil
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.Command
 import pw.aru.core.commands.ICommand
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.commands.help.*
+import pw.aru.libs.catnip.entityfinder.EntityFinder
 import pw.aru.utils.Colors
 import pw.aru.utils.extensions.lang.classOf
 import pw.aru.utils.extensions.lang.format
@@ -87,7 +87,7 @@ class ColorCmd : ICommand, ICommand.HelpDialogProvider {
                     }
                 } else {
                     val raw = args.raw
-                    val members = FinderUtil.findMembers(raw, guild)
+                    val members = EntityFinder.findMembers(raw, guild)
 
                     if (members.isNotEmpty()) {
                         if (members.size > 1) {

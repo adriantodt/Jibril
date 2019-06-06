@@ -4,7 +4,6 @@ import com.mewna.catnip.Catnip
 import com.mewna.catnip.entity.channel.TextChannel
 import com.mewna.catnip.entity.guild.Member
 import com.mewna.catnip.entity.message.Message
-import gg.amy.catnip.utilities.FinderUtil
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
 import pw.aru.commands.games.Game
@@ -26,6 +25,7 @@ import pw.aru.hg.engine.phases.*
 import pw.aru.hg.loader.loadFile
 import pw.aru.hg.loader.parseHarmfulActions
 import pw.aru.hg.loader.parseHarmlessActions
+import pw.aru.libs.catnip.entityfinder.EntityFinder
 import pw.aru.utils.Colors
 import pw.aru.utils.extensions.discordapp.safeUserInput
 import pw.aru.utils.extensions.lang.format
@@ -278,10 +278,10 @@ class AruHG(
                             }
 
                         val members = list.asSequence()
-                            .filter { FinderUtil.USER_MENTION.matcher(it).find() }
+                            .filter { EntityFinder.USER_MENTION.matcher(it).find() }
                             .onEach { list.remove(it) }
                             .flatMap { it.splitToSequence(" ", "\n", "\r", "\t") }
-                            .flatMap { FinderUtil.findMembers(it, message.guild()).asSequence() }
+                            .flatMap { EntityFinder.findMembers(it, message.guild()).asSequence() }
                             .toMutableList()
 
                         playerGuests.addAll(members)
@@ -311,10 +311,10 @@ class AruHG(
                             }
 
                         val members = list.asSequence()
-                            .filter { FinderUtil.USER_MENTION.matcher(it).find() }
+                            .filter { EntityFinder.USER_MENTION.matcher(it).find() }
                             .onEach { list.remove(it) }
                             .flatMap { it.splitToSequence(" ", "\n", "\r", "\t") }
-                            .flatMap { FinderUtil.findMembers(it, message.guild()).asSequence() }
+                            .flatMap { EntityFinder.findMembers(it, message.guild()).asSequence() }
                             .toMutableList()
 
                         members.retainAll(playerGuests)
