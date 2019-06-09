@@ -78,7 +78,6 @@ object DevEnvBootstrap {
 
             startupLock.join()
 
-            Bootstrap.dev = true
             Bootstrap.main()
         } catch (e: Exception) {
             DiscordLogBack.disable()

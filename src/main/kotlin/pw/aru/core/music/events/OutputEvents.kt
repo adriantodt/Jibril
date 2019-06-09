@@ -7,112 +7,127 @@ import pw.aru.core.music.entities.*
 import pw.aru.core.music.internal.LavaplayerLoadResult
 import java.util.*
 
-sealed class OutputMusicEvent(val player: MusicPlayer, val source: MusicEventSource)
+sealed class OutputMusicEvent {
+    abstract val player: MusicPlayer
+    abstract val source: MusicEventSource
+}
 
-class LoadResultsEvent(
-    player: MusicPlayer,
-    source: MusicEventSource,
+data class LoadResultsEvent(
+    override val player: MusicPlayer,
+    override val source: MusicEventSource,
     val id: UUID,
     val results: LavaplayerLoadResult,
     val trackLoadOptions: TrackLoadOptions
-) : OutputMusicEvent(player, source)
+) : OutputMusicEvent()
 
-class TrackQueuedEvent(
-    player: MusicPlayer,
-    source: MusicEventSource,
+data class TrackQueuedEvent(
+    override val player: MusicPlayer,
+    override val source: MusicEventSource,
     val track: MusicTrack
-) : OutputMusicEvent(player, source)
+) : OutputMusicEvent()
 
-class PlaylistQueuedEvent(
-    player: MusicPlayer,
-    source: MusicEventSource,
+data class PlaylistQueuedEvent(
+    override val player: MusicPlayer,
+    override val source: MusicEventSource,
     val playlist: AudioPlaylist,
     val trackLoadOptions: TrackLoadOptions
-) : OutputMusicEvent(player, source)
+) : OutputMusicEvent()
 
-class ConnectErrorEvent(
-    player: MusicPlayer,
-    source: MusicEventSource,
+data class ConnectErrorEvent(
+    override val player: MusicPlayer,
+    override val source: MusicEventSource,
     val error: ConnectionErrorType
-) : OutputMusicEvent(player, source)
+) : OutputMusicEvent()
 
-class MusicStartedEvent(
-    player: MusicPlayer,
-    source: MusicEventSource
-) : OutputMusicEvent(player, source)
+data class MusicStartedEvent(
+    override val player: MusicPlayer,
+    override val source: MusicEventSource
+) : OutputMusicEvent()
 
-class ChangedVolumeEvent(
-    player: MusicPlayer,
-    source: MusicEventSource,
+data class ChangedVolumeEvent(
+    override val player: MusicPlayer,
+    override val source: MusicEventSource,
     val volume: Int
-) : OutputMusicEvent(player, source)
+) : OutputMusicEvent()
 
-class ChangedPauseStateEvent(
-    player: MusicPlayer,
-    source: MusicEventSource,
+data class ChangedPauseStateEvent(
+    override val player: MusicPlayer,
+    override val source: MusicEventSource,
     val state: PauseState
-) : OutputMusicEvent(player, source)
+) : OutputMusicEvent()
 
-class ChangedRepeatModeEvent(
-    player: MusicPlayer,
-    source: MusicEventSource,
+data class ChangedRepeatModeEvent(
+    override val player: MusicPlayer,
+    override val source: MusicEventSource,
     val mode: RepeatMode
-) : OutputMusicEvent(player, source)
+) : OutputMusicEvent()
 
-class QueueClearedEvent(
-    player: MusicPlayer,
-    source: MusicEventSource
-) : OutputMusicEvent(player, source)
+data class QueueClearedEvent(
+    override val player: MusicPlayer,
+    override val source: MusicEventSource
+) : OutputMusicEvent()
 
-class QueueShuffledEvent(
-    player: MusicPlayer,
-    source: MusicEventSource
-) : OutputMusicEvent(player, source)
+data class QueueShuffledEvent(
+    override val player: MusicPlayer,
+    override val source: MusicEventSource
+) : OutputMusicEvent()
 
-class TrackGotStuckEvent(
-    player: MusicPlayer,
+data class TrackGotStuckEvent(
+    override val player: MusicPlayer,
     val track: AudioTrack
-) : OutputMusicEvent(player, MusicEventSource.AndesiteNode)
+) : OutputMusicEvent() {
+    override val source = MusicEventSource.AndesiteNode
+}
 
-class TrackErroredEvent(
-    player: MusicPlayer,
+data class TrackErroredEvent(
+    override val player: MusicPlayer,
     val track: AudioTrack,
     val reason: String
-) : OutputMusicEvent(player, MusicEventSource.AndesiteNode)
+) : OutputMusicEvent() {
+    override val source = MusicEventSource.AndesiteNode
+}
 
-class TrackSkippedEvent(
-    player: MusicPlayer,
-    source: MusicEventSource
-) : OutputMusicEvent(player, source)
 
-class NextTrackEvent(
-    player: MusicPlayer,
+data class TrackSkippedEvent(
+    override val player: MusicPlayer,
+    override val source: MusicEventSource
+) : OutputMusicEvent()
+
+data class NextTrackEvent(
+    override val player: MusicPlayer,
     val track: AudioTrack
-) : OutputMusicEvent(player, MusicEventSource.MusicSystem)
+) : OutputMusicEvent() {
+    override val source = MusicEventSource.MusicSystem
+}
 
-class MusicEndedEvent(
-    player: MusicPlayer,
-    source: MusicEventSource,
+data class MusicEndedEvent(
+    override val player: MusicPlayer,
+    override val source: MusicEventSource,
     val reason: MusicStopReason
-) : OutputMusicEvent(player, source)
+) : OutputMusicEvent()
 
-class ChangedVoteEvent(
-    player: MusicPlayer,
-    source: MusicEventSource,
+data class ChangedVoteEvent(
+    override val player: MusicPlayer,
+    override val source: MusicEventSource,
     val voteType: VoteType,
     val added: Boolean,
     val votesLeft: Int
-) : OutputMusicEvent(player, source)
+) : OutputMusicEvent()
 
-class ListenersLeftEvent(
-    player: MusicPlayer,
+data class ListenersLeftEvent(
+    override val player: MusicPlayer,
     val state: ListenersLeftState
-) : OutputMusicEvent(player, MusicEventSource.MusicSystem)
+) : OutputMusicEvent() {
+    override val source = MusicEventSource.MusicSystem
+}
 
-class PlayerInfoEvent(
-    player: MusicPlayer,
+
+data class PlayerInfoEvent(
+    override val player: MusicPlayer,
     val timestamp: Long,
     val position: Long,
     val currentTrack: MusicTrack,
     val queue: List<MusicTrack>
-) : OutputMusicEvent(player, MusicEventSource.AndesiteNode)
+) : OutputMusicEvent() {
+    override val source = MusicEventSource.AndesiteNode
+}

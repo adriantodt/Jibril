@@ -48,6 +48,9 @@ enum class Aru(
         val BOT_TOKEN by environiment
         val WEEBSH_TOKEN by environiment
 
+        val REDIS_HOSTNAME by environiment
+        val ANDESITE_HOSTNAME by environiment
+
         val CONSOLE_WEBHOOK by environiment
         val SERVERS_WEBHOOK by environiment
     }

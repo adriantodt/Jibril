@@ -29,6 +29,7 @@ abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, gui
     init {
         closeableRefs += inputPipe.subscribe(::onInputEvent)
         closeableRefs += musicSystem.playerEventPipe.subscribe(guildId, ::onAndePlayerEvent)
+        closeableRefs += outputPipe.subscribe { logger.trace { "sent output event $it" } }
         closeableRefs += catnip.on(DiscordEvent.VOICE_STATE_UPDATE) {
             val (g, channelId, userId) = it
             val selfId = catnip.selfUser()!!.idAsLong()
@@ -48,6 +49,7 @@ abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, gui
 
     private fun onInputEvent(event: InputMusicEvent) {
         try {
+            logger.trace { "received input event $event" }
             when (event) {
                 is LoadItemEvent -> onLoadItemEvent(event)
                 is EnqueueTrackEvent -> onEnqueueTrackEvent(event)
@@ -99,6 +101,7 @@ abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, gui
 
     private fun onAndePlayerEvent(event: AndePlayerEvent) {
         try {
+            logger.trace { "received andesite event $event" }
             when (event) {
                 is TrackStartEvent -> onTrackStartEvent(event)
                 is PlayerUpdateEvent -> onPlayerUpdateEvent(event)

@@ -50,7 +50,7 @@ class MusicPlayer(
     private val guildId = guild.idAsLong()
     val catnip = guild.catnip()!!
     private var lastTextChannelId: Long = 0
-    private var lastMessage: Message? = null
+    var lastMessage: Message? = null
 
     val andePlayer = musicSystem.andeClient.newPlayer(guildId)
     var queue = LinkedBlockingDeque<MusicTrack>()
@@ -625,5 +625,9 @@ class MusicPlayer(
         lastTrackData = null
         voteMap.clear()
         internalClose()
+    }
+
+    override fun toString(): String {
+        return "MusicPlayer(guildId=$guildId)"
     }
 }

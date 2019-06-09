@@ -21,6 +21,7 @@ import org.kodein.di.generic.instance
 import org.kodein.di.generic.singleton
 import pw.aru.Aru.Bot.aru
 import pw.aru.Aru.Bot.splashes
+import pw.aru.Aru.EnvVars.REDIS_HOSTNAME
 import pw.aru.commands.games.manager.GameManager
 import pw.aru.core.CommandProcessor
 import pw.aru.core.CommandRegistry
@@ -54,8 +55,6 @@ import kotlin.concurrent.thread
 
 class Bootstrap {
     companion object : KLogging() {
-        var dev = false
-
         @JvmStatic
         fun main(vararg args: String) {
             File(".vertx").deleteRecursively()
@@ -137,11 +136,7 @@ class Bootstrap {
             // Instances
             bind<Aru>() with instance(aru)
             bind<AruDB>() with singleton {
-                AruDB(
-                    aru.side,
-                    0,
-                    if (dev) "redis://localhost:6379" else "redis://redis:6379"
-                )
+                AruDB(aru.side, 0, "redis://$REDIS_HOSTNAME:6379")
             }
             bind<AruIO>() with singleton { instance<AruDB>().io() }
             bind<CommandRegistry>() with singleton { CommandRegistry() }

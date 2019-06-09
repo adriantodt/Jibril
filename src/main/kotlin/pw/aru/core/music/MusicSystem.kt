@@ -12,7 +12,7 @@ import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.tools.OrderedExecutor
 import org.apache.http.client.config.CookieSpecs
 import org.apache.http.client.config.RequestConfig
-import pw.aru.Bootstrap
+import pw.aru.Aru
 import pw.aru.core.music.entities.ItemSource
 import pw.aru.core.music.entities.ItemSource.*
 import pw.aru.db.AruDB
@@ -63,7 +63,7 @@ class MusicSystem(val andeClient: AndeClient, val db: AruDB) {
         }
 
         andeClient.newNode()
-            .host(if (Bootstrap.dev) "localhost" else "andesite")
+            .host(Aru.EnvVars.ANDESITE_HOSTNAME)
             .create()
 
         YoutubeAudioSourceManager().apply {

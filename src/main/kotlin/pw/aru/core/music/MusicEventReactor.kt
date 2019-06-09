@@ -244,14 +244,14 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
                     sendMessage(
                         "$VOLUME Volume set to **${event.volume}/150** by **${
                         event.source.member(event.player.guild)!!.effectiveName().safeUserInput()
-                        }**, on the Dashboard.."
+                        }**, on the Dashboard."
                     )
                 }
                 is MusicEventSource.Discord -> {
                     sendMessage(
                         "$VOLUME Volume set to **${event.volume}/150** by **${
                         event.source.member(event.player.guild)!!.effectiveName().safeUserInput()
-                        }**, on the Dashboard.."
+                        }**."
                     )
                 }
                 else -> {
@@ -408,6 +408,7 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
     }
 
     override fun onTrackSkippedEvent(event: TrackSkippedEvent) {
+        event.player.lastMessage = null
         event.player.textChannel?.run {
             when (event.source) {
                 is MusicEventSource.Dashboard -> {
