@@ -7,14 +7,14 @@ import pw.aru.core.categories.Category
 import pw.aru.core.commands.CommandProvider
 import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.URLCache
-import java.io.File
 
 @CommandProvider
 class NSFWImageCommands(
     httpClient: OkHttpClient,
     weebApi: Weeb4J,
+    cache: URLCache,
     private val assetProvider: ReloadableListProvider
-) : ActionCommandsWorkshop(weebApi, URLCache(httpClient, File("url_cache")), Category.NSFW_IMAGE) {
+) : ActionCommandsWorkshop(weebApi, cache, Category.NSFW_IMAGE) {
     override fun create() {
 
     }

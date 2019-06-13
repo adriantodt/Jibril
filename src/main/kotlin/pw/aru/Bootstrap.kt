@@ -171,7 +171,7 @@ class Bootstrap {
                     .build()
             }
 
-            bind<URLCache>() with singleton { URLCache(instance(), File("url_cache")) }
+            bind<URLCache>() with singleton { URLCache(instance(), File("cache/dwnl_imgs")) }
         }
     }
 

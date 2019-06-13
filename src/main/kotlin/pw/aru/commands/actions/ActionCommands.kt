@@ -9,14 +9,14 @@ import pw.aru.core.commands.CommandProvider
 import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.URLCache
 import pw.aru.utils.text.*
-import java.io.File
 
 @CommandProvider
 class ActionCommands(
     httpClient: OkHttpClient,
     weebApi: Weeb4J,
+    cache: URLCache,
     private val assetProvider: ReloadableListProvider
-) : ActionCommandsWorkshop(weebApi, URLCache(httpClient, File("url_cache")), Category.ACTION) {
+) : ActionCommandsWorkshop(weebApi, cache, Category.ACTION) {
 
     /*A
     weeb4j: {

@@ -9,14 +9,14 @@ import pw.aru.core.commands.help.prefix
 import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.URLCache
 import pw.aru.utils.text.*
-import java.io.File
 
 @CommandProvider
 class NSFWActionCommands(
     httpClient: OkHttpClient,
     weebApi: Weeb4J,
+    cache: URLCache,
     private val assetProvider: ReloadableListProvider
-) : ActionCommandsWorkshop(weebApi, URLCache(httpClient, File("url_cache")), Category.NSFW_ACTION) {
+) : ActionCommandsWorkshop(weebApi, cache, Category.NSFW_ACTION) {
     override fun create() {
         //69
         actionCommand(listOf("69"), "69 Command", "Hey, that's lewd!") {

@@ -10,14 +10,14 @@ import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.URLCache
 import pw.aru.utils.text.CAT
 import pw.aru.utils.text.DOG
-import java.io.File
 
 @CommandProvider
 class ImageCommands(
     httpClient: OkHttpClient,
     weebApi: Weeb4J,
+    cache: URLCache,
     private val assetProvider: ReloadableListProvider
-) : ActionCommandsWorkshop(weebApi, URLCache(httpClient, File("url_cache")), Category.IMAGE) {
+) : ActionCommandsWorkshop(weebApi, cache, Category.IMAGE) {
     override fun create() {
         imageCommand(listOf("cat"), "Cat Command", "Sends a random cat image.") {
             provider = fromWeebSh(type = "animal_cat")
