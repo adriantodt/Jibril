@@ -2,7 +2,6 @@ package pw.aru.commands.actions
 
 import com.github.natanbc.weeb4j.Weeb4J
 import com.github.natanbc.weeb4j.image.NsfwFilter.ONLY_NSFW
-import okhttp3.OkHttpClient
 import pw.aru.commands.actions.impl.ActionCommandsWorkshop
 import pw.aru.core.categories.Category
 import pw.aru.core.commands.CommandProvider
@@ -13,7 +12,6 @@ import pw.aru.utils.text.DOG
 
 @CommandProvider
 class ImageCommands(
-    httpClient: OkHttpClient,
     weebApi: Weeb4J,
     cache: URLCache,
     private val assetProvider: ReloadableListProvider
