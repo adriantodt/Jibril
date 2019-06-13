@@ -54,7 +54,7 @@ class Volume(musicSystem: MusicSystem, db: AruDB) : MusicCommand(musicSystem), I
     private class SetVolume(musicSystem: MusicSystem, private val db: AruDB) :
         MusicPermissionCommand(musicSystem, userQueued = true) {
         override fun CommandContext.actionWithPerms(musicPlayer: MusicPlayer, currentTrack: AudioTrack) {
-            if (permissions.contains(UserPermissions.BOT_DEVELOPER) && !Patreon.isPremium(db, author)) {
+            if (!permissions.contains(UserPermissions.BOT_DEVELOPER) && !Patreon.isPremium(db, author)) {
                 send(
                     multiline(
                         "$ERROR This is a premium-only feature." +
