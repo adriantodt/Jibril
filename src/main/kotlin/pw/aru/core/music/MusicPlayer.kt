@@ -616,6 +616,10 @@ class MusicPlayer(
         )
 
         andePlayer.controls().stop().execute()
+        destroy()
+    }
+
+    fun destroy() {
         destroyed = true
         queue.clear()
         catnip.closeVoiceConnection(guildId.toString())

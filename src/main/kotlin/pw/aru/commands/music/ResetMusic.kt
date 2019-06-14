@@ -25,7 +25,7 @@ class ResetMusic(val musicSystem: MusicSystem) : ICommand, ICommand.Permission {
         }
 
         player.andePlayer.runCatching { destroy() }
-        player.queue.clear()
+        player.destroy()
 
         send("MusicPlayer was reset. If this don't fix music, ask for support over at `aru!hangout`.")
     }
