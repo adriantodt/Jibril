@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "pw.aru"
-version = "3.0.3"
+version = "3.0.4"
 
 repositories {
     jcenter()
@@ -30,7 +30,7 @@ dependencies {
 
     compile(project("aruCore"))
 
-    compile("com.github.mewna:catnip:06af1cb2e5")
+    compile("com.github.mewna:catnip:3ba7d143")
     compile("io.projectreactor.addons:reactor-adapter:3.2.3.RELEASE")
     compile("io.reactivex.rxjava2:rxkotlin:2.3.0")
 

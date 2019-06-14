@@ -513,7 +513,6 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
                     )
                 }
             }
-
         }
     }
 

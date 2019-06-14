@@ -267,7 +267,7 @@ class MusicPlayer(
             MusicEventSource.MusicSystem -> {
                 stop(MusicStopReason.SystemReason(event.reason ?: SILENT))
             }
-            is MusicEventSource.Dashboard, is MusicEventSource.Discord -> {
+            is MusicEventSource.Dashboard, is MusicEventSource.Discord, is MusicEventSource.VotingSystem -> {
                 stop(MusicStopReason.UserCommand(event.source))
             }
             else -> throw IllegalStateException("wtf event source is ${event.source}")
