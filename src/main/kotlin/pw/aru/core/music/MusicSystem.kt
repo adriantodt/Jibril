@@ -12,6 +12,9 @@ import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.tools.OrderedExecutor
 import org.apache.http.client.config.CookieSpecs
 import org.apache.http.client.config.RequestConfig
+import org.kodein.di.Kodein
+import org.kodein.di.KodeinAware
+import org.kodein.di.generic.instance
 import pw.aru.Aru
 import pw.aru.core.music.entities.ItemSource
 import pw.aru.core.music.entities.ItemSource.*
@@ -26,7 +29,9 @@ import pw.aru.utils.extensions.lang.threadGroupBasedFactory
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors.newCachedThreadPool
 
-class MusicSystem(val andeClient: AndeClient, val db: AruDB) {
+class MusicSystem(override val kodein: Kodein) : KodeinAware {
+    val andeClient: AndeClient by instance()
+    val db: AruDB by instance()
 
     val players = ConcurrentHashMap<Long, MusicPlayer>()
 

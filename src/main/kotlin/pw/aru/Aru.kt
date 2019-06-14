@@ -86,6 +86,7 @@ enum class Aru(
         val splashes = arrayOf(
             "Hello everyone!",
             "Hi! I'm Aru!",
+            "Hai Hai, Aru-desu.",
             "with Kotlin",
             "now with Catnip",
             "with music",

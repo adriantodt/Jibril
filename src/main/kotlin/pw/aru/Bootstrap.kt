@@ -153,7 +153,7 @@ class Bootstrap {
 
             // Managers
             bind<GameManager>() with singleton { GameManager(kodein) }
-            bind<MusicSystem>() with singleton { MusicSystem(instance(), instance()) }
+            bind<MusicSystem>() with singleton { MusicSystem(kodein) }
 
             // APIs
             bind<OkHttpClient>() with singleton { OkHttpClient() }

@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "pw.aru"
-version = "3.0.4"
+version = "3.0.5"
 
 repositories {
     jcenter()
@@ -20,6 +20,7 @@ repositories {
     maven { url = uri("https://dl.bintray.com/arudiscord/kotlin") }
     maven { url = uri("https://dl.bintray.com/arudiscord/hg") }
     maven { url = uri("https://dl.bintray.com/adriantodt/maven") }
+    maven { url = uri("https://dl.bintray.com/natanbc/maven") }
     maven { url = uri("https://dl.bintray.com/kodehawa/maven") }
     mavenLocal()
 }
@@ -51,6 +52,7 @@ dependencies {
     compile("io.netty:netty-common:$netty_version")
 
     // Useful
+    compile("com.github.natanbc:java-eval:1.0")
     compile("net.kodehawa:imageboard-api:2.0.7")
 
     // Open-Source Libraries

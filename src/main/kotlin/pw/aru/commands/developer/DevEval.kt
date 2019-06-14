@@ -1,5 +1,7 @@
 package pw.aru.commands.developer
 
+import com.github.natanbc.javaeval.CompilationException
+import com.github.natanbc.javaeval.JavaEvaluator
 import com.mewna.catnip.entity.message.Message
 import pw.aru.Aru.Bot.evaluatingQuotes
 import pw.aru.core.CommandRegistry
@@ -26,7 +28,8 @@ class DevEval(db: AruDB, registry: CommandRegistry) {
     }
 
     private val evals: Map<String, Evaluator> = mapOf(
-        "js" to JsEvaluator(db, registry)
+        "js" to JsEvaluator(db, registry),
+        "java" to JEvaluator(db, registry)
     )
 
     private fun CommandContext.listEvals() {
@@ -54,7 +57,7 @@ class DevEval(db: AruDB, registry: CommandRegistry) {
             thumbnail("https://assets.aru.pw/img/loading.gif")
             description("*${evaluatingQuotes.random()}*")
         } then {
-            kotlin.runCatching {
+            runCatching {
                 evaluator(message, code)
             }.onFailure { e ->
                 styling(message).author("DevConsole | Evaluated and errored")
@@ -108,5 +111,78 @@ class DevEval(db: AruDB, registry: CommandRegistry) {
         }
 
         private operator fun ScriptEngine.set(key: String, value: Any?) = put(key, value)
+    }
+
+    class JEvaluator(private val db: AruDB, private val registry: CommandRegistry) : Evaluator {
+        private val classTemplate: (String) -> String = {
+            //language=JAVA
+            """
+            import com.mewna.catnip.entity.message.Message;
+
+            import pw.aru.*;
+            import pw.aru.core.*;
+            import pw.aru.core.commands.*;
+            import pw.aru.core.music.*;
+            import pw.aru.db.*;
+            import pw.aru.db.entities.*;
+            import pw.aru.utils.*;
+
+            import com.mewna.catnip.*;
+            import com.mewna.catnip.entity.*;
+            import com.mewna.catnip.entity.guild.*;
+            import com.mewna.catnip.entity.channel.*;
+            import com.mewna.catnip.entity.user.*;
+
+            public class AruJavaEval {
+                public static Object runEval(Message message, AruDB db, CommandRegistry registry) {
+                    Catnip catnip = message.catnip();
+                    Guild guild = message.guild();
+                    TextChannel channel = message.channel().asTextChannel();
+
+                    try {
+                        return null;
+                    } finally {
+                        ${it.removeSuffix(";")};
+                    }
+                }
+            }
+            """.trimIndent()
+        }
+
+        private val eval = JavaEvaluator()
+
+        override fun invoke(message: Message, code: String): Any? {
+            try {
+                val r = eval.compile()
+                    .addCompilerOptions("-Xlint:unchecked")
+                    .source("AruJavaEval", classTemplate(code))
+                    .execute()
+
+                val cl = EvalClassLoader()
+                r.classes.values.forEach(cl::define)
+
+                return cl.loadClass("AruJavaEval")
+                    .getMethod("runEval", Message::class.java, AruDB::class.java, CommandRegistry::class.java)
+                    .invoke(null, message, db, registry)
+            } catch (e: CompilationException) {
+                val err = """
+                    ${e.compilerOutput}
+
+                    ${e.diagnostics.joinToString("\n", "", "\n")}
+                """.trimIndent().trim()
+
+                return object : Error(err) {
+                    override fun toString() = err
+                }
+            } catch (e: Exception) {
+                return e
+            }
+        }
+
+        private class EvalClassLoader : ClassLoader() {
+            fun define(bytes: ByteArray) {
+                super.defineClass(null, bytes, 0, bytes.size)
+            }
+        }
     }
 }
