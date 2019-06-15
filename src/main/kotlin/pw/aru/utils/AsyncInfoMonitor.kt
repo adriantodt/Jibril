@@ -49,26 +49,30 @@ object AsyncInfoMonitor : KLogging() {
         val os = ManagementFactory.getOperatingSystemMXBean() as OperatingSystemMXBean
         val thread = ManagementFactory.getThreadMXBean()
         val r = Runtime.getRuntime()
+        val runtime = ManagementFactory.getRuntimeMXBean()
 
         fun processCpuTime(): Double = os.processCpuTime.toDouble()
         fun processCpuUsage(): Double {
-            val systemTime = System.nanoTime()
-            val processCpuTime = processCpuTime()
+            val systemTime = runtime.uptime
+            val processCpuTime = os.processCpuTime.toDouble()
 
-            val cpuUsage = (processCpuTime - lastProcessCpuTime) / (systemTime - lastSystemTime).toDouble()
+            val cpuUsage = Math.min(
+                99.99,
+                (processCpuTime - lastProcessCpuTime) / ((systemTime - lastSystemTime) * 10000.0 * availableProcessors.toDouble())
+            )
 
             lastSystemTime = systemTime
             lastProcessCpuTime = processCpuTime
 
-            return cpuUsage / availableProcessors
+            return cpuUsage
         }
 
-        lastSystemTime = System.nanoTime()
+        lastSystemTime = runtime.uptime
         lastProcessCpuTime = processCpuTime()
 
         task(1, SECONDS) {
             threadCount = thread.threadCount
-            availableProcessors = r.availableProcessors()
+            availableProcessors = os.availableProcessors
             freeMemory = floor((r.freeMemory() / mb), 100.0)
             maxMemory = floor((r.maxMemory() / mb), 100.0)
             totalMemory =

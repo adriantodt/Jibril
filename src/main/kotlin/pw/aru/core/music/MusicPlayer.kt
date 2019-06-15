@@ -5,6 +5,7 @@ import com.mewna.catnip.entity.channel.VoiceChannel
 import com.mewna.catnip.entity.guild.Guild
 import com.mewna.catnip.entity.guild.Member
 import com.mewna.catnip.entity.message.Message
+import com.mewna.catnip.entity.user.VoiceState
 import com.mewna.catnip.entity.util.Permission
 import com.mewna.catnip.shard.DiscordEvent
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
@@ -26,9 +27,6 @@ import pw.aru.libs.andeclient.events.track.TrackStuckEvent
 import pw.aru.utils.AruTaskExecutor.queue
 import pw.aru.utils.extensions.lang.getValue
 import pw.aru.utils.extensions.lang.roundRobinFlatten
-import pw.aru.utils.extensions.lib.component1
-import pw.aru.utils.extensions.lib.component2
-import pw.aru.utils.extensions.lib.component3
 import pw.aru.utils.extensions.lib.humanUsersCount
 import reactor.adapter.rxjava.toFlux
 import reactor.core.publisher.toMono
@@ -317,32 +315,13 @@ class MusicPlayer(
         publish(ListenersLeftEvent(this, ListenersLeftState.LEFT_ALONE))
         andePlayer.controls().pause().execute()
 
-        var channelId = voiceChannel!!.idAsLong()
-        val selfId = catnip.selfUser()!!.idAsLong()
+        fun sameChannel(it: VoiceState) = it.channel() == voiceChannel && it.user() != catnip.selfUser()
+        fun movedChannel(it: VoiceState) = it.user() == catnip.selfUser()
+                && it.channel() != voiceChannel
+                && it.channel()!!.humanUsersCount > 0
 
         catnip.observe(DiscordEvent.VOICE_STATE_UPDATE)
-            .filter {
-                val (_, stateChannelId, stateUserId) = it
-
-                when {
-                    //someone joined
-                    stateChannelId == channelId && stateUserId != selfId -> {
-                        true
-                    }
-                    //bot moved to another channel (or channel deleted)
-                    stateUserId == selfId && stateChannelId != channelId -> {
-                        val channel = it.channel()
-
-                        if (channel == null) {
-                            true
-                        } else {
-                            channelId = channel.idAsLong()
-                            channel.humanUsersCount > 0
-                        }
-                    }
-                    else -> false
-                }
-            }
+            .filter { guildId == it.guildIdAsLong() && (sameChannel(it) || movedChannel(it)) }
             .take(1)
             .singleElement()
             .timeout(2, TimeUnit.MINUTES) {
@@ -352,11 +331,9 @@ class MusicPlayer(
                 listenersLeftLock.release()
             }
             .subscribe {
-                if (!destroyed) {
-                    if (it.channel() != null) {
-                        andePlayer.controls().resume().execute()
-                        publish(ListenersLeftEvent(this, ListenersLeftState.RETURNED))
-                    }
+                if (!destroyed && it.channel() != null) {
+                    andePlayer.controls().resume().execute()
+                    publish(ListenersLeftEvent(this, ListenersLeftState.RETURNED))
                 }
                 listenersLeftLock.release()
             }

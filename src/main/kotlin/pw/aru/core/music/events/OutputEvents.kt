@@ -87,7 +87,6 @@ data class TrackErroredEvent(
     override val source = MusicEventSource.AndesiteNode
 }
 
-
 data class TrackSkippedEvent(
     override val player: MusicPlayer,
     override val source: MusicEventSource

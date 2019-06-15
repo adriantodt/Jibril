@@ -49,6 +49,7 @@ data class SkipTrackEvent(override val source: MusicEventSource) : InputMusicEve
 data class StopMusicEvent(override val source: MusicEventSource, val reason: Reason? = null) : InputMusicEvent() {
     enum class Reason {
         SILENT,
+        VOICE_KICK,
         CHANNEL_DELETED,
         MUSIC_SELECTION_CANCELLED,
         BOT_SHUTTING_DOWN

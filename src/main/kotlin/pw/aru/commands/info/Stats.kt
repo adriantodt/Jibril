@@ -57,14 +57,12 @@ class Stats
             inlineField(
                 "Bot Stats:",
                 "\u25AB **Aru Version**: $aru_version",
-                "\u25AB **Threads**: ${Thread.activeCount().format("%,d")}",
+                "\u25AB **Threads**: ${threadCount.format("%,d")}",
                 "\u25AB **Shards**: ${catnip.shardManager().shardCount().format("%,d")}",
                 "\u25AB **Commands**: ${processor.commandCount.format("%,d")} executed"
             )
             inlineField("Discord Stats:", "$LOADING Gathering $LOADING")
         } then {
-
-
             val guildCount = catnip.cache().guilds().size().format("%,d")
             val userCount = catnip.cache().users().size().format("%,d")
             val channelCounts = catnip.cache().channels().groupingBy { it.type() }.eachCount()

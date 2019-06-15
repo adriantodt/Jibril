@@ -489,6 +489,14 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
                                     "$BEG Apparently the channel I was playing got deleted."
                             )
                         }
+                        VOICE_KICK -> {
+                            sendMessage(
+                                if (Random.nextInt(20) == 1)
+                                    "$POUT I got kicked from the channel I was playing. *I hope I didn't upset you, I like playing music to you...*"
+                                else
+                                    "$POUT I got kicked from the channel I was playing."
+                            )
+                        }
                         BOT_SHUTTING_DOWN -> {
                             sendMessage(
                                 if (Random.nextInt(20) == 1)

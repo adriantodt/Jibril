@@ -54,10 +54,6 @@ inline val VoiceChannel.humanUsersCount: Int
 
 fun Member.voiceState() = guild().voiceStates().getById(idAsLong())
 
-operator fun VoiceState.component1() = guildIdAsLong()
-operator fun VoiceState.component2() = channelIdAsLong()
-operator fun VoiceState.component3() = userIdAsLong()
-
 fun <T> MessageConsumer<T>.asCloseable(): Closeable {
     return Closeable {
         this.unregister()
