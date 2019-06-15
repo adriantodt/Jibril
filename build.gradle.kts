@@ -37,7 +37,7 @@ dependencies {
 
     // Main APIs
     compile("com.github.natanbc:weeb4j:3.5")
-    compile("pw.aru.libs:andeclient:1.5-dev")
+    compile("pw.aru.libs:andeclient:1.5")
     compile("com.sedmelluq:lavaplayer:1.3.17") {
         exclude(group = "com.sedmelluq", module = "lavaplayer-natives")
     }
