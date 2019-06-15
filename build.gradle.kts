@@ -57,6 +57,7 @@ dependencies {
 
     // Open-Source Libraries
     compile("pw.aru.libs:catnip-entityfinder:1.0")
+    compile("pw.aru.libs:resources:1.0")
     compile("pw.aru.libs:dice-notation:1.1")
     compile("pw.aru.libs:properties:1.2")
     compile("pw.aru.libs:snowflake-local:1.0")

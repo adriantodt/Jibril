@@ -1,6 +1,6 @@
 package pw.aru.core.parser
 
-import pw.aru.utils.Resource
+import pw.aru.libs.resources.Resource
 
 internal fun Args.runOptions(list: List<Pair<(String) -> Boolean, Args.() -> Unit>>) {
     val map = list.toMap(LinkedHashMap())
