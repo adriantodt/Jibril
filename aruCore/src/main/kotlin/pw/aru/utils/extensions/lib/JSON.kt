@@ -19,3 +19,6 @@ fun Iterable<*>.asJsonArray() = JSONArray(this.toList())
 
 fun Sequence<*>.asJsonArray() = JSONArray(this.toList())
 
+fun String.toJsonObject() = JSONObject(this)
+
+fun String.toJsonArray() = JSONArray(this)

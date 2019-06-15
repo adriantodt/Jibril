@@ -20,28 +20,28 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    compile(kotlin("reflect"))
+    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("reflect"))
 
-    compile("io.projectreactor:reactor-core:3.2.9.RELEASE")
-    compile("com.github.mewna:catnip:1.2.3")
-    compile("io.lettuce:lettuce-core:5.1.6.RELEASE")
-    compile("pw.aru.libs:snowflake-local:1.0")
-    compile("pw.aru.libs:eventpipes:1.3.1")
+    api("io.projectreactor:reactor-core:3.2.10.RELEASE")
+    api("com.github.mewna:catnip:3ba7d143")
+    api("io.lettuce:lettuce-core:5.1.6.RELEASE")
+    api("pw.aru.libs:snowflake-local:1.0")
+    api("pw.aru.libs:eventpipes:1.3.1")
 
-    compile("com.fasterxml.jackson.core:jackson-databind:2.9.8")
-    compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
+    api("com.fasterxml.jackson.core:jackson-databind:2.9.9")
+    api("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.9")
 
-    compile("org.json:json:20180813")
-    compile("com.squareup.okhttp3:okhttp:3.14.1")
-    compile("org.kodein.di:kodein-di-generic-jvm:6.1.0")
+    api("org.json:json:20180813")
+    api("com.squareup.okhttp3:okhttp:3.14.1")
+    api("org.kodein.di:kodein-di-generic-jvm:6.1.0")
 
-    compile("ch.qos.logback:logback-classic:1.2.3")
-    compile("io.github.microutils:kotlin-logging:1.6.26")
+    api("ch.qos.logback:logback-classic:1.2.3")
+    api("io.github.microutils:kotlin-logging:1.6.26")
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "12"
 }
 
 val sourceJar = task("sourceJar", Jar::class) {

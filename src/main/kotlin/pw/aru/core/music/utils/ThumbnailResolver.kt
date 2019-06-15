@@ -4,16 +4,15 @@ import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceM
 import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
-import okhttp3.OkHttpClient
-import okhttp3.ResponseBody
 import org.apache.http.client.utils.URIBuilder
-import org.json.JSONObject
-import pw.aru.utils.extensions.lib.body
-import pw.aru.utils.extensions.lib.newCall
+import pw.aru.utils.extensions.lang.send
+import pw.aru.utils.extensions.lib.toJsonObject
+import java.net.http.HttpClient
+import java.net.http.HttpResponse.BodyHandlers.ofString
 import java.util.concurrent.atomic.AtomicInteger
 
 object ThumbnailResolver {
-    private val httpClient = OkHttpClient()
+    private val httpClient = HttpClient.newHttpClient()
     private val twitchTvThumbId = AtomicInteger()
 
     fun resolveThumbnail(track: AudioTrack): String? {
@@ -26,34 +25,30 @@ object ThumbnailResolver {
             }-854x480.jpg&t=${twitchTvThumbId.incrementAndGet()}"
             is SoundCloudAudioSourceManager -> {
                 fun request(retry: Boolean = true): String? {
-                    httpClient.newCall {
-                        url(
-                            URIBuilder(
-                                "https://api.soundcloud.com/tracks/${track.identifier.split(
-                                    '|'
-                                ).first()}"
-                            )
+                    val response = httpClient.send(ofString()) {
+                        uri(
+                            URIBuilder("https://api.soundcloud.com/tracks/${track.identifier.split('|').first()}")
                                 .addParameter("client_id", sourceManager.clientId)
                                 .build()
-                                .toURL()
                         )
-                    }.execute().use { response ->
-                        if (response.code() == 401) {
-                            return if (retry) {
-                                sourceManager.updateClientId()
-                                request(false)
-                            } else {
-                                null
-                            }
-                        }
+                    }
 
-                        return try {
-                            JSONObject(response.body(ResponseBody::string))
-                                .getString("artwork_url")
-                                .replace("large", "t500x500")
-                        } catch (_: Exception) {
+                    if (response.statusCode() == 401) {
+                        return if (retry) {
+                            sourceManager.updateClientId()
+                            request(false)
+                        } else {
                             null
                         }
+                    }
+
+                    return try {
+                        response
+                            .body().toJsonObject()
+                            .getString("artwork_url")
+                            .replace("large", "t500x500")
+                    } catch (_: Exception) {
+                        null
                     }
                 }
 

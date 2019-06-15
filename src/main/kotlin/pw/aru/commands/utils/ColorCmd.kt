@@ -192,10 +192,7 @@ class ColorCmd : ICommand, ICommand.HelpDialogProvider {
         return ByteArrayOutputStream().also { ImageIO.write(image, "png", it) }.toByteArray()
     }
 
-    private val colors = sequenceOf(
-        classOf<Color>(),
-        classOf<Colors>()
-    )
+    private val colors = sequenceOf(Color::class.java, Colors::class.java)
         .flatMap { it.fields.asSequence() }
         .filter { Modifier.isStatic(it.modifiers) && it.type == Color::class.java }
         .map { f -> f.name.let { if (it == it.toUpperCase()) it.toLowerCase() else it } to f.get(null) as Color }

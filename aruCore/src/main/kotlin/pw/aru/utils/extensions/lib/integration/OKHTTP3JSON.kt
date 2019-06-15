@@ -1,9 +1,9 @@
 package pw.aru.utils.extensions.lib.integration
 
 import okhttp3.ResponseBody
-import org.json.JSONArray
-import org.json.JSONObject
+import pw.aru.utils.extensions.lib.toJsonArray
+import pw.aru.utils.extensions.lib.toJsonObject
 
-fun ResponseBody.jsonObject() = JSONObject(string())
+fun ResponseBody.jsonObject() = string().toJsonObject()
 
-fun ResponseBody.jsonArray() = JSONArray(string())
+fun ResponseBody.jsonArray() = string().toJsonArray()

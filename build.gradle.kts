@@ -26,53 +26,53 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    compile(kotlin("reflect"))
+    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("reflect"))
 
-    compile(project("aruCore"))
+    implementation(project("aruCore"))
 
-    compile("com.github.mewna:catnip:3ba7d143")
-    compile("io.projectreactor.addons:reactor-adapter:3.2.3.RELEASE")
-    compile("io.reactivex.rxjava2:rxkotlin:2.3.0")
+    implementation("com.github.mewna:catnip:3ba7d143")
+    implementation("io.projectreactor.addons:reactor-adapter:3.2.3.RELEASE")
+    implementation("io.reactivex.rxjava2:rxkotlin:2.3.0")
 
     // Main APIs
-    compile("com.github.natanbc:weeb4j:3.5")
-    compile("pw.aru.libs:andeclient:1.5")
-    compile("com.sedmelluq:lavaplayer:1.3.17") {
+    implementation("com.github.natanbc:weeb4j:3.5")
+    implementation("pw.aru.libs:andeclient:1.5.1")
+    implementation("com.sedmelluq:lavaplayer:1.3.17") {
         exclude(group = "com.sedmelluq", module = "lavaplayer-natives")
     }
 
     //trying last Netty
     val netty_version = "4.1.36.Final"
-    compile("io.netty:netty-codec-http2:$netty_version")
-    compile("io.netty:netty-handler-proxy:$netty_version")
-    compile("io.netty:netty-resolver-dns:$netty_version")
-    compile("io.netty:netty-transport:$netty_version")
-    compile("io.netty:netty-buffer:$netty_version")
-    compile("io.netty:netty-common:$netty_version")
+    implementation("io.netty:netty-codec-http2:$netty_version")
+    implementation("io.netty:netty-handler-proxy:$netty_version")
+    implementation("io.netty:netty-resolver-dns:$netty_version")
+    implementation("io.netty:netty-transport:$netty_version")
+    implementation("io.netty:netty-buffer:$netty_version")
+    implementation("io.netty:netty-common:$netty_version")
 
     // Useful
-    compile("com.github.natanbc:java-eval:1.0")
-    compile("net.kodehawa:imageboard-api:2.0.7")
+    implementation("com.github.natanbc:java-eval:1.0")
+    implementation("net.kodehawa:imageboard-api:2.0.7")
 
     // Open-Source Libraries
-    compile("pw.aru.libs:catnip-entityfinder:1.0")
-    compile("pw.aru.libs:dice-notation:1.1")
-    compile("pw.aru.libs:properties:1.2")
-    compile("pw.aru.libs:snowflake-local:1.0")
-    compile("pw.aru.libs:DD4J:1.0")
-    compile("pw.aru.hg:hg-engine:1.0")
-    compile("pw.aru.hg:hg-loader:1.0")
+    implementation("pw.aru.libs:catnip-entityfinder:1.0")
+    implementation("pw.aru.libs:dice-notation:1.1")
+    implementation("pw.aru.libs:properties:1.2")
+    implementation("pw.aru.libs:snowflake-local:1.0")
+    implementation("pw.aru.libs:DD4J:1.0")
+    implementation("pw.aru.hg:hg-engine:1.0")
+    implementation("pw.aru.hg:hg-loader:1.0")
 
     //Scanning and Injections
-    compile("io.github.classgraph:classgraph:4.8.27")
-    compile("org.kodein.di:kodein-di-generic-jvm:6.1.0")
-    compile("pw.aru.libs:kodein-jit-bindings:2.2")
+    implementation("io.github.classgraph:classgraph:4.8.37")
+    implementation("org.kodein.di:kodein-di-generic-jvm:6.1.0")
+    implementation("pw.aru.libs:kodein-jit-bindings:2.2")
 }
 
 tasks {
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = "12"
     }
 
     withType<ShadowJar> {
