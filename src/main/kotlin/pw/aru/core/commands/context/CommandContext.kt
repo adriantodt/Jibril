@@ -18,6 +18,8 @@ import pw.aru.utils.extensions.aru.ERROR_GUILD_PERMS
 import pw.aru.utils.extensions.lang.handlers
 import pw.aru.utils.extensions.lib.embed
 import pw.aru.utils.extensions.lib.message
+import pw.aru.utils.ratelimiter.RateLimiter
+import pw.aru.utils.ratelimiter.RateLimiter.RateLimit
 import pw.aru.utils.text.X
 
 private typealias AruPermission = pw.aru.core.permissions.Permission
@@ -73,6 +75,23 @@ data class CommandContext(
 
     fun asMusicSource() = MusicEventSource.Discord(author, channel)
 
+    fun ICommand.RateLimited.rateLimiting(limiter: RateLimiter = rateLimiter, success: () -> Unit): RateLimit {
+        return rateLimiter.incrementAndGet(author).warnOnFailure().onSuccess(success)
+    }
+
+    fun RateLimit.onSuccess(block: () -> Unit): RateLimit {
+        if (success) block()
+        return this
+    }
+
+    fun RateLimit.onFailure(block: () -> Unit): RateLimit {
+        if (!success) block()
+        return this
+    }
+
+    fun RateLimit.warnOnFailure() = onFailure {
+        TODO()
+    }
 
     fun ICommand.ExceptionHandler.handleException(): (Throwable) -> Unit {
         val mdc = MDC.getCopyOfContextMap()

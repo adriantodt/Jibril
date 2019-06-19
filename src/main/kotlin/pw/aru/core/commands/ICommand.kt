@@ -6,6 +6,7 @@ import pw.aru.core.categories.Category
 import pw.aru.core.commands.ICommand.CustomHandler.Result
 import pw.aru.core.commands.context.CommandContext
 import pw.aru.core.permissions.Permissions
+import pw.aru.utils.ratelimiter.RateLimiter
 
 interface ICommand {
     val category: Category?
@@ -23,6 +24,10 @@ interface ICommand {
 
     interface Permission {
         val permissions: Permissions
+    }
+
+    interface RateLimited : ICommand {
+        val rateLimiter: RateLimiter
     }
 
     interface ExceptionHandler {
