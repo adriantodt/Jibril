@@ -118,13 +118,16 @@ class DevEval(db: AruDB, registry: CommandRegistry) {
             //language=JAVA
             """
             import com.mewna.catnip.entity.message.Message;
+            import pw.aru.db.AruDB;
+            import pw.aru.core.CommandRegistry;
 
             import pw.aru.*;
             import pw.aru.core.*;
             import pw.aru.core.commands.*;
             import pw.aru.core.music.*;
             import pw.aru.db.*;
-            import pw.aru.db.entities.*;
+            import pw.aru.db.entities.guild.*;
+            import pw.aru.db.entities.user.*;
             import pw.aru.utils.*;
 
             import com.mewna.catnip.*;
@@ -171,11 +174,7 @@ class DevEval(db: AruDB, registry: CommandRegistry) {
                     ${e.diagnostics.joinToString("\n", "", "\n")}
                 """.trimIndent().trim()
 
-                return object : Error(err) {
-                    override fun toString() = err
-                }
-            } catch (e: Exception) {
-                return e
+                throw CompileException(err)
             }
         }
 
@@ -183,6 +182,10 @@ class DevEval(db: AruDB, registry: CommandRegistry) {
             fun define(bytes: ByteArray) {
                 super.defineClass(null, bytes, 0, bytes.size)
             }
+        }
+
+        private class CompileException(override val message: String) : Exception() {
+            override fun toString() = message
         }
     }
 }

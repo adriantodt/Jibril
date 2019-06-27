@@ -7,7 +7,7 @@ WORKDIR /aru
 COPY run/aru-${version}-all.jar aru.jar
 COPY run/jlink.sh jlink.sh
 
-ENV ADDITIONAL_MODULES=jdk.crypto.ec
+ENV ADDITIONAL_MODULES=jdk.crypto.ec,jdk.compiler,jdk.zipfs
 
 RUN ["bash", "jlink.sh", "aru.jar"]
 
