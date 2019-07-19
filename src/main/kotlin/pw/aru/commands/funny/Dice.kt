@@ -1,15 +1,15 @@
 package pw.aru.commands.funny
 
+import pw.aru.bot.categories.Category
+import pw.aru.bot.commands.Command
+import pw.aru.bot.commands.ICommand
+import pw.aru.bot.commands.ICommand.CustomHandler.Result
+import pw.aru.bot.commands.context.CommandContext
+import pw.aru.bot.commands.help.CommandDescription
+import pw.aru.bot.commands.help.Description
+import pw.aru.bot.commands.help.Example
+import pw.aru.bot.commands.help.Help
 import pw.aru.commands.funny.dice.AruDice
-import pw.aru.core.categories.Category
-import pw.aru.core.commands.Command
-import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.ICommand.CustomHandler.Result
-import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.commands.help.CommandDescription
-import pw.aru.core.commands.help.Description
-import pw.aru.core.commands.help.Example
-import pw.aru.core.commands.help.Help
 import pw.aru.libs.dicenotation.exceptions.EvaluationException
 import pw.aru.libs.dicenotation.exceptions.SyntaxException
 import pw.aru.utils.extensions.discordapp.safeUserInput

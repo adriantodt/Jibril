@@ -3,7 +3,7 @@
 package pw.aru.utils.extensions.aru
 
 import com.mewna.catnip.entity.message.Message
-import pw.aru.core.commands.ICommand
+import pw.aru.bot.commands.ICommand
 import pw.aru.utils.text.ERROR
 
 fun onHelp(command: ICommand, message: Message) {

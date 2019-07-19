@@ -1,12 +1,12 @@
 package pw.aru.commands.games
 
+import pw.aru.bot.categories.Category
+import pw.aru.bot.commands.Command
+import pw.aru.bot.commands.ICommand
+import pw.aru.bot.commands.context.CommandContext
+import pw.aru.bot.commands.help.*
 import pw.aru.commands.games.hg.HGCreator
 import pw.aru.commands.games.manager.GameManager
-import pw.aru.core.categories.Category
-import pw.aru.core.commands.Command
-import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.commands.help.*
 import pw.aru.core.permissions.MemberPermissions
 import pw.aru.utils.extensions.discordapp.safeUserInput
 import pw.aru.utils.extensions.lang.limitedToString

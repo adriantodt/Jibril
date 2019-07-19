@@ -1,10 +1,10 @@
 package pw.aru.commands.developer
 
+import pw.aru.bot.CommandRegistry
+import pw.aru.bot.categories.Category
+import pw.aru.bot.commands.ICommand
+import pw.aru.bot.commands.help.*
 import pw.aru.commands.actions.impl.ImageBasedCommandImpl
-import pw.aru.core.CommandRegistry
-import pw.aru.core.categories.Category
-import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.help.*
 import pw.aru.core.permissions.UserPermissions
 import pw.aru.exported.aru_version
 import pw.aru.utils.extensions.lang.plusAssign

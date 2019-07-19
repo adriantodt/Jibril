@@ -27,8 +27,6 @@
         </filter>
     </appender>
 
-    <appender name="discord" class="pw.aru.core.logging.DiscordLogBack"/>
-
     <root level="INFO">
         <appender-ref ref="console"/>
         <appender-ref ref="sentry"/>
@@ -36,7 +34,7 @@
     </root>
 
     <!--
-    <logger name="pw.aru.core.music.internal.AbstractMusicPlayer" level="trace"/>
+    <logger name="pw.aru.bot.music.internal.AbstractMusicPlayer" level="trace"/>
     <logger name="pw.aru.libs.andeclient.internal.AndesiteNodeImpl" level="trace"/>
     -->
 </configuration>

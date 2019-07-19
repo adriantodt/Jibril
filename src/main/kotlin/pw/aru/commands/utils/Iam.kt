@@ -1,13 +1,13 @@
 //package pw.aru.commands.utils
 //
 //import com.mewna.catnip.entity.message.Message
-//import net.dv8tion.jda.core.exceptions.PermissionException
+//import net.dv8tion.jda.bot.exceptions.PermissionException
 //import pw.aru.Aru
 //import pw.aru.commands.utils.Iam.iam
 //import pw.aru.commands.utils.Iam.iamnot
-//import pw.aru.core.categories.Category
-//import pw.aru.core.commands.ICommand
-//import pw.aru.core.commands.context.CommandContext
+//import pw.aru.bot.categories.Category
+//import pw.aru.bot.commands.ICommand
+//import pw.aru.bot.commands.context.CommandContext
 //import pw.aru.db.AruDB
 //import pw.aru.db.entities.guild.GuildSettings
 //import pw.aru.utils.text.ERROR

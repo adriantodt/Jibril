@@ -10,11 +10,11 @@ import org.kodein.di.generic.bind
 import org.kodein.di.generic.instance
 import org.kodein.di.generic.singleton
 import pw.aru.Aru
+import pw.aru.bot.CommandProcessor
+import pw.aru.bot.CommandRegistry
+import pw.aru.bot.music.MusicSystem
+import pw.aru.bot.permissions.PermissionResolver
 import pw.aru.commands.games.manager.GameManager
-import pw.aru.core.CommandProcessor
-import pw.aru.core.CommandRegistry
-import pw.aru.core.music.MusicSystem
-import pw.aru.core.permissions.PermissionResolver
 import pw.aru.db.AruDB
 import pw.aru.exported.aru_version
 import pw.aru.io.AruIO

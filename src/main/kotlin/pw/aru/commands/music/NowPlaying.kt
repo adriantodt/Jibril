@@ -1,17 +1,17 @@
 package pw.aru.commands.music
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import pw.aru.bot.commands.Command
+import pw.aru.bot.commands.ICommand
+import pw.aru.bot.commands.context.CommandContext
+import pw.aru.bot.commands.help.CommandDescription
+import pw.aru.bot.commands.help.Description
+import pw.aru.bot.commands.help.Help
+import pw.aru.bot.commands.help.SeeAlso
+import pw.aru.bot.music.MusicPlayer
+import pw.aru.bot.music.MusicSystem
+import pw.aru.bot.music.utils.NowPlayingEmbed.nowPlayingEmbed
 import pw.aru.commands.music.base.MusicCommand
-import pw.aru.core.commands.Command
-import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.commands.help.CommandDescription
-import pw.aru.core.commands.help.Description
-import pw.aru.core.commands.help.Help
-import pw.aru.core.commands.help.SeeAlso
-import pw.aru.core.music.MusicPlayer
-import pw.aru.core.music.MusicSystem
-import pw.aru.core.music.utils.NowPlayingEmbed.nowPlayingEmbed
 
 @Command("nowplaying", "np")
 class NowPlaying(musicSystem: MusicSystem) : MusicCommand(musicSystem), ICommand.HelpDialogProvider {

@@ -12,9 +12,8 @@ import mu.KLogging
 import org.kodein.di.Kodein
 import org.kodein.di.generic.instance
 import pw.aru.Aru
-import pw.aru.Bootstrap
-import pw.aru.core.GuildLogger
-import pw.aru.core.listeners.CommandListener
+import pw.aru.bot.GuildLogger
+import pw.aru.bot.listeners.CommandListener
 import pw.aru.utils.AruTaskExecutor
 import pw.aru.utils.KodeinExtension
 import java.util.concurrent.CompletableFuture

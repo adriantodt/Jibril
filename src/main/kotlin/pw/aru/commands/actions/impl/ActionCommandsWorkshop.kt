@@ -6,12 +6,12 @@ import com.github.natanbc.weeb4j.image.HiddenMode
 import com.github.natanbc.weeb4j.image.HiddenMode.DEFAULT
 import com.github.natanbc.weeb4j.image.NsfwFilter
 import com.github.natanbc.weeb4j.image.NsfwFilter.NO_NSFW
+import pw.aru.bot.CommandRegistry
+import pw.aru.bot.categories.Category
+import pw.aru.bot.commands.ICommandProvider
 import pw.aru.commands.actions.impl.providers.LocalFileProvider
 import pw.aru.commands.actions.impl.providers.RandomURLProvider
 import pw.aru.commands.actions.impl.providers.WeebProvider
-import pw.aru.core.CommandRegistry
-import pw.aru.core.categories.Category
-import pw.aru.core.commands.ICommandProvider
 import pw.aru.utils.URLCache
 
 abstract class ActionCommandsWorkshop(weebApi: Weeb4J, private val cache: URLCache, private val category: Category) : ICommandProvider {

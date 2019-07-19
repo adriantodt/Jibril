@@ -1,11 +1,11 @@
 //package pw.aru.commands.moderation
 //
-//import net.dv8tion.jda.core.Permission.MESSAGE_HISTORY
-//import net.dv8tion.jda.core.Permission.MESSAGE_MANAGE
-//import pw.aru.core.categories.Category
-//import pw.aru.core.commands.ICommand
-//import pw.aru.core.commands.context.CommandContext
-//import pw.aru.core.parser.Args
+//import net.dv8tion.jda.bot.Permission.MESSAGE_HISTORY
+//import net.dv8tion.jda.bot.Permission.MESSAGE_MANAGE
+//import pw.aru.bot.categories.Category
+//import pw.aru.bot.commands.ICommand
+//import pw.aru.bot.commands.context.CommandContext
+//import pw.aru.bot.parser.Args
 //import pw.aru.permissions.MemberPermissions.MESSAGES
 //import pw.aru.permissions.Permissions
 //

@@ -1,12 +1,12 @@
 package pw.aru.commands.info
 
 import mu.KLogging
-import pw.aru.core.CommandRegistry
-import pw.aru.core.categories.Category
-import pw.aru.core.commands.Command
-import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.commands.help.*
+import pw.aru.bot.CommandRegistry
+import pw.aru.bot.categories.Category
+import pw.aru.bot.commands.Command
+import pw.aru.bot.commands.ICommand
+import pw.aru.bot.commands.context.CommandContext
+import pw.aru.bot.commands.help.*
 import pw.aru.utils.AruTaskExecutor.task
 import pw.aru.utils.CommandStatsManager
 import pw.aru.utils.extensions.aru.onHelp

@@ -1,10 +1,10 @@
 package pw.aru.commands.utils
 
-import pw.aru.core.categories.Category
-import pw.aru.core.commands.Command
-import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.commands.help.*
+import pw.aru.bot.categories.Category
+import pw.aru.bot.commands.Command
+import pw.aru.bot.commands.ICommand
+import pw.aru.bot.commands.context.CommandContext
+import pw.aru.bot.commands.help.*
 import pw.aru.libs.catnip.entityfinder.EntityFinder
 import pw.aru.utils.text.DISAPPOINTED
 import pw.aru.utils.text.ERROR

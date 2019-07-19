@@ -2,11 +2,11 @@ package pw.aru.commands.actions
 
 import com.github.natanbc.weeb4j.Weeb4J
 import mu.KLogging
+import pw.aru.bot.CommandRegistry
+import pw.aru.bot.executor.Executable
+import pw.aru.bot.executor.RunAtStartup
 import pw.aru.commands.actions.impl.ImageBasedCommandImpl
 import pw.aru.commands.actions.impl.providers.WeebProvider
-import pw.aru.core.CommandRegistry
-import pw.aru.core.executor.Executable
-import pw.aru.core.executor.RunAtStartup
 import pw.aru.utils.extensions.lang.getValue
 
 @RunAtStartup

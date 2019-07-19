@@ -1,6 +1,6 @@
 package pw.aru.commands.actions.impl
 
-import pw.aru.core.categories.Category
+import pw.aru.bot.categories.Category
 
 sealed class ImageBasedCommandBuilder {
     abstract val names: List<String>

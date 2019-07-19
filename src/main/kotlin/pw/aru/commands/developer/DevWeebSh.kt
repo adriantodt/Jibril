@@ -5,9 +5,9 @@ import com.github.natanbc.weeb4j.Weeb4J
 import com.github.natanbc.weeb4j.image.FileType
 import com.github.natanbc.weeb4j.image.HiddenMode
 import com.github.natanbc.weeb4j.image.NsfwFilter
-import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.parser.Args
-import pw.aru.core.parser.parseAndCreate
+import pw.aru.bot.commands.context.CommandContext
+import pw.aru.bot.parser.Args
+import pw.aru.bot.parser.parseAndCreate
 import pw.aru.utils.extensions.lang.invoke
 import pw.aru.utils.extensions.lib.description
 import pw.aru.utils.styling

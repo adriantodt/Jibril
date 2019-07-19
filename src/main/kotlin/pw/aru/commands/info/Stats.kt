@@ -2,13 +2,13 @@ package pw.aru.commands.info
 
 import com.mewna.catnip.entity.channel.Channel.ChannelType.*
 import pw.aru.Aru.Bot.uptime
-import pw.aru.core.CommandProcessor
-import pw.aru.core.categories.Category
-import pw.aru.core.commands.Command
-import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.commands.help.*
-import pw.aru.core.music.MusicSystem
+import pw.aru.bot.CommandProcessor
+import pw.aru.bot.categories.Category
+import pw.aru.bot.commands.Command
+import pw.aru.bot.commands.ICommand
+import pw.aru.bot.commands.context.CommandContext
+import pw.aru.bot.commands.help.*
+import pw.aru.bot.music.MusicSystem
 import pw.aru.exported.aru_version
 import pw.aru.utils.*
 import pw.aru.utils.AsyncInfoMonitor.availableProcessors

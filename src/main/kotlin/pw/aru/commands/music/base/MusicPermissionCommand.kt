@@ -1,10 +1,10 @@
 package pw.aru.commands.music.base
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
-import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.commands.help.prefix
-import pw.aru.core.music.MusicPlayer
-import pw.aru.core.music.MusicSystem
+import pw.aru.bot.commands.context.CommandContext
+import pw.aru.bot.commands.help.prefix
+import pw.aru.bot.music.MusicPlayer
+import pw.aru.bot.music.MusicSystem
 import pw.aru.core.permissions.MemberPermissions
 import pw.aru.utils.extensions.lang.anyOf
 import pw.aru.utils.extensions.lib.humanUsersCount

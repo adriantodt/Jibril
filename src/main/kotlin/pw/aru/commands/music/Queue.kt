@@ -1,15 +1,15 @@
 package pw.aru.commands.music
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import pw.aru.bot.commands.Command
+import pw.aru.bot.commands.ICommand
+import pw.aru.bot.commands.context.CommandContext
+import pw.aru.bot.commands.help.*
+import pw.aru.bot.music.MusicPlayer
+import pw.aru.bot.music.MusicSystem
+import pw.aru.bot.music.utils.NowPlayingEmbed.musicLength
+import pw.aru.bot.music.utils.NowPlayingEmbed.progressBar
 import pw.aru.commands.music.base.MusicCommand
-import pw.aru.core.commands.Command
-import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.commands.help.*
-import pw.aru.core.music.MusicPlayer
-import pw.aru.core.music.MusicSystem
-import pw.aru.core.music.utils.NowPlayingEmbed.musicLength
-import pw.aru.core.music.utils.NowPlayingEmbed.progressBar
 import pw.aru.utils.extensions.lib.blankField
 import pw.aru.utils.extensions.lib.field
 import pw.aru.utils.styling

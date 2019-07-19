@@ -6,9 +6,9 @@ import org.kodein.di.generic.instance
 import pw.aru.bootstrap.CatnipBootstrap
 import pw.aru.bootstrap.CommandBootstrap
 import pw.aru.bootstrap.KodeinBootstrap
-import pw.aru.core.CommandRegistry
-import pw.aru.core.reporting.ErrorReportHandler
-import pw.aru.core.reporting.LocalPastes
+import pw.aru.bot.CommandRegistry
+import pw.aru.bot.reporting.ErrorReportHandler
+import pw.aru.bot.reporting.LocalPastes
 import pw.aru.utils.AsyncInfoMonitor
 import java.io.File
 import java.util.*

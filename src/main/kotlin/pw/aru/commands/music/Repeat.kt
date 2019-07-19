@@ -1,15 +1,15 @@
 package pw.aru.commands.music
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import pw.aru.bot.commands.Command
+import pw.aru.bot.commands.ICommand
+import pw.aru.bot.commands.context.CommandContext
+import pw.aru.bot.commands.help.*
+import pw.aru.bot.music.MusicPlayer
+import pw.aru.bot.music.MusicSystem
+import pw.aru.bot.music.entities.RepeatMode
+import pw.aru.bot.music.events.ChangeRepeatModeEvent
 import pw.aru.commands.music.base.MusicPermissionCommand
-import pw.aru.core.commands.Command
-import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.commands.help.*
-import pw.aru.core.music.MusicPlayer
-import pw.aru.core.music.MusicSystem
-import pw.aru.core.music.entities.RepeatMode
-import pw.aru.core.music.events.ChangeRepeatModeEvent
 
 @Command("repeat")
 class Repeat(musicSystem: MusicSystem) : MusicPermissionCommand(musicSystem), ICommand.HelpDialogProvider {

@@ -1,10 +1,10 @@
 package pw.aru.commands.social
 
-import pw.aru.core.categories.Category
-import pw.aru.core.commands.Command
-import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.parser.tryTakeMember
+import pw.aru.bot.categories.Category
+import pw.aru.bot.commands.Command
+import pw.aru.bot.commands.ICommand
+import pw.aru.bot.commands.context.CommandContext
+import pw.aru.bot.parser.tryTakeMember
 import pw.aru.db.AruDB
 import pw.aru.db.entities.user.UserProfile
 import pw.aru.db.entities.user.UserRelationship

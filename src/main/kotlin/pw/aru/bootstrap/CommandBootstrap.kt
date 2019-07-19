@@ -4,13 +4,13 @@ import io.github.classgraph.ScanResult
 import mu.KLogging
 import org.kodein.di.Kodein
 import org.kodein.di.generic.instance
-import pw.aru.core.CommandRegistry
-import pw.aru.core.commands.Command
-import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.ICommandProvider
-import pw.aru.core.executor.Executable
-import pw.aru.core.executor.RunAtStartup
-import pw.aru.core.executor.RunEvery
+import pw.aru.bot.CommandRegistry
+import pw.aru.bot.commands.Command
+import pw.aru.bot.commands.ICommand
+import pw.aru.bot.commands.ICommandProvider
+import pw.aru.bot.executor.Executable
+import pw.aru.bot.executor.RunAtStartup
+import pw.aru.bot.executor.RunEvery
 import pw.aru.libs.kodein.jit.jitInstance
 import pw.aru.utils.AruTaskExecutor.queue
 import pw.aru.utils.AruTaskExecutor.task
@@ -23,8 +23,8 @@ class CommandBootstrap(val scanResult: ScanResult, val kodein: Kodein) {
     val registry by kodein.instance<CommandRegistry>()
 
     fun createCommands() {
-        scanResult.getClassesImplementing("pw.aru.core.commands.ICommand")
-            .filter { it.hasAnnotation("pw.aru.core.commands.Command") }
+        scanResult.getClassesImplementing("pw.aru.bot.commands.ICommand")
+            .filter { it.hasAnnotation("pw.aru.bot.commands.Command") }
             .loadClasses(ICommand::class.java)
             .forEach {
                 try {
@@ -39,8 +39,8 @@ class CommandBootstrap(val scanResult: ScanResult, val kodein: Kodein) {
     }
 
     fun createProviders() {
-        scanResult.getClassesImplementing("pw.aru.core.commands.ICommandProvider")
-            .filter { it.hasAnnotation("pw.aru.core.commands.CommandProvider") }
+        scanResult.getClassesImplementing("pw.aru.bot.commands.ICommandProvider")
+            .filter { it.hasAnnotation("pw.aru.bot.commands.CommandProvider") }
             .loadClasses(ICommandProvider::class.java)
             .forEach {
                 try {
@@ -54,16 +54,16 @@ class CommandBootstrap(val scanResult: ScanResult, val kodein: Kodein) {
     }
 
     fun createStandalones() {
-        scanResult.getClassesImplementing("pw.aru.core.executor.Executable")
+        scanResult.getClassesImplementing("pw.aru.bot.executor.Executable")
             .filter {
                 allOf(
                     arrayOf(
-                        "pw.aru.core.executor.RunAtStartup",
-                        "pw.aru.core.executor.RunEvery"
+                        "pw.aru.bot.executor.RunAtStartup",
+                        "pw.aru.bot.executor.RunEvery"
                     ).any(it::hasAnnotation),
                     arrayOf(
-                        "pw.aru.core.commands.ICommand",
-                        "pw.aru.core.commands.ICommandProvider"
+                        "pw.aru.bot.commands.ICommand",
+                        "pw.aru.bot.commands.ICommandProvider"
                     ).none(it::implementsInterface)
                 )
             }

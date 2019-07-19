@@ -1,10 +1,10 @@
 package pw.aru.commands.music
 
-import pw.aru.core.categories.Category
-import pw.aru.core.commands.Command
-import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.music.MusicSystem
+import pw.aru.bot.categories.Category
+import pw.aru.bot.commands.Command
+import pw.aru.bot.commands.ICommand
+import pw.aru.bot.commands.context.CommandContext
+import pw.aru.bot.music.MusicSystem
 import pw.aru.core.permissions.MemberPermissions.ADMIN
 import pw.aru.core.permissions.MemberPermissions.DJ
 import pw.aru.core.permissions.Permissions

@@ -1,12 +1,12 @@
 package pw.aru.commands.actions.impl
 
-import pw.aru.core.categories.Category
-import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.commands.help.CommandDescription
-import pw.aru.core.commands.help.CommandUsage
-import pw.aru.core.commands.help.Help
-import pw.aru.core.commands.help.Usage
+import pw.aru.bot.categories.Category
+import pw.aru.bot.commands.ICommand
+import pw.aru.bot.commands.context.CommandContext
+import pw.aru.bot.commands.help.CommandDescription
+import pw.aru.bot.commands.help.CommandUsage
+import pw.aru.bot.commands.help.Help
+import pw.aru.bot.commands.help.Usage
 import pw.aru.utils.extensions.lang.randomOf
 import pw.aru.utils.extensions.lang.randomOrNull
 import pw.aru.utils.extensions.lang.replaceEach

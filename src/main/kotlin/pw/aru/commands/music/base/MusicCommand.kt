@@ -1,11 +1,11 @@
 package pw.aru.commands.music.base
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
-import pw.aru.core.categories.Category
-import pw.aru.core.commands.ICommand
-import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.music.MusicPlayer
-import pw.aru.core.music.MusicSystem
+import pw.aru.bot.categories.Category
+import pw.aru.bot.commands.ICommand
+import pw.aru.bot.commands.context.CommandContext
+import pw.aru.bot.music.MusicPlayer
+import pw.aru.bot.music.MusicSystem
 import pw.aru.utils.text.CONFUSED
 
 abstract class MusicCommand(val musicSystem: MusicSystem) : ICommand {

@@ -4,10 +4,10 @@ import com.github.natanbc.javaeval.CompilationException
 import com.github.natanbc.javaeval.JavaEvaluator
 import com.mewna.catnip.entity.message.Message
 import pw.aru.Aru.Bot.evaluatingQuotes
-import pw.aru.core.CommandRegistry
-import pw.aru.core.commands.context.CommandContext
-import pw.aru.core.parser.Args
-import pw.aru.core.reporting.LocalPastes
+import pw.aru.bot.CommandRegistry
+import pw.aru.bot.commands.context.CommandContext
+import pw.aru.bot.parser.Args
+import pw.aru.bot.reporting.LocalPastes
 import pw.aru.db.AruDB
 import pw.aru.utils.Colors
 import pw.aru.utils.EmbedFirst
@@ -119,22 +119,11 @@ class DevEval(db: AruDB, registry: CommandRegistry) {
             """
             import com.mewna.catnip.entity.message.Message;
             import pw.aru.db.AruDB;
-            import pw.aru.core.CommandRegistry;
-
-            import pw.aru.*;
-            import pw.aru.core.*;
-            import pw.aru.core.commands.*;
-            import pw.aru.core.music.*;
-            import pw.aru.db.*;
-            import pw.aru.db.entities.guild.*;
-            import pw.aru.db.entities.user.*;
-            import pw.aru.utils.*;
+            import pw.aru.bot.CommandRegistry;
 
             import com.mewna.catnip.*;
-            import com.mewna.catnip.entity.*;
             import com.mewna.catnip.entity.guild.*;
             import com.mewna.catnip.entity.channel.*;
-            import com.mewna.catnip.entity.user.*;
 
             public class AruJavaEval {
                 public static Object runEval(Message message, AruDB db, CommandRegistry registry) {
