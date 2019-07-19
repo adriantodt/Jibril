@@ -68,6 +68,8 @@ inline fun <K, V> Map<K, V>.ifContains(k: K, function: (V) -> Unit) {
 
 inline fun anyOf(vararg cases: Boolean) = cases.find { it } ?: false
 
+inline fun allOf(vararg cases: Boolean) = cases.all { it }
+
 inline fun multiline(vararg lines: String) = lines.joinToString("\n")
 
 fun threadFactory(

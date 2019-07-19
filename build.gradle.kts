@@ -34,6 +34,7 @@ dependencies {
     compile("com.github.mewna:catnip:3ba7d143")
     compile("io.projectreactor.addons:reactor-adapter:3.2.3.RELEASE")
     compile("io.reactivex.rxjava2:rxkotlin:2.3.0")
+    compile("io.sentry:sentry-logback:1.7.23")
 
     // Main APIs
     compile("com.github.natanbc:weeb4j:3.5")
@@ -103,12 +104,12 @@ configure<DockerExtension> {
     buildArgs(mapOf("version" to version.toString(), "jattachVersion" to "v1.5"))
 }
 
-
-with(rootProject.file("src/main/kotlin/pw/aru/exported/exported.kt")) {
-    parentFile.mkdirs()
-    createNewFile()
-    writeText(
-        """
+rootProject.run {
+    file("src/main/kotlin/pw/aru/exported/exported.kt").run {
+        parentFile.mkdirs()
+        createNewFile()
+        writeText(
+            """
 @file:JvmName("AruExported")
 @file:Suppress("unused")
 
@@ -128,5 +129,19 @@ const val aru_version = "$version"
  */
 const val user_agent = "Aru/Discord (Aru! $version)"
 """.trim()
-    )
+        )
+    }
+
+    file(".env").run {
+        parentFile.mkdirs()
+        createNewFile()
+        writeText(
+            """
+aru_version=$version
+""".trim()
+        )
+    }
 }
+
+
+

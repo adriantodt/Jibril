@@ -8,27 +8,16 @@ import com.mewna.catnip.entity.message.MessageOptions
 import com.mewna.catnip.util.Utils.parseWebhook
 import mu.KLogging
 import org.apache.commons.lang3.tuple.ImmutablePair
+import pw.aru.core.logging.DiscordLogger
 import pw.aru.utils.Colors
 import pw.aru.utils.extensions.lang.multiline
 import pw.aru.utils.extensions.lang.plusAssign
 import pw.aru.utils.extensions.lib.embed
 import java.util.regex.Pattern
 
-class GuildWebhookLogger(webhook: String) {
-    companion object : KLogging()
-
-    val id: String
-    val token: String
-
-    init {
-        val matcher = Pattern.compile("https://discordapp\\.com/api/webhooks/(\\d+)/([\\w\\W]+)").matcher(webhook)
-        matcher.find()
-        id = matcher.group(1)
-        token = matcher.group(2)
-    }
-
+class GuildLogger(catnip: Catnip, url: String) : DiscordLogger(catnip, url) {
     fun onGuildJoin(guild: Guild) {
-        sendEmbed(guild.catnip()) {
+        embed {
             author("AruLog | New Server")
             color(Colors.discordGreen)
             thumbnail(guild.iconUrl())
@@ -60,7 +49,7 @@ class GuildWebhookLogger(webhook: String) {
     }
 
     fun onGuildLeave(guild: Guild) {
-        sendEmbed(guild.catnip()) {
+        embed {
             author("AruLog | Lost Server")
             color(Colors.discordRed)
             thumbnail(guild.iconUrl())
@@ -79,11 +68,5 @@ class GuildWebhookLogger(webhook: String) {
                 guild.catnip().selfUser()!!.effectiveAvatarUrl()
             )
         }
-    }
-
-    private fun sendEmbed(catnip: Catnip, builder: EmbedBuilder.() -> Unit) {
-        catnip.rest().webhook().executeWebhook(
-            id, token, MessageOptions().embed(embed(init = builder))
-        )
     }
 }
