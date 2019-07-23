@@ -1,4 +1,4 @@
-package pw.aru.bootstrap
+package pw.aru.bot.bootstrap
 
 import com.github.natanbc.weeb4j.TokenType
 import com.github.natanbc.weeb4j.Weeb4J
@@ -57,6 +57,7 @@ class KodeinBootstrap(val catnip: Catnip) {
         // Managers
         bind<GameManager>() with singleton { GameManager(kodein) }
         bind<MusicSystem>() with singleton { MusicSystem(kodein) }
+        bind<ShutdownManager>() with singleton { ShutdownManager() }
 
         // APIs
         bind<OkHttpClient>() with singleton { OkHttpClient() }

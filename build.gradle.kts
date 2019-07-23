@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "pw.aru"
-version = "3.0.7"
+version = "3.1"
 
 repositories {
     jcenter()
@@ -31,7 +31,7 @@ dependencies {
 
     compile(project("aruCore"))
 
-    compile("com.github.mewna:catnip:3ba7d143")
+    compile("com.github.mewna:catnip:1.3.2")
     compile("io.projectreactor.addons:reactor-adapter:3.2.3.RELEASE")
     compile("io.reactivex.rxjava2:rxkotlin:2.3.0")
     compile("io.sentry:sentry-logback:1.7.23")
@@ -91,17 +91,16 @@ configure<ApplicationPluginConvention> {
     mainClassName = "pw.aru.Bootstrap"
 }
 
-
-val shadowJar by tasks.getting
-
 configure<DockerExtension> {
     this.name = "adriantodt/aru:$version"
+
+    val shadowJar by tasks.getting
 
     dependsOn(shadowJar)
     files(shadowJar.outputs)
     copySpec.from("runDir").into("run")
 
-    buildArgs(mapOf("version" to version.toString(), "jattachVersion" to "v1.5"))
+    buildArgs(mapOf("version" to version.toString()))
 }
 
 rootProject.run {

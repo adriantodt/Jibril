@@ -1,6 +1,7 @@
 package pw.aru.commands.info
 
 import com.mewna.catnip.entity.channel.Channel.ChannelType.*
+import com.mewna.catnip.util.CatnipMeta
 import pw.aru.Aru.Bot.uptime
 import pw.aru.bot.CommandProcessor
 import pw.aru.bot.categories.Category
@@ -9,6 +10,7 @@ import pw.aru.bot.commands.ICommand
 import pw.aru.bot.commands.context.CommandContext
 import pw.aru.bot.commands.help.*
 import pw.aru.bot.music.MusicSystem
+import pw.aru.core.exported.aruCore_version
 import pw.aru.exported.aru_version
 import pw.aru.utils.*
 import pw.aru.utils.AsyncInfoMonitor.availableProcessors
@@ -57,6 +59,8 @@ class Stats
             inlineField(
                 "Bot Stats:",
                 "\u25AB **Aru Version**: $aru_version",
+                "\u25AB **AruCore Version**: $aruCore_version",
+                "\u25AB **Catnip Version**: ${CatnipMeta.VERSION}",
                 "\u25AB **Threads**: ${threadCount.format("%,d")}",
                 "\u25AB **Shards**: ${catnip.shardManager().shardCount().format("%,d")}",
                 "\u25AB **Commands**: ${processor.commandCount.format("%,d")} executed"

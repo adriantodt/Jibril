@@ -44,13 +44,19 @@ object Colors {
      * Other colors also used by Discord
      */
     @JvmField
-    val discordCanary = Color(0xfaa61a)
+    val discordYellow = Color(0xfaa61a)
     @JvmField
     val discordRed = Color(0xf04747)
     @JvmField
     val discordGreen = Color(0x43b581)
     @JvmField
     val discordPurple = Color(0x593695)
+
+    /**
+     * Pallete-derived other Discord Colors
+     */
+    @JvmField
+    val discordPink = Color(0xee2aa5)
 
     /*
      * Developer colors

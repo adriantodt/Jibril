@@ -1,6 +1,5 @@
 package pw.aru.bot
 
-import com.mewna.catnip.Catnip
 import com.mewna.catnip.entity.channel.GuildChannel
 import com.mewna.catnip.entity.guild.Guild
 import pw.aru.core.logging.DiscordLogger
@@ -8,7 +7,7 @@ import pw.aru.utils.Colors
 import pw.aru.utils.extensions.lang.multiline
 import pw.aru.utils.extensions.lang.plusAssign
 
-class GuildLogger(catnip: Catnip, url: String) : DiscordLogger(catnip, url) {
+class GuildLogger(url: String) : DiscordLogger(url) {
     fun onGuildJoin(guild: Guild) {
         embed {
             author("AruLog | New Server")

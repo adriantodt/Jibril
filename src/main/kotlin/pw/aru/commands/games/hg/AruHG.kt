@@ -108,7 +108,7 @@ class AruHG(
     private fun showHelp(newGame: Boolean = true) {
         channel.sendEmbed {
             author("Aru! HungerGames")
-            color(Colors.discordCanary)
+            color(Colors.discordYellow)
             thumbnail("https://assets.aru.pw/img/hungergames.png")
             description(
                 "${if (newGame) "New game created successfully! " else ""}**${admin.effectiveName().safeUserInput()}** is the admin of the game.",
@@ -140,7 +140,7 @@ class AruHG(
     private fun showInGameHelp() {
         channel.sendEmbed {
             author("Aru! HungerGames")
-            color(Colors.discordCanary)
+            color(Colors.discordYellow)
             thumbnail("https://assets.aru.pw/img/hungergames.png")
             description(
                 "**${admin.effectiveName().safeUserInput()}** is the admin of the game.",
@@ -195,7 +195,7 @@ class AruHG(
                         sendEmbed {
                             styling(message).author("Aru! HungerGames | ${admin.effectiveName()}'s Lobby").autoFooter()
 
-                            color(Colors.discordCanary)
+                            color(Colors.discordYellow)
                             thumbnail("https://assets.aru.pw/img/hungergames.png")
 
                             field(
@@ -225,7 +225,7 @@ class AruHG(
 
                         sendEmbed {
                             styling(message).author("Aru! HungerGames | Scoreboard of Last Game").autoFooter()
-                            color(Colors.discordCanary)
+                            color(Colors.discordYellow)
                             thumbnail("https://assets.aru.pw/img/hungergames.png")
 
                             inlineField(
