@@ -1,6 +1,7 @@
 package pw.aru.commands.music
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import pw.aru._obsolete.v1.db.AruDB
 import pw.aru.bot.commands.Command
 import pw.aru.bot.commands.ICommand
 import pw.aru.bot.commands.context.CommandContext
@@ -12,7 +13,6 @@ import pw.aru.bot.patreon.Patreon
 import pw.aru.commands.music.base.MusicCommand
 import pw.aru.commands.music.base.MusicPermissionCommand
 import pw.aru.core.permissions.UserPermissions
-import pw.aru.db.AruDB
 import pw.aru.utils.extensions.lang.multiline
 import pw.aru.utils.text.ERROR
 import pw.aru.utils.text.VOLUME

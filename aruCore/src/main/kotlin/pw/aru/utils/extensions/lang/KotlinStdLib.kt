@@ -7,17 +7,26 @@ package pw.aru.utils.extensions.lang
 import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.concurrent.thread
-import kotlin.properties.ReadOnlyProperty
 import kotlin.random.Random
 import kotlin.reflect.KProperty
 
-val environment = object : ReadOnlyProperty<Any?, String> {
+class Env private constructor() {
     private val env by lazy { System.getenv() }
 
-    override fun getValue(thisRef: Any?, property: KProperty<*>): String {
-        return env.get(property.name) ?: throw IllegalStateException("No environment property ${property.name}")
+    operator fun get(value: String): String {
+        return env[value] ?: throw IllegalStateException("No environment property $value")
+    }
+
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): String {
+        return get(property.name)
+    }
+
+    companion object {
+        val instance = Env()
     }
 }
+
+val environment = Env.instance
 
 inline fun <reified T> classOf() = T::class.java
 

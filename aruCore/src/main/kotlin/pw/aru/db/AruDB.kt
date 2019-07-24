@@ -1,71 +1,45 @@
 package pw.aru.db
 
 import io.lettuce.core.RedisClient
-import io.lettuce.core.api.StatefulRedisConnection
-import pw.aru.db.base.RedisObject
-import pw.aru.db.base.metadata.RedisObjectMetadata
-import pw.aru.io.AruIO
+import org.jdbi.v3.core.Jdbi
+import pw.aru.core.AruSide
+import pw.aru.db.modules.GlobalJdbiModule
+import pw.aru.db.modules.RedisModule
+import pw.aru.db.modules.ScopedJdbiModule
 import pw.aru.libs.snowflake.SnowflakeConfig
-import pw.aru.libs.snowflake.entities.SnowflakeWorker
 import pw.aru.libs.snowflake.local.LocalGenerator
-import pw.aru.sides.AruSide
-import java.io.Closeable
+import pw.aru.utils.extensions.lang.environment
+import pw.aru.utils.extensions.lib.get
 
-class AruDB(val side: AruSide, val sideId: Long, val uri: String = DEFAULT_REDIS_URI) : Closeable {
+class AruDB(config: Config = environmentBasedConfig()) {
+    data class Config(
+        val side: AruSide,
+        val sideId: Long,
+        val jbdiGlobalUrl: String,
+        val jbdiScopedUrl: String,
+        val redisUrl: String
+    )
 
-    val client: RedisClient
-    val conn: StatefulRedisConnection<String, String>
+    val globalJdbi = Jdbi.create(config.jbdiGlobalUrl)
+    val scopedJdbi = Jdbi.create(config.jbdiScopedUrl)
+    val redisClient = RedisClient.create(config.redisUrl)
+    val snowflakeWorker = aruSnowflakes[config.side.ordinal.toLong(), config.sideId]
 
-    private val snowflakeWorker: SnowflakeWorker
-    private val io by lazy { AruIO(this) }
-
-    init {
-        this.snowflakeWorker = aruSnowflakes
-            .getDatacenter(side.ordinal.toLong())
-            .getWorker(sideId)
-
-        this.client = RedisClient.create(uri)
-        this.conn = client.connect()
-    }
-
-    fun nextID(): Long {
-        return snowflakeWorker.generate()
-    }
-
-    fun io(): AruIO {
-        return io
-    }
-
-    fun <T : RedisObject> exists(table: Class<T>, id: Long): Boolean {
-        val meta = RedisObjectMetadata(table)
-        val existCount = conn.sync().exists(meta.remoteId(id))
-
-        return existCount > 0
-    }
-
-    fun <T : RedisObject> keys(table: Class<T>): List<Long> {
-        val meta = RedisObjectMetadata(table)
-        val keysMatched = conn.sync().keys(meta.identifier + ":*")
-
-        return keysMatched.asSequence()
-            .map(meta::parseRemoteID)
-            .filter { !it.hasChild }
-            .mapTo(ArrayList()) { it.id }
-    }
-
-    inline fun <reified T : RedisObject> exists(id: Long): Boolean {
-        return exists(T::class.java, id)
-    }
-
-    inline fun <reified T : RedisObject> keys(): List<Long> {
-        return keys(T::class.java)
-    }
-
-    override fun close() {
-        client.shutdown()
-    }
+    val globalJdbiModule = GlobalJdbiModule(this)
+    val scopedJdbiModule = ScopedJdbiModule(this)
+    val redisModule = RedisModule(this)
 
     companion object {
         val aruSnowflakes = LocalGenerator(SnowflakeConfig(1517400000000L))
+
+        fun environmentBasedConfig(): Config {
+            return Config(
+                AruSide.valueOf(environment["ARUDB_SIDE"].toLowerCase()),
+                environment["ARUDB_SIDE_ID"].toLong(),
+                environment["ARUDB_JBDI_GLOBAL_URL"],
+                environment["ARUDB_JBDI_SCOPED_URL"],
+                environment["ARUDB_JBDI_REDIS_URL"]
+            )
+        }
     }
 }

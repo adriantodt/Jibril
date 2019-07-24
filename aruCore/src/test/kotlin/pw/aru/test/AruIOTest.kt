@@ -1,8 +1,8 @@
 package pw.aru.test
 
 import mu.KotlinLogging.logger
-import pw.aru.db.AruDB
-import pw.aru.sides.AruSide
+import pw.aru._obsolete.v1.db.AruDB
+import pw.aru.core.AruSide
 
 fun main() {
     val log = logger {}

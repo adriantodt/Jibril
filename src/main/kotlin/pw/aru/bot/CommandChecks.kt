@@ -2,10 +2,10 @@ package pw.aru.bot
 
 import com.mewna.catnip.entity.message.Message
 import pw.aru.Aru
+import pw.aru._obsolete.v1.db.AruDB
 import pw.aru.bot.commands.ICommand
 import pw.aru.bot.patreon.Patreon
 import pw.aru.core.permissions.Permission
-import pw.aru.db.AruDB
 import pw.aru.utils.extensions.lang.multiline
 import pw.aru.utils.text.ERROR
 import pw.aru.utils.text.STOP

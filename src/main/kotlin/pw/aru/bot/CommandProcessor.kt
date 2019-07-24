@@ -6,6 +6,8 @@ import mu.KLogging
 import pw.aru.Aru
 import pw.aru.Aru.*
 import pw.aru.Aru.Bot.prefixes
+import pw.aru._obsolete.v1.db.AruDB
+import pw.aru._obsolete.v1.db.entities.guild.GuildSettings
 import pw.aru.bot.commands.ICommand
 import pw.aru.bot.commands.ICommand.ExceptionHandler
 import pw.aru.bot.commands.context.CommandContext
@@ -15,8 +17,6 @@ import pw.aru.bot.permissions.PermissionResolver
 import pw.aru.bot.reporting.ErrorReporter
 import pw.aru.core.permissions.Permission
 import pw.aru.core.permissions.UserPermissions.USE_BOT
-import pw.aru.db.AruDB
-import pw.aru.db.entities.guild.GuildSettings
 import pw.aru.utils.CommandStatsManager
 import pw.aru.utils.extensions.aru.ERROR_CHANNEL_PERMS
 import pw.aru.utils.extensions.aru.ERROR_GUILD_PERMS

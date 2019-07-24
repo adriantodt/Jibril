@@ -6,6 +6,7 @@ import com.mewna.catnip.shard.DiscordEvent
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import mu.KLogging
+import pw.aru._obsolete.v1.db.AruDB
 import pw.aru.bot.commands.help.prefix
 import pw.aru.bot.music.entities.*
 import pw.aru.bot.music.events.*
@@ -15,7 +16,6 @@ import pw.aru.bot.music.internal.OutputMusicEventAdapter
 import pw.aru.bot.music.utils.NowPlayingEmbed.musicLength
 import pw.aru.bot.patreon.Patreon
 import pw.aru.bot.reporting.ErrorReporter
-import pw.aru.db.AruDB
 import pw.aru.utils.AruColors
 import pw.aru.utils.extensions.discordapp.safeUserInput
 import pw.aru.utils.extensions.lang.awaitAll

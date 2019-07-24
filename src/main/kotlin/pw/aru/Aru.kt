@@ -1,6 +1,6 @@
 package pw.aru
 
-import pw.aru.sides.AruSide
+import pw.aru.core.AruSide
 import pw.aru.utils.extensions.lang.environment
 import pw.aru.utils.humanizedTime
 import java.io.File

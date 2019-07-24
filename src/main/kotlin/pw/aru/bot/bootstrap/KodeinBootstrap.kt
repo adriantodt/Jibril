@@ -10,14 +10,14 @@ import org.kodein.di.generic.bind
 import org.kodein.di.generic.instance
 import org.kodein.di.generic.singleton
 import pw.aru.Aru
+import pw.aru._obsolete.v1.db.AruDB
+import pw.aru._obsolete.v1.io.AruIO
 import pw.aru.bot.CommandProcessor
 import pw.aru.bot.CommandRegistry
 import pw.aru.bot.music.MusicSystem
 import pw.aru.bot.permissions.PermissionResolver
 import pw.aru.commands.games.manager.GameManager
-import pw.aru.db.AruDB
 import pw.aru.exported.aru_version
-import pw.aru.io.AruIO
 import pw.aru.libs.andeclient.entities.AndeClient
 import pw.aru.libs.kodein.jit.installJit
 import pw.aru.utils.ReloadableListProvider

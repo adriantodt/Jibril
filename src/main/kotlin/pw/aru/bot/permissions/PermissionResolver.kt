@@ -4,14 +4,14 @@ import com.mewna.catnip.entity.guild.Member
 import com.mewna.catnip.entity.user.User
 import com.mewna.catnip.entity.util.Permission.*
 import pw.aru.Aru.Bot.devs
+import pw.aru._obsolete.v1.db.AruDB
+import pw.aru._obsolete.v1.db.entities.user.UserSettings
 import pw.aru.bot.patreon.Patreon
 import pw.aru.core.permissions.MemberPermissions
 import pw.aru.core.permissions.MemberPermissions.*
 import pw.aru.core.permissions.Permission
 import pw.aru.core.permissions.UserPermissions
 import pw.aru.core.permissions.UserPermissions.*
-import pw.aru.db.AruDB
-import pw.aru.db.entities.user.UserSettings
 
 class PermissionResolver(private val db: AruDB) {
     fun resolveUser(user: User): Set<UserPermissions> {

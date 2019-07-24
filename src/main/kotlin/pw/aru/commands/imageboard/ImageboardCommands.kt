@@ -7,6 +7,9 @@ import net.kodehawa.lib.imageboards.ImageBoard
 import net.kodehawa.lib.imageboards.entities.Rating
 import net.kodehawa.lib.imageboards.entities.Rating.*
 import net.kodehawa.lib.imageboards.entities.exceptions.QueryFailedException
+import pw.aru._obsolete.v1.db.AruDB
+import pw.aru._obsolete.v1.db.entities.guild.GuildSettings
+import pw.aru._obsolete.v1.db.entities.user.UserSettings
 import pw.aru.bot.CommandRegistry
 import pw.aru.bot.categories.Category.IMAGEBOARD
 import pw.aru.bot.commands.CommandProvider
@@ -18,9 +21,6 @@ import pw.aru.bot.parser.parseAndCreate
 import pw.aru.bot.parser.tryTakeInt
 import pw.aru.commands.imageboard.ImageboardCommand.Type.RANDOM_IMAGE
 import pw.aru.commands.imageboard.ImageboardCommand.Type.SEARCH_RESULT
-import pw.aru.db.AruDB
-import pw.aru.db.entities.guild.GuildSettings
-import pw.aru.db.entities.user.UserSettings
 import pw.aru.utils.extensions.lib.description
 import pw.aru.utils.styling
 import pw.aru.utils.text.DISAPPOINTED

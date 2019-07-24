@@ -9,6 +9,9 @@ import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
 import pw.aru.Aru.Bot.sleepQuotes
+import pw.aru._obsolete.v1.db.AruDB
+import pw.aru._obsolete.v1.db.entities.guild.GuildSettings
+import pw.aru._obsolete.v1.db.entities.user.UserSettings
 import pw.aru.bot.CommandRegistry
 import pw.aru.bot.categories.Category
 import pw.aru.bot.commands.Command
@@ -23,9 +26,6 @@ import pw.aru.bot.parser.*
 import pw.aru.bot.reporting.LocalPastes.paste
 import pw.aru.core.permissions.Permissions
 import pw.aru.core.permissions.UserPermissions.BOT_DEVELOPER
-import pw.aru.db.AruDB
-import pw.aru.db.entities.guild.GuildSettings
-import pw.aru.db.entities.user.UserSettings
 import pw.aru.utils.ReloadableListProvider
 import pw.aru.utils.extensions.lang.SplitPolicy
 import pw.aru.utils.extensions.lang.limit

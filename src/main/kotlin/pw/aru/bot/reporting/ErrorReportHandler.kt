@@ -3,8 +3,8 @@ package pw.aru.bot.reporting
 import com.mewna.catnip.entity.channel.MessageChannel
 import com.mewna.catnip.entity.message.Message
 import pw.aru.Aru.Bot.errorQuotes
+import pw.aru._obsolete.v1.db.AruDB
 import pw.aru.bot.commands.help.prefix
-import pw.aru.db.AruDB
 import pw.aru.libs.snowflake.snow64.Snow64
 import pw.aru.utils.extensions.lang.*
 import pw.aru.utils.text.PENCIL

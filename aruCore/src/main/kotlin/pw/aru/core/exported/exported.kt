@@ -10,4 +10,4 @@ package pw.aru.core.exported
 /**
  * AruCore Version
  */
-const val aruCore_version = "1.2"
+const val aruCore_version = "2.0-postgres"

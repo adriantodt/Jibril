@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "pw.aru"
-version = "1.2"
+version = "2.0-postgres"
 
 //Repositories and Dependencies
 repositories {
@@ -22,6 +22,11 @@ repositories {
 dependencies {
     compile(kotlin("stdlib-jdk8"))
     compile(kotlin("reflect"))
+
+    compile("org.postgresql:postgresql:42.2.6")
+    compile("org.jdbi:jdbi3-core:3.8.2")
+    compile("org.jdbi:jdbi3-postgres:3.8.2")
+    compile("org.jdbi:jdbi3-kotlin:3.8.2")
 
     compile("io.projectreactor:reactor-core:3.2.10.RELEASE")
     compile("com.github.mewna:catnip:1.3.2")

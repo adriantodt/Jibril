@@ -15,7 +15,7 @@
     </root>
 
     <!-- -->
-    <logger name="pw.aru.io.AruIO" level="trace">
+    <logger name="pw.aru._obsolete.v1.io.AruIO" level="trace">
     </logger>
     <!-- -->
 </configuration>

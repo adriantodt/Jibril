@@ -1,13 +1,13 @@
 package pw.aru.commands.utils
 
+import pw.aru._obsolete.v1.db.AruDB
+import pw.aru._obsolete.v1.db.entities.guild.GuildSettings
+import pw.aru._obsolete.v1.db.entities.user.UserSettings
 import pw.aru.bot.categories.Category
 import pw.aru.bot.commands.Command
 import pw.aru.bot.commands.ICommand
 import pw.aru.bot.commands.context.CommandContext
 import pw.aru.bot.commands.help.*
-import pw.aru.db.AruDB
-import pw.aru.db.entities.guild.GuildSettings
-import pw.aru.db.entities.user.UserSettings
 import pw.aru.utils.AruColors.primary
 import pw.aru.utils.extensions.lib.field
 import pw.aru.utils.extensions.lib.footer

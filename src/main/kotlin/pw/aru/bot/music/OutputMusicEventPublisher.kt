@@ -7,12 +7,12 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import org.json.JSONArray
 import org.json.JSONObject
+import pw.aru._obsolete.v1.io.AruIO
 import pw.aru.bot.music.entities.MusicEventSource
 import pw.aru.bot.music.events.*
 import pw.aru.bot.music.internal.LavaplayerLoadResult
 import pw.aru.bot.music.internal.OutputMusicEventAdapter
 import pw.aru.bot.music.utils.ThumbnailResolver.resolveThumbnail
-import pw.aru.io.AruIO
 import pw.aru.libs.andeclient.util.AudioTrackUtil.fromTrack
 import pw.aru.utils.extensions.lang.especializationName
 import pw.aru.utils.extensions.lib.jsonOf

@@ -16,9 +16,9 @@ import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
 import pw.aru.Aru
+import pw.aru._obsolete.v1.db.AruDB
 import pw.aru.bot.music.entities.ItemSource
 import pw.aru.bot.music.entities.ItemSource.*
-import pw.aru.db.AruDB
 import pw.aru.lib.eventpipes.api.EventExecutor
 import pw.aru.lib.eventpipes.internal.DefaultKeyedEventPipe
 import pw.aru.libs.andeclient.entities.AndeClient

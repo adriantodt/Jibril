@@ -3,9 +3,9 @@ package pw.aru.bot.patreon
 import com.mewna.catnip.entity.guild.Guild
 import com.mewna.catnip.entity.guild.Member
 import com.mewna.catnip.entity.user.User
-import pw.aru.db.AruDB
-import pw.aru.db.entities.guild.GuildSettings
-import pw.aru.db.entities.user.UserSettings
+import pw.aru._obsolete.v1.db.AruDB
+import pw.aru._obsolete.v1.db.entities.guild.GuildSettings
+import pw.aru._obsolete.v1.db.entities.user.UserSettings
 
 /**
  * Use this class to check for Patreon privileges.

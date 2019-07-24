@@ -3,10 +3,10 @@ package pw.aru.bot.botio
 import com.mewna.catnip.Catnip
 import mu.KLogging
 import org.json.JSONObject
+import pw.aru._obsolete.v1.io.AruIO
 import pw.aru.bot.executor.Executable
 import pw.aru.bot.executor.RunAtStartup
-import pw.aru.io.AruIO
-import pw.aru.sides.AruSide.AUXILIARY
+import pw.aru.core.AruSide.AUXILIARY
 import pw.aru.utils.AruTaskExecutor.task
 import java.util.concurrent.TimeUnit
 

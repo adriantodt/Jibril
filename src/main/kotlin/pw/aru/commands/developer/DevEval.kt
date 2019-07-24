@@ -4,11 +4,11 @@ import com.github.natanbc.javaeval.CompilationException
 import com.github.natanbc.javaeval.JavaEvaluator
 import com.mewna.catnip.entity.message.Message
 import pw.aru.Aru.Bot.evaluatingQuotes
+import pw.aru._obsolete.v1.db.AruDB
 import pw.aru.bot.CommandRegistry
 import pw.aru.bot.commands.context.CommandContext
 import pw.aru.bot.parser.Args
 import pw.aru.bot.reporting.LocalPastes
-import pw.aru.db.AruDB
 import pw.aru.utils.Colors
 import pw.aru.utils.EmbedFirst
 import pw.aru.utils.extensions.lang.limit
@@ -118,7 +118,7 @@ class DevEval(db: AruDB, registry: CommandRegistry) {
             //language=JAVA
             """
             import com.mewna.catnip.entity.message.Message;
-            import pw.aru.db.AruDB;
+            import pw.aru._obsolete.v1.db.AruDB;
             import pw.aru.bot.CommandRegistry;
 
             import com.mewna.catnip.*;

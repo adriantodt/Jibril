@@ -1,6 +1,6 @@
 //package pw.aru.utils.ratelimiter
 //
-//import pw.aru.db.RedisPool
+//import pw.aru._obsolete.v1.db.RedisPool
 //import redis.clients.jedis.exceptions.JedisNoScriptException
 //import java.time.Instant
 //

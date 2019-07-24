@@ -1,13 +1,13 @@
 package pw.aru.commands.social
 
+import pw.aru._obsolete.v1.db.AruDB
+import pw.aru._obsolete.v1.db.entities.user.UserProfile
+import pw.aru._obsolete.v1.db.entities.user.UserRelationship
 import pw.aru.bot.categories.Category
 import pw.aru.bot.commands.Command
 import pw.aru.bot.commands.ICommand
 import pw.aru.bot.commands.context.CommandContext
 import pw.aru.bot.parser.tryTakeMember
-import pw.aru.db.AruDB
-import pw.aru.db.entities.user.UserProfile
-import pw.aru.db.entities.user.UserRelationship
 import pw.aru.utils.Colors.blurple
 import pw.aru.utils.extensions.lib.inlineField
 import pw.aru.utils.extensions.lib.sendEmbed
