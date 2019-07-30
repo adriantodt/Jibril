@@ -480,8 +480,7 @@ class AruHG(
 
         fun send(vararg messages: Any?) {
             check()
-            channel.sendMessage(messages.joinToString("\n", transform = Any?::toString))
-                .toCompletableFuture().join()
+            channel.sendMessage(messages.joinToString("\n", transform = Any?::toString)).blockingGet()
         }
 
         fun quickYield() {

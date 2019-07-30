@@ -7,8 +7,6 @@ import com.mewna.catnip.entity.guild.Member
 import com.mewna.catnip.entity.message.Embed
 import com.mewna.catnip.entity.message.MessageOptions
 import com.mewna.catnip.entity.user.VoiceState
-import io.vertx.core.eventbus.MessageConsumer
-import java.io.Closeable
 
 inline fun message(init: MessageOptions.() -> Unit): MessageOptions =
     MessageOptions().also(init)
@@ -53,9 +51,3 @@ inline val VoiceChannel.humanUsersCount: Int
     get() = guild().voiceStates().count { it.channelIdAsLong() == idAsLong() && !catnip().cache().user(it.userId())!!.bot() }.toInt()
 
 fun Member.voiceState() = guild().voiceStates().getById(idAsLong())
-
-fun <T> MessageConsumer<T>.asCloseable(): Closeable {
-    return Closeable {
-        this.unregister()
-    }
-}

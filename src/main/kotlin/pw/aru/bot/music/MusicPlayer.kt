@@ -80,10 +80,11 @@ class MusicPlayer(
 
             val m = lastMessage
             if (m != null) {
-                m.edit(nowPlayingEmbed(this, memberRequested)).thenAccept { lastMessage = it }
+                m.edit(nowPlayingEmbed(this, memberRequested))
+                    .subscribe { msg -> lastMessage = msg }
             } else {
                 textChannel?.sendMessage(nowPlayingEmbed(this, memberRequested))
-                    ?.thenAccept { lastMessage = it }
+                    ?.subscribe { msg -> lastMessage = msg }
             }
             if (logTime) lastNowPlayingSent = currentTimeMillis()
         }
@@ -319,7 +320,7 @@ class MusicPlayer(
                 && it.channel() != voiceChannel
                 && it.channel()!!.humanUsersCount > 0
 
-        catnip.observe(DiscordEvent.VOICE_STATE_UPDATE)
+        catnip.observable(DiscordEvent.VOICE_STATE_UPDATE)
             .filter { guildId == it.guildIdAsLong() && (sameChannel(it) || movedChannel(it)) }
             .take(1)
             .singleElement()
@@ -516,7 +517,7 @@ class MusicPlayer(
             }
         }
 
-        val nextVsu = catnip.observe(DiscordEvent.VOICE_SERVER_UPDATE)
+        val nextVsu = catnip.observable(DiscordEvent.VOICE_SERVER_UPDATE)
             .toFlux()
             .filter { it.guildIdAsLong() == guildId }
             .toMono()

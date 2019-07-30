@@ -3,9 +3,9 @@ package pw.aru.bot.listeners
 import com.mewna.catnip.entity.message.Message
 import com.mewna.catnip.entity.util.Permission.ADMINISTRATOR
 import com.mewna.catnip.entity.util.Permission.SEND_MESSAGES
+import io.reactivex.functions.Consumer
 import pw.aru.bot.CommandProcessor
 import pw.aru.utils.AruTaskExecutor.queue
-import java.util.function.Consumer
 
 class CommandListener(private val processor: CommandProcessor) : Consumer<Message> {
     override fun accept(message: Message) {

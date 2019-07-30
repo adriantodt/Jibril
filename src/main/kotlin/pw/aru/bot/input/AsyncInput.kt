@@ -23,7 +23,7 @@ abstract class AsyncInput protected constructor(
     protected abstract fun timeout()
 
     protected fun waitForNextEvent() {
-        catnip.observe(DiscordEvent.MESSAGE_CREATE)
+        catnip.observable(DiscordEvent.MESSAGE_CREATE)
             .filter(::filter)
             .singleElement()
             .timeout(timeout, unit) {

@@ -24,7 +24,8 @@ dependencies {
     compile(kotlin("reflect"))
 
     compile("io.projectreactor:reactor-core:3.2.10.RELEASE")
-    compile("com.github.mewna:catnip:1.3.2")
+    //compile("com.github.mewna:catnip:1.3.2")
+    compile("com.github.arudiscord:catnip:v2-SNAPSHOT")
     compile("io.lettuce:lettuce-core:5.1.6.RELEASE")
     compile("pw.aru.libs:snowflake-local:1.0")
     compile("pw.aru.libs:eventpipes:1.3.1")

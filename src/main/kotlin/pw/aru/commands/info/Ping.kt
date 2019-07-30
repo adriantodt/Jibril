@@ -1,5 +1,6 @@
 package pw.aru.commands.info
 
+import io.reactivex.Single
 import pw.aru.bot.categories.Category
 import pw.aru.bot.commands.Command
 import pw.aru.bot.commands.ICommand
@@ -7,11 +8,9 @@ import pw.aru.bot.commands.context.CommandContext
 import pw.aru.bot.commands.help.CommandDescription
 import pw.aru.bot.commands.help.Description
 import pw.aru.bot.commands.help.Help
-import pw.aru.utils.extensions.lang.invoke
 import pw.aru.utils.extensions.lang.random
 import pw.aru.utils.text.PING_PONG
 import java.lang.System.currentTimeMillis
-import java.util.concurrent.CompletionStage
 
 @Command("ping")
 class Ping : ICommand, ICommand.HelpDialogProvider {
@@ -24,11 +23,11 @@ class Ping : ICommand, ICommand.HelpDialogProvider {
 
     override fun CommandContext.call() {
         val start = currentTimeMillis()
-        channel.triggerTypingIndicator().thenRun {
+        channel.triggerTypingIndicator().subscribe {
             val ping = currentTimeMillis() - start
 
             val gatewayPing = catnip.shardManager().run { List(shardCount(), ::latency) }
-                .map(CompletionStage<Long>::invoke).average()
+                .map(Single<Long>::blockingGet).average()
 
             send("$PING_PONG ${messages.random()}\n**Ping**: API - `${ping}ms` / Gateway - `${gatewayPing}ms`")
         }

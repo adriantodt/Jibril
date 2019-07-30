@@ -171,7 +171,7 @@ class ImageboardCommand(
                     }
 
                     image(image.url)
-                }.whenComplete(handlingExceptions())
+                }.subscribe(handlingExceptions())
             }
         } else {
             send(

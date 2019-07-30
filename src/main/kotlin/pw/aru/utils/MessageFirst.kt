@@ -9,6 +9,6 @@ class MessageFirst(message: Message, init: MessageOptions.() -> Unit) {
 
     infix fun then(then: MessageOptions.() -> Unit) = apply {
         val message = builder.also(then).buildMessage()
-        msg = msg.thenCompose { it.edit(message) }
+        msg = msg.flatMap { it.edit(message) }.apply { subscribe() }
     }
 }

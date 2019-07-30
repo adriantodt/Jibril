@@ -8,6 +8,7 @@ import com.mewna.catnip.entity.user.Presence.Activity
 import com.mewna.catnip.entity.user.Presence.OnlineStatus.DND
 import com.mewna.catnip.entity.user.Presence.of
 import com.mewna.catnip.shard.DiscordEvent
+import io.reactivex.disposables.Disposable
 import io.vertx.core.Vertx
 import io.vertx.core.VertxOptions
 import io.vertx.core.dns.AddressResolverOptions
@@ -45,15 +46,16 @@ class CatnipBootstrap {
 
     fun configure(catnip: Catnip, kodein: Kodein) {
         val instance by kodein.instance<CommandListener>()
+        val disposableRefs = ArrayList<Disposable>()
 
         catnip.loadExtension(KodeinExtension(kodein))
 
-        catnip.on(DiscordEvent.MESSAGE_CREATE, instance)
+        disposableRefs += catnip.observable(DiscordEvent.MESSAGE_CREATE).subscribe(instance)
 
         val shardCount by lazy { catnip.gatewayInfo()!!.shards() }
         var ready = 0
 
-        catnip.on(DiscordEvent.READY) {
+        disposableRefs += catnip.observable(DiscordEvent.READY).subscribe {
             if (ready == 0) {
                 //queue("onFirstShardReady", onFirstShardReady)
                 onFirstShardReady()
@@ -66,8 +68,9 @@ class CatnipBootstrap {
         }
 
         val guildLogger = GuildLogger(SERVERS_WEBHOOK)
-        catnip.on(DiscordEvent.GUILD_CREATE, guildLogger::onGuildJoin)
-        catnip.on(DiscordEvent.GUILD_DELETE, guildLogger::onGuildLeave)
+
+        disposableRefs += catnip.observable(DiscordEvent.GUILD_CREATE).subscribe(guildLogger::onGuildJoin)
+        disposableRefs += catnip.observable(DiscordEvent.GUILD_DELETE).subscribe(guildLogger::onGuildLeave)
 
         catnip.connect()
     }

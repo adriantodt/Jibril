@@ -2,6 +2,7 @@ package pw.aru.bot.music.internal
 
 import com.mewna.catnip.Catnip
 import com.mewna.catnip.shard.DiscordEvent
+import io.reactivex.disposables.Disposable
 import mu.KLogging
 import pw.aru.bot.music.MusicSystem
 import pw.aru.bot.music.entities.MusicEventSource
@@ -15,7 +16,6 @@ import pw.aru.libs.andeclient.events.track.TrackEndEvent
 import pw.aru.libs.andeclient.events.track.TrackExceptionEvent
 import pw.aru.libs.andeclient.events.track.TrackStartEvent
 import pw.aru.libs.andeclient.events.track.TrackStuckEvent
-import pw.aru.utils.extensions.lib.asCloseable
 import pw.aru.utils.extensions.lib.humanUsersCount
 import pw.aru.utils.extensions.lib.voiceState
 import java.io.Closeable
@@ -34,19 +34,20 @@ abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, gui
         closeableRefs += inputPipe.subscribe(::onInputEvent)
         closeableRefs += musicSystem.playerEventPipe.subscribe(guildId, ::onAndePlayerEvent)
         closeableRefs += outputPipe.subscribe { logger.trace { "sent output event $it" } }
-        closeableRefs += catnip.on(DiscordEvent.VOICE_STATE_UPDATE) {
-            if (it.guildIdAsLong() == guildId) {
-                if (it.userIdAsLong() == catnip.selfUser()!!.idAsLong() && it.channelIdAsLong() == 0L) {
+
+        closeableRefs += catnip.observable(DiscordEvent.VOICE_STATE_UPDATE).subscribe { vs ->
+            if (vs.guildIdAsLong() == guildId) {
+                if (vs.userIdAsLong() == catnip.selfUser()!!.idAsLong() && vs.channelIdAsLong() == 0L) {
                     publish(
                         StopMusicEvent(
                             MusicEventSource.MusicSystem,
-                            if (it.guild()!!.voiceChannel(lastVoiceChannel) == null) CHANNEL_DELETED else VOICE_KICK
+                            if (vs.guild()!!.voiceChannel(lastVoiceChannel) == null) CHANNEL_DELETED else VOICE_KICK
                         )
                     )
                 } else {
-                    lastVoiceChannel = it.channelIdAsLong()
+                    lastVoiceChannel = vs.channelIdAsLong()
 
-                    if (it.guild()!!.selfMember().voiceState().channel()!!.humanUsersCount == 0) {
+                    if (vs.guild()!!.selfMember().voiceState().channel()!!.humanUsersCount == 0) {
                         publish(DiscordListenersLeftEvent)
                     }
                 }
@@ -146,5 +147,9 @@ abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, gui
 
     fun publish(event: InputMusicEvent) {
         inputPipe.publish(event)
+    }
+
+    private fun Disposable.asCloseable(): Closeable {
+        return Closeable(this::dispose)
     }
 }

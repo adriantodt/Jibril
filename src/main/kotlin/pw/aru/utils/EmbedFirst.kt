@@ -10,6 +10,6 @@ class EmbedFirst(message: Message, init: EmbedBuilder.() -> Unit) {
 
     infix fun then(then: EmbedBuilder.() -> Unit) = apply {
         val embed = embed(builder, then)
-        msg = msg.thenCompose { it.edit(embed) }
+        msg = msg.flatMap { it.edit(embed) }.apply { subscribe() }
     }
 }

@@ -4,6 +4,7 @@ import com.github.natanbc.weeb4j.Weeb4J
 import com.mewna.catnip.entity.guild.Guild
 import com.mewna.catnip.entity.user.User
 import com.mewna.catnip.rest.invite.InviteCreateOptions
+import io.reactivex.rxkotlin.zipWith
 import mu.KLogging
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -125,9 +126,10 @@ class DevCmd(override val kodein: Kodein) : ICommand, ICommand.Permission, IComm
     private fun CommandContext.makeInvite(args: Args) {
         (args.tryTakeTextChannel(guild) ?: channel)
             .createInvite(InviteCreateOptions())
-            .thenCombine(author.createDM()) { invite, channel ->
+            .zipWith(author.createDM()) { invite, channel ->
                 channel.sendMessage("https://discord.gg/${invite.code()}")
             }
+            .subscribe()
     }
 
     private fun CommandContext.userLegacyPremium(args: Args) {
@@ -223,7 +225,7 @@ class DevCmd(override val kodein: Kodein) : ICommand, ICommand.Permission, IComm
                 it.publish(StopMusicEvent(MusicEventSource.MusicSystem, BOT_SHUTTING_DOWN))
             }
 
-            send(sleepQuotes.random()).toCompletableFuture().join()
+            send(sleepQuotes.random()).blockingGet()
 
             catnip.shutdown(true)
         } catch (ignored: Exception) {

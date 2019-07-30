@@ -5,6 +5,7 @@ import com.mewna.catnip.entity.guild.Member
 import com.mewna.catnip.shard.DiscordEvent
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import io.reactivex.Completable
 import mu.KLogging
 import pw.aru.bot.commands.help.prefix
 import pw.aru.bot.music.entities.*
@@ -18,7 +19,6 @@ import pw.aru.bot.reporting.ErrorReporter
 import pw.aru.db.AruDB
 import pw.aru.utils.AruColors
 import pw.aru.utils.extensions.discordapp.safeUserInput
-import pw.aru.utils.extensions.lang.awaitAll
 import pw.aru.utils.extensions.lang.toStringReflexively
 import pw.aru.utils.extensions.lib.sendEmbed
 import pw.aru.utils.text.*
@@ -115,12 +115,12 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
                     "${index + 1}\u20E3 **[${it.info.title}](${it.info.uri}) (${musicLength(it.info.length)})**"
                 }
             )
-        }.thenAccept { m ->
+        }.subscribe { m ->
             val indices = dialog.tracks.indices.map { i -> "${i + 1}\u20E3" }
 
-            indices.map(m::react).awaitAll().thenRun { m.react(X) }
+            Completable.merge(indices.map(m::react)).subscribe { m.react(X) }
 
-            m.catnip().observe(DiscordEvent.MESSAGE_REACTION_ADD)
+            m.catnip().observable(DiscordEvent.MESSAGE_REACTION_ADD)
                 .filter { e ->
                     e.channelId() == m.channelId() &&
                             e.messageId() == m.id() &&
