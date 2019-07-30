@@ -27,7 +27,7 @@ dependencies {
     compile("com.github.mewna:catnip:1.3.2")
     compile("io.lettuce:lettuce-core:5.1.6.RELEASE")
     compile("pw.aru.libs:snowflake-local:1.0")
-    compile("pw.aru.libs:eventpipes:1.3.1")
+    compile("pw.aru.libs:eventpipes:1.4")
 
     compile("com.fasterxml.jackson.core:jackson-databind:2.9.9")
     compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.9")

@@ -9,7 +9,7 @@ import pw.aru.io.entities.CallResponse
 import pw.aru.io.entities.CommandCall
 import pw.aru.io.entities.CommandResult
 import pw.aru.io.entities.FeedMessage
-import pw.aru.lib.eventpipes.EventPipes.newAsyncPipe
+import pw.aru.libs.eventpipes.EventPipes.newAsyncPipe
 import pw.aru.sides.AruSide
 import pw.aru.utils.extensions.lang.threadGroupBasedFactory
 import pw.aru.utils.extensions.lib.jsonStringOf

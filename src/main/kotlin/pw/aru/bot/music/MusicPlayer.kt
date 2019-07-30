@@ -179,7 +179,7 @@ class MusicPlayer(
     override fun onChangeVolumeEvent(event: ChangeVolumeEvent) {
         eagerHandle(event)
 
-        andePlayer.controls().volume(event.volume).execute()
+        andePlayer.controls().volume(event.volume).submit()
         publish(ChangedVolumeEvent(this, event.source, event.volume))
     }
 
@@ -189,19 +189,19 @@ class MusicPlayer(
         when (event.state) {
             null -> {
                 if (andePlayer.paused()) {
-                    andePlayer.controls().resume().execute()
+                    andePlayer.controls().resume().submit()
                     publish(ChangedPauseStateEvent(this, event.source, PauseState.RESUMED))
                 } else {
-                    andePlayer.controls().pause().execute()
+                    andePlayer.controls().pause().submit()
                     publish(ChangedPauseStateEvent(this, event.source, PauseState.PAUSED))
                 }
             }
             PauseState.PAUSED -> {
-                if (!andePlayer.paused()) andePlayer.controls().pause().execute()
+                if (!andePlayer.paused()) andePlayer.controls().pause().submit()
                 publish(ChangedPauseStateEvent(this, event.source, event.state))
             }
             PauseState.RESUMED -> {
-                if (andePlayer.paused()) andePlayer.controls().resume().execute()
+                if (andePlayer.paused()) andePlayer.controls().resume().submit()
                 publish(ChangedPauseStateEvent(this, event.source, event.state))
             }
         }
@@ -223,7 +223,7 @@ class MusicPlayer(
     override fun onChangeMusicPositionEvent(event: ChangeMusicPositionEvent) {
         eagerHandle(event)
 
-        andePlayer.controls().seek(event.position).execute()
+        andePlayer.controls().seek(event.position).submit()
     }
 
     override fun onShuffleQueueEvent(event: ShuffleQueueEvent) {
@@ -312,7 +312,7 @@ class MusicPlayer(
     override fun onDiscordListenersLeftEvent(event: DiscordListenersLeftEvent) {
         if (!listenersLeftLock.tryAcquire()) return
         publish(ListenersLeftEvent(this, ListenersLeftState.LEFT_ALONE))
-        andePlayer.controls().pause().execute()
+        andePlayer.controls().pause().submit()
 
         fun sameChannel(it: VoiceState) = it.channel() == voiceChannel && it.user() != catnip.selfUser()
         fun movedChannel(it: VoiceState) = it.user() == catnip.selfUser()
@@ -331,7 +331,7 @@ class MusicPlayer(
             }
             .subscribe {
                 if (!destroyed && it.channel() != null) {
-                    andePlayer.controls().resume().execute()
+                    andePlayer.controls().resume().submit()
                     publish(ListenersLeftEvent(this, ListenersLeftState.RETURNED))
                 }
                 listenersLeftLock.release()
@@ -549,7 +549,7 @@ class MusicPlayer(
                     val (start, end) = lastTrackData!!.trackLoadOptions.run {
                         (startTimestamp ?: 0) to (endTimestamp ?: lastTrack.duration)
                     }
-                    andePlayer.controls().play().track(lastTrack.makeClone()).start(start).end(end).execute()
+                    andePlayer.controls().play().track(lastTrack.makeClone()).start(start).end(end).submit()
                     return
                 }
                 RepeatMode.QUEUE -> {
@@ -573,7 +573,7 @@ class MusicPlayer(
             volume(volume)
             start(startTimestamp)
             end(endTimestamp)
-        }.execute()
+        }.submit()
 
         next.data.trackLoadOptions.repeatMode?.let {
             publish(ChangeRepeatModeEvent(next.data.source, it))
@@ -591,7 +591,7 @@ class MusicPlayer(
             }
         )
 
-        andePlayer.controls().stop().execute()
+        andePlayer.controls().stop().submit()
         destroy()
     }
 

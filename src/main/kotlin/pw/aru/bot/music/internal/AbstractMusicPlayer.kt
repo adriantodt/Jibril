@@ -8,13 +8,13 @@ import pw.aru.bot.music.entities.MusicEventSource
 import pw.aru.bot.music.events.*
 import pw.aru.bot.music.events.StopMusicEvent.Reason.CHANNEL_DELETED
 import pw.aru.bot.music.events.StopMusicEvent.Reason.VOICE_KICK
-import pw.aru.lib.eventpipes.EventPipes.newAsyncPipe
 import pw.aru.libs.andeclient.events.AndePlayerEvent
 import pw.aru.libs.andeclient.events.player.PlayerUpdateEvent
 import pw.aru.libs.andeclient.events.track.TrackEndEvent
 import pw.aru.libs.andeclient.events.track.TrackExceptionEvent
 import pw.aru.libs.andeclient.events.track.TrackStartEvent
 import pw.aru.libs.andeclient.events.track.TrackStuckEvent
+import pw.aru.libs.eventpipes.EventPipes.newAsyncPipe
 import pw.aru.utils.extensions.lib.asCloseable
 import pw.aru.utils.extensions.lib.humanUsersCount
 import pw.aru.utils.extensions.lib.voiceState
