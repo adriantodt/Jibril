@@ -11,7 +11,7 @@ ENV ADDITIONAL_MODULES=jdk.crypto.ec,jdk.compiler,jdk.zipfs
 
 RUN ["bash", "jlink.sh", "aru.jar"]
 
-FROM alpine-zlib-jattach:3.9-1.2.11-1.5
+FROM adriantodt/alpine-zlib-jattach:3.9-1.2.11-1.5
 
 WORKDIR /aru
 
