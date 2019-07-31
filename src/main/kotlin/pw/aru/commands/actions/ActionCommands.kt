@@ -233,7 +233,7 @@ class ActionCommands(
         }
 
         imageCommand(listOf("blush"), "Blush Command", "When it's just too much for you to handle.") {
-            provider = fromWeebSh(type = "banghead", fileType = GIF)
+            provider = fromWeebSh(type = "blush", fileType = GIF)
             messages("$BLUSH {author} is slowly turning into a tomato")
         }
 
