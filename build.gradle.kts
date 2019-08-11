@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "pw.aru"
-version = "3.1"
+version = "3.1.1"
 
 repositories {
     jcenter()
@@ -34,7 +34,7 @@ dependencies {
     compile("com.github.mewna:catnip:1.3.2")
     compile("io.projectreactor.addons:reactor-adapter:3.2.3.RELEASE")
     compile("io.reactivex.rxjava2:rxkotlin:2.3.0")
-    compile("io.sentry:sentry-logback:1.7.23")
+    compile("io.sentry:sentry:1.7.23")
 
     // Main APIs
     compile("com.github.natanbc:weeb4j:3.5")
