@@ -18,12 +18,13 @@ import org.kodein.di.generic.instance
 import pw.aru.Aru
 import pw.aru.bot.music.entities.ItemSource
 import pw.aru.bot.music.entities.ItemSource.*
+import pw.aru.bot.music.events.InputMusicEvent
 import pw.aru.db.AruDB
 import pw.aru.libs.andeclient.entities.AndeClient
 import pw.aru.libs.andeclient.events.AndePlayerEvent
 import pw.aru.libs.andeclient.util.AudioTrackManager
+import pw.aru.libs.eventpipes.EventPipes
 import pw.aru.libs.eventpipes.api.EventExecutor
-import pw.aru.libs.eventpipes.internal.DefaultKeyedEventPipe
 import pw.aru.utils.AruTaskExecutor.queue
 import pw.aru.utils.extensions.lang.threadGroupBasedFactory
 import java.util.concurrent.ConcurrentHashMap
@@ -39,7 +40,8 @@ class MusicSystem(override val kodein: Kodein) : KodeinAware {
         newCachedThreadPool(threadGroupBasedFactory("MusicPlayerOrderedExecutor"))
     )
     val pipeExecutor = EventExecutor.upgradeKeyed { key, runnable -> playerOrderedExecutor.submit(key, runnable) }
-    val playerEventPipe = DefaultKeyedEventPipe<Long, AndePlayerEvent>(pipeExecutor)
+    val playerEventPipe = EventPipes.newAsyncKeyedPipe<Long, AndePlayerEvent>(pipeExecutor)
+    val playerInputPipe = EventPipes.newAsyncKeyedPipe<Long, InputMusicEvent>(pipeExecutor)
 
     private val defaultPlayerSources = AudioTrackManager()
     private val patreonPlayerSources = AudioTrackManager()

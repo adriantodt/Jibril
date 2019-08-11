@@ -1,6 +1,7 @@
 package pw.aru.bot.tasks
 
 import com.mewna.catnip.Catnip
+import com.mewna.catnip.shard.DiscordEvent
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
@@ -24,7 +25,12 @@ class BotDailyReport(override val kodein: Kodein) : Executable, KodeinAware {
 
     private var day = 0
     private var commands = 0
-    private var guilds = catnip.cache().guilds().size()
+    private var newGuilds = 0
+
+    init {
+        catnip.on(DiscordEvent.GUILD_CREATE) { newGuilds++ }
+        catnip.on(DiscordEvent.GUILD_DELETE) { newGuilds-- }
+    }
 
     override fun run() {
         day++
@@ -32,8 +38,8 @@ class BotDailyReport(override val kodein: Kodein) : Executable, KodeinAware {
         val newCommands = processor.commandCount - commands
         commands += newCommands
 
-        val newGuilds = catnip.cache().guilds().size() - guilds
-        guilds += newGuilds
+        val newGuilds = this.newGuilds
+        this.newGuilds = 0
 
         logger.embed {
             author("Report - Day $day")

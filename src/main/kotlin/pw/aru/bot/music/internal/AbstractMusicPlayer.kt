@@ -22,16 +22,17 @@ import java.io.Closeable
 import java.util.concurrent.CopyOnWriteArrayList
 
 abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, guildId: Long) {
-
     companion object : KLogging()
 
-    private val inputPipe = newAsyncPipe<InputMusicEvent>(musicSystem.pipeExecutor)
+    private val inputPipe = musicSystem.playerInputPipe.pipe(guildId)
     private val outputPipe = newAsyncPipe<OutputMusicEvent>()
     private val closeableRefs = CopyOnWriteArrayList<Closeable>()
+
     private var lastVoiceChannel: Long = 0L
+    private lateinit var lastSessionId: String
 
     init {
-        closeableRefs += inputPipe.subscribe(::onInputEvent)
+        closeableRefs += musicSystem.playerInputPipe.subscribe(guildId, ::onInputEvent)
         closeableRefs += musicSystem.playerEventPipe.subscribe(guildId, ::onAndePlayerEvent)
         closeableRefs += outputPipe.subscribe { logger.trace { "sent output event $it" } }
         closeableRefs += catnip.on(DiscordEvent.VOICE_STATE_UPDATE) {
@@ -45,10 +46,21 @@ abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, gui
                     )
                 } else {
                     lastVoiceChannel = it.channelIdAsLong()
+                    it.sessionId()?.apply(::lastSessionId::set)
 
                     if (it.guild()!!.selfMember().voiceState().channel()!!.humanUsersCount == 0) {
                         publish(DiscordListenersLeftEvent)
                     }
+                }
+            }
+        }.asCloseable()
+        closeableRefs += catnip.on(DiscordEvent.VOICE_SERVER_UPDATE) {
+            if (it.guildIdAsLong() == guildId) {
+                try {
+                    logger.trace { "received voice server update $it" }
+                    onVoiceServerUpdate(it.endpoint(), it.token(), lastSessionId)
+                } catch (e: Exception) {
+                    logger.error(e) { "error on voice server update $it" }
                 }
             }
         }.asCloseable()
@@ -77,6 +89,8 @@ abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, gui
             logger.error(e) { "error on InputMusicEvent event $event" }
         }
     }
+
+    protected abstract fun onVoiceServerUpdate(endpoint: String, token: String, sessionId: String)
 
     protected abstract fun onLoadItemEvent(event: LoadItemEvent)
 

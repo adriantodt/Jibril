@@ -27,11 +27,8 @@ import pw.aru.libs.andeclient.events.track.TrackStuckEvent
 import pw.aru.utils.AruTaskExecutor.queue
 import pw.aru.utils.extensions.lang.roundRobinFlatten
 import pw.aru.utils.extensions.lib.humanUsersCount
-import reactor.adapter.rxjava.toFlux
-import reactor.core.publisher.toMono
 import java.lang.System.currentTimeMillis
 import java.net.URL
-import java.time.Duration
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.LinkedBlockingDeque
@@ -58,9 +55,12 @@ class MusicPlayer(
     var lastTimestamp: Long = -1
     var lastTrackData: TrackData? = null
     var lastNowPlayingSent: Long = -1
-    private val nowPlayingLock = ReentrantLock()
 
-    var destroyed: Boolean = false
+    private val nowPlayingLock = ReentrantLock()
+    private val vsuSemaphore = Semaphore(1)
+    private val listenersLeftLock = Semaphore(1)
+
+    private var destroyed: Boolean = false
 
     val guild: Guild
         get() = catnip.cache().guild(guildId)!!
@@ -102,6 +102,11 @@ class MusicPlayer(
         }
 
         sendOrUpdateNowPlaying(memberRequested, false)
+    }
+
+    override fun onVoiceServerUpdate(endpoint: String, token: String, sessionId: String) {
+        andePlayer.handleVoiceServerUpdate(sessionId, token, endpoint)
+        vsuSemaphore.release()
     }
 
     override fun onLoadItemEvent(event: LoadItemEvent) {
@@ -306,8 +311,6 @@ class MusicPlayer(
             }
         )
     }
-
-    private val listenersLeftLock = Semaphore(1)
 
     override fun onDiscordListenersLeftEvent(event: DiscordListenersLeftEvent) {
         if (!listenersLeftLock.tryAcquire()) return
@@ -516,27 +519,14 @@ class MusicPlayer(
             }
         }
 
-        val nextVsu = catnip.observe(DiscordEvent.VOICE_SERVER_UPDATE)
-            .toFlux()
-            .filter { it.guildIdAsLong() == guildId }
-            .toMono()
-            .cache()
-
+        vsuSemaphore.acquire()
         catnip.openVoiceConnection(guildId, memberVoiceChannel.idAsLong())
 
-        val vsu = nextVsu.runCatching { block(Duration.ofSeconds(45)) }.getOrNull()
-
-        if (vsu == null) {
+        if (!vsuSemaphore.tryAcquire(45, TimeUnit.SECONDS)) {
             publish(ConnectErrorEvent(this, source, ConnectionErrorType.BOT_CONNECT_TIMEOUT))
             catnip.closeVoiceConnection(guildId)
             return false
         }
-
-        andePlayer.handleVoiceServerUpdate(
-            catnip.cache().voiceState(vsu.guildId(), catnip.selfUser()!!.id())!!.sessionId()!!,
-            vsu.token(),
-            vsu.endpoint()
-        )
 
         return true
     }
