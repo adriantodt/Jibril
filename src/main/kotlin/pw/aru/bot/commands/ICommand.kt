@@ -12,7 +12,6 @@ interface ICommand {
 
     fun CommandContext.call()
 
-
     fun nsfw(): Boolean {
         return category?.nsfw ?: false
     }
@@ -21,19 +20,19 @@ interface ICommand {
         fun CommandContext.discreteCall(outer: String)
     }
 
-    interface Permission {
+    interface Permission : ICommand {
         val permissions: Permissions
     }
 
-    interface ExceptionHandler {
+    interface ExceptionHandler : ICommand {
         fun handle(message: Message, t: Throwable)
     }
 
-    interface HelpDialog {
+    interface HelpDialog : ICommand {
         fun onHelp(message: Message): Embed
     }
 
-    interface HelpDialogProvider {
+    interface HelpDialogProvider : ICommand {
         val helpHandler: HelpDialog
     }
 

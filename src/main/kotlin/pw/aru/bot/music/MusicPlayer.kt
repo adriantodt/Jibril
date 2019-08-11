@@ -11,6 +11,7 @@ import com.mewna.catnip.shard.DiscordEvent
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist
+import io.reactivex.rxkotlin.subscribeBy
 import pw.aru.bot.music.entities.*
 import pw.aru.bot.music.events.*
 import pw.aru.bot.music.events.StopMusicEvent.Reason.SILENT
@@ -312,33 +313,46 @@ class MusicPlayer(
         )
     }
 
-    override fun onDiscordListenersLeftEvent(event: DiscordListenersLeftEvent) {
-        if (!listenersLeftLock.tryAcquire()) return
-        publish(ListenersLeftEvent(this, ListenersLeftState.LEFT_ALONE))
-        andePlayer.controls().pause().submit()
+    //filter functions for onDiscordListenersLeftEvent
+    private fun sameChannel(it: VoiceState) = it.channel() == voiceChannel && it.user() != catnip.selfUser()
 
-        fun sameChannel(it: VoiceState) = it.channel() == voiceChannel && it.user() != catnip.selfUser()
-        fun movedChannel(it: VoiceState) = it.user() == catnip.selfUser()
-                && it.channel() != voiceChannel
-                && it.channel()!!.humanUsersCount > 0
+    private fun movedChannel(it: VoiceState) = it.user() == catnip.selfUser()
+            && it.channel() != voiceChannel
+            && it.channel()!!.humanUsersCount > 0
+
+
+    override fun onDiscordListenersLeftEvent(event: DiscordListenersLeftEvent) {
+        // Guard against multiple Listeners-left bug
+        if (!listenersLeftLock.tryAcquire()) return
+
+        // Tell everyone we are gonna leave
+        publish(ListenersLeftEvent(this, ListenersLeftState.LEFT_ALONE))
+
+        // pause music
+        andePlayer.controls().pause().submit()
 
         catnip.observe(DiscordEvent.VOICE_STATE_UPDATE)
             .filter { guildId == it.guildIdAsLong() && (sameChannel(it) || movedChannel(it)) }
             .take(1)
-            .singleElement()
             .timeout(2, TimeUnit.MINUTES) {
+                it.onComplete()
                 if (!destroyed) {
                     stop(MusicStopReason.LeftAlone)
                 }
                 listenersLeftLock.release()
             }
-            .subscribe {
-                if (!destroyed && it.channel() != null) {
-                    andePlayer.controls().resume().submit()
-                    publish(ListenersLeftEvent(this, ListenersLeftState.RETURNED))
+            .subscribeBy(
+                onNext = {
+                    if (!destroyed && it.channel() != null) {
+                        andePlayer.controls().resume().submit()
+                        publish(ListenersLeftEvent(this, ListenersLeftState.RETURNED))
+                    }
+                    listenersLeftLock.release()
+                },
+                onError = {
+                    logger.error("Apparently ListenersLeftEvent went bs?", it)
                 }
-                listenersLeftLock.release()
-            }
+            )
     }
 
     override fun onTrackStartEvent(event: TrackStartEvent) {

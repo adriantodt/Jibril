@@ -16,6 +16,7 @@ import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
 import pw.aru.Aru
+import pw.aru.bot.bootstrap.ShutdownManager
 import pw.aru.bot.music.entities.ItemSource
 import pw.aru.bot.music.entities.ItemSource.*
 import pw.aru.bot.music.events.InputMusicEvent
@@ -36,9 +37,8 @@ class MusicSystem(override val kodein: Kodein) : KodeinAware {
 
     val players = ConcurrentHashMap<Long, MusicPlayer>()
 
-    private val playerOrderedExecutor = OrderedExecutor(
-        newCachedThreadPool(threadGroupBasedFactory("MusicPlayerOrderedExecutor"))
-    )
+    private val playerExecutor = newCachedThreadPool(threadGroupBasedFactory("MusicPlayerOrderedExecutor"))
+    private val playerOrderedExecutor = OrderedExecutor(playerExecutor)
     val pipeExecutor = EventExecutor.upgradeKeyed { key, runnable -> playerOrderedExecutor.submit(key, runnable) }
     val playerEventPipe = EventPipes.newAsyncKeyedPipe<Long, AndePlayerEvent>(pipeExecutor)
     val playerInputPipe = EventPipes.newAsyncKeyedPipe<Long, InputMusicEvent>(pipeExecutor)
@@ -108,6 +108,14 @@ class MusicSystem(override val kodein: Kodein) : KodeinAware {
             HTTP_SAFE to httpSafePlayerSource,
             DEV to devPlayerSources
         )
+
+        val shutdownManager by instance<ShutdownManager>()
+        shutdownManager += playerExecutor::shutdown
+        shutdownManager += { players.values.forEach(MusicPlayer::destroy) }
+        shutdownManager += andeClient::shutdown
+        shutdownManager += { sources.values.forEach(AudioPlayerManager::shutdown) }
+        shutdownManager += playerInputPipe::close
+        shutdownManager += playerEventPipe::close
     }
 
     private fun <T : AudioSourceManager> T.register(vararg managers: AudioPlayerManager) = apply {

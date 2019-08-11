@@ -5,6 +5,9 @@ import pw.aru.libs.dicenotation.evaluator.DiceSolver
 import pw.aru.libs.dicenotation.lexer.DiceLexer
 import pw.aru.libs.dicenotation.parser.DiceParser
 import pw.aru.utils.extensions.lang.randomOf
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.tan
 
 class AruDice(text: String) {
     companion object {
@@ -14,9 +17,9 @@ class AruDice(text: String) {
             .value("e", Math.E)
             .value("r", Math::random)
             .valueAlias("r", "rand", "rdn", "random")
-            .function("sin") { Math.sin(it[0].toDouble()) }
-            .function("cos") { Math.cos(it[0].toDouble()) }
-            .function("tan") { Math.tan(it[0].toDouble()) }
+            .function("sin") { sin(it[0].toDouble()) }
+            .function("cos") { cos(it[0].toDouble()) }
+            .function("tan") { tan(it[0].toDouble()) }
             .function("random") { dice.roll(it[0].toInt()) }
             .function("average") { sequenceOf(*it).map(Number::toDouble).average() }
             .function("any") { randomOf(*it) }
