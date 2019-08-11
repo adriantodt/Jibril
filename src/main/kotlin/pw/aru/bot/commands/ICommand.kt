@@ -28,11 +28,11 @@ interface ICommand {
         fun handle(message: Message, t: Throwable)
     }
 
-    interface HelpDialog : ICommand {
+    interface HelpDialog {
         fun onHelp(message: Message): Embed
     }
 
-    interface HelpDialogProvider : ICommand {
+    interface HelpDialogProvider {
         val helpHandler: HelpDialog
     }
 
