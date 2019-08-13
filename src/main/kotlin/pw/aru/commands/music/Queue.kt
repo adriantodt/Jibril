@@ -38,9 +38,9 @@ class Queue(musicSystem: MusicSystem) : MusicCommand(musicSystem), ICommand.Help
                     "$PLAY Streaming... $STREAMING"
                 else
                     "$PLAY ${progressBar(
-                        currentTrack.position,
+                        musicPlayer.lastPosition,
                         currentTrack.duration
-                    )} (`${musicLength(currentTrack.duration - currentTrack.position)}`)"
+                    )} (`${musicLength(currentTrack.duration - musicPlayer.lastPosition)}`)"
             )
 
             thumbnail(musicPlayer.lastTrackData!!.thumbnail)
