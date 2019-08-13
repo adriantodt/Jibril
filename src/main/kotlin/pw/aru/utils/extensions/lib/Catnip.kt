@@ -3,6 +3,7 @@ package pw.aru.utils.extensions.lib
 import com.mewna.catnip.entity.builder.EmbedBuilder
 import com.mewna.catnip.entity.channel.MessageChannel
 import com.mewna.catnip.entity.channel.VoiceChannel
+import com.mewna.catnip.entity.guild.Guild
 import com.mewna.catnip.entity.guild.Member
 import com.mewna.catnip.entity.message.Embed
 import com.mewna.catnip.entity.message.MessageOptions
@@ -47,12 +48,20 @@ fun EmbedBuilder.blankField(inline: Boolean = false) {
 }
 
 inline val VoiceChannel.listeners: Collection<VoiceState>
-    get() = guild().voiceStates().find { it.channelIdAsLong() == idAsLong() }
+    get() = guild().voiceChannelListeners(idAsLong())
 
 inline val VoiceChannel.humanUsersCount: Int
-    get() = guild().voiceStates().count { it.channelIdAsLong() == idAsLong() && !catnip().cache().user(it.userId())!!.bot() }.toInt()
+    get() = guild().voiceChannelHumanCount(idAsLong())
 
-fun Member.voiceState() = guild().voiceStates().getById(idAsLong())
+fun Guild.voiceChannelListeners(id: Long): Collection<VoiceState> {
+    return voiceStates().find { it.channelIdAsLong() == id }
+}
+
+fun Guild.voiceChannelHumanCount(id: Long): Int {
+    return voiceStates().count { it.channelIdAsLong() == id && !it.user().bot() }.toInt()
+}
+
+fun Member.voiceState(): VoiceState? = guild().voiceStates().getById(idAsLong())
 
 fun <T> MessageConsumer<T>.asCloseable(): Closeable {
     return Closeable {

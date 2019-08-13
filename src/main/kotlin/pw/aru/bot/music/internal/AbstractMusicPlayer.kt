@@ -6,8 +6,7 @@ import mu.KLogging
 import pw.aru.bot.music.MusicSystem
 import pw.aru.bot.music.entities.MusicEventSource
 import pw.aru.bot.music.events.*
-import pw.aru.bot.music.events.StopMusicEvent.Reason.CHANNEL_DELETED
-import pw.aru.bot.music.events.StopMusicEvent.Reason.VOICE_KICK
+import pw.aru.bot.music.events.StopMusicEvent.Reason.*
 import pw.aru.libs.andeclient.events.AndePlayerEvent
 import pw.aru.libs.andeclient.events.player.PlayerUpdateEvent
 import pw.aru.libs.andeclient.events.track.TrackEndEvent
@@ -16,8 +15,7 @@ import pw.aru.libs.andeclient.events.track.TrackStartEvent
 import pw.aru.libs.andeclient.events.track.TrackStuckEvent
 import pw.aru.libs.eventpipes.EventPipes.newAsyncPipe
 import pw.aru.utils.extensions.lib.asCloseable
-import pw.aru.utils.extensions.lib.humanUsersCount
-import pw.aru.utils.extensions.lib.voiceState
+import pw.aru.utils.extensions.lib.voiceChannelHumanCount
 import java.io.Closeable
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -37,18 +35,25 @@ abstract class AbstractMusicPlayer(musicSystem: MusicSystem, catnip: Catnip, gui
         closeableRefs += outputPipe.subscribe { logger.trace { "sent output event $it" } }
         closeableRefs += catnip.on(DiscordEvent.VOICE_STATE_UPDATE) {
             if (it.guildIdAsLong() == guildId) {
-                if (it.userIdAsLong() == catnip.selfUser()!!.idAsLong() && it.channelIdAsLong() == 0L) {
-                    publish(
-                        StopMusicEvent(
-                            MusicEventSource.MusicSystem,
-                            if (it.guild()!!.voiceChannel(lastVoiceChannel) == null) CHANNEL_DELETED else VOICE_KICK
-                        )
-                    )
+                val guild = it.guild()
+                if (guild == null) {
+                    publish(StopMusicEvent(MusicEventSource.MusicSystem, GUILD_KICK))
                 } else {
-                    lastVoiceChannel = it.channelIdAsLong()
-                    it.sessionId()?.apply(::lastSessionId::set)
+                    if (catnip.selfUser()!!.idAsLong() == it.userIdAsLong()) {
+                        lastVoiceChannel = it.channelIdAsLong()
+                        it.sessionId()?.let { s -> lastSessionId = s }
 
-                    if (it.guild()!!.selfMember().voiceState().channel()!!.humanUsersCount == 0) {
+                        if (it.channelIdAsLong() == 0L) {
+                            publish(
+                                StopMusicEvent(
+                                    MusicEventSource.MusicSystem,
+                                    if (guild.voiceChannel(lastVoiceChannel) == null) CHANNEL_DELETED else VOICE_KICK
+                                )
+                            )
+                        }
+                    }
+
+                    if (guild.voiceChannelHumanCount(lastVoiceChannel) == 0) {
                         publish(DiscordListenersLeftEvent)
                     }
                 }

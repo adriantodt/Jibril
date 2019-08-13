@@ -50,6 +50,7 @@ data class StopMusicEvent(override val source: MusicEventSource, val reason: Rea
     enum class Reason {
         SILENT,
         VOICE_KICK,
+        GUILD_KICK,
         CHANNEL_DELETED,
         MUSIC_SELECTION_CANCELLED,
         BOT_SHUTTING_DOWN

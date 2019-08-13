@@ -505,7 +505,7 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
                                     "$BEG Sorry, but the bot is shutting down."
                             )
                         }
-                        SILENT, MUSIC_SELECTION_CANCELLED -> {
+                        SILENT, MUSIC_SELECTION_CANCELLED, GUILD_KICK -> {
                             //nop
                         }
                     }

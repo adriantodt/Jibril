@@ -602,13 +602,13 @@ class MusicPlayer(
     fun destroy() {
         destroyed = true
         queue.clear()
+        internalClose()
         catnip.closeVoiceConnection(guildId.toString())
         andePlayer.destroy()
 
         //gc
         lastTrackData = null
         voteMap.clear()
-        internalClose()
     }
 
     override fun toString(): String {
