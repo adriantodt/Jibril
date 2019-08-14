@@ -12,6 +12,7 @@ import org.kodein.di.generic.singleton
 import pw.aru.Aru
 import pw.aru.bot.CommandProcessor
 import pw.aru.bot.CommandRegistry
+import pw.aru.bot.DevStreamHook
 import pw.aru.bot.music.MusicSystem
 import pw.aru.bot.permissions.PermissionResolver
 import pw.aru.commands.games.manager.GameManager
@@ -47,6 +48,8 @@ class KodeinBootstrap(val catnip: Catnip) {
         bind<ReloadableListProvider>() with singleton { ReloadableListProvider() }
         bind<PermissionResolver>() with singleton { PermissionResolver(instance()) }
         bind<Catnip>() with instance(catnip)
+
+        bind<DevStreamHook>() with singleton { DevStreamHook() }
 
         bind<AndeClient>() with singleton {
             AndeClient.andeClient(catnip.selfUser()!!.idAsLong())

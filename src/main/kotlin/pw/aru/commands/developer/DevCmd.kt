@@ -2,6 +2,7 @@ package pw.aru.commands.developer
 
 import com.github.natanbc.weeb4j.Weeb4J
 import com.mewna.catnip.entity.guild.Guild
+import com.mewna.catnip.entity.user.Presence
 import com.mewna.catnip.entity.user.User
 import com.mewna.catnip.rest.invite.InviteCreateOptions
 import mu.KLogging
@@ -10,6 +11,7 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
 import pw.aru.Aru.Bot.sleepQuotes
 import pw.aru.bot.CommandRegistry
+import pw.aru.bot.DevStreamHook
 import pw.aru.bot.categories.Category
 import pw.aru.bot.commands.Command
 import pw.aru.bot.commands.ICommand
@@ -34,6 +36,8 @@ import pw.aru.utils.extensions.lang.smartSplit
 import pw.aru.utils.extensions.lib.field
 import pw.aru.utils.extensions.lib.humanUsersCount
 import pw.aru.utils.styling
+import pw.aru.utils.text.AWOO
+import pw.aru.utils.text.HUG
 import pw.aru.utils.text.SHRUG
 import pw.aru.utils.text.SUCCESS
 import java.lang.System.currentTimeMillis
@@ -118,7 +122,30 @@ class DevCmd(override val kodein: Kodein) : ICommand, ICommand.Permission, IComm
 
             "genemotelist" -> generateEmoteList()
 
+            "streammode" -> toggleStreamMode()
+
             else -> showHelp()
+        }
+    }
+
+    private fun CommandContext.toggleStreamMode() {
+        val devStreamHook: DevStreamHook by instance()
+        val enabled = !devStreamHook.enabled
+        devStreamHook.enabled = enabled
+        if (enabled) {
+            catnip.presence(
+                Presence.of(
+                    Presence.OnlineStatus.ONLINE,
+                    Presence.Activity.of(
+                        "${prefix}help | DEV STREAM HYPE!",
+                        Presence.ActivityType.STREAMING,
+                        "https://twitch.tv/adriantodt"
+                    )
+                )
+            )
+            send("$AWOO STREAM MODE ENABLED. GOD BLESS THE HYPE!")
+        } else {
+            send("$HUG Stream Mode disabled, hype will worn off soon...")
         }
     }
 

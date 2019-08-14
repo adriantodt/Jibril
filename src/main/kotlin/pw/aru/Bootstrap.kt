@@ -8,6 +8,7 @@ import io.github.classgraph.ClassGraph
 import org.kodein.di.generic.instance
 import pw.aru.Aru.Bot.splashes
 import pw.aru.bot.CommandRegistry
+import pw.aru.bot.DevStreamHook
 import pw.aru.bot.bootstrap.BootstrapLogger
 import pw.aru.bot.bootstrap.CatnipBootstrap
 import pw.aru.bot.bootstrap.CommandBootstrap
@@ -62,9 +63,12 @@ object Bootstrap {
                 }
 
                 onAllShardsReady = {
+                    val hook by kodein.instance<DevStreamHook>()
                     task(1, TimeUnit.MINUTES) {
-                        val text = "${prefix}help | ${splashes.random()}"
-                        catnip.presence(of(ONLINE, Activity.of(text, PLAYING)))
+                        if (!hook.enabled) {
+                            val text = "${prefix}help | ${splashes.random()}"
+                            catnip.presence(of(ONLINE, Activity.of(text, PLAYING)))
+                        }
                     }
 
                     val registry by kodein.instance<CommandRegistry>()
