@@ -200,6 +200,18 @@ class MusicEventReactor(private val db: AruDB) : OutputMusicEventAdapter() {
         }
     }
 
+    override fun onConnectSuccessfulEvent(event: ConnectSuccessfulEvent) {
+        val source = event.source as? MusicEventSource.Discord ?: return
+
+        source.textChannel.run {
+            if (Patreon.isPremium(db, event.player.guild, source.user)) {
+                sendMessage("$PATREON_WINK Connected to the channel, Thanks for being a Patreon!")
+            } else {
+                sendMessage("$WINK Connected to the channel.\n$BEG Aru is running out of money and might get shut down soon! Please, consider being a patreon (`aru!links`) otherwise the bot might get shut down.")
+            }
+        }
+    }
+
     override fun onConnectErrorEvent(event: ConnectErrorEvent) {
         val source = event.source as? MusicEventSource.Discord ?: return
 

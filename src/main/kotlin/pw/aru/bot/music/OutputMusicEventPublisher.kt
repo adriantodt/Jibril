@@ -52,6 +52,10 @@ class OutputMusicEventPublisher(val io: AruIO) : OutputMusicEventAdapter() {
         TODO("onPlaylistQueuedEvent")
     }
 
+    override fun onConnectSuccessfulEvent(event: ConnectSuccessfulEvent) {
+        TODO("onConnectSuccessfulEvent")
+    }
+
     override fun onConnectErrorEvent(event: ConnectErrorEvent) {
         TODO("onConnectErrorEvent")
     }

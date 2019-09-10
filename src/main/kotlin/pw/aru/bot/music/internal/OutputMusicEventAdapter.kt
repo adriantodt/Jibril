@@ -8,6 +8,7 @@ abstract class OutputMusicEventAdapter : (OutputMusicEvent) -> Unit {
             is LoadResultsEvent -> onLoadResultsEvent(event)
             is TrackQueuedEvent -> onTrackQueuedEvent(event)
             is PlaylistQueuedEvent -> onPlaylistQueuedEvent(event)
+            is ConnectSuccessfulEvent -> onConnectSuccessfulEvent(event)
             is ConnectErrorEvent -> onConnectErrorEvent(event)
             is MusicStartedEvent -> onMusicStartedEvent(event)
             is ChangedVolumeEvent -> onChangedVolumeEvent(event)
@@ -35,6 +36,8 @@ abstract class OutputMusicEventAdapter : (OutputMusicEvent) -> Unit {
     abstract fun onTrackQueuedEvent(event: TrackQueuedEvent)
 
     abstract fun onPlaylistQueuedEvent(event: PlaylistQueuedEvent)
+
+    abstract fun onConnectSuccessfulEvent(event: ConnectSuccessfulEvent)
 
     abstract fun onConnectErrorEvent(event: ConnectErrorEvent)
 

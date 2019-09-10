@@ -39,6 +39,11 @@ data class ConnectErrorEvent(
     val error: ConnectionErrorType
 ) : OutputMusicEvent()
 
+data class ConnectSuccessfulEvent(
+    override val player: MusicPlayer,
+    override val source: MusicEventSource
+) : OutputMusicEvent()
+
 data class MusicStartedEvent(
     override val player: MusicPlayer,
     override val source: MusicEventSource

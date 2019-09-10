@@ -542,6 +542,8 @@ class MusicPlayer(
             return false
         }
 
+        publish(ConnectSuccessfulEvent(this, source))
+
         return true
     }
 
