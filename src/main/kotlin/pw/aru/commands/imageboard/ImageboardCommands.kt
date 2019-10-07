@@ -39,10 +39,12 @@ class ImageboardCommands(private val db: AruDB) : ICommandProvider {
             board = RULE34, nsfwOnly = true
         ).register(r)
 
-        ImageboardCommand(
-            listOf("e621"), "e621", db,
-            board = E621, nsfwOnly = true
-        ).register(r)
+        // we got banned from e621 because we don't have ratelimit.
+        // TODO RATELIMIT IMAGEBOARDS
+        //ImageboardCommand(
+        //    listOf("e621"), "e621", db,
+        //    board = E621, nsfwOnly = true
+        //).register(r)
 
         ImageboardCommand(
             listOf("yandere"), "Yande.re", db,
@@ -130,7 +132,7 @@ class ImageboardCommand(
                 }
                 .shuffled()
                 .firstOrNull()
-        }.onFailure { it.printStackTrace() }.getOrNull()
+        }.getOrNull()
 
         if (image != null) {
             withMDC("image" to image.toString()) {

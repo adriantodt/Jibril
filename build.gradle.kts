@@ -3,7 +3,7 @@ import com.palantir.gradle.docker.DockerExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.3.31"
+    kotlin("jvm") version "1.3.50"
     application
     id("com.github.johnrengelman.shadow") version "5.0.0"
     id("com.github.ben-manes.versions") version "0.21.0"
@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "pw.aru"
-version = "3.1.4"
+version = "3.1.5"
 
 repositories {
     jcenter()
