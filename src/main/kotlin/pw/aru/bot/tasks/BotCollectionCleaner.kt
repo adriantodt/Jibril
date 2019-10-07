@@ -45,7 +45,7 @@ class BotCollectionCleaner(override val kodein: Kodein) : Executable, KodeinAwar
     }
 
     override fun run() {
-        logger.info("Cleaning up... This might take a while")
+        logger.info("Cleaning up... This might take a while.")
         var left = 0
 
         fun checkGuildTask(guild: Guild) = Runnable {
@@ -69,9 +69,11 @@ class BotCollectionCleaner(override val kodein: Kodein) : Executable, KodeinAwar
 
         val threadPool = Executors.newFixedThreadPool(8)
 
-        catnip.cache().guilds().forEach { threadPool.submit(checkGuildTask(it)) }
+        val tasks = catnip.cache().guilds().map { threadPool.submit(checkGuildTask(it)) }
 
         threadPool.shutdown()
+
+        tasks.forEach { it.get() }
 
         logger.info("Left $left guilds. Will run again in 1 hour.")
         log.embed {

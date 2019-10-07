@@ -19,12 +19,12 @@ open class DiscordLogger(val url: String) {
     }
 
     var last: CompletableFuture<*> = CompletableFuture.completedFuture<Void>(null)
-    var waitUntil: Long = System.currentTimeMillis()
+    var waitUntil: Long = 0
 
     fun embed(builder: EmbedBuilder.() -> Unit) = apply {
 
         last = last.thenComposeAsync {
-            val wait = (System.currentTimeMillis() - waitUntil).coerceAtLeast(0)
+            val wait = (waitUntil - System.currentTimeMillis()).coerceAtLeast(0)
             waitUntil = System.currentTimeMillis() + 500
             if (wait > 0) sleep(wait)
             client.sendAsync(discarding()) {
@@ -44,7 +44,7 @@ open class DiscordLogger(val url: String) {
 
     fun text(vararg value: String) = apply {
         last = last.thenComposeAsync {
-            val wait = (System.currentTimeMillis() - waitUntil).coerceAtLeast(0)
+            val wait = (waitUntil - System.currentTimeMillis()).coerceAtLeast(0)
             waitUntil = System.currentTimeMillis() + 500
             if (wait > 0) sleep(wait)
             client.sendAsync(discarding()) {
