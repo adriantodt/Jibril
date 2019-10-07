@@ -172,6 +172,15 @@ class AruHG(
                 manager.remove(channel)
             }
 
+            override fun call(message: Message) {
+                try {
+                    super.call(message)
+                } catch (e: CommandContext.ShowHelp) {
+                    showHelp()
+                    waitForNextEvent()
+                }
+            }
+
             override fun CommandContext.onCommand() {
                 if (forceStopped) return
 
