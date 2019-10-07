@@ -1,6 +1,7 @@
 package pw.aru.bot.tasks
 
 import com.mewna.catnip.Catnip
+import com.mewna.catnip.entity.guild.Guild
 import com.mewna.catnip.entity.util.Permission
 import mu.KLogging
 import org.kodein.di.Kodein
@@ -18,10 +19,11 @@ import pw.aru.utils.Colors
 import pw.aru.utils.extensions.lang.multiline
 import pw.aru.utils.text.BEG
 import pw.aru.utils.text.CRY
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
-@RunEvery(5, 60, TimeUnit.MINUTES)
+@RunEvery(2, 60, TimeUnit.MINUTES)
 class BotCollectionCleaner(override val kodein: Kodein) : Executable, KodeinAware {
     companion object : KLogging()
 
@@ -39,29 +41,37 @@ class BotCollectionCleaner(override val kodein: Kodein) : Executable, KodeinAwar
     )
 
     init {
-        logger.info("Cleaning up in 5 minutes...")
+        logger.info("Cleaning up in 2 minutes...")
     }
 
     override fun run() {
         logger.info("Cleaning up... This might take a while")
         var left = 0
-        for (guild in catnip.cache().guilds()) {
+
+        fun checkGuildTask(guild: Guild) = Runnable {
             runCatching {
                 val counts = guild.members().groupingBy { it.user().bot() }
                     .eachCount()
 
                 if (counts.getValue(true) >= (counts.getValue(false) * 1.25).roundToInt()) {
-                    if (Patreon.isPremium(db, guild.owner()) || BOT_DEVELOPER in perms.resolve(guild.owner())) return
+                    if (Patreon.isPremium(db, guild.owner()) || BOT_DEVELOPER in perms.resolve(guild.owner()))
+                        return@Runnable
 
                     val suitableChannel = guild.channels()
                         .findAny { it.isText && guild.selfMember().hasPermissions(it, Permission.SEND_MESSAGES) }
-                        .asTextChannel()
+                        ?.asTextChannel()
 
-                    suitableChannel.sendMessage(leaveMessage).thenRun { guild.leave() }
+                    suitableChannel?.sendMessage(leaveMessage)?.thenRun { guild.leave() } ?: guild.leave()
                     left++
                 }
             }
         }
+
+        val threadPool = Executors.newFixedThreadPool(8)
+
+        catnip.cache().guilds().forEach { threadPool.submit(checkGuildTask(it)) }
+
+        threadPool.shutdown()
 
         logger.info("Left $left guilds. Will run again in 1 hour.")
         log.embed {
@@ -71,4 +81,5 @@ class BotCollectionCleaner(override val kodein: Kodein) : Executable, KodeinAwar
             description("_Left $left guilds._")
         }
     }
+
 }

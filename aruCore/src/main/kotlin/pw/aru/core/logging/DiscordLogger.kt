@@ -5,6 +5,7 @@ import com.mewna.catnip.entity.impl.EntityBuilder
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import pw.aru.utils.extensions.lang.sendAsync
+import java.lang.Thread.sleep
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpResponse.BodyHandlers.discarding
@@ -18,9 +19,14 @@ open class DiscordLogger(val url: String) {
     }
 
     var last: CompletableFuture<*> = CompletableFuture.completedFuture<Void>(null)
+    var waitUntil: Long = System.currentTimeMillis()
 
     fun embed(builder: EmbedBuilder.() -> Unit) = apply {
-        last = last.thenCompose {
+
+        last = last.thenComposeAsync {
+            val wait = (System.currentTimeMillis() - waitUntil).coerceAtLeast(0)
+            waitUntil = System.currentTimeMillis() + 500
+            if (wait > 0) sleep(wait)
             client.sendAsync(discarding()) {
                 uri(URI.create(url))
                 header("Content-Type", "application/json")
@@ -37,7 +43,10 @@ open class DiscordLogger(val url: String) {
     }
 
     fun text(vararg value: String) = apply {
-        last = last.thenCompose {
+        last = last.thenComposeAsync {
+            val wait = (System.currentTimeMillis() - waitUntil).coerceAtLeast(0)
+            waitUntil = System.currentTimeMillis() + 500
+            if (wait > 0) sleep(wait)
             client.sendAsync(discarding()) {
                 uri(URI.create(url))
                 header("Content-Type", "application/json")
