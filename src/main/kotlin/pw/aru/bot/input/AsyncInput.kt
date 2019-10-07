@@ -3,6 +3,8 @@ package pw.aru.bot.input
 import com.mewna.catnip.Catnip
 import com.mewna.catnip.entity.message.Message
 import com.mewna.catnip.shard.DiscordEvent
+import io.reactivex.rxkotlin.subscribeBy
+import mu.KLogging
 import pw.aru.bot.commands.context.CommandContext
 import java.util.concurrent.TimeUnit
 
@@ -11,6 +13,7 @@ abstract class AsyncInput protected constructor(
     private val timeout: Long,
     private val unit: TimeUnit
 ) {
+    companion object : KLogging()
 
     init {
         waitForNextEvent()
@@ -25,11 +28,17 @@ abstract class AsyncInput protected constructor(
     protected fun waitForNextEvent() {
         catnip.observe(DiscordEvent.MESSAGE_CREATE)
             .filter(::filter)
-            .singleElement()
+            .take(1)
             .timeout(timeout, unit) {
+                it.onComplete()
                 timeout()
             }
-            .subscribe(::call)
+            .subscribeBy(
+                onNext = ::call,
+                onError = {
+                    logger.error("Error on AsyncInput", it)
+                }
+            )
     }
 }
 
