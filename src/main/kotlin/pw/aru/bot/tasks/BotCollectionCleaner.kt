@@ -10,7 +10,9 @@ import pw.aru.Aru
 import pw.aru.bot.executor.Executable
 import pw.aru.bot.executor.RunEvery
 import pw.aru.bot.patreon.Patreon
+import pw.aru.bot.permissions.PermissionResolver
 import pw.aru.core.logging.DiscordLogger
+import pw.aru.core.permissions.UserPermissions.BOT_DEVELOPER
 import pw.aru.db.AruDB
 import pw.aru.utils.Colors
 import pw.aru.utils.extensions.lang.multiline
@@ -25,6 +27,7 @@ class BotCollectionCleaner(override val kodein: Kodein) : Executable, KodeinAwar
 
     private val catnip: Catnip by instance()
     private val db: AruDB by instance()
+    private val perms: PermissionResolver by instance()
 
     private val log = DiscordLogger(Aru.EnvVars.CONSOLE_WEBHOOK)
 
@@ -48,7 +51,7 @@ class BotCollectionCleaner(override val kodein: Kodein) : Executable, KodeinAwar
                     .eachCount()
 
                 if (counts.getValue(true) >= (counts.getValue(false) * 1.25).roundToInt()) {
-                    if (Patreon.isPremium(db, guild.owner())) return
+                    if (Patreon.isPremium(db, guild.owner()) || BOT_DEVELOPER in perms.resolve(guild.owner())) return
 
                     val suitableChannel = guild.channels()
                         .findAny { it.isText && guild.selfMember().hasPermissions(it, Permission.SEND_MESSAGES) }
