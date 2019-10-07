@@ -8,9 +8,9 @@ import org.kodein.di.generic.instance
 import pw.aru.Aru
 import pw.aru.bot.executor.Executable
 import pw.aru.bot.executor.RunAtStartup
+import pw.aru.bot.patreon.Patreon
 import pw.aru.core.logging.DiscordLogger
 import pw.aru.db.AruDB
-import pw.aru.db.entities.guild.GuildSettings
 import pw.aru.utils.Colors
 import pw.aru.utils.extensions.lang.multiline
 import pw.aru.utils.text.BEG
@@ -38,7 +38,7 @@ class BotCollectionCleaner(override val kodein: Kodein) : Executable, KodeinAwar
                 .eachCount()
 
             if (counts.getValue(true) >= (counts.getValue(false) * 1.25).roundToInt()) {
-                if (GuildSettings(db, guild.idAsLong()).legacyPremium) return
+                if (Patreon.isPremium(db, guild.owner())) return
 
                 val suitableChannel = guild.channels()
                     .findAny { it.isText && guild.selfMember().hasPermissions(it, Permission.SEND_MESSAGES) }
